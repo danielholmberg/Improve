@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Theme Default colors -->
+    <color name="colorPrimary">#125688</color>
+    <color name="colorPrimaryDark">#125688</color>
+    <color name="colorAccent">#36d939</color>
+    <color name="textColorPrimary">#FFFFFF</color>
+    <color name="windowBackground">#c8e8ff</color>
+
+    <!-- Theme Sweden colors -->
+    <color name="swedenPrimary">#006aa7</color>
+    <color name="swedenPrimaryDark">#004b78</color>
+    <color name="swedenAccent">#fecc00</color>
+    <color name="swedenTextColorPrimary">#ffffff</color>
+    <color name="swedenWindowBackground">#c8e8ff</color>
+
+    <!-- Theme Dark colors -->
+
+    <!-- Theme Light colors -->
+
+
+</resources>

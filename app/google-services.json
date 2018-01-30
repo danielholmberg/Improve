@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "158013774234",
+    "firebase_url": "https://careercontacts-849ca.firebaseio.com",
+    "project_id": "careercontacts-849ca",
+    "storage_bucket": "careercontacts-849ca.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:158013774234:android:93c15eb94ec84d2f",
+        "android_client_info": {
+          "package_name": "dev.danielholmberg.careercontacts"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "158013774234-iqjv00nketr9fqc75eekl6itu5q05eff.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dev.danielholmberg.careercontacts",
+            "certificate_hash": "d4d33119b9e9cc9fa33bcc8b1774e263a57513da"
+          }
+        },
+        {
+          "client_id": "158013774234-r2834206s6k7i59o5pvuffrlmhq1al62.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKxIyr-gjohoA__HEA9luK8PrmMBFzHCw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "158013774234-r2834206s6k7i59o5pvuffrlmhq1al62.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
