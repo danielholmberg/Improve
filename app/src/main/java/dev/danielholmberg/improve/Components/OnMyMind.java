@@ -1,10 +1,12 @@
 package dev.danielholmberg.improve.Components;
 
+import java.io.Serializable;
+
 /**
  * Created by DanielHolmberg on 2018-01-21.
  */
 
-public class OnMyMind {
+public class OnMyMind implements Serializable{
     private String id;
     private String title;
     private String info;

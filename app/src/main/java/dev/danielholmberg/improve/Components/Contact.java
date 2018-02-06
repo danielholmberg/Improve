@@ -1,28 +1,30 @@
 package dev.danielholmberg.improve.Components;
 
+import java.io.Serializable;
+
 /**
  * Created by DanielHolmberg on 2018-01-17.
  */
 
-public class Contact {
+public class Contact implements Serializable{
     private String cid;
     private String firstName;
     private String lastName;
     private String company;
     private String email;
-    private String phone;
+    private String mobile;
 
     public Contact() {
 
     };
 
-    public Contact(String cid, String firstName, String lastName, String company, String email, String phone) {
+    public Contact(String cid, String firstName, String lastName, String company, String email, String mobile) {
         this.cid = cid;
         this.firstName = firstName;
         this.lastName = lastName;
         this.company = company;
         this.email = email;
-        this.phone = phone;
+        this.mobile = mobile;
     }
 
     public String getCID() {
@@ -49,8 +51,8 @@ public class Contact {
         return this.email;
     }
 
-    public String getPhone() {
-        return this.phone;
+    public String getMobile() {
+        return this.mobile;
     }
 
     public void setCID(String cid) {
@@ -73,5 +75,5 @@ public class Contact {
         this.email = email;
     }
 
-    public void setPhone(String phone) { this.phone = phone; }
+    public void setMobile(String mobile) { this.mobile = mobile; }
 }

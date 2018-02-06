@@ -19,10 +19,12 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.IOException;
 import java.util.List;
 
 import dev.danielholmberg.improve.Activities.AddOnMyMindActivity;
 import dev.danielholmberg.improve.Components.OnMyMind;
+import dev.danielholmberg.improve.InternalStorage;
 import dev.danielholmberg.improve.R;
 
 /**
@@ -33,24 +35,26 @@ public class OnMyMindsRecyclerViewAdapter extends
         RecyclerView.Adapter<OnMyMindsRecyclerViewAdapter.ViewHolder> {
 
     private static final String TAG = OnMyMindsRecyclerViewAdapter.class.getSimpleName();
-    public List<OnMyMind> onmymindsList;
+    private static final String INTERNAL_STORAGE_KEY = "OnMyMinds";
+
+    private List<OnMyMind> ommsList;
     private Context context;
     private FirebaseFirestore firestoreDB;
     private Toolbar toolbar;
 
     public OnMyMindsRecyclerViewAdapter(List<OnMyMind> list, Context ctx, FirebaseFirestore firestore) {
-        onmymindsList = list;
-        context = ctx;
-        firestoreDB = firestore;
+        this.ommsList = list;
+        this.context = ctx;
+        this.firestoreDB = firestore;
     }
 
     public void setAdapterList(List<OnMyMind> list) {
-        onmymindsList = list;
+        ommsList = list;
     }
 
     @Override
     public int getItemCount() {
-        return onmymindsList.size();
+        return ommsList.size();
     }
 
     @Override
@@ -69,37 +73,81 @@ public class OnMyMindsRecyclerViewAdapter extends
     @Override
     public void onBindViewHolder(OnMyMindsRecyclerViewAdapter.ViewHolder holder, int position) {
         final int itemPos = position;
-        final OnMyMind omm = onmymindsList.get(position);
+        final OnMyMind omm = ommsList.get(position);
         holder.title.setText(omm.getTitle());
         holder.info.setText(omm.getInfo());
         holder.edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                editOnMyMindFragment(omm);
+                editOnMyMindFragment(omm, itemPos);
             }
         });
-
-        AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(context).setTitle("Delete OnMyMind")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                deleteOnMyMind(omm.getId(), itemPos);
-                            }
-                        }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                });
-        final AlertDialog dialog = alertDialogBuilder.create();
-
+        holder.done.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(context, omm.getTitle()+" marked as Done", Toast.LENGTH_SHORT).show();
+            }
+        });
         holder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                AlertDialog.Builder alertDialogBuilder =
+                        new AlertDialog.Builder(context).setTitle("Delete OnMyMind")
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        deleteOnMyMind(omm.getId(), itemPos);
+                                    }
+                                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        });
+                final AlertDialog dialog = alertDialogBuilder.create();
                 dialog.show();
             }
         });
+    }
+
+    private void editOnMyMindFragment(OnMyMind omm, int itemPos){
+        Bundle bundle = new Bundle();
+        bundle.putString("id", omm.getId());
+        bundle.putString("title", omm.getTitle());
+        bundle.putString("info", omm.getInfo());
+        bundle.putInt("position", itemPos);
+
+        Intent i = new Intent(context, AddOnMyMindActivity.class);
+        i.putExtra("onmymind", bundle);
+        context.startActivity(i);
+    }
+
+    public void deleteOnMyMind(String docId, final int position){
+        // Delete the OnMyMind from the recycler list.
+        ommsList.remove(position);
+        try {
+            // Try to get the stored list of OnMyminds and remove the specified OnMyMind.
+            List<OnMyMind> storedList = (List<OnMyMind>) InternalStorage.readObject(context, INTERNAL_STORAGE_KEY);
+            storedList.remove(position);
+            InternalStorage.writeObject(context, INTERNAL_STORAGE_KEY, storedList);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, ommsList.size());
+        // Delete the specified OnMyMind from Firestore Database.
+        firestoreDB.collection("onmyminds").document(docId).delete()
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        // Deletion was successful.
+                        Toast.makeText(context,
+                                "OnMyMind document has been deleted",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -107,6 +155,7 @@ public class OnMyMindsRecyclerViewAdapter extends
         private TextView title;
         private TextView info;
         private Button edit;
+        private Button done;
         private Button delete;
 
         public ViewHolder(View view) {
@@ -115,34 +164,8 @@ public class OnMyMindsRecyclerViewAdapter extends
             title = (TextView) view.findViewById(R.id.title_tv);
             info = (TextView) view.findViewById(R.id.info_tv);
             edit = (Button) view.findViewById(R.id.edit_omm_b);
+            done = (Button) view.findViewById(R.id.done_omm_b);
             delete = (Button) view.findViewById(R.id.delete_omm_b);
         }
-    }
-
-    private void editOnMyMindFragment(OnMyMind omm){
-        Bundle bundle = new Bundle();
-        bundle.putString("id", omm.getId());
-        bundle.putString("title", omm.getTitle());
-        bundle.putString("info", omm.getInfo());
-
-        Intent i = new Intent(context, AddOnMyMindActivity.class);
-        i.putExtra("onmymind", bundle);
-        context.startActivity(i);
-
-    }
-
-    public void deleteOnMyMind(String docId, final int position){
-        firestoreDB.collection("onmyminds").document(docId).delete()
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        onmymindsList.remove(position);
-                        notifyItemRemoved(position);
-                        notifyItemRangeChanged(position, onmymindsList.size());
-                        Toast.makeText(context,
-                                "OnMyMind document has been deleted",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
     }
 }

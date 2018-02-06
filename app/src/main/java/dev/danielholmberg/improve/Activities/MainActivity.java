@@ -15,7 +15,7 @@ import dev.danielholmberg.improve.Fragments.ViewContactsFragment;
 import dev.danielholmberg.improve.Fragments.ViewOnMyMindFragment;
 import dev.danielholmberg.improve.R;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private TabLayout tabLayout;
@@ -24,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
             R.drawable.ic_tab_omms,
             R.drawable.ic_tab_contacts,
     };
+    private ViewOnMyMindFragment tab1;
+    private ViewContactsFragment tab2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,8 +106,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new ViewOnMyMindFragment(), "OnMyMind");
-        adapter.addFragment(new ViewContactsFragment(), "Contacts");
+        tab1 = new ViewOnMyMindFragment();
+        tab2 = new ViewContactsFragment();
+        adapter.addFragment(tab1, "OnMyMind");
+        adapter.addFragment(tab2, "Contacts");
         viewPager.setAdapter(adapter);
     }
 

@@ -19,10 +19,14 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import dev.danielholmberg.improve.Activities.AddContactActivity;
 import dev.danielholmberg.improve.Components.Contact;
+import dev.danielholmberg.improve.Components.OnMyMind;
+import dev.danielholmberg.improve.InternalStorage;
 import dev.danielholmberg.improve.R;
 
 /**
@@ -31,19 +35,24 @@ import dev.danielholmberg.improve.R;
 
 public class ContactsRecyclerViewAdapter extends
         RecyclerView.Adapter<ContactsRecyclerViewAdapter.ViewHolder> {
+    private static final String TAG = ContactsRecyclerViewAdapter.class.getSimpleName();
+    private static final String INTERNAL_STORAGE_KEY = "contacts";
 
     private List<Contact> contactsList;
+    private List<Contact> contactsListCopy;
     private Context context;
     private FirebaseFirestore firestoreDB;
 
     public ContactsRecyclerViewAdapter(List<Contact> list, Context ctx, FirebaseFirestore firestore) {
-        contactsList = list;
-        context = ctx;
-        firestoreDB = firestore;
+        this.contactsList = list;
+        this.context = ctx;
+        this.firestoreDB = firestore;
     }
 
     public void setAdapterList(List<Contact> list) {
         contactsList = list;
+        contactsListCopy = new ArrayList<Contact>();
+        contactsListCopy.addAll(contactsList);
     }
 
     @Override
@@ -72,7 +81,7 @@ public class ContactsRecyclerViewAdapter extends
         holder.edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                editContactActivity(contact);
+                editContactActivity(contact, itemPos);
             }
         });
 
@@ -99,6 +108,65 @@ public class ContactsRecyclerViewAdapter extends
         });
     }
 
+    private void editContactActivity(Contact contact, int itemPos){
+        Bundle bundle = new Bundle();
+        bundle.putString("cid", contact.getCID());
+        bundle.putString("first_name", contact.getFirstName());
+        bundle.putString("last_name", contact.getLastName());
+        bundle.putString("company", contact.getCompany());
+        bundle.putString("email", contact.getEmail());
+        bundle.putString("mobile", contact.getMobile());
+        bundle.putInt("position", itemPos);
+
+        Intent i = new Intent(context, AddContactActivity.class);
+        i.putExtra("contact", bundle);
+        context.startActivity(i);
+    }
+
+    private void deleteContact(String docId, final int position){
+        DocumentReference companyRef = firestoreDB.collection("companies").document(contactsList.get(position).getCompany());
+        // Delete the OnMyMind from the recycler list.
+        contactsList.remove(position);
+        try {
+            // Try to get the stored list of contacts and remove the specified contact.
+            List<OnMyMind> storedList = (List<OnMyMind>) InternalStorage.readObject(context, INTERNAL_STORAGE_KEY);
+            storedList.remove(position);
+            InternalStorage.writeObject(context, INTERNAL_STORAGE_KEY, storedList);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, contactsList.size());
+        // Delete the specified contact from Firestore Database.
+        companyRef.collection("contacts").document(docId).delete()
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        // Deletion was successful.
+                        Toast.makeText(context,
+                                "Contact document has been deleted",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    public void filter(String text) {
+        contactsList.clear();
+        if(text.isEmpty()){
+            contactsList.addAll(contactsListCopy);
+        } else {
+            text = text.toLowerCase();
+            for(Contact contact: contactsListCopy){
+                if(contact.getFirstName().toLowerCase().contains(text) || contact.getEmail().toLowerCase().contains(text)){
+                    contactsList.add(contact);
+                }
+            }
+        }
+        notifyDataSetChanged();
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView name;
@@ -114,37 +182,5 @@ public class ContactsRecyclerViewAdapter extends
             edit = (Button) view.findViewById(R.id.edit_contact_b);
             delete = (Button) view.findViewById(R.id.delete_contact_b);
         }
-    }
-
-    private void editContactActivity(Contact contact){
-        Bundle bundle = new Bundle();
-        bundle.putString("cid", contact.getCID());
-        bundle.putString("first_name", contact.getFirstName());
-        bundle.putString("last_name", contact.getLastName());
-        bundle.putString("company", contact.getCompany());
-        bundle.putString("email", contact.getEmail());
-        bundle.putString("phone", contact.getPhone());
-
-        Intent i = new Intent(context, AddContactActivity.class);
-        i.putExtra("contact", bundle);
-        context.startActivity(i);
-
-    }
-
-    private void deleteContact(String docId, final int position){
-        DocumentReference companyRef = firestoreDB.collection("companies").document(contactsList.get(position).getCompany());
-
-        companyRef.collection("contacts").document(docId).delete()
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        contactsList.remove(position);
-                        notifyItemRemoved(position);
-                        notifyItemRangeChanged(position, contactsList.size());
-                        Toast.makeText(context,
-                                "Contact document has been deleted",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
     }
 }

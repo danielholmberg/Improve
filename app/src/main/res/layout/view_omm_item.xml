@@ -76,6 +76,13 @@
                 android:background="?attr/selectableItemBackground"
                 android:text="@string/omm_footer_edit_label" />
             <Button
+                android:id="@+id/done_omm_b"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackground"
+                android:text="@string/omm_footer_done_label" />
+            <Button
                 android:id="@+id/delete_omm_b"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

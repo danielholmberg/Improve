@@ -18,4 +18,7 @@
     <string name="title_edit_onmymind">Edit OnMyMind</string>
     <string name="empty_omms_list_text">What\'s on your mind?</string>
     <string name="hint_phone">Phonenumber</string>
+    <string name="search_title">Search contact</string>
+    <string name="search_hint">Contact name or email</string>
+    <string name="omm_footer_done_label">Done</string>
 </resources>

@@ -24,17 +24,23 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 
 import dev.danielholmberg.improve.Components.Contact;
+import dev.danielholmberg.improve.InternalStorage;
 import dev.danielholmberg.improve.R;
 
 /**
- * Dialog-window to add a new Contact in MainActivity.
+ * Created by DanielHolmberg on 2018-01-27.
  */
 
 public class AddContactActivity extends AppCompatActivity {
     private static final String TAG = AddContactActivity.class.getSimpleName();
+    private static final String INTERNAL_STORAGE_KEY = "contacts";
+
+    private List<Contact> storedContacts;
 
     private EditText inputFirstName, inputLastName, inputCompany, inputEmail, inputPhone;
     private TextInputLayout inputLayoutFirstName, inputLayoutLastName, inputLayoutCompany, inputLayoutEmail, inputLayoutPhone;
@@ -44,6 +50,7 @@ public class AddContactActivity extends AppCompatActivity {
     private boolean isEdit;
 
     private String oldCID, oldCompany;
+    private int contactPosition;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,12 +68,12 @@ public class AddContactActivity extends AppCompatActivity {
         inputLayoutLastName = (TextInputLayout) findViewById(R.id.input_layout_last_name);
         inputLayoutCompany = (TextInputLayout) findViewById(R.id.input_layout_company);
         inputLayoutEmail = (TextInputLayout) findViewById(R.id.input_layout_email);
-        inputLayoutPhone = (TextInputLayout) findViewById(R.id.input_layout_phone);
+        inputLayoutPhone = (TextInputLayout) findViewById(R.id.input_layout_mobile);
         inputFirstName = (EditText) findViewById(R.id.input_first_name);
         inputLastName = (EditText) findViewById(R.id.input_last_name);
         inputCompany = (EditText) findViewById(R.id.input_company);
         inputEmail = (EditText) findViewById(R.id.input_email);
-        inputPhone = (EditText) findViewById(R.id.input_phone);
+        inputPhone = (EditText) findViewById(R.id.input_mobile);
 
         Contact contact = null;
         Bundle extras = getIntent().getBundleExtra("contact");
@@ -77,7 +84,7 @@ public class AddContactActivity extends AppCompatActivity {
             contact.setLastName(extras.getString("last_name"));
             contact.setCompany(extras.getString("company"));
             contact.setEmail(extras.getString("email"));
-            contact.setPhone(extras.getString("phone"));
+            contact.setMobile(extras.getString("mobile"));
         }
         if(contact != null){
             Log.d(TAG, "Contact is not null");
@@ -85,15 +92,24 @@ public class AddContactActivity extends AppCompatActivity {
             ((TextView) findViewById(R.id.input_last_name)).setText(contact.getLastName());
             ((TextView) findViewById(R.id.input_company)).setText(contact.getCompany());
             ((TextView) findViewById(R.id.input_email)).setText(contact.getEmail());
-            ((TextView) findViewById(R.id.input_phone)).setText(contact.getPhone());
+            ((TextView) findViewById(R.id.input_mobile)).setText(contact.getMobile());
 
             ((TextView) findViewById(R.id.toolbar_add_contact_title)).setText(R.string.title_edit_contact);
             isEdit = true;
             oldCID = contact.getCID();
             oldCompany = contact.getCompany();
+            contactPosition = extras.getInt("position");
         }
 
         firestoreDB = FirebaseFirestore.getInstance();
+
+        try {
+            storedContacts = (List<Contact>) InternalStorage.readObject(getApplicationContext(), INTERNAL_STORAGE_KEY);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
 
         fab.setOnClickListener(new View.OnClickListener()        {
             @Override
@@ -129,7 +145,7 @@ public class AddContactActivity extends AppCompatActivity {
         contact.setLastName(((TextView) findViewById(R.id.input_last_name)).getText().toString());
         contact.setCompany(((TextView) findViewById(R.id.input_company)).getText().toString());
         contact.setEmail(((TextView) findViewById(R.id.input_email)).getText().toString());
-        contact.setPhone(((TextView) findViewById(R.id.input_phone)).getText().toString());
+        contact.setMobile(((TextView) findViewById(R.id.input_mobile)).getText().toString());
 
         return contact;
     }
@@ -139,8 +155,14 @@ public class AddContactActivity extends AppCompatActivity {
      * @param contact
      */
     private void addDocumentToCollection(final Contact contact) {
-        firestoreDB.collection("companies").document(contact.getCompany()).set(new HashMap<>(), SetOptions.merge());
+        storedContacts.add(contact);
+        try {
+            InternalStorage.writeObject(getApplicationContext(), INTERNAL_STORAGE_KEY, storedContacts);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+        firestoreDB.collection("companies").document(contact.getCompany()).set(new HashMap<>(), SetOptions.merge());
         firestoreDB.collection("companies").document(contact.getCompany()).collection("contacts")
                 .add(contact)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -148,8 +170,6 @@ public class AddContactActivity extends AppCompatActivity {
                     public void onSuccess(DocumentReference documentReference) {
                         Log.d(TAG, "Contact document added - id: "
                                 + documentReference.getId());
-                        restUi();
-                        showMainActivity();
                         Toast.makeText(getApplicationContext(),
                                 "Contact document has been added",
                                 Toast.LENGTH_SHORT).show();
@@ -164,6 +184,7 @@ public class AddContactActivity extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
+        showMainActivity();
     }
 
     /**
@@ -171,6 +192,12 @@ public class AddContactActivity extends AppCompatActivity {
      * @param updatedContact
      */
     private void updateDocumentToCollection(Contact updatedContact){
+        storedContacts.set(contactPosition, updatedContact);
+        try {
+            InternalStorage.writeObject(getApplicationContext(), INTERNAL_STORAGE_KEY, storedContacts);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         firestoreDB.collection("companies")
                 .document(oldCompany)
                 .collection("contacts")
@@ -183,7 +210,6 @@ public class AddContactActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(),
                                 "Contact document has been updated",
                                 Toast.LENGTH_SHORT).show();
-                        showMainActivity();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -195,6 +221,12 @@ public class AddContactActivity extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
+        showMainActivity();
+    }
+
+    private void showMainActivity() {
+        restUi();
+        NavUtils.navigateUpFromSameTask(this);
     }
 
     private void restUi(){
@@ -202,18 +234,14 @@ public class AddContactActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.input_last_name)).setText("");
         ((TextView) findViewById(R.id.input_company)).setText("");
         ((TextView) findViewById(R.id.input_email)).setText("");
-        ((TextView) findViewById(R.id.input_phone)).setText("");
-    }
-
-    private void showMainActivity() {
-        NavUtils.navigateUpFromSameTask(this);
+        ((TextView) findViewById(R.id.input_mobile)).setText("");
     }
 
     /**
      * Validating new contact form
      */
     private boolean formIsValid() {
-        if (!validateFirstName() && !validateLastName() && !validateEmail()) {
+        if (validateFirstName() && validateLastName() && validateEmail()) {
             Log.d(TAG, "New contact form is valid");
             return true;
         } else {
