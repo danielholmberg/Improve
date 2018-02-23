@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -40,13 +41,12 @@ import dev.danielholmberg.improve.R;
 
 public class ViewContactsFragment extends Fragment implements SearchView.OnQueryTextListener{
     private static final String TAG = "ViewContactsFragment";
-    private static final String INTERNAL_STORAGE_KEY = "contacts";
-    private static final String filename = "contacts";
 
     private FirebaseFirestore firestoreDB;
     private RecyclerView contactsRecyclerView;
     private List<Contact> contactList = new ArrayList<>();
     private List<Contact> cachedContacts;
+    private TextView emptyListText;
     public ContactsRecyclerViewAdapter recyclerViewAdapter;
     private ProgressBar progressBar;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -74,6 +74,7 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
 
         // Initialize View components to be used.
         contactsRecyclerView = (RecyclerView) view.findViewById(R.id.contacts_list);
+        emptyListText = (TextView) view.findViewById(R.id.empty_contact_list_tv);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh_contacts);
         fab = (FloatingActionButton) getActivity().getWindow().findViewById(R.id.add_contact);
@@ -132,8 +133,9 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
 
         try {
             // Try to read the already stored list of contacts in Internal Storage.
-            cachedContacts = (List<Contact>) InternalStorage.readObject(getContext(), INTERNAL_STORAGE_KEY);
+            cachedContacts = (ArrayList<Contact>) InternalStorage.readObject(getContext(), InternalStorage.CONTACTS_STORAGE_KEY);
         } catch (IOException e) {
+            Log.e(TAG, "Failed to read from Internal Storage: ");
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -144,18 +146,16 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
             if(cachedContacts.isEmpty()) {
                 // The list of already stored list of contacts is empty.
                 // Get the list from the Firestore Database instead.
-                Log.d(TAG, "Getting contacts from Firestore Database");
                 getDataFromFirestore();
             } else {
                 // The list of already stored list of contacts is NOT empty.
                 // Add the stored list of contacts to the custom RecycleViewAdapter.
-                Log.d(TAG, "Getting contacts from Internal Storge");
+                Log.d(TAG, "*** Using data from Internal Storage ***");
                 recyclerViewAdapter.setAdapterList(cachedContacts);
                 recyclerViewAdapter.notifyDataSetChanged();
                 contactsRecyclerView.setVisibility(View.VISIBLE);
             }
         } else {
-            // The Internal Storage list has NOT been initialized in a previous session.
             // Get the list from the Firestore Database instead.
             Log.d(TAG, "Getting contacts from Firestore Database");
             getDataFromFirestore();
@@ -164,7 +164,7 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu, menu);
+        inflater.inflate(R.menu.toolbar_menu, menu);
 
         final MenuItem searchItem = menu.findItem(R.id.search);
         final SearchView searchView = (SearchView) searchItem.getActionView();
@@ -189,7 +189,7 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
      * Retrieves contact list data from Firestore Database
      */
     private void getDataFromFirestore() {
-        Log.d(TAG, "getDataFromFirestore()");
+        Log.d(TAG, "Getting data from Firestore...");
         contactsRecyclerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
         // Run the Query on a new thread for performance purposes.
@@ -208,6 +208,7 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
                                     if (task.getResult().isEmpty()) {
                                         // No companies exists.
                                         Log.e(TAG, "No companies exists.");
+                                        emptyListText.setVisibility(View.VISIBLE);
                                     } else {
                                         // Get data from each stored company.
                                         for (final DocumentSnapshot company : task.getResult()) {
@@ -234,14 +235,15 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
                                                                     }
                                                                     try {
                                                                         // Writing all the retrieved contacts to Internal Storage for offline use.
-                                                                        InternalStorage.writeObject(getContext(), INTERNAL_STORAGE_KEY, contactList);
+                                                                        InternalStorage.writeObject(getContext(), InternalStorage.CONTACTS_STORAGE_KEY, contactList);
                                                                     } catch (IOException e) {
+                                                                        Log.e(TAG, "Failed to write data from Firestore to Internal Storage file: ");
                                                                         e.printStackTrace();
                                                                     }
                                                                     Log.d(TAG, "Wrote contacts to Internal Storage");
                                                                     recyclerViewAdapter.setAdapterList(contactList);
                                                                     recyclerViewAdapter.notifyDataSetChanged();
-                                                                    contactsRecyclerView.setVisibility(View.VISIBLE);
+                                                                    emptyListText.setVisibility(View.GONE);
                                                                 }
                                                                 Log.d(TAG,"Done getting data from company: " + company.getId());
                                                             }  else {
@@ -257,7 +259,7 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
                                     Log.e(TAG, "Error getting companies: ", task.getException());
                                 }
                                 // Done getting all the contacts stored in Firestore Database.
-                                Log.d(TAG, "Done getting Data");
+                                Log.d(TAG, "*** Done getting data from Firestore ***");
                                 progressBar.setVisibility(View.GONE);
                                 contactsRecyclerView.setVisibility(View.VISIBLE);
                             }

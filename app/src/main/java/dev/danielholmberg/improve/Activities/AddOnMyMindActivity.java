@@ -8,20 +8,23 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import dev.danielholmberg.improve.Components.OnMyMind;
 import dev.danielholmberg.improve.InternalStorage;
@@ -33,7 +36,8 @@ import dev.danielholmberg.improve.R;
 
 public class AddOnMyMindActivity extends AppCompatActivity {
     private static final String TAG = AddOnMyMindActivity.class.getSimpleName();
-    private static final String INTERNAL_STORAGE_KEY = "OnMyMinds";
+    public static final int OMM_ADDED = 9998;
+    public static final int OMM_UPDATED = 9999;
 
     private List<OnMyMind> storedOnMyMinds;
 
@@ -43,8 +47,11 @@ public class AddOnMyMindActivity extends AppCompatActivity {
     private FirebaseFirestore firestoreDB;
     private boolean isEdit;
 
-    private String ommId, oldTitle, oldInfo;
+    private String oldId, oldTitle, oldInfo;
     private int ommPosition;
+
+    private boolean ommAdded = false;
+    private boolean ommUpdated = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,18 +63,18 @@ public class AddOnMyMindActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.done);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.omm_done);
 
-        inputLayoutTitle = (TextInputLayout) findViewById(R.id.input_layout_first_name);
-        inputLayoutInfo = (TextInputLayout) findViewById(R.id.input_layout_last_name);
-        inputTitle = (EditText) findViewById(R.id.input_first_name);
-        inputInfo = (EditText) findViewById(R.id.input_last_name);
+        inputLayoutTitle = (TextInputLayout) findViewById(R.id.input_layout_title);
+        inputLayoutInfo = (TextInputLayout) findViewById(R.id.input_layout_info);
+        inputTitle = (EditText) findViewById(R.id.input_title);
+        inputInfo = (EditText) findViewById(R.id.input_info);
 
         OnMyMind omm = null;
         Bundle extras = getIntent().getBundleExtra("onmymind");
         if(extras != null){
             omm = new OnMyMind();
-            omm.setID(extras.getString("id"));
+            omm.setId(extras.getString("id"));
             omm.setTitle(extras.getString("title"));
             omm.setInfo(extras.getString("info"));
         }
@@ -78,7 +85,7 @@ public class AddOnMyMindActivity extends AppCompatActivity {
 
             ((TextView) findViewById(R.id.toolbar_add_omm_title)).setText(R.string.title_edit_onmymind);
             isEdit = true;
-            ommId = omm.getId();
+            oldId = omm.getId();
             oldTitle = omm.getTitle();
             oldInfo = omm.getInfo();
             ommPosition = extras.getInt("position");
@@ -87,11 +94,17 @@ public class AddOnMyMindActivity extends AppCompatActivity {
         firestoreDB = FirebaseFirestore.getInstance();
 
         try {
-            storedOnMyMinds = (List<OnMyMind>) InternalStorage.readObject(getApplicationContext(), INTERNAL_STORAGE_KEY);
+            storedOnMyMinds = (ArrayList<OnMyMind>) InternalStorage.readObject(getApplicationContext(),
+                    InternalStorage.ONMYMINDS_STORAGE_KEY);
         } catch (IOException e) {
+            Log.e(TAG, "Failed to read from Internal Storage: ");
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
+        }
+
+        if(storedOnMyMinds.isEmpty()) {
+            storedOnMyMinds = new ArrayList<>();
         }
 
         fab.setOnClickListener(new View.OnClickListener()        {
@@ -99,12 +112,44 @@ public class AddOnMyMindActivity extends AppCompatActivity {
             public void onClick(View v)
             {
                 if(!isEdit){
-                    addOnMyMind();
+                    if(validateTitle() && valitdateInfo()) {
+                        addOnMyMind();
+                    }
                 } else {
                     updateOnMyMind();
                 }
             }
         });
+    }
+
+    private boolean validateTitle() {
+        if(TextUtils.isEmpty(inputTitle.getText())) {
+            inputLayoutTitle.setError(getString(R.string.err_msg_title));
+            requestFocus(inputTitle);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private boolean valitdateInfo() {
+        if(TextUtils.isEmpty(inputInfo.getText())) {
+            inputLayoutInfo.setError(getString(R.string.err_msg_info));
+            requestFocus(inputInfo);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Requests focus of the incoming view.
+     * @param view
+     */
+    private void requestFocus(View view) {
+        if (view.requestFocus()) {
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        }
     }
 
     public void addOnMyMind(){
@@ -130,23 +175,24 @@ public class AddOnMyMindActivity extends AppCompatActivity {
      * @param omm
      */
     private void addDocumentToCollection(final OnMyMind omm) {
+        omm.setId(UUID.randomUUID().toString());
+        Log.d(TAG, "Id: " + omm.getId());
         storedOnMyMinds.add(omm);
         try {
-            InternalStorage.writeObject(getApplicationContext(), INTERNAL_STORAGE_KEY, storedOnMyMinds);
+            InternalStorage.writeObject(getApplicationContext(), InternalStorage.ONMYMINDS_STORAGE_KEY,
+                    storedOnMyMinds);
         } catch (IOException e) {
+            Log.e(TAG, "Failed to write to Internal Storage: ");
             e.printStackTrace();
         }
-        firestoreDB.collection("onmyminds")
-                .add(omm)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+        firestoreDB.collection("onmyminds").document(omm.getId())
+                .set(omm)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
-                    public void onSuccess(DocumentReference documentReference) {
+                    public void onSuccess(Void avoid) {
                         Log.d(TAG, "OnMyMind document added - id: "
-                                + documentReference.getId());
-
-                        Toast.makeText(getApplicationContext(),
-                                "OnMyMind document has been added",
-                                Toast.LENGTH_SHORT).show();
+                                + omm.getId());
+                        ommAdded = true;
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -154,7 +200,7 @@ public class AddOnMyMindActivity extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error adding OnMyMind document: " + e);
                         Toast.makeText(getApplicationContext(),
-                                "OnMyMind document could not be added",
+                                "Adding new OnMyMind failed",
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -165,22 +211,24 @@ public class AddOnMyMindActivity extends AppCompatActivity {
      * Update a OnMyMind in Firestore Database
      * @param updatedOnMyMind
      */
-    private void updateDocumentToCollection(OnMyMind updatedOnMyMind) {
+    private void updateDocumentToCollection(final OnMyMind updatedOnMyMind) {
+        updatedOnMyMind.setId(oldId);
         storedOnMyMinds.set(ommPosition, updatedOnMyMind);
         try {
-            InternalStorage.writeObject(getApplicationContext(), INTERNAL_STORAGE_KEY, storedOnMyMinds);
+            InternalStorage.writeObject(getApplicationContext(), InternalStorage.ONMYMINDS_STORAGE_KEY,
+                    storedOnMyMinds);
         } catch (IOException e) {
+            Log.e(TAG, "Failed to write to Internal Storage: ");
             e.printStackTrace();
         }
-        firestoreDB.collection("onmyminds").document(ommId)
+        Log.d(TAG, "oldId: " + oldId);
+        firestoreDB.collection("onmyminds").document(oldId)
                 .set(updatedOnMyMind, SetOptions.merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "OnMyMind document updated ");
-                        Toast.makeText(getApplicationContext(),
-                                "OnMyMind document has been updated",
-                                Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, updatedOnMyMind.getTitle() + " updated successfully");
+                        ommUpdated = true;
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -188,7 +236,7 @@ public class AddOnMyMindActivity extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error adding OnMyMind document: " + e);
                         Toast.makeText(getApplicationContext(),
-                                "OnMyMind document could not be added",
+                                updatedOnMyMind.getTitle() + " document could not be added",
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -197,7 +245,13 @@ public class AddOnMyMindActivity extends AppCompatActivity {
 
     private void showMainActivity() {
         restUi();
+        if(ommAdded) {
+            setResult(OMM_ADDED);
+        } else if(ommUpdated){
+            setResult(OMM_UPDATED);
+        }
         NavUtils.navigateUpFromSameTask(this);
+        finish();
     }
 
     private void restUi(){

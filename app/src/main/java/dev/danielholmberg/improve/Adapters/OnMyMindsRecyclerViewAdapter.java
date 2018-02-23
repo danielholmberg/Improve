@@ -5,14 +5,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -20,6 +21,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import dev.danielholmberg.improve.Activities.AddOnMyMindActivity;
@@ -41,6 +43,7 @@ public class OnMyMindsRecyclerViewAdapter extends
     private Context context;
     private FirebaseFirestore firestoreDB;
     private Toolbar toolbar;
+    private View parentLayout;
 
     public OnMyMindsRecyclerViewAdapter(List<OnMyMind> list, Context ctx, FirebaseFirestore firestore) {
         this.ommsList = list;
@@ -60,6 +63,7 @@ public class OnMyMindsRecyclerViewAdapter extends
     @Override
     public OnMyMindsRecyclerViewAdapter.ViewHolder
     onCreateViewHolder(ViewGroup parent, int viewType) {
+        parentLayout = parent;
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.view_omm_item, parent, false);
 
@@ -85,14 +89,23 @@ public class OnMyMindsRecyclerViewAdapter extends
         holder.done.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(context, omm.getTitle()+" marked as Done", Toast.LENGTH_SHORT).show();
+                // TODO - Move the OnMyMind to Archive.
+                Snackbar.make(parentLayout, omm.getTitle() + " moved to Archive",
+                        Snackbar.LENGTH_LONG)
+                        .setAction("UNDO", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                // TODO - Undo move to archive.
+                            }
+                        })
+                        .show();
             }
         });
         holder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 AlertDialog.Builder alertDialogBuilder =
-                        new AlertDialog.Builder(context).setTitle("Delete OnMyMind")
+                        new AlertDialog.Builder(context).setTitle("Delete " + omm.getTitle())
                                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -123,18 +136,27 @@ public class OnMyMindsRecyclerViewAdapter extends
     }
 
     public void deleteOnMyMind(String docId, final int position){
+        final String ommTitle = ommsList.get(position).getTitle();
+
         // Delete the OnMyMind from the recycler list.
         ommsList.remove(position);
+        if(ommsList.isEmpty()) {
+            TextView emptyListText = (TextView) parentLayout.getRootView().findViewById(R.id.empty_omms_list_tv);
+            emptyListText.setVisibility(View.VISIBLE);
+        }
         try {
             // Try to get the stored list of OnMyminds and remove the specified OnMyMind.
-            List<OnMyMind> storedList = (List<OnMyMind>) InternalStorage.readObject(context, INTERNAL_STORAGE_KEY);
+            List<OnMyMind> storedList = (ArrayList<OnMyMind>) InternalStorage.readObject(context,
+                    InternalStorage.ONMYMINDS_STORAGE_KEY);
             storedList.remove(position);
-            InternalStorage.writeObject(context, INTERNAL_STORAGE_KEY, storedList);
+            InternalStorage.writeObject(context, InternalStorage.ONMYMINDS_STORAGE_KEY, storedList);
         } catch (IOException e) {
+            Log.e(TAG, "Failed to read from Internal Storage: ");
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, ommsList.size());
         // Delete the specified OnMyMind from Firestore Database.
@@ -143,9 +165,9 @@ public class OnMyMindsRecyclerViewAdapter extends
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         // Deletion was successful.
-                        Toast.makeText(context,
-                                "OnMyMind document has been deleted",
-                                Toast.LENGTH_SHORT).show();
+                        Snackbar.make(parentLayout,
+                                ommTitle + " has been deleted",
+                                Snackbar.LENGTH_SHORT).show();
                     }
                 });
     }

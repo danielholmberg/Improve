@@ -2,6 +2,7 @@ package dev.danielholmberg.improve;
 
 import android.content.Context;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,8 +14,20 @@ import java.io.ObjectOutputStream;
  */
 
 public final class InternalStorage {
+    public static final String ONMYMINDS_STORAGE_KEY = "onmyminds";
+    public static final String CONTACTS_STORAGE_KEY = "contacts";
 
     private InternalStorage() {}
+
+    public static void createStorage(Context context) throws IOException {
+        // Create the Storage file for OnMyMinds
+        File onmyminds = new File(context.getFilesDir(), ONMYMINDS_STORAGE_KEY);
+        onmyminds.createNewFile(); //If already exist, will do nothing
+
+        // Create the Storage file for Contacts
+        File contacts = new File(context.getFilesDir(), CONTACTS_STORAGE_KEY);
+        contacts.createNewFile(); //If already exist, will do nothing
+    }
 
     public static void writeObject(Context context, String key, Object object) throws IOException {
         FileOutputStream fos = context.openFileOutput(key, Context.MODE_PRIVATE);

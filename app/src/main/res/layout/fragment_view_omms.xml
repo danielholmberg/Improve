@@ -15,7 +15,7 @@
         tools:context=".Activities.MainActivity">
 
         <TextView
-            android:id="@+id/empty_list_text"
+            android:id="@+id/empty_omms_list_tv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/empty_omms_list_text"

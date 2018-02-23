@@ -5,14 +5,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -25,7 +26,6 @@ import java.util.List;
 
 import dev.danielholmberg.improve.Activities.AddContactActivity;
 import dev.danielholmberg.improve.Components.Contact;
-import dev.danielholmberg.improve.Components.OnMyMind;
 import dev.danielholmberg.improve.InternalStorage;
 import dev.danielholmberg.improve.R;
 
@@ -36,12 +36,12 @@ import dev.danielholmberg.improve.R;
 public class ContactsRecyclerViewAdapter extends
         RecyclerView.Adapter<ContactsRecyclerViewAdapter.ViewHolder> {
     private static final String TAG = ContactsRecyclerViewAdapter.class.getSimpleName();
-    private static final String INTERNAL_STORAGE_KEY = "contacts";
 
     private List<Contact> contactsList;
     private List<Contact> contactsListCopy;
     private Context context;
     private FirebaseFirestore firestoreDB;
+    private View parentLayout;
 
     public ContactsRecyclerViewAdapter(List<Contact> list, Context ctx, FirebaseFirestore firestore) {
         this.contactsList = list;
@@ -63,6 +63,7 @@ public class ContactsRecyclerViewAdapter extends
     @Override
     public ContactsRecyclerViewAdapter.ViewHolder
     onCreateViewHolder(ViewGroup parent, int viewType) {
+        parentLayout = parent;
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.view_contact_item, parent, false);
 
@@ -86,7 +87,7 @@ public class ContactsRecyclerViewAdapter extends
         });
 
         AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(context).setTitle("Delete contact")
+                new AlertDialog.Builder(context).setTitle("Delete " + contact.getFullName())
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -125,18 +126,28 @@ public class ContactsRecyclerViewAdapter extends
 
     private void deleteContact(String docId, final int position){
         DocumentReference companyRef = firestoreDB.collection("companies").document(contactsList.get(position).getCompany());
+        final String contactName = contactsList.get(position).getFullName();
+
         // Delete the OnMyMind from the recycler list.
         contactsList.remove(position);
+        contactsListCopy.remove(position);
+        if(contactsList.isEmpty()) {
+            TextView epmtyListText = (TextView) parentLayout.getRootView().findViewById(R.id.empty_contact_list_tv);
+            epmtyListText.setVisibility(View.VISIBLE);
+        }
         try {
             // Try to get the stored list of contacts and remove the specified contact.
-            List<OnMyMind> storedList = (List<OnMyMind>) InternalStorage.readObject(context, INTERNAL_STORAGE_KEY);
+            List<Contact> storedList = (ArrayList<Contact>) InternalStorage.readObject(context,
+                    InternalStorage.CONTACTS_STORAGE_KEY);
             storedList.remove(position);
-            InternalStorage.writeObject(context, INTERNAL_STORAGE_KEY, storedList);
+            InternalStorage.writeObject(context, InternalStorage.CONTACTS_STORAGE_KEY, storedList);
         } catch (IOException e) {
+            Log.e(TAG, "Failed to read from Internal Storage: ");
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, contactsList.size());
         // Delete the specified contact from Firestore Database.
@@ -145,9 +156,9 @@ public class ContactsRecyclerViewAdapter extends
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         // Deletion was successful.
-                        Toast.makeText(context,
-                                "Contact document has been deleted",
-                                Toast.LENGTH_SHORT).show();
+                        Snackbar.make(parentLayout,
+                                contactName + " has been deleted",
+                                Snackbar.LENGTH_SHORT).show();
                     }
                 });
     }

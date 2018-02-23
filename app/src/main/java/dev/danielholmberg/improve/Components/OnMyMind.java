@@ -23,7 +23,7 @@ public class OnMyMind implements Serializable{
         return this.id;
     }
 
-    public void setID(String id) {
+    public void setId(String id) {
         this.id = id;
     }
 

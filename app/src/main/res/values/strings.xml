@@ -21,4 +21,18 @@
     <string name="search_title">Search contact</string>
     <string name="search_hint">Contact name or email</string>
     <string name="omm_footer_done_label">Done</string>
+    <string name="navigation_drawer_open">open drawer</string>
+    <string name="navigation_drawer_close">close drawer</string>
+    <string name="desc_firebase_lockup">Firebase logo and name</string>
+    <string name="google_title_text">Google Sign In</string>
+    <string name="signed_out">Signed Out</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="google_status_fmt">Google User: %s</string>
+    <string name="firebase_status_fmt">Firebase User: %s</string>
+    <string name="err_msg_title">Enter a title</string>
+    <string name="err_msg_info">Enter some information</string>
+    <string name="err_msg_company">Enter a company name</string>
+    <string name="empty_contact_list_text">No contacts added</string>
+    <string name="settings">Settings</string>
 </resources>

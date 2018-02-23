@@ -25,8 +25,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import dev.danielholmberg.improve.Components.Contact;
 import dev.danielholmberg.improve.InternalStorage;
@@ -38,7 +40,6 @@ import dev.danielholmberg.improve.R;
 
 public class AddContactActivity extends AppCompatActivity {
     private static final String TAG = AddContactActivity.class.getSimpleName();
-    private static final String INTERNAL_STORAGE_KEY = "contacts";
 
     private List<Contact> storedContacts;
 
@@ -62,7 +63,7 @@ public class AddContactActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.done);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.contact_done);
 
         inputLayoutFirstName = (TextInputLayout) findViewById(R.id.input_layout_first_name);
         inputLayoutLastName = (TextInputLayout) findViewById(R.id.input_layout_last_name);
@@ -104,11 +105,17 @@ public class AddContactActivity extends AppCompatActivity {
         firestoreDB = FirebaseFirestore.getInstance();
 
         try {
-            storedContacts = (List<Contact>) InternalStorage.readObject(getApplicationContext(), INTERNAL_STORAGE_KEY);
+            storedContacts = (List<Contact>) InternalStorage.readObject(getApplicationContext(),
+                    InternalStorage.CONTACTS_STORAGE_KEY);
         } catch (IOException e) {
+            Log.e(TAG, "Failed to read from Internal Storage: ");
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
+        }
+
+        if(storedContacts.isEmpty()) {
+            storedContacts = new ArrayList<>();
         }
 
         fab.setOnClickListener(new View.OnClickListener()        {
@@ -125,8 +132,6 @@ public class AddContactActivity extends AppCompatActivity {
 
             }
         });
-
-
     }
 
     public void addContact(){
@@ -155,10 +160,14 @@ public class AddContactActivity extends AppCompatActivity {
      * @param contact
      */
     private void addDocumentToCollection(final Contact contact) {
+        contact.setCID(UUID.randomUUID().toString());
+        Log.d(TAG, "Id: " + contact.getCID());
         storedContacts.add(contact);
         try {
-            InternalStorage.writeObject(getApplicationContext(), INTERNAL_STORAGE_KEY, storedContacts);
+            InternalStorage.writeObject(getApplicationContext(), InternalStorage.CONTACTS_STORAGE_KEY,
+                    storedContacts);
         } catch (IOException e) {
+            Log.e(TAG, "Failed to write to Internal Storage: ");
             e.printStackTrace();
         }
 
@@ -170,9 +179,6 @@ public class AddContactActivity extends AppCompatActivity {
                     public void onSuccess(DocumentReference documentReference) {
                         Log.d(TAG, "Contact document added - id: "
                                 + documentReference.getId());
-                        Toast.makeText(getApplicationContext(),
-                                "Contact document has been added",
-                                Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -180,7 +186,7 @@ public class AddContactActivity extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error adding contact document: " + e);
                         Toast.makeText(getApplicationContext(),
-                                "Contact document could not be added",
+                                "Adding new contact failed",
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -191,10 +197,12 @@ public class AddContactActivity extends AppCompatActivity {
      * Update a Contact in Firestore Database.
      * @param updatedContact
      */
-    private void updateDocumentToCollection(Contact updatedContact){
+    private void updateDocumentToCollection(final Contact updatedContact){
+        updatedContact.setCID(oldCID);
         storedContacts.set(contactPosition, updatedContact);
         try {
-            InternalStorage.writeObject(getApplicationContext(), INTERNAL_STORAGE_KEY, storedContacts);
+            InternalStorage.writeObject(getApplicationContext(), InternalStorage.CONTACTS_STORAGE_KEY,
+                    storedContacts);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -206,10 +214,7 @@ public class AddContactActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "Contact document updated ");
-                        Toast.makeText(getApplicationContext(),
-                                "Contact document has been updated",
-                                Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, updatedContact.getFullName() + " updated successfully");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -241,7 +246,7 @@ public class AddContactActivity extends AppCompatActivity {
      * Validating new contact form
      */
     private boolean formIsValid() {
-        if (validateFirstName() && validateLastName() && validateEmail()) {
+        if (validateFirstName() && validateLastName() && validateCompany() && validateEmail()) {
             Log.d(TAG, "New contact form is valid");
             return true;
         } else {
@@ -276,6 +281,22 @@ public class AddContactActivity extends AppCompatActivity {
             return false;
         } else {
             inputLayoutLastName.setErrorEnabled(false);
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate if the user has entered a company.
+     * @return false if last name is empty.
+     */
+    private boolean validateCompany() {
+        if (inputCompany.getText().toString().isEmpty()) {
+            inputLayoutCompany.setError(getString(R.string.err_msg_company));
+            requestFocus(inputCompany);
+            return false;
+        } else {
+            inputLayoutCompany.setErrorEnabled(false);
         }
 
         return true;
