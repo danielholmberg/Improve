@@ -76,7 +76,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+        progressBar.setVisibility(View.GONE);
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             try {
@@ -88,6 +88,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e);
                 Toast.makeText(getApplicationContext(), "Google sign in failed", Toast.LENGTH_SHORT).show();
+                signInButton.setVisibility(View.VISIBLE);
             }
         }
     }
