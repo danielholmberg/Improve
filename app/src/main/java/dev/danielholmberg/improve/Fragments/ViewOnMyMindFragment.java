@@ -85,7 +85,8 @@ public class ViewOnMyMindFragment extends Fragment {
             }
         });
 
-        // Add a OnScrollListener to change when to show the Floating Action Button for adding a new OnMyMind.
+        // Add a OnScrollListener to change when to show the Floating Action Button for adding
+        // a new OnMyMind.
         ommsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener(){
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy){
@@ -147,7 +148,7 @@ public class ViewOnMyMindFragment extends Fragment {
     }
 
     /**
-     * Retrieves OnMyMind list data from Firestore Database
+     * Retrieves OnMyMind stored in Firestore Database.
      */
     private void getDataFromFirestore() {
         Log.d(TAG, "Getting data from Firestore...");
@@ -172,6 +173,7 @@ public class ViewOnMyMindFragment extends Fragment {
                                         emptyListText.setVisibility(View.VISIBLE);
                                     } else {
                                         // Getting data from each stored OnMyMind.
+                                        // and adding it to the list.
                                         for (DocumentSnapshot onmymind : task.getResult()) {
                                             OnMyMind omm = onmymind.toObject(OnMyMind.class);
                                             omm.setId(onmymind.getId());

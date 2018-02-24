@@ -45,11 +45,10 @@ public class AddOnMyMindActivity extends AppCompatActivity {
     private TextInputLayout inputLayoutTitle, inputLayoutInfo;
 
     private FirebaseFirestore firestoreDB;
-    private boolean isEdit;
 
+    private boolean isEdit;
     private String oldId, oldTitle, oldInfo;
     private int ommPosition;
-
     private boolean ommAdded = false;
     private boolean ommUpdated = false;
 
@@ -154,12 +153,12 @@ public class AddOnMyMindActivity extends AppCompatActivity {
 
     public void addOnMyMind(){
         OnMyMind omm = createOnMyMindObj();
-        addDocumentToCollection(omm);
+        addOnMyMind(omm);
     }
 
     public void updateOnMyMind(){
         OnMyMind omm = createOnMyMindObj();
-        updateDocumentToCollection(omm);
+        updateOnMyMind(omm);
     }
 
     private OnMyMind createOnMyMindObj(){
@@ -174,7 +173,7 @@ public class AddOnMyMindActivity extends AppCompatActivity {
      * Add a new OnMyMind to the Firestore Database.
      * @param omm
      */
-    private void addDocumentToCollection(final OnMyMind omm) {
+    private void addOnMyMind(final OnMyMind omm) {
         omm.setId(UUID.randomUUID().toString());
         Log.d(TAG, "Id: " + omm.getId());
         storedOnMyMinds.add(omm);
@@ -211,7 +210,7 @@ public class AddOnMyMindActivity extends AppCompatActivity {
      * Update a OnMyMind in Firestore Database
      * @param updatedOnMyMind
      */
-    private void updateDocumentToCollection(final OnMyMind updatedOnMyMind) {
+    private void updateOnMyMind(final OnMyMind updatedOnMyMind) {
         updatedOnMyMind.setId(oldId);
         storedOnMyMinds.set(ommPosition, updatedOnMyMind);
         try {

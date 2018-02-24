@@ -30,26 +30,21 @@ import dev.danielholmberg.improve.R;
  */
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener{
-
-    private static final String TAG = "GoogleActivity";
+    private static final String TAG = LoginActivity.class.getSimpleName();
     private static final int RC_SIGN_IN = 9001;
-
-    // [START declare_auth]
-    private FirebaseAuth mAuth;
-    // [END declare_auth]
 
     private ProgressBar progressBar;
     private SignInButton signInButton;
 
     private GoogleSignInClient mGoogleSignInClient;
-    private TextView mStatusTextView;
-    private TextView mDetailTextView;
+    private FirebaseAuth mAuth;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signin);
 
+        // ProgressBar
         progressBar = (ProgressBar) findViewById(R.id.sign_in_progressBar);
 
         // Button listeners
@@ -61,7 +56,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
-
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         mAuth = FirebaseAuth.getInstance();
 
@@ -70,6 +64,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onStart() {
         super.onStart();
+        // Locks the app to the orientation that was used at startup.
+        // So that the UI does not re-render when the user turns the phone.
         setRequestedOrientation(getResources().getConfiguration().orientation);
     }
 
@@ -93,6 +89,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    /**
+     * Called when the user has chosen a Google-account for sign in.
+     * @param acct - GoogleSignInAccount
+     */
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
 
@@ -115,12 +115,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 });
     }
 
+    /**
+     * Called when the user is correctly authenticated with Google and Firebase.
+     * Sends the user to the MainActivity.
+     */
     private void goToMainActivity() {
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(i);
         finish();
     }
 
+    /**
+     * Starts an Intent to get the users Google-account to be used to sign in.
+     */
     private void signIn() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);

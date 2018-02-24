@@ -59,6 +59,7 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Enable the OptionsMenu to show the SearchView.
         setHasOptionsMenu(true);
     }
 
@@ -83,6 +84,7 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
                 new LinearLayoutManager(getActivity().getApplicationContext());
         contactsRecyclerView.setLayoutManager(recyclerLayoutManager);
 
+        // Separate each Contact in the list with a divider.
         DividerItemDecoration dividerItemDecoration =
                 new DividerItemDecoration(contactsRecyclerView.getContext(),
                         recyclerLayoutManager.getOrientation());
@@ -186,7 +188,7 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
     }
 
     /**
-     * Retrieves contact list data from Firestore Database
+     * Retrieves Contacts stored in Firestore Database.
      */
     private void getDataFromFirestore() {
         Log.d(TAG, "Getting data from Firestore...");
@@ -210,7 +212,7 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
                                         Log.e(TAG, "No companies exists.");
                                         emptyListText.setVisibility(View.VISIBLE);
                                     } else {
-                                        // Get data from each stored company.
+                                        // Get data from each stored Company.
                                         for (final DocumentSnapshot company : task.getResult()) {
                                             firestoreDB.collection("companies")
                                                     .document(company.getId())
@@ -226,7 +228,8 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
                                                                     firestoreDB.collection("companies")
                                                                             .document(company.getId()).delete();
                                                                 } else {
-                                                                    // Getting all contacts from {company} and adding them to the contactList.
+                                                                    // Getting data from each stored Contact
+                                                                    // and adding it to the list.
                                                                     for (DocumentSnapshot contact : task.getResult()) {
                                                                         Log.d(TAG, "Getting data from contact: " + contact.getId());
                                                                         Contact c = contact.toObject(Contact.class);
@@ -245,6 +248,7 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
                                                                     recyclerViewAdapter.notifyDataSetChanged();
                                                                     emptyListText.setVisibility(View.GONE);
                                                                 }
+                                                                // Done getting all the Contacts from a Company.
                                                                 Log.d(TAG,"Done getting data from company: " + company.getId());
                                                             }  else {
                                                                 // Error occured when retrieving contacts for {company}.

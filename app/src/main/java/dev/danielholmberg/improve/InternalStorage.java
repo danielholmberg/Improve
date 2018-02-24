@@ -19,16 +19,28 @@ public final class InternalStorage {
 
     private InternalStorage() {}
 
+    /**
+     * Creates two Files to store OnMyMinds and Contacts in Internal Storage.
+     * @param context
+     * @throws IOException
+     */
     public static void createStorage(Context context) throws IOException {
-        // Create the Storage file for OnMyMinds
+        // Create the File to store OnMyMinds.
         File onmyminds = new File(context.getFilesDir(), ONMYMINDS_STORAGE_KEY);
-        onmyminds.createNewFile(); //If already exist, will do nothing
+        onmyminds.createNewFile(); //If File already exist, will do nothing
 
-        // Create the Storage file for Contacts
+        // Create the File to store Contacts.
         File contacts = new File(context.getFilesDir(), CONTACTS_STORAGE_KEY);
-        contacts.createNewFile(); //If already exist, will do nothing
+        contacts.createNewFile(); //If File already exist, will do nothing
     }
 
+    /**
+     * Writes the incoming Object to the File in Internal Storage with the name "key".
+     * @param context
+     * @param key - Name of the File in Internal Storage to write to.
+     * @param object - The Object to write to the File.
+     * @throws IOException
+     */
     public static void writeObject(Context context, String key, Object object) throws IOException {
         FileOutputStream fos = context.openFileOutput(key, Context.MODE_PRIVATE);
         ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -37,6 +49,14 @@ public final class InternalStorage {
         fos.close();
     }
 
+    /**
+     * Reads the Object stored in the File with the name "key" in Internal Storage.
+     * @param context
+     * @param key - Name of the File in Internal Storage to read from.
+     * @return - Returns the stored Object from the File.
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public static Object readObject(Context context, String key) throws IOException,
             ClassNotFoundException {
         FileInputStream fis = context.openFileInput(key);

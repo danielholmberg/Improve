@@ -48,8 +48,8 @@ public class AddContactActivity extends AppCompatActivity {
     private boolean firstNameIsValid, lastNameIsValid, emailIsValid = false;
 
     private FirebaseFirestore firestoreDB;
-    private boolean isEdit;
 
+    private boolean isEdit;
     private String oldCID, oldCompany;
     private int contactPosition;
 
@@ -136,12 +136,12 @@ public class AddContactActivity extends AppCompatActivity {
 
     public void addContact(){
         Contact contact = createContactObj();
-        addDocumentToCollection(contact);
+        addContact(contact);
     }
 
     public void updateContact(){
         Contact contact = createContactObj();
-        updateDocumentToCollection(contact);
+        updateContact(contact);
     }
 
     private Contact createContactObj(){
@@ -159,7 +159,7 @@ public class AddContactActivity extends AppCompatActivity {
      * Add a new Contact to the Firestore Database.
      * @param contact
      */
-    private void addDocumentToCollection(final Contact contact) {
+    private void addContact(final Contact contact) {
         contact.setCID(UUID.randomUUID().toString());
         Log.d(TAG, "Id: " + contact.getCID());
         storedContacts.add(contact);
@@ -197,7 +197,7 @@ public class AddContactActivity extends AppCompatActivity {
      * Update a Contact in Firestore Database.
      * @param updatedContact
      */
-    private void updateDocumentToCollection(final Contact updatedContact){
+    private void updateContact(final Contact updatedContact){
         updatedContact.setCID(oldCID);
         storedContacts.set(contactPosition, updatedContact);
         try {
