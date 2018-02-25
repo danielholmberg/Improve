@@ -1,9 +1,11 @@
 package dev.danielholmberg.improve.Fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
@@ -30,6 +32,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import dev.danielholmberg.improve.Activities.AddContactActivity;
 import dev.danielholmberg.improve.Adapters.ContactsRecyclerViewAdapter;
 import dev.danielholmberg.improve.Components.Contact;
 import dev.danielholmberg.improve.InternalStorage;
@@ -39,10 +42,12 @@ import dev.danielholmberg.improve.R;
  * Created by DanielHolmberg on 2018-01-18.
  */
 
-public class ViewContactsFragment extends Fragment implements SearchView.OnQueryTextListener{
-    private static final String TAG = "ViewContactsFragment";
+public class ContactsFragment extends Fragment implements SearchView.OnQueryTextListener{
+    private static final String TAG = "ContactsFragment";
+    private static final int FORM_REQUEST_CODE = 9995;
 
     private FirebaseFirestore firestoreDB;
+    private View view;
     private RecyclerView contactsRecyclerView;
     private List<Contact> contactList = new ArrayList<>();
     private List<Contact> cachedContacts;
@@ -52,7 +57,7 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
     private SwipeRefreshLayout swipeRefreshLayout;
     private FloatingActionButton fab;
 
-    public ViewContactsFragment() {
+    public ContactsFragment() {
         // Required empty public constructor
     }
 
@@ -67,7 +72,7 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_view_contacts,
+        view = inflater.inflate(R.layout.fragment_contacts,
                 container, false);
 
         // Initialize Firestore Database.
@@ -118,6 +123,15 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
+            }
+        });
+
+        final FloatingActionButton fab_add_contact = (FloatingActionButton) view.findViewById(R.id.add_contact);
+        fab_add_contact.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Handle action add a new Contact.
+                addContact();
             }
         });
 
@@ -188,6 +202,14 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
     }
 
     /**
+     * Called when a user clicks on the Floating Action Button to add a new Contact.
+     */
+    public void addContact() {
+        Intent i = new Intent(getContext(), AddContactActivity.class);
+        startActivityForResult(i, FORM_REQUEST_CODE);
+    }
+
+    /**
      * Retrieves Contacts stored in Firestore Database.
      */
     private void getDataFromFirestore() {
@@ -225,6 +247,7 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
                                                             if (task.isSuccessful()) {
                                                                 if (task.getResult().isEmpty()) {
                                                                     Log.e(TAG, "No contacts exists for company: " + company.getId());
+                                                                    Log.d(TAG, "*** Deleting company: " + company.getId());
                                                                     firestoreDB.collection("companies")
                                                                             .document(company.getId()).delete();
                                                                 } else {
@@ -270,5 +293,17 @@ public class ViewContactsFragment extends Fragment implements SearchView.OnQuery
                         });
             }
         }).start();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case FORM_REQUEST_CODE:
+                if (resultCode == AddContactActivity.CONTACT_ADDED) {
+                    Snackbar.make(view, "Contact added successfully", Snackbar.LENGTH_SHORT).show();
+                } else if (resultCode == AddContactActivity.CONTACT_UPDATED) {
+                    Snackbar.make(view, "Contact updated successfully", Snackbar.LENGTH_SHORT).show();
+                }
+        }
     }
 }

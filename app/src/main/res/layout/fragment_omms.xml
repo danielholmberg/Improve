@@ -1,24 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.SwipeRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/swiperefresh_contacts"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/swiperefresh_omms"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
     <android.support.constraint.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/contacts_fragment_container"
+        android:id="@+id/omm_fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/windowBackground"
         tools:context=".Activities.MainActivity">
 
         <TextView
-            android:id="@+id/empty_contact_list_tv"
+            android:id="@+id/empty_omms_list_tv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/empty_contact_list_text"
+            android:text="@string/empty_omms_list_text"
             android:visibility="gone"
             android:paddingTop="64dp"
             android:textSize="28sp"
@@ -26,13 +28,23 @@
             android:gravity="center_horizontal"/>
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/contacts_list"
+            android:id="@+id/omms_list"
             android:scrollbars="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="8dp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/add_omm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/ic_fab_add_omm" />
 
         <ProgressBar
             android:id="@+id/progressBar"

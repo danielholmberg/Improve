@@ -16,8 +16,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toolbar;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
@@ -135,7 +135,7 @@ public class OnMyMindsRecyclerViewAdapter extends
         context.startActivity(i);
     }
 
-    public void deleteOnMyMind(String docId, final int position){
+    public void deleteOnMyMind(final String docId, final int position){
         final String ommTitle = ommsList.get(position).getTitle();
 
         // Delete the OnMyMind from the recycler list.
@@ -161,13 +161,21 @@ public class OnMyMindsRecyclerViewAdapter extends
         notifyItemRangeChanged(position, ommsList.size());
         // Delete the specified OnMyMind from Firestore Database.
         firestoreDB.collection("onmyminds").document(docId).delete()
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
-                    public void onComplete(@NonNull Task<Void> task) {
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "*** Deleted OnMyMind successfully ***");
                         // Deletion was successful.
                         Snackbar.make(parentLayout,
                                 ommTitle + " has been deleted",
                                 Snackbar.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Failed to delete OnMyMind - id: " + docId);
+                        e.printStackTrace();
                     }
                 });
     }

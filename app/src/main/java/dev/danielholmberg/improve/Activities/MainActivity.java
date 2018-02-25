@@ -3,12 +3,11 @@ package dev.danielholmberg.improve.Activities;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
+import android.os.Handler;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
@@ -16,8 +15,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,28 +26,37 @@ import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 
-import dev.danielholmberg.improve.Adapters.ViewPagerAdapter;
 import dev.danielholmberg.improve.CircleTransform;
-import dev.danielholmberg.improve.Fragments.ViewContactsFragment;
-import dev.danielholmberg.improve.Fragments.ViewOnMyMindFragment;
+import dev.danielholmberg.improve.Fragments.ContactsFragment;
+import dev.danielholmberg.improve.Fragments.OnMyMindFragment;
 import dev.danielholmberg.improve.InternalStorage;
 import dev.danielholmberg.improve.R;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final int FORM_REQUEST_CODE = 9995;
+    private static final String TAG_ONMYMINDS_FRAGMENT = "ONMYMINDS_FRAGMENT";
+    private static final String TAG_CONTACTS_FRAGMENT = "CONTACTS_FRAGMENT";
+    private static final String TAG_ARCHIVE_FRAGMENT = "ARCHIVE_FRAGMENT";
+    private static String CURRENT_TAG = TAG_ONMYMINDS_FRAGMENT;
+
+    // index to identify current nav menu item
+    public static int navItemIndex = 0;
+    private static final String[] subTitles = {
+            "OnMyMinds",
+            "Contacts",
+            "Archive",
+            "Settings",
+    };
+    // flag to load home fragment when user presses back key
+    private boolean shouldLoadHomeFragOnBackPress = true;
+    private Handler mHandler;
 
     private FirebaseAuth mAuth;
     private GoogleSignInAccount user;
     private Toolbar toolbar;
-    private TabLayout tabLayout;
-    private ViewPager viewPager;
-    private int[] tabIcons = {
-            R.drawable.ic_tab_omms,
-            R.drawable.ic_tab_contacts,
-    };
-    private ViewOnMyMindFragment tab1;
-    private ViewContactsFragment tab2;
+    private DrawerLayout drawer;
+    private NavigationView navigationView;
+    private ActionBarDrawerToggle actionBarDrawerToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,19 +81,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mAuth = FirebaseAuth.getInstance();
         user = GoogleSignIn.getLastSignedInAccount(this);
 
-        viewPager = (ViewPager) findViewById(R.id.viewpager);
-        setupViewPager(viewPager);
-
         // Initalize NavigationDrawer
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+        drawer.addDrawerListener(actionBarDrawerToggle);
+        actionBarDrawerToggle.syncState();
+
+        mHandler = new Handler();
 
         // Set the Image, Name and Email in the NavigationDrawer Header.
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         ImageView drawer_header_image = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.drawer_header_image_iv);
         TextView drawer_header_name = (TextView)  navigationView.getHeaderView(0).findViewById(R.id.drawer_header_name_tv);
         TextView drawer_header_email = (TextView)  navigationView.getHeaderView(0).findViewById(R.id.drawer_header_email_tv);
@@ -101,115 +105,145 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer_header_name.setText(user.getDisplayName());
         drawer_header_email.setText(user.getEmail());
 
-        final FloatingActionButton fab_add_contact = (FloatingActionButton) findViewById(R.id.add_contact);
-        fab_add_contact.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Handle action add a new Contact.
-                addContact();
-            }
-        });
+        // initializing navigation menu
+        setUpNavigationView();
 
-        final FloatingActionButton fab_add_omm = (FloatingActionButton) findViewById(R.id.add_omm);
-        fab_add_omm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Handel action add a new OnMyMind.
-                addOnMyMind();
-            }
-        });
-
-
-        tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                // Fade in
-                AlphaAnimation in = new AlphaAnimation(0.0f, 1.0f);
-                in.setDuration(800);
-                if (tab.getPosition() == 0) {
-                    // OnMyMind Tab
-                    fab_add_omm.startAnimation(in);
-                    fab_add_omm.setVisibility(View.VISIBLE);
-                } else if(tab.getPosition() == 1) {
-                    // Contacts Tab
-                    fab_add_contact.startAnimation(in);
-                    fab_add_contact.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-                // Fade out
-                AlphaAnimation out = new AlphaAnimation(1.0f, 0.0f);
-                out.setDuration(100);
-                if (tab.getPosition() == 0) {
-                    // OnMyMind Tab
-                    fab_add_omm.startAnimation(out);
-                    fab_add_omm.setVisibility(View.GONE);
-                } else if(tab.getPosition() == 1) {
-                    // Contacts Tab
-                    fab_add_contact.startAnimation(out);
-                    fab_add_contact.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
-        });
-        setupTabIcons();
-    }
-
-    private void setupTabIcons() {
-        tabLayout.getTabAt(0).setIcon(tabIcons[0]);
-        tabLayout.getTabAt(1).setIcon(tabIcons[1]);
-    }
-
-    private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        tab1 = new ViewOnMyMindFragment();
-        tab2 = new ViewContactsFragment();
-        adapter.addFragment(tab1, "OnMyMind");
-        adapter.addFragment(tab2, "Contacts");
-        viewPager.setAdapter(adapter);
-    }
-
-    /**
-     * Called when a user clicks on the Floating Action Button to add a new OnMyMind.
-     */
-    private void addOnMyMind() {
-        Intent i = new Intent(this, AddOnMyMindActivity.class);
-        startActivityForResult(i, FORM_REQUEST_CODE);
-    }
-
-    /**
-     * Called when a user clicks on the Floating Action Button to add a new Contact.
-     */
-    public void addContact() {
-        Intent i = new Intent(this, AddContactActivity.class);
-        startActivityForResult(i, FORM_REQUEST_CODE);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_home) {
-            // TODO - Switch to Home fragment.
-        } else if (id == R.id.nav_archive) {
-            // TODO - Switch to Archive fragment.
-        } else if (id == R.id.nav_search) {
-            // TODO - Request focus of Search View in ContactTab.
-        } else if (id == R.id.nav_sign_out) {
-            startSignOut();
+        if (savedInstanceState == null) {
+            navItemIndex = 0;
+            CURRENT_TAG = TAG_ONMYMINDS_FRAGMENT;
+            loadCurrentFragment();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
+    }
+
+    /***
+     * Returns respected fragment that user
+     * selected from navigation menu
+     */
+    private void loadCurrentFragment() {
+        // selecting appropriate nav menu item
+        selectNavMenu();
+
+        // set toolbar title
+        setToolbarTitle();
+
+        // if user select the current navigation menu again, don't do anything
+        // just close the navigation drawer
+        if (getSupportFragmentManager().findFragmentByTag(CURRENT_TAG) != null) {
+            drawer.closeDrawers();
+            return;
+        }
+
+        // Sometimes, when fragment has huge data, screen seems hanging
+        // when switching between navigation menus
+        // So using runnable, the fragment is loaded with cross fade effect
+        // This effect can be seen in GMail app
+        Runnable mPendingRunnable = new Runnable() {
+            @Override
+            public void run() {
+                // update the main content by replacing fragments
+                Fragment fragment = getCurrentFragment();
+                FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
+                        android.R.anim.fade_out);
+                fragmentTransaction.replace(R.id.main_fragment_container, fragment, CURRENT_TAG);
+                fragmentTransaction.commitAllowingStateLoss();
+            }
+        };
+
+        // If mPendingRunnable is not null, then add to the message queue
+        if (mPendingRunnable != null) {
+            mHandler.post(mPendingRunnable);
+        }
+
+        //Closing drawer on item click
+        drawer.closeDrawers();
+
+        // refresh toolbar menu
+        invalidateOptionsMenu();
+    }
+
+    private Fragment getCurrentFragment() {
+        switch (navItemIndex) {
+            case 0:
+                // OnMyMinds
+                OnMyMindFragment ommFragment = new OnMyMindFragment();
+                return ommFragment;
+            case 1:
+                // Contacts
+                ContactsFragment contactsFragment = new ContactsFragment();
+                return contactsFragment;
+            case 2:
+                // Archive fragment
+                return null;
+            case 3:
+                // Settings fragment
+                return null;
+            default:
+                return new OnMyMindFragment();
+        }
+    }
+
+    private void setToolbarTitle() {
+        getSupportActionBar().setSubtitle(subTitles[navItemIndex]);
+    }
+
+    private void selectNavMenu() {
+        navigationView.getMenu().getItem(navItemIndex).setChecked(true);
+    }
+
+    private void setUpNavigationView() {
+        //Setting Navigation View Item Selected Listener to handle the item click of the navigation menu
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+
+            // This method will trigger on item Click of navigation menu
+            @Override
+            public boolean onNavigationItemSelected(MenuItem menuItem) {
+
+                //Check to see which item was being clicked and perform appropriate action
+                switch (menuItem.getItemId()) {
+                    //Replacing the main content with ContentFragment Which is our Inbox View;
+                    case R.id.nav_onmyminds:
+                        navItemIndex = 0;
+                        CURRENT_TAG = TAG_ONMYMINDS_FRAGMENT;
+                        break;
+                    case R.id.nav_contacts:
+                        navItemIndex = 1;
+                        CURRENT_TAG = TAG_CONTACTS_FRAGMENT;
+                        break;
+                    case R.id.nav_archive:
+                        navItemIndex = 2;
+                        CURRENT_TAG = TAG_ARCHIVE_FRAGMENT;
+                        break;
+                    case R.id.nav_settings:
+                        // launch new intent instead of loading fragment
+                        // TODO - startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                        // drawer.closeDrawers();
+                        return true;
+                    case R.id.nav_sign_out:
+                        startSignOut();
+                        drawer.closeDrawers();
+                        return true;
+                    default:
+                        navItemIndex = 0;
+                }
+
+                // Checking if the item is in checked state or not, if not make it in checked state
+                if (menuItem.isChecked()) {
+                    menuItem.setChecked(false);
+                } else {
+                    menuItem.setChecked(true);
+                }
+                menuItem.setChecked(true);
+
+                loadCurrentFragment();
+
+                return true;
+            }
+        });
+
+        // Calling sync state is necessary or else your hamburger icon wont show up
+        actionBarDrawerToggle.syncState();
     }
 
     /**
@@ -242,39 +276,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case FORM_REQUEST_CODE:
-                if (resultCode == AddOnMyMindActivity.OMM_ADDED) {
-                    Snackbar.make(viewPager, "OnMyMind added successfully", Snackbar.LENGTH_SHORT).show();
-                } else if (resultCode == AddOnMyMindActivity.OMM_UPDATED) {
-                    Snackbar.make(viewPager, "OnMyMind updated successfully", Snackbar.LENGTH_SHORT).show();
-                }
-        }    }
-
-    @Override
     public void onBackPressed() {
-        if (tabLayout.getSelectedTabPosition() == 0) {
-            AlertDialog.Builder alertDialogBuilder =
-                    new AlertDialog.Builder(this).setTitle("Exit application")
-                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    // Terminate the application.
-                                    finish();
-                                }
-                            }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            dialogInterface.dismiss();
-                        }
-                    });
-            final AlertDialog dialog = alertDialogBuilder.create();
-            dialog.show();
-        } else if (tabLayout.getSelectedTabPosition() == 1) {
-            tabLayout.getTabAt(0).select();
-        } else {
-            super.onBackPressed();
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawers();
+            return;
+        }
+
+        // This code loads home fragment when back key is pressed
+        // when user is in other fragment than home
+        if (shouldLoadHomeFragOnBackPress) {
+            // checking if user is on other navigation menu
+            // rather than home
+            if (navItemIndex != 0) {
+                navItemIndex = 0;
+                CURRENT_TAG = TAG_ONMYMINDS_FRAGMENT;
+                loadCurrentFragment();
+                return;
+            } else {
+                AlertDialog.Builder alertDialogBuilder =
+                        new AlertDialog.Builder(this).setTitle("Exit application")
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        // Terminate the application.
+                                        finish();
+                                    }
+                                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        });
+                final AlertDialog dialog = alertDialogBuilder.create();
+                dialog.show();
+            }
         }
     }
 }

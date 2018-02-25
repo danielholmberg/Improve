@@ -15,8 +15,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -124,7 +124,7 @@ public class ContactsRecyclerViewAdapter extends
         context.startActivity(i);
     }
 
-    private void deleteContact(String docId, final int position){
+    private void deleteContact(final String docId, final int position){
         DocumentReference companyRef = firestoreDB.collection("companies").document(contactsList.get(position).getCompany());
         final String contactName = contactsList.get(position).getFullName();
 
@@ -152,30 +152,40 @@ public class ContactsRecyclerViewAdapter extends
         notifyItemRangeChanged(position, contactsList.size());
         // Delete the specified contact from Firestore Database.
         companyRef.collection("contacts").document(docId).delete()
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
-                    public void onComplete(@NonNull Task<Void> task) {
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "*** Deleted contact successfully ***");
                         // Deletion was successful.
                         Snackbar.make(parentLayout,
                                 contactName + " has been deleted",
                                 Snackbar.LENGTH_SHORT).show();
                     }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Failed to delete contact - id: " + docId);
+                        e.printStackTrace();
+                    }
                 });
     }
 
     public void filter(String text) {
-        contactsList.clear();
-        if(text.isEmpty()){
-            contactsList.addAll(contactsListCopy);
-        } else {
-            text = text.toLowerCase();
-            for(Contact contact: contactsListCopy){
-                if(contact.getFirstName().toLowerCase().contains(text) || contact.getEmail().toLowerCase().contains(text)){
-                    contactsList.add(contact);
+        if(contactsList != null && contactsListCopy != null) {
+            contactsList.clear();
+            if (text.isEmpty()) {
+                contactsList.addAll(contactsListCopy);
+            } else {
+                text = text.toLowerCase();
+                for (Contact contact : contactsListCopy) {
+                    if (contact.getFirstName().toLowerCase().contains(text) || contact.getEmail().toLowerCase().contains(text)) {
+                        contactsList.add(contact);
+                    }
                 }
             }
+            notifyDataSetChanged();
         }
-        notifyDataSetChanged();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

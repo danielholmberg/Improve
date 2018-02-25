@@ -40,6 +40,8 @@ import dev.danielholmberg.improve.R;
 
 public class AddContactActivity extends AppCompatActivity {
     private static final String TAG = AddContactActivity.class.getSimpleName();
+    public static final int CONTACT_ADDED = 9998;
+    public static final int CONTACT_UPDATED = 9999;
 
     private List<Contact> storedContacts;
 
@@ -52,6 +54,8 @@ public class AddContactActivity extends AppCompatActivity {
     private boolean isEdit;
     private String oldCID, oldCompany;
     private int contactPosition;
+    private boolean contactAdded = false;
+    private boolean contactUpdated = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -179,6 +183,7 @@ public class AddContactActivity extends AppCompatActivity {
                     public void onSuccess(DocumentReference documentReference) {
                         Log.d(TAG, "Contact document added - id: "
                                 + documentReference.getId());
+                        contactAdded = true;
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -215,6 +220,7 @@ public class AddContactActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, updatedContact.getFullName() + " updated successfully");
+                        contactUpdated = true;
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -231,6 +237,11 @@ public class AddContactActivity extends AppCompatActivity {
 
     private void showMainActivity() {
         restUi();
+        if(contactAdded) {
+            setResult(CONTACT_ADDED);
+        } else if(contactUpdated){
+            setResult(CONTACT_UPDATED);
+        }
         NavUtils.navigateUpFromSameTask(this);
     }
 

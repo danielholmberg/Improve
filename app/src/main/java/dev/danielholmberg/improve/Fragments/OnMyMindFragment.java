@@ -1,9 +1,11 @@
 package dev.danielholmberg.improve.Fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import dev.danielholmberg.improve.Activities.AddOnMyMindActivity;
 import dev.danielholmberg.improve.Adapters.OnMyMindsRecyclerViewAdapter;
 import dev.danielholmberg.improve.Components.OnMyMind;
 import dev.danielholmberg.improve.InternalStorage;
@@ -34,10 +37,12 @@ import dev.danielholmberg.improve.R;
  * Created by DanielHolmberg on 2018-01-20.
  */
 
-public class ViewOnMyMindFragment extends Fragment {
-    private static final String TAG = "ViewOnMyMindFragment";
+public class OnMyMindFragment extends Fragment {
+    private static final String TAG = "OnMyMindFragment";
+    private static final int FORM_REQUEST_CODE = 9995;
 
     private FirebaseFirestore firestoreDB;
+    private View view;
     private RecyclerView ommsRecyclerView;
     private List<OnMyMind> onmymindList = new ArrayList<>();
     private List<OnMyMind> cachedOnMyMinds;
@@ -47,7 +52,7 @@ public class ViewOnMyMindFragment extends Fragment {
     private SwipeRefreshLayout swipeRefreshLayout;
     private FloatingActionButton fab;
 
-    public ViewOnMyMindFragment() {
+    public OnMyMindFragment() {
         // Required empty public constructor
     }
 
@@ -55,7 +60,7 @@ public class ViewOnMyMindFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_view_omms,
+        view = inflater.inflate(R.layout.fragment_omms,
                 container, false);
 
         // Initialize Firestore Database.
@@ -104,6 +109,15 @@ public class ViewOnMyMindFragment extends Fragment {
             }
         });
 
+        final FloatingActionButton fab_add_omm = (FloatingActionButton) view.findViewById(R.id.add_omm);
+        fab_add_omm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Handel action add a new OnMyMind.
+                addOnMyMind();
+            }
+        });
+
         return view;
     }
 
@@ -145,6 +159,14 @@ public class ViewOnMyMindFragment extends Fragment {
             // Get the list from the Firestore Database instead.
             getDataFromFirestore();
         }
+    }
+
+    /**
+     * Called when a user clicks on the Floating Action Button to add a new OnMyMind.
+     */
+    private void addOnMyMind() {
+        Intent i = new Intent(getContext(), AddOnMyMindActivity.class);
+        startActivityForResult(i, FORM_REQUEST_CODE);
     }
 
     /**
@@ -203,5 +225,17 @@ public class ViewOnMyMindFragment extends Fragment {
                         });
             }
         }).start();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case FORM_REQUEST_CODE:
+                if (resultCode == AddOnMyMindActivity.OMM_ADDED) {
+                    Snackbar.make(view, "OnMyMind added successfully", Snackbar.LENGTH_SHORT).show();
+                } else if (resultCode == AddOnMyMindActivity.OMM_UPDATED) {
+                    Snackbar.make(view, "OnMyMind updated successfully", Snackbar.LENGTH_SHORT).show();
+                }
+        }
     }
 }
