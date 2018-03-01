@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -17,19 +18,19 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
-
-import java.io.IOException;
 
 import dev.danielholmberg.improve.CircleTransform;
 import dev.danielholmberg.improve.Fragments.ContactsFragment;
 import dev.danielholmberg.improve.Fragments.OnMyMindFragment;
-import dev.danielholmberg.improve.InternalStorage;
 import dev.danielholmberg.improve.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -47,12 +48,13 @@ public class MainActivity extends AppCompatActivity {
             "Archive",
             "Settings",
     };
-    // flag to load home fragment when user presses back key
+    // flag to load home fragment when googleAcc presses back key
     private boolean shouldLoadHomeFragOnBackPress = true;
     private Handler mHandler;
 
-    private FirebaseAuth mAuth;
-    private GoogleSignInAccount user;
+    private FirebaseAuth fireAuth;
+    private GoogleSignInAccount googleAcc;
+    private GoogleSignInClient mGoogleSignInClient;
     private Toolbar toolbar;
     private DrawerLayout drawer;
     private NavigationView navigationView;
@@ -63,25 +65,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Setup Internal Storage
-        try {
-            InternalStorage.createStorage(this);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to setup Storage files: ");
-            e.printStackTrace();
-            Toast.makeText(this, "Failed to setup Storage files", Toast.LENGTH_SHORT).show();
-        }
-
-        // Setup the Toolbar
+        // Initializing the Toolbar
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        // Get currentUser information
-        mAuth = FirebaseAuth.getInstance();
-        user = GoogleSignIn.getLastSignedInAccount(this);
+        // Getting current signed in User references.
+        fireAuth = FirebaseAuth.getInstance();
+        googleAcc = GoogleSignIn.getLastSignedInAccount(this);
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        // Initalize NavigationDrawer
+        // Initalizing NavigationDrawer
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         actionBarDrawerToggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -90,24 +88,25 @@ public class MainActivity extends AppCompatActivity {
 
         mHandler = new Handler();
 
-        // Set the Image, Name and Email in the NavigationDrawer Header.
+        // Setting the Image, Name and Email in the NavigationDrawer Header.
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         ImageView drawer_header_image = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.drawer_header_image_iv);
         TextView drawer_header_name = (TextView)  navigationView.getHeaderView(0).findViewById(R.id.drawer_header_name_tv);
         TextView drawer_header_email = (TextView)  navigationView.getHeaderView(0).findViewById(R.id.drawer_header_email_tv);
         Picasso.with(this)
-                .load(user.getPhotoUrl())
+                .load(googleAcc.getPhotoUrl())
                 .error(R.drawable.ic_error_no_photo)
                 .transform(new CircleTransform())
                 .resize(200, 200)
                 .centerCrop()
                 .into(drawer_header_image);
-        drawer_header_name.setText(user.getDisplayName());
-        drawer_header_email.setText(user.getEmail());
+        drawer_header_name.setText(googleAcc.getDisplayName());
+        drawer_header_email.setText(googleAcc.getEmail());
 
-        // initializing navigation menu
+        // Initializing navigation menu
         setUpNavigationView();
 
+        // Initializing the "Home" fragment
         if (savedInstanceState == null) {
             navItemIndex = 0;
             CURRENT_TAG = TAG_ONMYMINDS_FRAGMENT;
@@ -117,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /***
-     * Returns respected fragment that user
+     * Returns respected fragment that googleAcc
      * selected from navigation menu
      */
     private void loadCurrentFragment() {
@@ -127,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
         // set toolbar title
         setToolbarTitle();
 
-        // if user select the current navigation menu again, don't do anything
+        // if googleAcc select the current navigation menu again, don't do anything
         // just close the navigation drawer
         if (getSupportFragmentManager().findFragmentByTag(CURRENT_TAG) != null) {
             drawer.closeDrawers();
@@ -217,8 +216,8 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case R.id.nav_settings:
                         // launch new intent instead of loading fragment
-                        // TODO - startActivity(new Intent(MainActivity.this, SettingsActivity.class));
-                        // drawer.closeDrawers();
+                        startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                        drawer.closeDrawers();
                         return true;
                     case R.id.nav_sign_out:
                         startSignOut();
@@ -247,8 +246,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Called when a user clicks on the navigation option "Sign out" and shows a dialog window to
-     * make sure that the user really wants to sign out.
+     * Called when a googleAcc clicks on the navigation option "Sign out" and shows a dialog window to
+     * make sure that the googleAcc really wants to sign out.
      */
     private void startSignOut() {
         AlertDialog.Builder alertDialogBuilder =
@@ -269,10 +268,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void signOutUser() {
-        mAuth.signOut();
-        Intent i = new Intent(this, LoginActivity.class);
-        startActivity(i);
-        finish();
+        mGoogleSignInClient.signOut()
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        fireAuth.signOut();
+                        Log.d(TAG, "*** User successfully Signed Out ***");
+                        Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                        startActivity(i);
+                        finish();
+                    }
+                });
+
     }
 
     @Override
@@ -283,9 +290,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // This code loads home fragment when back key is pressed
-        // when user is in other fragment than home
+        // when googleAcc is in other fragment than home
         if (shouldLoadHomeFragOnBackPress) {
-            // checking if user is on other navigation menu
+            // checking if googleAcc is on other navigation menu
             // rather than home
             if (navItemIndex != 0) {
                 navItemIndex = 0;

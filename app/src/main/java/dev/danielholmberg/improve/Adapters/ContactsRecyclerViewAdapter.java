@@ -17,7 +17,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
@@ -124,8 +124,8 @@ public class ContactsRecyclerViewAdapter extends
         context.startActivity(i);
     }
 
-    private void deleteContact(final String docId, final int position){
-        DocumentReference companyRef = firestoreDB.collection("companies").document(contactsList.get(position).getCompany());
+    private void deleteContact(final String contactId, final int position){
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         final String contactName = contactsList.get(position).getFullName();
 
         // Delete the OnMyMind from the recycler list.
@@ -137,10 +137,9 @@ public class ContactsRecyclerViewAdapter extends
         }
         try {
             // Try to get the stored list of contacts and remove the specified contact.
-            List<Contact> storedList = (ArrayList<Contact>) InternalStorage.readObject(context,
-                    InternalStorage.CONTACTS_STORAGE_KEY);
+            List<Contact> storedList = (ArrayList<Contact>) InternalStorage.readObject(InternalStorage.contacts);
             storedList.remove(position);
-            InternalStorage.writeObject(context, InternalStorage.CONTACTS_STORAGE_KEY, storedList);
+            InternalStorage.writeObject(InternalStorage.contacts, storedList);
         } catch (IOException e) {
             Log.e(TAG, "Failed to read from Internal Storage: ");
             e.printStackTrace();
@@ -151,7 +150,11 @@ public class ContactsRecyclerViewAdapter extends
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, contactsList.size());
         // Delete the specified contact from Firestore Database.
-        companyRef.collection("contacts").document(docId).delete()
+        firestoreDB.collection("users")
+                .document(userId)
+                .collection("contacts")
+                .document(contactId)
+                .delete()
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -165,7 +168,7 @@ public class ContactsRecyclerViewAdapter extends
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Failed to delete contact - id: " + docId);
+                        Log.e(TAG, "Failed to delete contact - id: " + contactId);
                         e.printStackTrace();
                     }
                 });

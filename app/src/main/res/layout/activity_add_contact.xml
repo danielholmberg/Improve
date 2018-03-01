@@ -25,7 +25,7 @@
             android:textColor="@color/textColorPrimary"
             style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
             android:layout_gravity="center"
-            android:id="@+id/toolbar_add_contact_title" />
+            android:id="@+id/toolbar_add_contact_title_tv" />
 
     </android.support.v7.widget.Toolbar>
 

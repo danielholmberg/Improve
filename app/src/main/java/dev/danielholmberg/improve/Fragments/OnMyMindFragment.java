@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -42,6 +43,7 @@ public class OnMyMindFragment extends Fragment {
     private static final int FORM_REQUEST_CODE = 9995;
 
     private FirebaseFirestore firestoreDB;
+    private String userId;
     private View view;
     private RecyclerView ommsRecyclerView;
     private List<OnMyMind> onmymindList = new ArrayList<>();
@@ -65,6 +67,9 @@ public class OnMyMindFragment extends Fragment {
 
         // Initialize Firestore Database.
         firestoreDB = FirebaseFirestore.getInstance();
+
+        // Get current userId.
+        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         // Initialize View components to be used.
         ommsRecyclerView = (RecyclerView) view.findViewById(R.id.omms_list);
@@ -132,7 +137,7 @@ public class OnMyMindFragment extends Fragment {
 
         try {
             // Try to read the already stored list of OnMyMinds in Internal Storage.
-            cachedOnMyMinds = (ArrayList<OnMyMind>) InternalStorage.readObject(getContext(), InternalStorage.ONMYMINDS_STORAGE_KEY);
+            cachedOnMyMinds = (ArrayList<OnMyMind>) InternalStorage.readObject(InternalStorage.onmyminds);
         } catch (IOException e) {
             Log.e(TAG, "Failed to read from Internal Storage: ");
             e.printStackTrace();
@@ -180,7 +185,9 @@ public class OnMyMindFragment extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                firestoreDB.collection("onmyminds")
+                firestoreDB.collection("users")
+                        .document(userId)
+                        .collection("onmyminds")
                         .get()
                         .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                             @Override
@@ -192,6 +199,15 @@ public class OnMyMindFragment extends Fragment {
                                     if(task.getResult().isEmpty()){
                                         // No OnMyMinds exists.
                                         Log.e(TAG, "No OnMyMinds exists");
+                                        try {
+                                            // Writing a empty list to the Internal Storage.
+                                            InternalStorage.writeObject(InternalStorage.onmyminds, onmymindList);
+                                        } catch (IOException e) {
+                                            Log.e(TAG, "Failed to write an empty OnMyMinds list to Internal Storage file: ");
+                                            e.printStackTrace();
+                                        }
+                                        recyclerViewAdapter.setAdapterList(onmymindList);
+                                        recyclerViewAdapter.notifyDataSetChanged();
                                         emptyListText.setVisibility(View.VISIBLE);
                                     } else {
                                         // Getting data from each stored OnMyMind.
@@ -203,12 +219,12 @@ public class OnMyMindFragment extends Fragment {
                                         }
                                         try {
                                             // Writing all the retrieved OnMyMinds to Internal Storage for offline use.
-                                            InternalStorage.writeObject(getContext(), InternalStorage.ONMYMINDS_STORAGE_KEY, onmymindList);
+                                            InternalStorage.writeObject(InternalStorage.onmyminds, onmymindList);
+                                            Log.d(TAG, "Wrote OnMyMinds to Internal Storage");
                                         } catch (IOException e) {
                                             Log.e(TAG, "Failed to write data from Firestore to Internal Storage file: ");
                                             e.printStackTrace();
                                         }
-                                        Log.d(TAG, "Wrote OnMyMinds to Internal Storage");
                                         recyclerViewAdapter.setAdapterList(onmymindList);
                                         recyclerViewAdapter.notifyDataSetChanged();
                                         emptyListText.setVisibility(View.GONE);

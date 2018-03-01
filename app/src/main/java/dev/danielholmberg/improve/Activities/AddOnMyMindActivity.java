@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
@@ -46,6 +47,7 @@ public class AddOnMyMindActivity extends AppCompatActivity {
 
     private FirebaseFirestore firestoreDB;
 
+    private String userId;
     private boolean isEdit;
     private String oldId, oldTitle, oldInfo;
     private int ommPosition;
@@ -71,6 +73,10 @@ public class AddOnMyMindActivity extends AppCompatActivity {
 
         OnMyMind omm = null;
         Bundle extras = getIntent().getBundleExtra("onmymind");
+
+        // Get current userId.
+        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
         if(extras != null){
             omm = new OnMyMind();
             omm.setId(extras.getString("id"));
@@ -82,7 +88,7 @@ public class AddOnMyMindActivity extends AppCompatActivity {
             ((TextView) findViewById(R.id.input_title)).setText(omm.getTitle());
             ((TextView) findViewById(R.id.input_info)).setText(omm.getInfo());
 
-            ((TextView) findViewById(R.id.toolbar_add_omm_title)).setText(R.string.title_edit_onmymind);
+            ((TextView) findViewById(R.id.toolbar_add_omm_title_tv)).setText(R.string.title_edit_onmymind);
             isEdit = true;
             oldId = omm.getId();
             oldTitle = omm.getTitle();
@@ -93,8 +99,7 @@ public class AddOnMyMindActivity extends AppCompatActivity {
         firestoreDB = FirebaseFirestore.getInstance();
 
         try {
-            storedOnMyMinds = (ArrayList<OnMyMind>) InternalStorage.readObject(getApplicationContext(),
-                    InternalStorage.ONMYMINDS_STORAGE_KEY);
+            storedOnMyMinds = (ArrayList<OnMyMind>) InternalStorage.readObject(InternalStorage.onmyminds);
         } catch (IOException e) {
             Log.e(TAG, "Failed to read from Internal Storage: ");
             e.printStackTrace();
@@ -178,13 +183,16 @@ public class AddOnMyMindActivity extends AppCompatActivity {
         Log.d(TAG, "Id: " + omm.getId());
         storedOnMyMinds.add(omm);
         try {
-            InternalStorage.writeObject(getApplicationContext(), InternalStorage.ONMYMINDS_STORAGE_KEY,
-                    storedOnMyMinds);
+            InternalStorage.writeObject(InternalStorage.onmyminds, storedOnMyMinds);
         } catch (IOException e) {
             Log.e(TAG, "Failed to write to Internal Storage: ");
             e.printStackTrace();
         }
-        firestoreDB.collection("onmyminds").document(omm.getId())
+
+        firestoreDB.collection("users")
+                .document(userId)
+                .collection("onmyminds")
+                .document(omm.getId())
                 .set(omm)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -193,16 +201,17 @@ public class AddOnMyMindActivity extends AppCompatActivity {
                                 + omm.getId());
                         ommAdded = true;
                     }
-                })
-                .addOnFailureListener(new OnFailureListener() {
+                }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Error adding OnMyMind document: " + e);
-                        Toast.makeText(getApplicationContext(),
-                                "Adding new OnMyMind failed",
-                                Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Error adding OnMyMind document: " + e);
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(),
+                        "Adding new OnMyMind failed",
+                        Toast.LENGTH_SHORT).show();
                     }
                 });
+
         showMainActivity();
     }
 
@@ -214,14 +223,16 @@ public class AddOnMyMindActivity extends AppCompatActivity {
         updatedOnMyMind.setId(oldId);
         storedOnMyMinds.set(ommPosition, updatedOnMyMind);
         try {
-            InternalStorage.writeObject(getApplicationContext(), InternalStorage.ONMYMINDS_STORAGE_KEY,
-                    storedOnMyMinds);
+            InternalStorage.writeObject(InternalStorage.onmyminds, storedOnMyMinds);
         } catch (IOException e) {
             Log.e(TAG, "Failed to write to Internal Storage: ");
             e.printStackTrace();
         }
         Log.d(TAG, "oldId: " + oldId);
-        firestoreDB.collection("onmyminds").document(oldId)
+        firestoreDB.collection("users")
+                .document(userId)
+                .collection("onmyminds")
+                .document(oldId)
                 .set(updatedOnMyMind, SetOptions.merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override

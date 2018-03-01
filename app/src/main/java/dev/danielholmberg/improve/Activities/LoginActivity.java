@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -17,12 +16,20 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
+import java.io.IOException;
+import java.util.HashMap;
+
+import dev.danielholmberg.improve.InternalStorage;
 import dev.danielholmberg.improve.R;
 
 /**
@@ -37,7 +44,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private SignInButton signInButton;
 
     private GoogleSignInClient mGoogleSignInClient;
-    private FirebaseAuth mAuth;
+    private FirebaseAuth fireAuth;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,15 +64,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-        mAuth = FirebaseAuth.getInstance();
+        fireAuth = FirebaseAuth.getInstance();
 
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        // Locks the app to the orientation that was used at startup.
-        // So that the UI does not re-render when the user turns the phone.
+        // Locking the app to the orientation that was used at startup.
+        // So that the UI does not re-render when the user turns the device.
         setRequestedOrientation(getResources().getConfiguration().orientation);
     }
 
@@ -97,14 +104,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-        mAuth.signInWithCredential(credential)
+        fireAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in successful, go to MainActivity
+                            // Sign in successful
+                            // Add user to Database before going to MainActivity.
                             Log.d(TAG, "signInWithCredential:success");
-                            goToMainActivity();
+                            createUserStorage();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
@@ -116,8 +124,59 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     /**
-     * Called when the user is correctly authenticated with Google and Firebase.
+     * Initializing the Internal- and Cloud storage setup.
+     * Called once the user is successfully authorized.
+     */
+    private void createUserStorage() {
+        createInternalStorageFiles();
+        addUserToFirestore();
+    }
+
+    /**
+     * Creates the Internal Storage for the signed in User.
+     */
+    private void createInternalStorageFiles() {
+        try {
+            Log.d(TAG, "Creating storage with UserIdToken: " + fireAuth.getCurrentUser().getUid());
+            InternalStorage.createStorage(this, fireAuth.getCurrentUser().getUid());
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to setup Storage files: ");
+            e.printStackTrace();
+            Toast.makeText(this, "Failed to setup Storage files", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    /**
+     * Creates the Firestores Storage for the signed in User.
+     */
+    private void addUserToFirestore() {
+        FirebaseFirestore.getInstance().collection("users")
+                .document(fireAuth.getCurrentUser().getUid())
+                .set(new HashMap<>(), SetOptions.merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "*** User Successfully Added To DatabaseStorage ***");
+                        goToMainActivity();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Failed to create user reference in DatabaseStorage: " + e);
+                        Toast.makeText(getApplicationContext(),
+                                "Failed to create user reference for Cloud Storage",
+                                Toast.LENGTH_LONG)
+                                .show();
+                        e.printStackTrace();
+                    }
+                });
+    }
+
+    /**
      * Sends the user to the MainActivity.
+     * Called when the user is correctly authenticated with Google and Firebase.
      */
     private void goToMainActivity() {
         Intent i = new Intent(getApplicationContext(), MainActivity.class);

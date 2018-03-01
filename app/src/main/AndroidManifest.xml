@@ -23,6 +23,10 @@
             android:name=".Activities.MainActivity"
             android:theme="@style/AppTheme.Base.NoActionBar"/>
         <activity
+            android:name=".Activities.SettingsActivity"
+            android:label="@string/title_settings"
+            android:parentActivityName=".Activities.MainActivity"/>
+        <activity
             android:name=".Activities.AddOnMyMindActivity"
             android:label="@string/lable_add_onmymind"
             android:windowSoftInputMode="adjustResize"

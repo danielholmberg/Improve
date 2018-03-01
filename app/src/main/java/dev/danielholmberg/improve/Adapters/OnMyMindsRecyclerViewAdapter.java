@@ -18,6 +18,7 @@ import android.widget.Toolbar;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
@@ -135,7 +136,8 @@ public class OnMyMindsRecyclerViewAdapter extends
         context.startActivity(i);
     }
 
-    public void deleteOnMyMind(final String docId, final int position){
+    public void deleteOnMyMind(final String ommId, final int position){
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         final String ommTitle = ommsList.get(position).getTitle();
 
         // Delete the OnMyMind from the recycler list.
@@ -146,10 +148,9 @@ public class OnMyMindsRecyclerViewAdapter extends
         }
         try {
             // Try to get the stored list of OnMyminds and remove the specified OnMyMind.
-            List<OnMyMind> storedList = (ArrayList<OnMyMind>) InternalStorage.readObject(context,
-                    InternalStorage.ONMYMINDS_STORAGE_KEY);
+            List<OnMyMind> storedList = (ArrayList<OnMyMind>) InternalStorage.readObject(InternalStorage.onmyminds);
             storedList.remove(position);
-            InternalStorage.writeObject(context, InternalStorage.ONMYMINDS_STORAGE_KEY, storedList);
+            InternalStorage.writeObject(InternalStorage.onmyminds, storedList);
         } catch (IOException e) {
             Log.e(TAG, "Failed to read from Internal Storage: ");
             e.printStackTrace();
@@ -160,7 +161,11 @@ public class OnMyMindsRecyclerViewAdapter extends
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, ommsList.size());
         // Delete the specified OnMyMind from Firestore Database.
-        firestoreDB.collection("onmyminds").document(docId).delete()
+        firestoreDB.collection("users")
+                .document(userId)
+                .collection("onmyminds")
+                .document(ommId)
+                .delete()
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -174,7 +179,7 @@ public class OnMyMindsRecyclerViewAdapter extends
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Failed to delete OnMyMind - id: " + docId);
+                        Log.e(TAG, "Failed to delete OnMyMind - id: " + ommId);
                         e.printStackTrace();
                     }
                 });

@@ -20,13 +20,12 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,6 +50,7 @@ public class AddContactActivity extends AppCompatActivity {
 
     private FirebaseFirestore firestoreDB;
 
+    private String userId;
     private boolean isEdit;
     private String oldCID, oldCompany;
     private int contactPosition;
@@ -82,6 +82,10 @@ public class AddContactActivity extends AppCompatActivity {
 
         Contact contact = null;
         Bundle extras = getIntent().getBundleExtra("contact");
+
+        // Get current userId.
+        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
         if(extras != null){
             contact = new Contact();
             contact.setCID(extras.getString("cid"));
@@ -99,7 +103,7 @@ public class AddContactActivity extends AppCompatActivity {
             ((TextView) findViewById(R.id.input_email)).setText(contact.getEmail());
             ((TextView) findViewById(R.id.input_mobile)).setText(contact.getMobile());
 
-            ((TextView) findViewById(R.id.toolbar_add_contact_title)).setText(R.string.title_edit_contact);
+            ((TextView) findViewById(R.id.toolbar_add_contact_title_tv)).setText(R.string.title_edit_contact);
             isEdit = true;
             oldCID = contact.getCID();
             oldCompany = contact.getCompany();
@@ -109,8 +113,7 @@ public class AddContactActivity extends AppCompatActivity {
         firestoreDB = FirebaseFirestore.getInstance();
 
         try {
-            storedContacts = (List<Contact>) InternalStorage.readObject(getApplicationContext(),
-                    InternalStorage.CONTACTS_STORAGE_KEY);
+            storedContacts = (List<Contact>) InternalStorage.readObject(InternalStorage.contacts);
         } catch (IOException e) {
             Log.e(TAG, "Failed to read from Internal Storage: ");
             e.printStackTrace();
@@ -168,21 +171,22 @@ public class AddContactActivity extends AppCompatActivity {
         Log.d(TAG, "Id: " + contact.getCID());
         storedContacts.add(contact);
         try {
-            InternalStorage.writeObject(getApplicationContext(), InternalStorage.CONTACTS_STORAGE_KEY,
-                    storedContacts);
+            InternalStorage.writeObject(InternalStorage.contacts, storedContacts);
         } catch (IOException e) {
             Log.e(TAG, "Failed to write to Internal Storage: ");
             e.printStackTrace();
         }
 
-        firestoreDB.collection("companies").document(contact.getCompany()).set(new HashMap<>(), SetOptions.merge());
-        firestoreDB.collection("companies").document(contact.getCompany()).collection("contacts")
-                .add(contact)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+        firestoreDB.collection("users")
+                .document(userId)
+                .collection("contacts")
+                .document(contact.getCID())
+                .set(contact)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
-                    public void onSuccess(DocumentReference documentReference) {
+                    public void onSuccess(Void avoid) {
                         Log.d(TAG, "Contact document added - id: "
-                                + documentReference.getId());
+                                + contact.getCID());
                         contactAdded = true;
                     }
                 })
@@ -206,13 +210,12 @@ public class AddContactActivity extends AppCompatActivity {
         updatedContact.setCID(oldCID);
         storedContacts.set(contactPosition, updatedContact);
         try {
-            InternalStorage.writeObject(getApplicationContext(), InternalStorage.CONTACTS_STORAGE_KEY,
-                    storedContacts);
+            InternalStorage.writeObject(InternalStorage.contacts, storedContacts);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        firestoreDB.collection("companies")
-                .document(oldCompany)
+        firestoreDB.collection("users")
+                .document(userId)
                 .collection("contacts")
                 .document(oldCID)
                 .set(updatedContact, SetOptions.merge())

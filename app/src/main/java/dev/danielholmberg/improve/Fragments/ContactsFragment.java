@@ -24,6 +24,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -47,6 +48,7 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
     private static final int FORM_REQUEST_CODE = 9995;
 
     private FirebaseFirestore firestoreDB;
+    private String userId;
     private View view;
     private RecyclerView contactsRecyclerView;
     private List<Contact> contactList = new ArrayList<>();
@@ -77,6 +79,9 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
 
         // Initialize Firestore Database.
         firestoreDB = FirebaseFirestore.getInstance();
+
+        // Get current userId.
+        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         // Initialize View components to be used.
         contactsRecyclerView = (RecyclerView) view.findViewById(R.id.contacts_list);
@@ -149,7 +154,7 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
 
         try {
             // Try to read the already stored list of contacts in Internal Storage.
-            cachedContacts = (ArrayList<Contact>) InternalStorage.readObject(getContext(), InternalStorage.CONTACTS_STORAGE_KEY);
+            cachedContacts = (ArrayList<Contact>) InternalStorage.readObject(InternalStorage.contacts);
         } catch (IOException e) {
             Log.e(TAG, "Failed to read from Internal Storage: ");
             e.printStackTrace();
@@ -220,7 +225,9 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
         new Thread(new Runnable() {
             @Override
             public void run() {
-                firestoreDB.collection("companies")
+                firestoreDB.collection("users")
+                        .document(userId)
+                        .collection("contacts")
                         .get()
                         .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                             @Override
@@ -231,59 +238,40 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
 
                                     if (task.getResult().isEmpty()) {
                                         // No companies exists.
-                                        Log.e(TAG, "No companies exists.");
+                                        Log.e(TAG, "No contacts exists.");
+                                        try {
+                                            // Writing a empty list to the Internal Storage.
+                                            InternalStorage.writeObject(InternalStorage.contacts, contactList);
+                                        } catch (IOException e) {
+                                            Log.e(TAG, "Failed to write an empty contact list to Internal Storage file: ");
+                                            e.printStackTrace();
+                                        }
+                                        recyclerViewAdapter.setAdapterList(contactList);
+                                        recyclerViewAdapter.notifyDataSetChanged();
                                         emptyListText.setVisibility(View.VISIBLE);
                                     } else {
-                                        // Get data from each stored Company.
-                                        for (final DocumentSnapshot company : task.getResult()) {
-                                            firestoreDB.collection("companies")
-                                                    .document(company.getId())
-                                                    .collection("contacts")
-                                                    .orderBy("firstName")
-                                                    .get()
-                                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                            if (task.isSuccessful()) {
-                                                                if (task.getResult().isEmpty()) {
-                                                                    Log.e(TAG, "No contacts exists for company: " + company.getId());
-                                                                    Log.d(TAG, "*** Deleting company: " + company.getId());
-                                                                    firestoreDB.collection("companies")
-                                                                            .document(company.getId()).delete();
-                                                                } else {
-                                                                    // Getting data from each stored Contact
-                                                                    // and adding it to the list.
-                                                                    for (DocumentSnapshot contact : task.getResult()) {
-                                                                        Log.d(TAG, "Getting data from contact: " + contact.getId());
-                                                                        Contact c = contact.toObject(Contact.class);
-                                                                        c.setCID(contact.getId());
-                                                                        contactList.add(c);
-                                                                    }
-                                                                    try {
-                                                                        // Writing all the retrieved contacts to Internal Storage for offline use.
-                                                                        InternalStorage.writeObject(getContext(), InternalStorage.CONTACTS_STORAGE_KEY, contactList);
-                                                                    } catch (IOException e) {
-                                                                        Log.e(TAG, "Failed to write data from Firestore to Internal Storage file: ");
-                                                                        e.printStackTrace();
-                                                                    }
-                                                                    Log.d(TAG, "Wrote contacts to Internal Storage");
-                                                                    recyclerViewAdapter.setAdapterList(contactList);
-                                                                    recyclerViewAdapter.notifyDataSetChanged();
-                                                                    emptyListText.setVisibility(View.GONE);
-                                                                }
-                                                                // Done getting all the Contacts from a Company.
-                                                                Log.d(TAG,"Done getting data from company: " + company.getId());
-                                                            }  else {
-                                                                // Error occured when retrieving contacts for {company}.
-                                                                Log.e(TAG, "Error getting contacts for company " + company.getId() + ":", task.getException());
-                                                            }
-                                                        }
-                                                    });
+                                        // Get stored contacts.
+                                        for (DocumentSnapshot contact : task.getResult()) {
+                                            Log.d(TAG, "Getting data from contact: " + contact.getId());
+                                            Contact c = contact.toObject(Contact.class);
+                                            c.setCID(contact.getId());
+                                            contactList.add(c);
                                         }
+                                        try {
+                                            // Writing all the retrieved contacts to Internal Storage for offline use.
+                                            InternalStorage.writeObject(InternalStorage.contacts, contactList);
+                                            Log.d(TAG, "Wrote contacts to Internal Storage");
+                                        } catch (IOException e) {
+                                            Log.e(TAG, "Failed to write data from Firestore to Internal Storage file: ");
+                                            e.printStackTrace();
+                                        }
+                                        recyclerViewAdapter.setAdapterList(contactList);
+                                        recyclerViewAdapter.notifyDataSetChanged();
+                                        emptyListText.setVisibility(View.GONE);
                                     }
                                 } else {
-                                    // Error occured when retrieving companies from Firestore Database.
-                                    Log.e(TAG, "Error getting companies: ", task.getException());
+                                    // Error occured when retrieving contacts from Firestore Database.
+                                    Log.e(TAG, "Error getting contacts: ", task.getException());
                                 }
                                 // Done getting all the contacts stored in Firestore Database.
                                 Log.d(TAG, "*** Done getting data from Firestore ***");
