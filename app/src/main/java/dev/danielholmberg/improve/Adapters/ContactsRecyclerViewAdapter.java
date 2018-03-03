@@ -135,7 +135,7 @@ public class ContactsRecyclerViewAdapter extends
     }
 
     private void editContactActivity(Contact contact, int itemPos){
-        Bundle bundle = new Bundle();
+        Bundle bundle = createBundle(contact);
         bundle.putInt("position", itemPos);
 
         Intent i = new Intent(context, AddContactActivity.class);
