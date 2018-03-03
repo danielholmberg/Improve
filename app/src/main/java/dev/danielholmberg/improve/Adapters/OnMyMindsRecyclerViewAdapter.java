@@ -3,6 +3,7 @@ package dev.danielholmberg.improve.Adapters;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -14,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toolbar;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dev.danielholmberg.improve.Activities.AddOnMyMindActivity;
+import dev.danielholmberg.improve.Activities.OnMyMindDetailsActivity;
 import dev.danielholmberg.improve.Components.OnMyMind;
 import dev.danielholmberg.improve.InternalStorage;
 import dev.danielholmberg.improve.R;
@@ -43,7 +44,6 @@ public class OnMyMindsRecyclerViewAdapter extends
     private List<OnMyMind> ommsList;
     private Context context;
     private FirebaseFirestore firestoreDB;
-    private Toolbar toolbar;
     private View parentLayout;
 
     public OnMyMindsRecyclerViewAdapter(List<OnMyMind> list, Context ctx, FirebaseFirestore firestore) {
@@ -68,8 +68,6 @@ public class OnMyMindsRecyclerViewAdapter extends
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.view_omm_item, parent, false);
 
-        toolbar = (Toolbar) view.findViewById(R.id.toolbar_omm);
-
         OnMyMindsRecyclerViewAdapter.ViewHolder viewHolder =
                 new OnMyMindsRecyclerViewAdapter.ViewHolder(view);
         return viewHolder;
@@ -79,61 +77,80 @@ public class OnMyMindsRecyclerViewAdapter extends
     public void onBindViewHolder(OnMyMindsRecyclerViewAdapter.ViewHolder holder, int position) {
         final int itemPos = position;
         final OnMyMind omm = ommsList.get(position);
+
+        // Fill the list-item with all the necessary content.
+        holder.cardToolbarView.setBackgroundColor(Color.parseColor(omm.getColor()));
         holder.title.setText(omm.getTitle());
         holder.info.setText(omm.getInfo());
+
+        // Handle what happens when the user clicks on "edit".
         holder.edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 editOnMyMindFragment(omm, itemPos);
             }
         });
-        holder.done.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // TODO - Move the OnMyMind to Archive.
-                Snackbar.make(parentLayout, omm.getTitle() + " moved to Archive",
-                        Snackbar.LENGTH_LONG)
-                        .setAction("UNDO", new View.OnClickListener() {
+        AlertDialog.Builder alertDialogBuilder =
+                new AlertDialog.Builder(context).setTitle("Delete OnMyMind")
+                        .setMessage("Do you really want to delete: " + omm.getTitle())
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(View view) {
-                                // TODO - Undo move to archive.
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                deleteOnMyMind(omm.getId(), itemPos);
                             }
-                        })
-                        .show();
-            }
-        });
+                        }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+        final AlertDialog dialog = alertDialogBuilder.create();
+
+        // Handle what happens when the user clicks on "delete".
         holder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog.Builder alertDialogBuilder =
-                        new AlertDialog.Builder(context).setTitle("Delete " + omm.getTitle())
-                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        deleteOnMyMind(omm.getId(), itemPos);
-                                    }
-                                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.dismiss();
-                            }
-                        });
-                final AlertDialog dialog = alertDialogBuilder.create();
                 dialog.show();
+            }
+        });
+
+        // Handle what happens when the user clicks on the OnMyMind toolbar.
+        setUpOnClickListener(holder.cardToolbarView, omm);
+    }
+
+    private void setUpOnClickListener(View view, final OnMyMind omm) {
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showOnMyMindDetailsActivity(omm);
             }
         });
     }
 
+    private void showOnMyMindDetailsActivity(OnMyMind omm) {
+        Bundle bundle = createBundle(omm);
+
+        Intent i = new Intent(context, OnMyMindDetailsActivity.class);
+        i.putExtra("onmymind", bundle);
+        context.startActivity(i);
+    }
+
     private void editOnMyMindFragment(OnMyMind omm, int itemPos){
-        Bundle bundle = new Bundle();
-        bundle.putString("id", omm.getId());
-        bundle.putString("title", omm.getTitle());
-        bundle.putString("info", omm.getInfo());
+        Bundle bundle = createBundle(omm);
         bundle.putInt("position", itemPos);
 
         Intent i = new Intent(context, AddOnMyMindActivity.class);
         i.putExtra("onmymind", bundle);
         context.startActivity(i);
+    }
+
+    private Bundle createBundle(OnMyMind omm) {
+        Bundle bundle = new Bundle();
+        bundle.putString("id", omm.getId());
+        bundle.putString("title", omm.getTitle());
+        bundle.putString("info", omm.getInfo());
+        bundle.putString("color", omm.getColor());
+        return bundle;
     }
 
     public void deleteOnMyMind(final String ommId, final int position){
@@ -187,19 +204,20 @@ public class OnMyMindsRecyclerViewAdapter extends
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
+        private View cardToolbarView;
         private TextView title;
         private TextView info;
         private Button edit;
-        private Button done;
         private Button delete;
 
         public ViewHolder(View view) {
             super(view);
 
+            cardToolbarView = view.findViewById(R.id.toolbar_omm);
+
             title = (TextView) view.findViewById(R.id.title_tv);
             info = (TextView) view.findViewById(R.id.info_tv);
             edit = (Button) view.findViewById(R.id.edit_omm_b);
-            done = (Button) view.findViewById(R.id.done_omm_b);
             delete = (Button) view.findViewById(R.id.delete_omm_b);
         }
     }

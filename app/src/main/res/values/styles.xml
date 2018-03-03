@@ -1,27 +1,33 @@
 <resources>
 
-    <!-- Base application theme. -->
+    <!-- Default application theme. -->
     <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
+        <!-- color for the app bar and other primary UI elements -->
         <item name="colorPrimary">@color/colorPrimary</item>
+        <!-- a darker variant of the primary color, used for
+           the status bar (on Android 5.0+) and contextual app bars -->
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <!-- a secondary color for controls like checkboxes and text fields -->
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="colorControlNormal">@color/textColorPrimary</item>
+        <!-- color for the back-button and other controls -->
+        <item name="colorControlNormal">@color/controlColor</item>
+        <!-- color for the background of the activity -->
+        <item name="android:windowBackground">@color/windowBackground</item>
     </style>
 
-    <style name="AppTheme.Base.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
+    <!-- [Base] Toolbar title text style -->
+    <style name="AppTheme.Base.ActivityTitle" parent="AppTheme.Base">
+        <item name="android:textColor">@color/titleTextColor</item>
+        <item name="android:textSize">@dimen/titleTextSize</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="AppTheme.Base.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.Base.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
+    <!-- [Base] Application Title text style -->
     <style name="AppTitle" parent="@android:style/TextAppearance.Material.Widget.ActionBar.Title">
-        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:textColor">@color/titleTextColor</item>
         <item name="android:letterSpacing">0.5</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:textStyle">bold</item>
     </style>
+
 </resources>

@@ -76,7 +76,7 @@ public class OnMyMindFragment extends Fragment {
         emptyListText = (TextView) view.findViewById(R.id.empty_omms_list_tv);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh_omms);
-        fab = (FloatingActionButton) getActivity().getWindow().findViewById(R.id.add_omm);
+        fab = (FloatingActionButton) view.findViewById(R.id.add_omm);
 
         LinearLayoutManager recyclerLayoutManager =
                 new LinearLayoutManager(getActivity().getApplicationContext());
@@ -114,8 +114,7 @@ public class OnMyMindFragment extends Fragment {
             }
         });
 
-        final FloatingActionButton fab_add_omm = (FloatingActionButton) view.findViewById(R.id.add_omm);
-        fab_add_omm.setOnClickListener(new View.OnClickListener() {
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Handel action add a new OnMyMind.

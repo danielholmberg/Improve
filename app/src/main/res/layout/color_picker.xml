@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:weightSum="5">
+
+    <Button
+        android:id="@+id/buttonColorWhite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@color/cardBackgroundWhite"/>
+    <Button
+        android:id="@+id/buttonColorYellow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@color/cardBackgroundYellow"/>
+    <Button
+        android:id="@+id/buttonColorBlue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@color/cardBackgroundBlue"/>
+    <Button
+        android:id="@+id/buttonColorPink"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@color/cardBackgroundPink"/>
+    <Button
+        android:id="@+id/buttonColorBrown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@color/cardBackgroundBrown"/>
+
+
+</LinearLayout>

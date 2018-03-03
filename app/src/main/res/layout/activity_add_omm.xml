@@ -3,31 +3,16 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/add_omm_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/windowBackground"
+    android:background="@color/cardBackground"
     android:fitsSystemWindows="true"
     tools:context="dev.danielholmberg.improve.Activities.AddOnMyMindActivity">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar_add_omm"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        app:layout_scrollFlags="scroll|enterAlways"
-        app:popupTheme="@style/AppTheme.Base.PopupOverlay">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/lable_add_onmymind"
-            android:textColor="@color/textColorPrimary"
-            style="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
-            android:layout_gravity="center"
-            android:id="@+id/toolbar_add_omm_title_tv" />
-
-    </android.support.v7.widget.Toolbar>
+    <include
+        android:id="@+id/include_toolbar_add_omm"
+        layout="@layout/app_bar_add_omm" />
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/input_layout_title"
@@ -38,12 +23,13 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_add_omm">
+        app:layout_constraintTop_toBottomOf="@id/include_toolbar_add_omm">
         <android.support.design.widget.TextInputEditText
             android:id="@+id/input_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textCapWords"
+            android:backgroundTint="@color/editTextTint"
             android:hint="@string/hint_title" />
     </android.support.design.widget.TextInputLayout>
     <android.support.design.widget.TextInputLayout
@@ -59,6 +45,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textCapSentences|textMultiLine"
+            android:backgroundTint="@color/editTextTint"
             android:hint="@string/hint_info"/>
     </android.support.design.widget.TextInputLayout>
 

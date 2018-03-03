@@ -2,26 +2,25 @@
 <android.support.design.widget.AppBarLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:theme="@style/AppTheme.Base.AppBarOverlay"
+    android:theme="@style/AppTheme.Base"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbar_add_omm"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
         android:elevation="4dp"
         app:layout_scrollFlags="scroll|enterAlways"
-        app:popupTheme="@style/AppTheme.Base.PopupOverlay">
+        app:popupTheme="@style/AppTheme.Base">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            style="@style/AppTitle"
+            android:text="@string/lable_add_onmymind"
+            style="@style/AppTheme.Base.ActivityTitle"
             android:layout_gravity="center"
-            android:id="@+id/toolbar_title" />
+            android:id="@+id/toolbar_add_omm_title_tv" />
 
     </android.support.v7.widget.Toolbar>
 

@@ -155,11 +155,8 @@ public class MainActivity extends AppCompatActivity {
             mHandler.post(mPendingRunnable);
         }
 
-        //Closing drawer on item click
+        // Closing drawer on item click
         drawer.closeDrawers();
-
-        // refresh toolbar menu
-        invalidateOptionsMenu();
     }
 
     private Fragment getCurrentFragment() {
@@ -199,9 +196,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
 
-                //Check to see which item was being clicked and perform appropriate action
+                // Check to see which item was being clicked and perform appropriate action
                 switch (menuItem.getItemId()) {
-                    //Replacing the main content with ContentFragment Which is our Inbox View;
+                    // Replacing the main content with correct fragment.
                     case R.id.nav_onmyminds:
                         navItemIndex = 0;
                         CURRENT_TAG = TAG_ONMYMINDS_FRAGMENT;
@@ -210,15 +207,6 @@ public class MainActivity extends AppCompatActivity {
                         navItemIndex = 1;
                         CURRENT_TAG = TAG_CONTACTS_FRAGMENT;
                         break;
-                    case R.id.nav_archive:
-                        navItemIndex = 2;
-                        CURRENT_TAG = TAG_ARCHIVE_FRAGMENT;
-                        break;
-                    case R.id.nav_settings:
-                        // launch new intent instead of loading fragment
-                        startActivity(new Intent(MainActivity.this, SettingsActivity.class));
-                        drawer.closeDrawers();
-                        return true;
                     case R.id.nav_sign_out:
                         startSignOut();
                         drawer.closeDrawers();
@@ -226,14 +214,6 @@ public class MainActivity extends AppCompatActivity {
                     default:
                         navItemIndex = 0;
                 }
-
-                // Checking if the item is in checked state or not, if not make it in checked state
-                if (menuItem.isChecked()) {
-                    menuItem.setChecked(false);
-                } else {
-                    menuItem.setChecked(true);
-                }
-                menuItem.setChecked(true);
 
                 loadCurrentFragment();
 
@@ -252,17 +232,18 @@ public class MainActivity extends AppCompatActivity {
     private void startSignOut() {
         AlertDialog.Builder alertDialogBuilder =
                 new AlertDialog.Builder(this).setTitle("Sign out")
+                        .setMessage("Do you really want to sign out?")
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 signOutUser();
                             }
                         }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                });
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        });
         final AlertDialog dialog = alertDialogBuilder.create();
         dialog.show();
     }
@@ -302,6 +283,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 AlertDialog.Builder alertDialogBuilder =
                         new AlertDialog.Builder(this).setTitle("Exit application")
+                                .setMessage("You are about to exit the application, do you want to continue?")
                                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {

@@ -17,8 +17,8 @@
         android:fitsSystemWindows="true">
 
         <include
-            android:id="@+id/include"
-            layout="@layout/app_bar" />
+            android:id="@+id/include_toolbar_main"
+            layout="@layout/app_bar_main" />
 
         <FrameLayout
             android:id="@+id/main_fragment_container"
@@ -32,6 +32,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
+        android:background="@color/colorNavigationBackground"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer" />
 </android.support.v4.widget.DrawerLayout>

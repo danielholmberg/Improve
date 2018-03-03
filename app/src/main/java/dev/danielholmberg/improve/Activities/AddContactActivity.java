@@ -39,8 +39,6 @@ import dev.danielholmberg.improve.R;
 
 public class AddContactActivity extends AppCompatActivity {
     private static final String TAG = AddContactActivity.class.getSimpleName();
-    public static final int CONTACT_ADDED = 9998;
-    public static final int CONTACT_UPDATED = 9999;
 
     private List<Contact> storedContacts;
 
@@ -52,10 +50,8 @@ public class AddContactActivity extends AppCompatActivity {
 
     private String userId;
     private boolean isEdit;
-    private String oldCID, oldCompany;
+    private String oldCID;
     private int contactPosition;
-    private boolean contactAdded = false;
-    private boolean contactUpdated = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -97,17 +93,17 @@ public class AddContactActivity extends AppCompatActivity {
         }
         if(contact != null){
             Log.d(TAG, "Contact is not null");
+            isEdit = true;
+            ((TextView) findViewById(R.id.toolbar_add_contact_title_tv)).setText(R.string.title_edit_contact);
+
+            oldCID = contact.getCID();
+            contactPosition = extras.getInt("position");
+
             ((TextView) findViewById(R.id.input_first_name)).setText(contact.getFirstName());
             ((TextView) findViewById(R.id.input_last_name)).setText(contact.getLastName());
             ((TextView) findViewById(R.id.input_company)).setText(contact.getCompany());
             ((TextView) findViewById(R.id.input_email)).setText(contact.getEmail());
             ((TextView) findViewById(R.id.input_mobile)).setText(contact.getMobile());
-
-            ((TextView) findViewById(R.id.toolbar_add_contact_title_tv)).setText(R.string.title_edit_contact);
-            isEdit = true;
-            oldCID = contact.getCID();
-            oldCompany = contact.getCompany();
-            contactPosition = extras.getInt("position");
         }
 
         firestoreDB = FirebaseFirestore.getInstance();
@@ -187,7 +183,6 @@ public class AddContactActivity extends AppCompatActivity {
                     public void onSuccess(Void avoid) {
                         Log.d(TAG, "Contact document added - id: "
                                 + contact.getCID());
-                        contactAdded = true;
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -223,7 +218,6 @@ public class AddContactActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, updatedContact.getFullName() + " updated successfully");
-                        contactUpdated = true;
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -240,11 +234,6 @@ public class AddContactActivity extends AppCompatActivity {
 
     private void showMainActivity() {
         restUi();
-        if(contactAdded) {
-            setResult(CONTACT_ADDED);
-        } else if(contactUpdated){
-            setResult(CONTACT_UPDATED);
-        }
         NavUtils.navigateUpFromSameTask(this);
     }
 

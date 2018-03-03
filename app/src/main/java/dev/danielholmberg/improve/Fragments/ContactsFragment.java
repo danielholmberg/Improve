@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
@@ -88,7 +87,7 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
         emptyListText = (TextView) view.findViewById(R.id.empty_contact_list_tv);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh_contacts);
-        fab = (FloatingActionButton) getActivity().getWindow().findViewById(R.id.add_contact);
+        fab = (FloatingActionButton) view.findViewById(R.id.add_contact);
 
         LinearLayoutManager recyclerLayoutManager =
                 new LinearLayoutManager(getActivity().getApplicationContext());
@@ -131,8 +130,7 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
             }
         });
 
-        final FloatingActionButton fab_add_contact = (FloatingActionButton) view.findViewById(R.id.add_contact);
-        fab_add_contact.setOnClickListener(new View.OnClickListener() {
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Handle action add a new Contact.
@@ -185,7 +183,7 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.toolbar_menu, menu);
+        inflater.inflate(R.menu.fragment_contacts_toolbar_menu, menu);
 
         final MenuItem searchItem = menu.findItem(R.id.search);
         final SearchView searchView = (SearchView) searchItem.getActionView();
@@ -281,17 +279,5 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
                         });
             }
         }).start();
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case FORM_REQUEST_CODE:
-                if (resultCode == AddContactActivity.CONTACT_ADDED) {
-                    Snackbar.make(view, "Contact added successfully", Snackbar.LENGTH_SHORT).show();
-                } else if (resultCode == AddContactActivity.CONTACT_UPDATED) {
-                    Snackbar.make(view, "Contact updated successfully", Snackbar.LENGTH_SHORT).show();
-                }
-        }
     }
 }

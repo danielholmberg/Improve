@@ -10,6 +10,7 @@ public class OnMyMind implements Serializable{
     private String id;
     private String title;
     private String info;
+    private String color;
 
     public OnMyMind() {}
 
@@ -41,5 +42,13 @@ public class OnMyMind implements Serializable{
 
     public void setInfo(String info) {
         this.info = info;
+    }
+
+    public String getColor() {
+        return this.color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 }

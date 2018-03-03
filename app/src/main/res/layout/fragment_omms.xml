@@ -13,7 +13,6 @@
         android:id="@+id/omm_fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/windowBackground"
         tools:context=".Activities.MainActivity">
 
         <TextView

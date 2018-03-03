@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dev.danielholmberg.improve.Activities.AddContactActivity;
+import dev.danielholmberg.improve.Activities.ContactDetailsActivity;
 import dev.danielholmberg.improve.Components.Contact;
 import dev.danielholmberg.improve.InternalStorage;
 import dev.danielholmberg.improve.R;
@@ -76,40 +77,73 @@ public class ContactsRecyclerViewAdapter extends
     public void onBindViewHolder(ContactsRecyclerViewAdapter.ViewHolder holder, int position) {
         final int itemPos = position;
         final Contact contact = contactsList.get(position);
+
+        // Fill the list-item with all the necessary content.
         holder.name.setText(contact.getFullName());
         holder.email.setText(contact.getEmail());
 
+        // Handle what happens when the user clicks on "edit".
         holder.edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 editContactActivity(contact, itemPos);
             }
         });
-
         AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(context).setTitle("Delete " + contact.getFullName())
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        deleteContact(contact.getCID(), itemPos);
-                    }
-                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                });
+                new AlertDialog.Builder(context).setTitle("Delete contact")
+                        .setMessage("Do you really want to delete: " + contact.getFullName())
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                deleteContact(contact.getCID(), itemPos);
+                            }
+                        }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        });
         final AlertDialog dialog = alertDialogBuilder.create();
 
+        // Handle what happens when the user clicks on "delete".
         holder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dialog.show();
             }
         });
+
+        // Handle what happens when the user clicks on the contact card.
+        setUpOnClickListener(holder.cardBodyView, contact);
+    }
+
+    private void setUpOnClickListener(View view, final Contact contact) {
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showContactDetailsActivity(contact);
+            }
+        });
+    }
+
+    private void showContactDetailsActivity(Contact contact) {
+        Bundle bundle = createBundle(contact);
+
+        Intent i = new Intent(context, ContactDetailsActivity.class);
+        i.putExtra("contact", bundle);
+        context.startActivity(i);
     }
 
     private void editContactActivity(Contact contact, int itemPos){
+        Bundle bundle = new Bundle();
+        bundle.putInt("position", itemPos);
+
+        Intent i = new Intent(context, AddContactActivity.class);
+        i.putExtra("contact", bundle);
+        context.startActivity(i);
+    }
+
+    private Bundle createBundle(Contact contact) {
         Bundle bundle = new Bundle();
         bundle.putString("cid", contact.getCID());
         bundle.putString("first_name", contact.getFirstName());
@@ -117,11 +151,7 @@ public class ContactsRecyclerViewAdapter extends
         bundle.putString("company", contact.getCompany());
         bundle.putString("email", contact.getEmail());
         bundle.putString("mobile", contact.getMobile());
-        bundle.putInt("position", itemPos);
-
-        Intent i = new Intent(context, AddContactActivity.class);
-        i.putExtra("contact", bundle);
-        context.startActivity(i);
+        return bundle;
     }
 
     private void deleteContact(final String contactId, final int position){
@@ -193,6 +223,7 @@ public class ContactsRecyclerViewAdapter extends
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
+        public View cardBodyView;
         public TextView name;
         public TextView email;
         public Button edit;
@@ -200,6 +231,8 @@ public class ContactsRecyclerViewAdapter extends
 
         public ViewHolder(View view) {
             super(view);
+
+            cardBodyView = view;
 
             name = (TextView) view.findViewById(R.id.name_tv);
             email = (TextView) view.findViewById(R.id.email_tv);

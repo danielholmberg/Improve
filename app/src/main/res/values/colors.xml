@@ -1,22 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base Colors -->
+    <color name="titleTextColor">#ffffff</color>
+    <color name="controlColor">#ffffff</color>
+
     <!-- Theme Default colors -->
     <color name="colorPrimary">#125688</color>
     <color name="colorPrimaryDark">#125688</color>
     <color name="colorAccent">#36d939</color>
-    <color name="textColorPrimary">#FFFFFF</color>
+    <color name="textColorPrimary">#000000</color>
     <color name="windowBackground">#c8e8ff</color>
+    <color name="cardBackground">#ffffff</color>
+    <color name="colorNavigationBackground">#ffffff</color>
 
+    <color name="editTextTint">#00ffffff</color>
+    <color name="cardBackgroundWhite">#ffffff</color>
+    <color name="cardBackgroundYellow">#FFF9C4</color>
+    <color name="cardBackgroundBlue">#448aff</color>
+    <color name="cardBackgroundPink">#f8bbd0</color>
+    <color name="cardBackgroundBrown">#D7CCC8</color>
+
+    <!-- Colors for potential Theme changes -->
     <!-- Theme Sweden colors -->
     <color name="swedenPrimary">#006aa7</color>
     <color name="swedenPrimaryDark">#004b78</color>
     <color name="swedenAccent">#fecc00</color>
     <color name="swedenTextColorPrimary">#ffffff</color>
     <color name="swedenWindowBackground">#c8e8ff</color>
+    <color name="swedenCardBackground">#FF018EDF</color>
 
     <!-- Theme Dark colors -->
-
-    <!-- Theme Light colors -->
-
+    <color name="darkPrimary">#212121</color>
+    <color name="darkPrimaryDark">#000000</color>
+    <color name="darkAccent">#36d939</color>
+    <color name="darkTextColorPrimary">#FFFFFF</color>
+    <color name="darkWindowBackground">#303030</color>
+    <color name="darkCardBackground">#424242</color>
+    <color name="darkTextColorHint">#90ffffff</color>
 
 </resources>
