@@ -8,8 +8,7 @@ import java.io.Serializable;
 
 public class Contact implements Serializable{
     private String cid;
-    private String firstName;
-    private String lastName;
+    private String name;
     private String company;
     private String email;
     private String mobile;
@@ -18,10 +17,9 @@ public class Contact implements Serializable{
 
     };
 
-    public Contact(String cid, String firstName, String lastName, String company, String email, String mobile) {
+    public Contact(String cid, String name, String company, String email, String mobile) {
         this.cid = cid;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.name = name;
         this.company = company;
         this.email = email;
         this.mobile = mobile;
@@ -31,16 +29,8 @@ public class Contact implements Serializable{
         return this.cid;
     }
 
-    public String getFirstName() {
-        return this.firstName;
-    }
-
-    public String getLastName() {
-        return this.lastName;
-    }
-
-    public String getFullName() {
-        return this.firstName + " " + this.lastName;
+    public String getName() {
+        return this.name;
     }
 
     public String getCompany() {
@@ -59,12 +49,8 @@ public class Contact implements Serializable{
         this.cid = cid;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setCompany(String company) {

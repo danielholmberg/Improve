@@ -3,26 +3,35 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/windowBackground">
 
     <include
         android:id="@+id/include_toolbar_contact_details"
         layout="@layout/app_bar_contact_details"/>
 
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/contact_details_container"
+    <android.support.v7.widget.CardView
+        android:id="@+id/contact_details_cardview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/contact_details_padding">
+        android:layout_margin="@dimen/contact_details_padding">
 
-        <TextView
-            android:id="@+id/contact_details_email_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/contact_details_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/contact_details_padding">
 
-    </android.support.constraint.ConstraintLayout>
+            <TextView
+                android:id="@+id/contact_details_email_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.v7.widget.CardView>
 
 </android.widget.LinearLayout>

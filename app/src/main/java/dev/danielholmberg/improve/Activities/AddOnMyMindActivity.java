@@ -159,7 +159,8 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-        }    }
+        }
+    }
 
     private void chooseBackgroundColor() {
         LinearLayout colorPickerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.color_picker, null, false);

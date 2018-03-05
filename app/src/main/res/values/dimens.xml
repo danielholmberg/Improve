@@ -13,4 +13,9 @@
     <dimen name="titleTextSize">20sp</dimen>
     <dimen name="omm_details_padding">16dp</dimen>
     <dimen name="contact_details_padding">16dp</dimen>
+    <dimen name="contact_form_icons_padding">16dp</dimen>
+    <dimen name="contact_details_text_size">16sp</dimen>
+    <dimen name="contact_details_vertical_padding">8dp</dimen>
+    <dimen name="contact_details_action_margin">8dp</dimen>
+    <dimen name="contact_details_actions_text_size">12sp</dimen>
 </resources>

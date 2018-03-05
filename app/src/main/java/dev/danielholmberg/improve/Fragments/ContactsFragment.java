@@ -18,6 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -187,6 +188,10 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
 
         final MenuItem searchItem = menu.findItem(R.id.search);
         final SearchView searchView = (SearchView) searchItem.getActionView();
+        EditText searchEditText = (EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+        searchEditText.setHint(R.string.search_hint);
+        searchEditText.setTextColor(getResources().getColor(R.color.titleTextColor));
+        searchEditText.setHintTextColor(getResources().getColor(R.color.searchHintTextColor));
         searchView.setOnQueryTextListener(this);
     }
 

@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
         TextView drawer_header_email = (TextView)  navigationView.getHeaderView(0).findViewById(R.id.drawer_header_email_tv);
         Picasso.with(this)
                 .load(googleAcc.getPhotoUrl())
-                .error(R.drawable.ic_error_no_photo)
+                .error(R.drawable.ic_error_no_photo_white)
                 .transform(new CircleTransform())
                 .resize(200, 200)
                 .centerCrop()
@@ -106,12 +106,7 @@ public class MainActivity extends AppCompatActivity {
         // Initializing navigation menu
         setUpNavigationView();
 
-        // Initializing the "Home" fragment
-        if (savedInstanceState == null) {
-            navItemIndex = 0;
-            CURRENT_TAG = TAG_ONMYMINDS_FRAGMENT;
-            loadCurrentFragment();
-        }
+        loadCurrentFragment();
 
     }
 

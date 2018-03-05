@@ -44,7 +44,7 @@
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/ic_fab_add_contact" />
+            app:srcCompat="@drawable/ic_fab_add_contact_white" />
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -65,4 +65,8 @@
             app:layout_constraintTop_toTopOf="parent" />
 
     </android.support.constraint.ConstraintLayout>
+
+    <!-- Bottom sheet for contact details -->
+    <include layout="@layout/contact_details_sheet"/>
+
 </android.support.v4.widget.SwipeRefreshLayout>

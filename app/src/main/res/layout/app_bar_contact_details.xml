@@ -18,8 +18,27 @@
             android:id="@+id/toolbar_contact_details_name_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="@string/label_contact_details"
             style="@style/AppTheme.Base.ActivityTitle"
             android:layout_gravity="center" />
+
+        <Button
+            android:id="@+id/delete_contact_btn"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/ic_menu_delete_white"
+            android:layout_gravity="end"
+            android:layout_marginEnd="16dp"
+            style="?android:attr/borderlessButtonStyle"/>
+
+        <Button
+            android:id="@+id/update_contact_btn"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/ic_mode_edit_white"
+            android:layout_gravity="end"
+            android:layout_marginEnd="16dp"
+            style="?android:attr/borderlessButtonStyle"/>
 
     </android.support.v7.widget.Toolbar>
 

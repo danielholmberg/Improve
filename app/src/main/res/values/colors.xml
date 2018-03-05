@@ -37,5 +37,8 @@
     <color name="darkWindowBackground">#303030</color>
     <color name="darkCardBackground">#424242</color>
     <color name="darkTextColorHint">#90ffffff</color>
+    <color name="searchHintTextColor">#90FFFFFF</color>
+    <color name="contact_form_icon">#E0E0E0</color>
+    <color name="iconColorWhite">#FFFFFFFF</color>
 
 </resources>

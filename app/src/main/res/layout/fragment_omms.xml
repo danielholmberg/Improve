@@ -43,7 +43,7 @@
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/ic_fab_add_omm" />
+            app:srcCompat="@drawable/ic_fab_add_omm_white" />
 
         <ProgressBar
             android:id="@+id/progressBar"

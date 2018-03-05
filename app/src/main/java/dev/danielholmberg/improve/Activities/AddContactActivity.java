@@ -4,17 +4,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 
 import dev.danielholmberg.improve.Components.Contact;
+import dev.danielholmberg.improve.ContactInputValidator;
 import dev.danielholmberg.improve.InternalStorage;
 import dev.danielholmberg.improve.R;
 
@@ -39,12 +34,9 @@ import dev.danielholmberg.improve.R;
 
 public class AddContactActivity extends AppCompatActivity {
     private static final String TAG = AddContactActivity.class.getSimpleName();
+    private static final int CONTACT_UPDATED = 9997;
 
     private List<Contact> storedContacts;
-
-    private EditText inputFirstName, inputLastName, inputCompany, inputEmail, inputPhone;
-    private TextInputLayout inputLayoutFirstName, inputLayoutLastName, inputLayoutCompany, inputLayoutEmail, inputLayoutPhone;
-    private boolean firstNameIsValid, lastNameIsValid, emailIsValid = false;
 
     private FirebaseFirestore firestoreDB;
 
@@ -63,18 +55,8 @@ public class AddContactActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        View layout = (View) findViewById(R.id.activity_add_contact_layout);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.contact_done);
-
-        inputLayoutFirstName = (TextInputLayout) findViewById(R.id.input_layout_first_name);
-        inputLayoutLastName = (TextInputLayout) findViewById(R.id.input_layout_last_name);
-        inputLayoutCompany = (TextInputLayout) findViewById(R.id.input_layout_company);
-        inputLayoutEmail = (TextInputLayout) findViewById(R.id.input_layout_email);
-        inputLayoutPhone = (TextInputLayout) findViewById(R.id.input_layout_mobile);
-        inputFirstName = (EditText) findViewById(R.id.input_first_name);
-        inputLastName = (EditText) findViewById(R.id.input_last_name);
-        inputCompany = (EditText) findViewById(R.id.input_company);
-        inputEmail = (EditText) findViewById(R.id.input_email);
-        inputPhone = (EditText) findViewById(R.id.input_mobile);
 
         Contact contact = null;
         Bundle extras = getIntent().getBundleExtra("contact");
@@ -85,8 +67,7 @@ public class AddContactActivity extends AppCompatActivity {
         if(extras != null){
             contact = new Contact();
             contact.setCID(extras.getString("cid"));
-            contact.setFirstName(extras.getString("first_name"));
-            contact.setLastName(extras.getString("last_name"));
+            contact.setName(extras.getString("name"));
             contact.setCompany(extras.getString("company"));
             contact.setEmail(extras.getString("email"));
             contact.setMobile(extras.getString("mobile"));
@@ -99,8 +80,7 @@ public class AddContactActivity extends AppCompatActivity {
             oldCID = contact.getCID();
             contactPosition = extras.getInt("position");
 
-            ((TextView) findViewById(R.id.input_first_name)).setText(contact.getFirstName());
-            ((TextView) findViewById(R.id.input_last_name)).setText(contact.getLastName());
+            ((TextView) findViewById(R.id.input_name)).setText(contact.getName());
             ((TextView) findViewById(R.id.input_company)).setText(contact.getCompany());
             ((TextView) findViewById(R.id.input_email)).setText(contact.getEmail());
             ((TextView) findViewById(R.id.input_mobile)).setText(contact.getMobile());
@@ -121,11 +101,12 @@ public class AddContactActivity extends AppCompatActivity {
             storedContacts = new ArrayList<>();
         }
 
+        final ContactInputValidator validator = new ContactInputValidator(this, layout);
         fab.setOnClickListener(new View.OnClickListener()        {
             @Override
             public void onClick(View v)
             {
-                if(formIsValid()) {
+                if(validator.formIsValid()) {
                     if (!isEdit) {
                         addContact();
                     } else {
@@ -149,8 +130,7 @@ public class AddContactActivity extends AppCompatActivity {
 
     private Contact createContactObj(){
         final Contact contact = new Contact();
-        contact.setFirstName(((TextView) findViewById(R.id.input_first_name)).getText().toString());
-        contact.setLastName(((TextView) findViewById(R.id.input_last_name)).getText().toString());
+        contact.setName(((TextView) findViewById(R.id.input_name)).getText().toString());
         contact.setCompany(((TextView) findViewById(R.id.input_company)).getText().toString());
         contact.setEmail(((TextView) findViewById(R.id.input_email)).getText().toString());
         contact.setMobile(((TextView) findViewById(R.id.input_mobile)).getText().toString());
@@ -194,7 +174,7 @@ public class AddContactActivity extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
-        showMainActivity();
+        showParentActivity();
     }
 
     /**
@@ -217,7 +197,8 @@ public class AddContactActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, updatedContact.getFullName() + " updated successfully");
+                        Log.d(TAG, updatedContact.getName() + " updated successfully");
+                        setResult(CONTACT_UPDATED);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -229,149 +210,18 @@ public class AddContactActivity extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
-        showMainActivity();
+        showParentActivity();
     }
 
-    private void showMainActivity() {
+    private void showParentActivity() {
         restUi();
         NavUtils.navigateUpFromSameTask(this);
     }
 
     private void restUi(){
-        ((TextView) findViewById(R.id.input_first_name)).setText("");
-        ((TextView) findViewById(R.id.input_last_name)).setText("");
+        ((TextView) findViewById(R.id.input_name)).setText("");
         ((TextView) findViewById(R.id.input_company)).setText("");
         ((TextView) findViewById(R.id.input_email)).setText("");
         ((TextView) findViewById(R.id.input_mobile)).setText("");
     }
-
-    /**
-     * Validating new contact form
-     */
-    private boolean formIsValid() {
-        if (validateFirstName() && validateLastName() && validateCompany() && validateEmail()) {
-            Log.d(TAG, "New contact form is valid");
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Validate if the user has entered a first name.
-     * @return false if first name is empty.
-     */
-    private boolean validateFirstName() {
-        if (inputFirstName.getText().toString().trim().isEmpty()) {
-            inputLayoutFirstName.setError(getString(R.string.err_msg_name));
-            requestFocus(inputFirstName);
-            return false;
-        } else {
-            inputLayoutFirstName.setErrorEnabled(false);
-        }
-
-        return true;
-    }
-
-    /**
-     * Validate if the user has entered a last name.
-     * @return false if last name is empty.
-     */
-    private boolean validateLastName() {
-        if (inputLastName.getText().toString().trim().isEmpty()) {
-            inputLayoutLastName.setError(getString(R.string.err_msg_name));
-            requestFocus(inputLastName);
-            return false;
-        } else {
-            inputLayoutLastName.setErrorEnabled(false);
-        }
-
-        return true;
-    }
-
-    /**
-     * Validate if the user has entered a company.
-     * @return false if last name is empty.
-     */
-    private boolean validateCompany() {
-        if (inputCompany.getText().toString().isEmpty()) {
-            inputLayoutCompany.setError(getString(R.string.err_msg_company));
-            requestFocus(inputCompany);
-            return false;
-        } else {
-            inputLayoutCompany.setErrorEnabled(false);
-        }
-
-        return true;
-    }
-
-    /**
-     * Validate if the user has entered a non-empty field or a correct email-format.
-     * @return true if email is valid.
-     */
-    private boolean validateEmail() {
-        String email = inputEmail.getText().toString().trim();
-
-        if (email.isEmpty() || !isValidEmail(email)) {
-            inputLayoutEmail.setError(getString(R.string.err_msg_email));
-            requestFocus(inputEmail);
-            return false;
-        } else {
-            inputLayoutEmail.setErrorEnabled(false);
-        }
-
-        return true;
-    }
-
-    /**
-     * Check if the entered email is of correct format.
-     * @param email
-     * @return true if the email is of correct format.
-     */
-    private static boolean isValidEmail(String email) {
-        return !TextUtils.isEmpty(email) && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
-    }
-
-    /**
-     * Requests focus of the incoming view.
-     * @param view
-     */
-    private void requestFocus(View view) {
-        if (view.requestFocus()) {
-           getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-        }
-    }
-
-    /**
-     * Class to live-check if the input is valid.
-     */
-    private class MyTextWatcher implements TextWatcher {
-
-        private View view;
-
-        private MyTextWatcher(View view) {
-            this.view = view;
-        }
-
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        }
-
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        }
-
-        public void afterTextChanged(Editable editable) {
-            switch (view.getId()) {
-                case R.id.input_first_name:
-                    validateFirstName();
-                    break;
-                case R.id.input_last_name:
-                    validateLastName();
-                    break;
-                case R.id.input_email:
-                    validateEmail();
-                    break;
-            }
-        }
-    }
-
 }

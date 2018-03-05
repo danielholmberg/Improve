@@ -5,12 +5,12 @@
         android:checkableBehavior="single">
         <item
             android:id="@+id/nav_onmyminds"
-            android:icon="@drawable/ic_menu_omms"
+            android:icon="@drawable/ic_menu_omms_white"
             android:checked="true"
             android:title="@string/menu_onmyminds" />
         <item
             android:id="@+id/nav_contacts"
-            android:icon="@drawable/ic_menu_contacts"
+            android:icon="@drawable/ic_menu_contacts_white"
             android:title="@string/menu_contacts" />
     </group>
 
@@ -18,7 +18,7 @@
         android:id="@+id/bottom">
         <item
             android:id="@+id/nav_sign_out"
-            android:icon="@drawable/ic_menu_sign_out"
+            android:icon="@drawable/ic_menu_sign_out_white"
             android:title="@string/sign_out" />
     </group>
 </menu>

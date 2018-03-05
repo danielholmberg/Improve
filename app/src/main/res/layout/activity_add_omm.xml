@@ -60,6 +60,6 @@
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_done" />
+        app:srcCompat="@drawable/ic_done_white" />
 
 </android.support.constraint.ConstraintLayout>
