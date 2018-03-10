@@ -35,7 +35,7 @@
 
     <!-- Search contact strings -->
     <string name="search_title">Search contact</string>
-    <string name="search_hint">Enter a name or email</string>
+    <string name="search_hint">Enter a name or company</string>
 
     <!-- Navigation strings -->
     <string name="navigation_drawer_open">open drawer</string>

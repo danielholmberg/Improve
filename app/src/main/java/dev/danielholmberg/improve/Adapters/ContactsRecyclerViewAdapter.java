@@ -145,7 +145,7 @@ public class ContactsRecyclerViewAdapter extends
             } else {
                 text = text.toLowerCase();
                 for (Contact contact : contactsListCopy) {
-                    if (contact.getName().toLowerCase().contains(text) || contact.getEmail().toLowerCase().contains(text)) {
+                    if (contact.getName().toLowerCase().contains(text) || contact.getCompany().toLowerCase().contains(text)) {
                         contactsList.add(contact);
                     }
                 }
