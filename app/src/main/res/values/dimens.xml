@@ -1,21 +1,46 @@
 <resources>
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="tab_max_width">264dp</dimen>
-    <dimen name="tab_padding_bottom">16dp</dimen>
-    <dimen name="tab_label">14sp</dimen>
-    <dimen name="custom_tab_layout_height">72dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+
+    <!-- Toolbar dimens -->
+    <dimen name="toolbar_label_padding">16dp</dimen>
+    <dimen name="title_text_size">20sp</dimen>
+
+    <!-- Navigation header dimens -->
     <dimen name="nav_header_height">150dp</dimen>
     <dimen name="nav_header_vertical_spacing">16dp</dimen>
     <dimen name="nav_header_iv_top_spacing">32dp</dimen>
-    <dimen name="settings_content_margin">8dp</dimen>
-    <dimen name="titleTextSize">20sp</dimen>
-    <dimen name="omm_details_padding">16dp</dimen>
+
+    <!-- General card dimens -->
+    <dimen name="card_footer_elevation">4dp</dimen>
+    <dimen name="card_toolbar_elevation">4dp</dimen>
+    <dimen name="card_item_margin">8dp</dimen>
+
+    <!-- Contact dimens -->
     <dimen name="contact_details_padding">16dp</dimen>
     <dimen name="contact_form_icons_padding">16dp</dimen>
     <dimen name="contact_details_text_size">16sp</dimen>
     <dimen name="contact_details_vertical_padding">8dp</dimen>
     <dimen name="contact_details_action_margin">8dp</dimen>
     <dimen name="contact_details_actions_text_size">12sp</dimen>
+
+    <!-- OnMyMind dimens -->
+    <dimen name="omm_item_body_padding">16dp</dimen>
+    <dimen name="omm_details_info_text_size">16sp</dimen>
+    <dimen name="omm_details_padding">16dp</dimen>
+    <dimen name="omm_form_icons_padding">16dp</dimen>
+    <dimen name="footer_omm_padding">8dp</dimen>
+    <dimen name="toolbar_omm_title_padding">8dp</dimen>
+    <dimen name="footer_omm_details_timestamp_text_size">10sp</dimen>
+    <dimen name="contact_item_start_margin">8dp</dimen>
+    <dimen name="contact_list_top_margin">8dp</dimen>
+    <dimen name="contact_item_end_margin">8dp</dimen>
+    <dimen name="contact_item_bottom_margin">4dp</dimen>
+    <dimen name="contact_card_top_margin">8dp</dimen>
+    <dimen name="contact_card_start_margin">16dp</dimen>
+    <dimen name="contact_card_end_margin">16dp</dimen>
+    <dimen name="contact_card_bottom_margin">8dp</dimen>
+    <dimen name="contact_details_name_text_size">22sp</dimen>
+    <dimen name="color_button_margin">8dp</dimen>
 </resources>

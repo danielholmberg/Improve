@@ -73,6 +73,8 @@ public final class InternalStorage {
         FileInputStream fis = new FileInputStream(file);
         ObjectInputStream ois = new ObjectInputStream(fis);
         Object object = ois.readObject();
+        ois.close();
+        fis.close();
         Log.d(TAG,"*** Read from FileName: " + file.getPath() + " ***");
         return object;
     }

@@ -29,16 +29,12 @@
             android:name=".Activities.AddOnMyMindActivity"
             android:label="@string/lable_add_onmymind"
             android:parentActivityName=".Activities.MainActivity"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".Activities.AddContactActivity"
             android:label="@string/lable_add_contact"
             android:parentActivityName=".Activities.MainActivity"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".Activities.OnMyMindDetailsActivity"
-            android:parentActivityName=".Activities.MainActivity"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustPan" />
     </application>
 
 </manifest>

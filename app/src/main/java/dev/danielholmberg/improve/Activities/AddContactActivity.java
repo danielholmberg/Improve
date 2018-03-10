@@ -3,11 +3,14 @@ package dev.danielholmberg.improve.Activities;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,10 +48,15 @@ public class AddContactActivity extends AppCompatActivity {
     private String oldCID;
     private int contactPosition;
 
+    private TextInputEditText inputName, inputEmail, inputCompany, inputPhone, inputComment;
+    private ContactInputValidator validator;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_contact);
+
+        firestoreDB = FirebaseFirestore.getInstance();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_add_contact);
         setSupportActionBar(toolbar);
@@ -56,37 +64,32 @@ public class AddContactActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         View layout = (View) findViewById(R.id.activity_add_contact_layout);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.contact_done);
 
-        Contact contact = null;
-        Bundle extras = getIntent().getBundleExtra("contact");
+        inputName = (TextInputEditText) findViewById(R.id.input_name);
+        inputCompany = (TextInputEditText) findViewById(R.id.input_company);
+        inputEmail = (TextInputEditText) findViewById(R.id.input_email);
+        inputPhone = (TextInputEditText) findViewById(R.id.input_mobile);
+        inputComment = (TextInputEditText) findViewById(R.id.input_comment);
+
+        Bundle intentBundle = getIntent().getBundleExtra("contactBundle");
+        Contact contact =  intentBundle != null ? (Contact) intentBundle.getSerializable("contact") : null;
 
         // Get current userId.
         userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        if(extras != null){
-            contact = new Contact();
-            contact.setCID(extras.getString("cid"));
-            contact.setName(extras.getString("name"));
-            contact.setCompany(extras.getString("company"));
-            contact.setEmail(extras.getString("email"));
-            contact.setMobile(extras.getString("mobile"));
-        }
         if(contact != null){
-            Log.d(TAG, "Contact is not null");
             isEdit = true;
             ((TextView) findViewById(R.id.toolbar_add_contact_title_tv)).setText(R.string.title_edit_contact);
 
             oldCID = contact.getCID();
-            contactPosition = extras.getInt("position");
+            contactPosition = intentBundle.getInt("position");
 
-            ((TextView) findViewById(R.id.input_name)).setText(contact.getName());
-            ((TextView) findViewById(R.id.input_company)).setText(contact.getCompany());
-            ((TextView) findViewById(R.id.input_email)).setText(contact.getEmail());
-            ((TextView) findViewById(R.id.input_mobile)).setText(contact.getMobile());
+            inputName.setText(contact.getName());
+            inputCompany.setText(contact.getCompany());
+            inputEmail.setText(contact.getEmail());
+            inputPhone.setText(contact.getMobile());
+            inputComment.setText(contact.getComment());
         }
-
-        firestoreDB = FirebaseFirestore.getInstance();
 
         try {
             storedContacts = (List<Contact>) InternalStorage.readObject(InternalStorage.contacts);
@@ -101,11 +104,22 @@ public class AddContactActivity extends AppCompatActivity {
             storedContacts = new ArrayList<>();
         }
 
-        final ContactInputValidator validator = new ContactInputValidator(this, layout);
-        fab.setOnClickListener(new View.OnClickListener()        {
-            @Override
-            public void onClick(View v)
-            {
+        // Initialize input validator
+        validator = new ContactInputValidator(this, layout);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.activity_add_edit_contact, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.contactDone:
                 if(validator.formIsValid()) {
                     if (!isEdit) {
                         addContact();
@@ -113,10 +127,12 @@ public class AddContactActivity extends AppCompatActivity {
                         updateContact();
                     }
                 }
-
-            }
-        });
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
+
 
     public void addContact(){
         Contact contact = createContactObj();
@@ -130,10 +146,11 @@ public class AddContactActivity extends AppCompatActivity {
 
     private Contact createContactObj(){
         final Contact contact = new Contact();
-        contact.setName(((TextView) findViewById(R.id.input_name)).getText().toString());
-        contact.setCompany(((TextView) findViewById(R.id.input_company)).getText().toString());
-        contact.setEmail(((TextView) findViewById(R.id.input_email)).getText().toString());
-        contact.setMobile(((TextView) findViewById(R.id.input_mobile)).getText().toString());
+        contact.setName(inputName.getText().toString());
+        contact.setCompany(inputCompany.getText().toString());
+        contact.setEmail(inputEmail.getText().toString());
+        contact.setMobile(inputPhone.getText().toString());
+        contact.setComment(inputComment.getText().toString());
 
         return contact;
     }
@@ -219,9 +236,10 @@ public class AddContactActivity extends AppCompatActivity {
     }
 
     private void restUi(){
-        ((TextView) findViewById(R.id.input_name)).setText("");
-        ((TextView) findViewById(R.id.input_company)).setText("");
-        ((TextView) findViewById(R.id.input_email)).setText("");
-        ((TextView) findViewById(R.id.input_mobile)).setText("");
+        inputName.getText().clear();
+        inputCompany.getText().clear();
+        inputEmail.getText().clear();
+        inputPhone.getText().clear();
+        inputComment.getText().clear();
     }
 }

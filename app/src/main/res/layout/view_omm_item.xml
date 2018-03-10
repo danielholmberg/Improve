@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:focusable="true"
     android:clickable="true"
-    android:layout_margin="8dp"
+    android:layout_margin="@dimen/card_item_margin"
     app:cardBackgroundColor="@color/cardBackground">
     <LinearLayout
         android:id="@+id/card_omm_container"
@@ -15,44 +15,45 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <Toolbar
+        <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar_omm"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:elevation="4dp"
-            android:background="#FFFFFF">
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            android:elevation="@dimen/card_toolbar_elevation"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:popupTheme="@style/AppTheme.Base">
 
+            <!-- Toolbar content -->
             <TextView
                 android:id="@+id/title_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:maxLines="2"
+                android:padding="@dimen/toolbar_omm_title_padding"
+                android:maxLines="@integer/omm_item_title_max_lines"
                 android:ellipsize="end"
+                android:textColor="@color/cardTitleColor"
                 android:textStyle="bold"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-        </Toolbar>
+        </android.support.v7.widget.Toolbar>
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/omm_body_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#FAFAFA"
-            android:padding="8dp">
+            android:background="@color/cardInfoBackground"
+            android:padding="@dimen/omm_item_body_padding">
 
             <TextView
                 android:id="@+id/info_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
                 android:ellipsize="end"
-                android:maxLines="4"
+                android:maxLines="@integer/omm_item_info_max_lines"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -60,29 +61,9 @@
 
         </android.support.constraint.ConstraintLayout>
 
-        <LinearLayout
+        <include
             android:id="@+id/footer_omm"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#FFFFFF"
-            android:gravity="center_horizontal"
-            android:orientation="horizontal"
-            android:elevation="4dp">
-            <Button
-                android:id="@+id/edit_omm_b"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="?attr/selectableItemBackground"
-                android:text="@string/omm_footer_edit_label" />
-            <Button
-                android:id="@+id/delete_omm_b"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="?attr/selectableItemBackground"
-                android:text="@string/omm_footer_delete_label" />
-        </LinearLayout>
+            layout="@layout/omm_item_footer"/>
 
     </LinearLayout>
 </android.support.v7.widget.CardView>

@@ -64,4 +64,8 @@
             app:layout_constraintTop_toTopOf="parent" />
 
     </android.support.constraint.ConstraintLayout>
+
+    <!-- Dialog Fragment for OnMyMind details -->
+    <include layout="@layout/fragment_omm_details"/>
+
 </android.support.v4.widget.SwipeRefreshLayout>

@@ -14,13 +14,15 @@
     <color name="colorNavigationBackground">#ffffff</color>
 
     <color name="editTextTint">#00ffffff</color>
-    <color name="cardBackgroundWhite">#ffffff</color>
-    <color name="cardBackgroundYellow">#FFF9C4</color>
-    <color name="cardBackgroundBlue">#448aff</color>
-    <color name="cardBackgroundPink">#f8bbd0</color>
-    <color name="cardBackgroundBrown">#D7CCC8</color>
 
-    <!-- Colors for potential Theme changes -->
+    <!-- OnMyMind colors -->
+    <color name="ommYellow">#FDD835</color>
+    <color name="ommBlue">#448aff</color>
+    <color name="ommPink">#E91E63</color>
+    <color name="ommBrown">#6D4C41</color>
+    <color name="cardTitleColor">#FFFFFFFF</color>
+
+    <!-- Colors for *potential* Theme changes -->
     <!-- Theme Sweden colors -->
     <color name="swedenPrimary">#006aa7</color>
     <color name="swedenPrimaryDark">#004b78</color>
@@ -40,5 +42,9 @@
     <color name="searchHintTextColor">#90FFFFFF</color>
     <color name="contact_form_icon">#E0E0E0</color>
     <color name="iconColorWhite">#FFFFFFFF</color>
+    <color name="omm_form_icon">#FFE0E0E0</color>
+    <color name="cardInfoBackground">#FAFAFA</color>
+    <color name="cardFooterColor">#FFFFFFFF</color>
+    <color name="contactCardBackgroundColor">#FFFFFFFF</color>
 
 </resources>

@@ -7,35 +7,45 @@
     android:weightSum="5">
 
     <Button
-        android:id="@+id/buttonColorWhite"
+        android:id="@+id/buttonColorGreen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:elevation="@dimen/cardview_default_elevation"
         android:layout_weight="1"
-        android:background="@color/cardBackgroundWhite"/>
+        android:layout_margin="@dimen/color_button_margin"
+        android:background="@color/colorAccent"/>
     <Button
         android:id="@+id/buttonColorYellow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:elevation="@dimen/cardview_default_elevation"
         android:layout_weight="1"
-        android:background="@color/cardBackgroundYellow"/>
+        android:layout_margin="@dimen/color_button_margin"
+        android:background="@color/ommYellow"/>
     <Button
         android:id="@+id/buttonColorBlue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:elevation="@dimen/cardview_default_elevation"
         android:layout_weight="1"
-        android:background="@color/cardBackgroundBlue"/>
+        android:layout_margin="@dimen/color_button_margin"
+        android:background="@color/ommBlue"/>
     <Button
         android:id="@+id/buttonColorPink"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:elevation="@dimen/cardview_default_elevation"
         android:layout_weight="1"
-        android:background="@color/cardBackgroundPink"/>
+        android:layout_margin="@dimen/color_button_margin"
+        android:background="@color/ommPink"/>
     <Button
         android:id="@+id/buttonColorBrown"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:elevation="@dimen/cardview_default_elevation"
         android:layout_weight="1"
-        android:background="@color/cardBackgroundBrown"/>
+        android:layout_margin="@dimen/color_button_margin"
+        android:background="@color/ommBrown"/>
 
 
 </LinearLayout>

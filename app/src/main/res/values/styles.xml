@@ -13,12 +13,14 @@
         <item name="colorControlNormal">@color/controlColor</item>
         <!-- color for the background of the activity -->
         <item name="android:windowBackground">@color/windowBackground</item>
+        <!-- enable window content transitions -->
+        <!-- no used, but can be implemented <item name="android:windowActivityTransitions">true</item> -->
     </style>
 
     <!-- [Base] Toolbar title text style -->
     <style name="AppTheme.Base.ActivityTitle" parent="AppTheme.Base">
         <item name="android:textColor">@color/titleTextColor</item>
-        <item name="android:textSize">@dimen/titleTextSize</item>
+        <item name="android:textSize">@dimen/title_text_size</item>
         <item name="android:textStyle">bold</item>
     </style>
 

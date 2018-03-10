@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
@@ -31,7 +31,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
 import java.io.IOException;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,15 +56,14 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
     private TextInputLayout inputLayoutTitle, inputLayoutInfo;
 
     private FirebaseFirestore firestoreDB;
+    private Toolbar toolbar;
     private ConstraintLayout contentLayout;
 
+    private Bundle ommBundle;
     private String userId;
     private boolean isEdit;
-    private String oldId, oldTitle, oldInfo;
+    private String oldId, oldTitle, oldColor, oldInfo, oldCreatedTimestamp, oldUpdatedTimestamp;
     private int ommPosition;
-    private boolean ommAdded = false;
-    private boolean ommUpdated = false;
-    private String oldColor;
     private AlertDialog colorPickerDialog;
 
     @Override
@@ -70,35 +71,28 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_omm);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_add_omm);
+        firestoreDB = FirebaseFirestore.getInstance();
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar_add_omm);
+        toolbar.setBackgroundColor(getResources().getColor(R.color.colorAccent));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         contentLayout = (ConstraintLayout) findViewById(R.id.add_omm_content);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.omm_done);
-
         inputLayoutTitle = (TextInputLayout) findViewById(R.id.input_layout_title);
         inputLayoutInfo = (TextInputLayout) findViewById(R.id.input_layout_info);
-        inputTitle = (EditText) findViewById(R.id.input_title);
-        inputInfo = (EditText) findViewById(R.id.input_info);
+        inputTitle = (TextInputEditText) findViewById(R.id.input_title);
+        inputInfo = (TextInputEditText) findViewById(R.id.input_info);
 
-        OnMyMind omm = null;
-        Bundle extras = getIntent().getBundleExtra("onmymind");
+        ommBundle = getIntent().getBundleExtra("ommBundle");
+        OnMyMind omm = ommBundle != null ? (OnMyMind) ommBundle.getSerializable("omm") : null;
 
         // Get current userId.
         userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        if(extras != null){
-            omm = new OnMyMind();
-            omm.setId(extras.getString("id"));
-            omm.setTitle(extras.getString("title"));
-            omm.setInfo(extras.getString("info"));
-            omm.setColor(extras.getString("color"));
-        }
         if(omm != null){
-            Log.d(TAG, "OnMyMind is not null - Entering Edit Mode...");
             isEdit = true;
             ((TextView) findViewById(R.id.toolbar_add_omm_title_tv)).setText(R.string.title_edit_onmymind);
 
@@ -106,14 +100,18 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
             oldTitle = omm.getTitle();
             oldInfo = omm.getInfo();
             oldColor = omm.getColor();
-            ommPosition = extras.getInt("position");
+            oldCreatedTimestamp = omm.getCreatedTimestamp();
+            if(omm.getUpdatedTimestamp() != null) {
+                if (!omm.getUpdatedTimestamp().isEmpty()) {
+                    oldUpdatedTimestamp = omm.getUpdatedTimestamp();
+                }
+            }
+            ommPosition = ommBundle.getInt("position");
 
-            contentLayout.setBackgroundColor(Color.parseColor(oldColor));
-            ((TextView) findViewById(R.id.input_title)).setText(oldTitle);
-            ((TextView) findViewById(R.id.input_info)).setText(oldInfo);
+            toolbar.setBackgroundColor(Color.parseColor(oldColor));
+            inputTitle.setText(oldTitle);
+            inputInfo.setText(oldInfo);
         }
-
-        firestoreDB = FirebaseFirestore.getInstance();
 
         try {
             storedOnMyMinds = (ArrayList<OnMyMind>) InternalStorage.readObject(InternalStorage.onmyminds);
@@ -127,26 +125,12 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
         if(storedOnMyMinds.isEmpty()) {
             storedOnMyMinds = new ArrayList<>();
         }
-
-        fab.setOnClickListener(new View.OnClickListener()        {
-            @Override
-            public void onClick(View v)
-            {
-                if(!isEdit){
-                    if(validateTitle() && valitdateInfo()) {
-                        addOnMyMind();
-                    }
-                } else {
-                    updateOnMyMind();
-                }
-            }
-        });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.activity_add_edit_omm_toolbar_menu, menu);
+        inflater.inflate(R.menu.activity_add_edit_omm, menu);
         return true;
     }
 
@@ -157,6 +141,15 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
             case R.id.chooseBackgroundColor:
                 chooseBackgroundColor();
                 return true;
+            case R.id.ommDone:
+                if(!isEdit) {
+                    if(validateTitle() && valitdateInfo()) {
+                        addOnMyMind();
+                    }
+                } else {
+                    updateOnMyMind();
+                }
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -164,7 +157,7 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
 
     private void chooseBackgroundColor() {
         LinearLayout colorPickerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.color_picker, null, false);
-        colorPickerLayout.findViewById(R.id.buttonColorWhite).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorGreen).setOnClickListener(this);
         colorPickerLayout.findViewById(R.id.buttonColorYellow).setOnClickListener(this);
         colorPickerLayout.findViewById(R.id.buttonColorBlue).setOnClickListener(this);
         colorPickerLayout.findViewById(R.id.buttonColorPink).setOnClickListener(this);
@@ -223,7 +216,12 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
         final OnMyMind omm = new OnMyMind();
         omm.setTitle(((TextView) findViewById(R.id.input_title)).getText().toString());
         omm.setInfo(((TextView) findViewById(R.id.input_info)).getText().toString());
-        omm.setColor("#"+Integer.toHexString(((ColorDrawable)contentLayout.getBackground()).getColor()));
+        if(((ColorDrawable)toolbar.getBackground()) != null) {
+            omm.setColor("#" + Integer.toHexString(((ColorDrawable) toolbar.getBackground()).getColor()));
+        } else {
+            omm.setColor("#" + Integer.toHexString(getResources().getColor(R.color.colorAccent)));
+        }
+        omm.setCreatedTimestamp(oldCreatedTimestamp);
 
         return omm;
     }
@@ -234,7 +232,8 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
      */
     private void addOnMyMind(final OnMyMind omm) {
         omm.setId(UUID.randomUUID().toString());
-        Log.d(TAG, "Id: " + omm.getId());
+        // Create timestamp
+        omm.setCreatedTimestamp(getCurrentTimestamp());
         storedOnMyMinds.add(omm);
         try {
             InternalStorage.writeObject(InternalStorage.onmyminds, storedOnMyMinds);
@@ -253,7 +252,6 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
                     public void onSuccess(Void avoid) {
                         Log.d(TAG, "OnMyMind document added - id: "
                                 + omm.getId());
-                        ommAdded = true;
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -269,12 +267,17 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
         showMainActivity();
     }
 
+    private String getCurrentTimestamp() {
+        return DateFormat.getDateTimeInstance().format(new Date());
+    }
+
     /**
      * Update a OnMyMind in Firestore Database
      * @param updatedOnMyMind
      */
     private void updateOnMyMind(final OnMyMind updatedOnMyMind) {
         updatedOnMyMind.setId(oldId);
+        updatedOnMyMind.setUpdatedTimestamp(getCurrentTimestamp());
         storedOnMyMinds.set(ommPosition, updatedOnMyMind);
         try {
             InternalStorage.writeObject(InternalStorage.onmyminds, storedOnMyMinds);
@@ -291,8 +294,7 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, updatedOnMyMind.getTitle() + " updated successfully");
-                        ommUpdated = true;
+                        Log.d(TAG,  "*** Successfully updated OnMyMind ***");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -300,7 +302,7 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "Error adding OnMyMind document: " + e);
                         Toast.makeText(getApplicationContext(),
-                                updatedOnMyMind.getTitle() + " document could not be added",
+                                "Error: OnMyMind document could not be added",
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -309,46 +311,40 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
 
     private void showMainActivity() {
         restUi();
-        if(ommAdded) {
-            setResult(OMM_ADDED);
-        } else if(ommUpdated){
-            setResult(OMM_UPDATED);
-        }
         NavUtils.navigateUpFromSameTask(this);
         finish();
     }
 
     private void restUi(){
-        ((TextView) findViewById(R.id.input_title)).setText("");
-        ((TextView) findViewById(R.id.input_info)).setText("");
+        inputTitle.getText().clear();
+        inputInfo.getText().clear();
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.buttonColorWhite:
-                Log.d(TAG, "White was chosen");
-                contentLayout.setBackgroundColor(getResources().getColor(R.color.cardBackgroundWhite));
+            case R.id.buttonColorGreen:
+                Log.d(TAG, "Green was chosen");
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorAccent));
                 break;
             case R.id.buttonColorYellow:
                 Log.d(TAG, "Yellow was chosen");
-                contentLayout.setBackgroundColor(getResources().getColor(R.color.cardBackgroundYellow));
+                toolbar.setBackgroundColor(getResources().getColor(R.color.ommYellow));
                 break;
             case R.id.buttonColorBlue:
                 Log.d(TAG, "Blue was chosen");
-                contentLayout.setBackgroundColor(getResources().getColor(R.color.cardBackgroundBlue));
+                toolbar.setBackgroundColor(getResources().getColor(R.color.ommBlue));
                 break;
             case R.id.buttonColorPink:
                 Log.d(TAG, "Pink was chosen");
-                contentLayout.setBackgroundColor(getResources().getColor(R.color.cardBackgroundPink));
+                toolbar.setBackgroundColor(getResources().getColor(R.color.ommPink));
                 break;
             case R.id.buttonColorBrown:
                 Log.d(TAG, "Brown was chosen");
-                contentLayout.setBackgroundColor(getResources().getColor(R.color.cardBackgroundBrown));
+                toolbar.setBackgroundColor(getResources().getColor(R.color.ommBrown));
                 break;
             default:
-                // White
-                contentLayout.setBackgroundColor(getResources().getColor(R.color.cardBackgroundWhite));
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorAccent));
                 break;
         }
         colorPickerDialog.dismiss();

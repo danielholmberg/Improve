@@ -6,4 +6,10 @@
         android:title="@string/omm_backround_color"
         android:icon="@drawable/ic_menu_background_color_white"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/ommDone"
+        android:title="@string/ommDone"
+        android:icon="@drawable/ic_done_white"
+        app:showAsAction="always"
+        />
 </menu>

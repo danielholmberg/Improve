@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -93,12 +92,6 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
         LinearLayoutManager recyclerLayoutManager =
                 new LinearLayoutManager(getActivity().getApplicationContext());
         contactsRecyclerView.setLayoutManager(recyclerLayoutManager);
-
-        // Separate each Contact in the list with a divider.
-        DividerItemDecoration dividerItemDecoration =
-                new DividerItemDecoration(contactsRecyclerView.getContext(),
-                        recyclerLayoutManager.getOrientation());
-        contactsRecyclerView.addItemDecoration(dividerItemDecoration);
 
         // Initialize the adapter for RecycleView.
         initAdapter();
@@ -213,8 +206,8 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
      * Called when a user clicks on the Floating Action Button to add a new Contact.
      */
     public void addContact() {
-        Intent i = new Intent(getContext(), AddContactActivity.class);
-        startActivityForResult(i, FORM_REQUEST_CODE);
+        Intent addContactIntent = new Intent(getContext(), AddContactActivity.class);
+        startActivity(addContactIntent);
     }
 
     /**

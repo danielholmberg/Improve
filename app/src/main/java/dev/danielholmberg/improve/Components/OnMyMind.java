@@ -11,6 +11,8 @@ public class OnMyMind implements Serializable{
     private String title;
     private String info;
     private String color;
+    private String createdTimestamp;
+    private String updatedTimestamp;
 
     public OnMyMind() {}
 
@@ -50,5 +52,21 @@ public class OnMyMind implements Serializable{
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public String getCreatedTimestamp() {
+        return createdTimestamp;
+    }
+
+    public void setCreatedTimestamp(String timestamp) {
+        this.createdTimestamp = timestamp;
+    }
+
+    public String getUpdatedTimestamp() {
+        return updatedTimestamp;
+    }
+
+    public void setUpdatedTimestamp(String updatedTimestamp) {
+        this.updatedTimestamp = updatedTimestamp;
     }
 }

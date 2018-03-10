@@ -1,36 +1,52 @@
 <resources>
     <string name="app_name" translatable="false">Improve</string>
+
+    <!-- Contact strings -->
     <string name="hint_name">Name</string>
     <string name="hint_company">Company</string>
-    <string name="hint_email">E-mail</string>
+    <string name="hint_email">Add a e-mail</string>
+    <string name="hint_phone">Add a phone number</string>
+    <string name="hint_comment">Add a comment</string>
     <string name="err_msg_name">Please enter a name</string>
+    <string name="err_msg_company">Please enter a company</string>
     <string name="err_msg_email">Please enter a valid e-mail</string>
-    <string name="title_add_contact">Add Contact</string>
+    <string name="title_add_contact">Add contact</string>
     <string name="lable_add_contact">Add a contact</string>
+    <string name="title_edit_contact">Edit contact</string>
+    <string name="label_contact_details">Contact details</string>
+    <string name="contact_details_action_call">Call now</string>
+    <string name="contact_details_action_email">Send e-mail</string>
+    <string name="contact_details_name_text">Name</string>
+
+    <!-- OnMyMind strings -->
     <string name="hint_title">Title</string>
     <string name="hint_info">Information</string>
+    <string name="err_msg_title">Please enter a title</string>
+    <string name="err_msg_info">Please enter some information</string>
     <string name="lable_add_onmymind">Add a OnMyMind</string>
-    <string name="title_edit_contact">Edit contact</string>
     <string name="omm_footer_edit_label">Edit</string>
     <string name="omm_footer_delete_label">Delete</string>
     <string name="title_edit_onmymind">Edit OnMyMind</string>
     <string name="empty_omms_list_text">What\'s on your mind?</string>
-    <string name="hint_phone">Phone number</string>
+    <string name="omm_backround_color">OnMyMind Background Color</string>
+    <string name="label_omm_details">OnMyMind details</string>
+    <string name="footer_omm_updated_label">Updated:</string>
+    <string name="footer_omm_created_label">Created:</string>
+
+    <!-- Search contact strings -->
     <string name="search_title">Search contact</string>
-    <string name="search_hint">Enter name or email</string>
-    <string name="omm_footer_done_label">Done</string>
+    <string name="search_hint">Enter a name or email</string>
+
+    <!-- Navigation strings -->
     <string name="navigation_drawer_open">open drawer</string>
     <string name="navigation_drawer_close">close drawer</string>
-    <string name="google_title_text">Google Sign In</string>
     <string name="sign_out">Sign Out</string>
-    <string name="err_msg_title">Please enter a title</string>
-    <string name="err_msg_info">Please enter some information</string>
-    <string name="err_msg_company">Please enter a company</string>
     <string name="empty_contact_list_text">No contacts added</string>
-    <string name="menu_contacts">Contacts</string>
-    <string name="menu_onmyminds">OnMyMinds</string>
-    <string name="omm_backround_color">OnMyMind Background Color</string>
-    <string name="label_contact_details">Contact details</string>
-    <string name="contact_details_action_call">Call now</string>
-    <string name="contact_details_action_email">Mail now</string>
+    <string name="nav_contacts">Contacts</string>
+    <string name="nav_onmyminds">OnMyMinds</string>
+    <string name="contact_details_empty_mobile_text">Add a phone number</string>
+    <string name="contact_details_empty_comment_text">Add a comment</string>
+    <string name="ommDone">Done</string>
+    <string name="contactDone">Done</string>
+
 </resources>

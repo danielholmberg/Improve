@@ -1,12 +1,15 @@
 package dev.danielholmberg.improve.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -68,7 +71,43 @@ public class ContactsRecyclerViewAdapter extends
 
         // Fill the list-item with all the necessary content.
         holder.name.setText(contact.getName());
-        holder.email.setText(contact.getEmail());
+        holder.company.setText(contact.getCompany());
+
+        if(contact.getEmail() != null) {
+            if (contact.getEmail().isEmpty()) {
+                holder.mailBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_email_grey));
+                holder.mailBtn.setEnabled(false);
+            }
+        } else {
+            holder.mailBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_email_grey));
+            holder.mailBtn.setEnabled(false);
+        }
+        if(contact.getMobile() != null) {
+            if (contact.getMobile().isEmpty()) {
+                holder.callBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_mobile_grey));
+                holder.callBtn.setEnabled(false);
+            }
+        } else {
+            holder.callBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_mobile_grey));
+            holder.callBtn.setEnabled(false);
+        }
+
+        holder.callBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent callIntent = new Intent(Intent.ACTION_DIAL);
+                callIntent.setData(Uri.parse("tel:" + contact.getMobile()));
+                context.startActivity(callIntent);
+            }
+        });
+        holder.mailBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent mailIntent = new Intent(Intent.ACTION_SENDTO);
+                mailIntent.setData(Uri.parse("mailto:" + contact.getEmail()));
+                context.startActivity(mailIntent);
+            }
+        });
 
         // Handle what happens when the user clicks on the contact card.
         setUpOnClickListener(holder.cardBodyView, contact, itemPos);
@@ -85,11 +124,7 @@ public class ContactsRecyclerViewAdapter extends
 
     private Bundle createBundle(Contact contact, int itemPos) {
         Bundle bundle = new Bundle();
-        bundle.putString("cid", contact.getCID());
-        bundle.putString("name", contact.getName());
-        bundle.putString("company", contact.getCompany());
-        bundle.putString("email", contact.getEmail());
-        bundle.putString("mobile", contact.getMobile());
+        bundle.putSerializable("contact", contact);
         bundle.putInt("position", itemPos);
         return bundle;
     }
@@ -123,7 +158,9 @@ public class ContactsRecyclerViewAdapter extends
 
         public View cardBodyView;
         public TextView name;
-        public TextView email;
+        public TextView company;
+        public Button callBtn;
+        public Button mailBtn;
 
         public ViewHolder(View view) {
             super(view);
@@ -131,7 +168,9 @@ public class ContactsRecyclerViewAdapter extends
             cardBodyView = view;
 
             name = (TextView) view.findViewById(R.id.name_tv);
-            email = (TextView) view.findViewById(R.id.email_tv);
+            company = (TextView) view.findViewById(R.id.company_tv);
+            callBtn = (Button) view.findViewById(R.id.call_contact_btn);
+            mailBtn = (Button) view.findViewById(R.id.mail_contact_btn);
         }
     }
 }

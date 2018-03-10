@@ -7,11 +7,11 @@
             android:id="@+id/nav_onmyminds"
             android:icon="@drawable/ic_menu_omms_white"
             android:checked="true"
-            android:title="@string/menu_onmyminds" />
+            android:title="@string/nav_onmyminds" />
         <item
             android:id="@+id/nav_contacts"
             android:icon="@drawable/ic_menu_contacts_white"
-            android:title="@string/menu_contacts" />
+            android:title="@string/nav_contacts" />
     </group>
 
     <group

@@ -12,17 +12,19 @@ public class Contact implements Serializable{
     private String company;
     private String email;
     private String mobile;
+    private String comment;
 
     public Contact() {
 
-    };
+    }
 
-    public Contact(String cid, String name, String company, String email, String mobile) {
+    public Contact(String cid, String name, String company, String email, String mobile, String comment) {
         this.cid = cid;
         this.name = name;
         this.company = company;
         this.email = email;
         this.mobile = mobile;
+        this.comment = comment;
     }
 
     public String getCID() {
@@ -45,6 +47,10 @@ public class Contact implements Serializable{
         return this.mobile;
     }
 
+    public String getComment() {
+        return this.comment;
+    }
+
     public void setCID(String cid) {
         this.cid = cid;
     }
@@ -62,4 +68,8 @@ public class Contact implements Serializable{
     }
 
     public void setMobile(String mobile) { this.mobile = mobile; }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 }

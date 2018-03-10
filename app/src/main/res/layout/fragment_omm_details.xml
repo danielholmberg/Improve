@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.widget.LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/omm_details_dialog_fragment_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_omm_details"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:elevation="@dimen/card_toolbar_elevation"
+        app:layout_scrollFlags="scroll|enterAlways"
+        app:popupTheme="@style/AppTheme.Base">
+
+        <!-- Toolbar content -->
+        <Button
+            android:id="@+id/close_details_btn"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/ic_menu_close_white"
+            android:layout_gravity="start|center_vertical"
+            android:layout_marginEnd="16dp"
+            style="?android:attr/borderlessButtonStyle"/>
+
+        <TextView
+            android:id="@+id/toolbar_omm_details_title_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_omm_details"
+            style="@style/AppTheme.Base.ActivityTitle"
+            android:layout_gravity="center_vertical"/>
+
+        <Button
+            android:id="@+id/delete_omm_btn"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/ic_menu_delete_white"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="16dp"
+            style="?android:attr/borderlessButtonStyle"/>
+
+        <Button
+            android:id="@+id/update_omm_btn"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/ic_mode_edit_white"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="16dp"
+            style="?android:attr/borderlessButtonStyle"/>
+
+    </android.support.v7.widget.Toolbar>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/omm_details_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/cardInfoBackground"
+        android:padding="@dimen/omm_details_padding">
+
+        <TextView
+            android:id="@+id/omm_details_title_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:paddingBottom="@dimen/omm_details_padding"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ScrollView
+            android:id="@+id/omm_details_info_scroll_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/omm_details_title_tv">
+            <TextView
+                android:id="@+id/omm_details_info_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/omm_details_info_text_size" />
+        </ScrollView>
+
+    </android.support.constraint.ConstraintLayout>
+
+    <include
+        android:id="@+id/footer_omm_details"
+        layout="@layout/omm_item_footer"/>
+
+</android.widget.LinearLayout>
