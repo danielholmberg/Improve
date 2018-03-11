@@ -63,7 +63,7 @@ public class AddContactActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        View layout = (View) findViewById(R.id.activity_add_contact_layout);
+        View layout = (View) findViewById(R.id.add_contact_layout);
 
         inputName = (TextInputEditText) findViewById(R.id.input_name);
         inputCompany = (TextInputEditText) findViewById(R.id.input_company);

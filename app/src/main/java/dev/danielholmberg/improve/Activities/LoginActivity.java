@@ -90,6 +90,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e);
                 Toast.makeText(getApplicationContext(), "Google sign in failed", Toast.LENGTH_SHORT).show();
+                progressBar.setVisibility(View.GONE);
                 signInButton.setVisibility(View.VISIBLE);
             }
         }

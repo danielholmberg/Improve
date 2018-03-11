@@ -45,4 +45,6 @@
     <dimen name="color_button_margin">8dp</dimen>
     <dimen name="card_elevation">4dp</dimen>
     <dimen name="omm_item_marker_width">16dp</dimen>
+    <dimen name="omm_form_padding">16dp</dimen>
+    <dimen name="contact_form_padding">16dp</dimen>
 </resources>

@@ -5,7 +5,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.NavUtils;
@@ -57,7 +56,7 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
 
     private FirebaseFirestore firestoreDB;
     private Toolbar toolbar;
-    private ConstraintLayout contentLayout;
+    private View contentLayout;
 
     private Bundle ommBundle;
     private String userId;
@@ -79,7 +78,7 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        contentLayout = (ConstraintLayout) findViewById(R.id.add_omm_content);
+        contentLayout = (View) findViewById(R.id.add_omm_layout);
 
         inputLayoutTitle = (TextInputLayout) findViewById(R.id.input_layout_title);
         inputLayoutInfo = (TextInputLayout) findViewById(R.id.input_layout_info);
