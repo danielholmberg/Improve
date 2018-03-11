@@ -9,6 +9,7 @@
     android:layout_marginStart="@dimen/contact_item_start_margin"
     android:layout_marginEnd="@dimen/contact_item_end_margin"
     android:layout_marginBottom="@dimen/contact_item_bottom_margin"
+    android:elevation="@dimen/card_elevation"
     android:background="@color/contactCardBackgroundColor">
     <android.widget.RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"

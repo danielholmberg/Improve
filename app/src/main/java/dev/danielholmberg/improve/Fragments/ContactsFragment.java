@@ -44,7 +44,6 @@ import dev.danielholmberg.improve.R;
 
 public class ContactsFragment extends Fragment implements SearchView.OnQueryTextListener{
     private static final String TAG = "ContactsFragment";
-    private static final int FORM_REQUEST_CODE = 9995;
 
     private FirebaseFirestore firestoreDB;
     private String userId;
@@ -141,7 +140,7 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
     private void initAdapter() {
         recyclerViewAdapter = new
                 ContactsRecyclerViewAdapter(contactList,
-                getActivity(), firestoreDB);
+                getActivity());
         contactsRecyclerView.setAdapter(recyclerViewAdapter);
 
         try {

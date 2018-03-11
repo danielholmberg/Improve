@@ -79,7 +79,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        progressBar.setVisibility(View.GONE);
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             try {
@@ -179,6 +178,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
      * Called when the user is correctly authenticated with Google and Firebase.
      */
     private void goToMainActivity() {
+        progressBar.setVisibility(View.GONE);
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(i);
         finish();

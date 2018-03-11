@@ -22,51 +22,52 @@ public class OnMyMind implements Serializable{
         this.info = info;
     }
 
-    public String getId() {
-        return this.id;
-    }
-
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
     }
 
     public void setTitle(String title) {
         this.title = title;
     }
 
-    public String getInfo() {
-        return info;
-    }
-
     public void setInfo(String info) {
         this.info = info;
-    }
-
-    public String getColor() {
-        return this.color;
     }
 
     public void setColor(String color) {
         this.color = color;
     }
 
-    public String getCreatedTimestamp() {
-        return createdTimestamp;
-    }
-
     public void setCreatedTimestamp(String timestamp) {
         this.createdTimestamp = timestamp;
+    }
+
+    public void setUpdatedTimestamp(String updatedTimestamp) {
+        this.updatedTimestamp = updatedTimestamp;
+    }
+
+    public String getId() {
+        return this.id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getInfo() {
+        return info;
+    }
+
+    public String getColor() {
+        return this.color;
+    }
+
+    public String getCreatedTimestamp() {
+        return createdTimestamp;
     }
 
     public String getUpdatedTimestamp() {
         return updatedTimestamp;
     }
 
-    public void setUpdatedTimestamp(String updatedTimestamp) {
-        this.updatedTimestamp = updatedTimestamp;
-    }
 }

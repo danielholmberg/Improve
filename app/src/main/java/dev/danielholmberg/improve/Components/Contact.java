@@ -10,21 +10,12 @@ public class Contact implements Serializable{
     private String cid;
     private String name;
     private String company;
-    private String email;
-    private String mobile;
-    private String comment;
+    private String email = "";
+    private String mobile = "";
+    private String comment = "";
 
     public Contact() {
 
-    }
-
-    public Contact(String cid, String name, String company, String email, String mobile, String comment) {
-        this.cid = cid;
-        this.name = name;
-        this.company = company;
-        this.email = email;
-        this.mobile = mobile;
-        this.comment = comment;
     }
 
     public String getCID() {
@@ -64,12 +55,20 @@ public class Contact implements Serializable{
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        if(email != null) {
+            this.email = email;
+        }
     }
 
-    public void setMobile(String mobile) { this.mobile = mobile; }
+    public void setMobile(String mobile) {
+        if(mobile != null) {
+            this.mobile = mobile;
+        }
+    }
 
     public void setComment(String comment) {
-        this.comment = comment;
+        if(comment != null) {
+            this.comment = comment;
+        }
     }
 }

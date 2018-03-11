@@ -157,11 +157,11 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
 
     private void chooseBackgroundColor() {
         LinearLayout colorPickerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.color_picker, null, false);
-        colorPickerLayout.findViewById(R.id.buttonColorGreen).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorOrange).setOnClickListener(this);
         colorPickerLayout.findViewById(R.id.buttonColorYellow).setOnClickListener(this);
         colorPickerLayout.findViewById(R.id.buttonColorBlue).setOnClickListener(this);
         colorPickerLayout.findViewById(R.id.buttonColorPink).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorBrown).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorGrey).setOnClickListener(this);
 
         AlertDialog.Builder alertDialogBuilder =
                 new AlertDialog.Builder(this).setTitle("Choose a color")
@@ -323,8 +323,8 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.buttonColorGreen:
-                Log.d(TAG, "Green was chosen");
+            case R.id.buttonColorOrange:
+                Log.d(TAG, "Orange was chosen");
                 toolbar.setBackgroundColor(getResources().getColor(R.color.colorAccent));
                 break;
             case R.id.buttonColorYellow:
@@ -339,9 +339,9 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
                 Log.d(TAG, "Pink was chosen");
                 toolbar.setBackgroundColor(getResources().getColor(R.color.ommPink));
                 break;
-            case R.id.buttonColorBrown:
+            case R.id.buttonColorGrey:
                 Log.d(TAG, "Brown was chosen");
-                toolbar.setBackgroundColor(getResources().getColor(R.color.ommBrown));
+                toolbar.setBackgroundColor(getResources().getColor(R.color.ommGrey));
                 break;
             default:
                 toolbar.setBackgroundColor(getResources().getColor(R.color.colorAccent));

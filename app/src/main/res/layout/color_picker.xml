@@ -7,7 +7,7 @@
     android:weightSum="5">
 
     <Button
-        android:id="@+id/buttonColorGreen"
+        android:id="@+id/buttonColorOrange"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:elevation="@dimen/cardview_default_elevation"
@@ -39,13 +39,13 @@
         android:layout_margin="@dimen/color_button_margin"
         android:background="@color/ommPink"/>
     <Button
-        android:id="@+id/buttonColorBrown"
+        android:id="@+id/buttonColorGrey"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:elevation="@dimen/cardview_default_elevation"
         android:layout_weight="1"
         android:layout_margin="@dimen/color_button_margin"
-        android:background="@color/ommBrown"/>
+        android:background="@color/ommGrey"/>
 
 
 </LinearLayout>

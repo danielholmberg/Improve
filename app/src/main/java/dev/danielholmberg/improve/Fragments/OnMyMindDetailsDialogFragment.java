@@ -64,7 +64,7 @@ public class OnMyMindDetailsDialogFragment extends DialogFragment {
         view = inflater.inflate(R.layout.fragment_omm_details, container, false);
 
         final Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar_omm_details);
-        View layout = (View) view.findViewById(R.id.omm_details_container);
+        View layout = (View) view.findViewById(R.id.omm_details_body_container);
 
         Button closeDetailsBtn = (Button) view.findViewById(R.id.close_details_btn);
         Button updateOnMyMindBtn = (Button) view.findViewById(R.id.update_omm_btn);

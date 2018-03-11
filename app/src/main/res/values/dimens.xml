@@ -13,8 +13,8 @@
     <dimen name="nav_header_iv_top_spacing">32dp</dimen>
 
     <!-- General card dimens -->
-    <dimen name="card_footer_elevation">4dp</dimen>
-    <dimen name="card_toolbar_elevation">4dp</dimen>
+    <dimen name="card_footer_elevation">2dp</dimen>
+    <dimen name="card_toolbar_elevation">2dp</dimen>
     <dimen name="card_item_margin">8dp</dimen>
 
     <!-- Contact dimens -->
@@ -30,8 +30,8 @@
     <dimen name="omm_details_info_text_size">16sp</dimen>
     <dimen name="omm_details_padding">16dp</dimen>
     <dimen name="omm_form_icons_padding">16dp</dimen>
-    <dimen name="footer_omm_padding">8dp</dimen>
-    <dimen name="toolbar_omm_title_padding">8dp</dimen>
+    <dimen name="footer_omm_padding">16dp</dimen>
+    <dimen name="omm_title_padding">8dp</dimen>
     <dimen name="footer_omm_details_timestamp_text_size">10sp</dimen>
     <dimen name="contact_item_start_margin">8dp</dimen>
     <dimen name="contact_list_top_margin">8dp</dimen>
@@ -43,4 +43,6 @@
     <dimen name="contact_card_bottom_margin">8dp</dimen>
     <dimen name="contact_details_name_text_size">22sp</dimen>
     <dimen name="color_button_margin">8dp</dimen>
+    <dimen name="card_elevation">4dp</dimen>
+    <dimen name="omm_item_marker_width">16dp</dimen>
 </resources>

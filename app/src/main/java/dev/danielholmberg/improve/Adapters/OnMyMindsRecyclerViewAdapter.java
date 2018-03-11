@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -65,7 +66,7 @@ public class OnMyMindsRecyclerViewAdapter extends
         final OnMyMind omm = ommsList.get(holder.getAdapterPosition());
 
         // Fill the list-item with all the necessary content.
-        holder.cardToolbarView.setBackgroundColor(Color.parseColor(omm.getColor()));
+        holder.cardMarker.setBackgroundColor(Color.parseColor(omm.getColor()));
         holder.title.setText(omm.getTitle());
         holder.info.setText(omm.getInfo());
         holder.createdTimestamp.setText(omm.getCreatedTimestamp());
@@ -78,7 +79,7 @@ public class OnMyMindsRecyclerViewAdapter extends
         }
 
         // Handle what happens when the user clicks on the OnMyMind toolbar.
-        setUpOnClickListener(holder.cardToolbarView, omm, holder.getAdapterPosition());
+        setUpOnClickListener(holder.container, omm, holder.getAdapterPosition());
     }
 
     private void setUpOnClickListener(View view, final OnMyMind omm, final int itemPos) {
@@ -107,7 +108,8 @@ public class OnMyMindsRecyclerViewAdapter extends
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private View cardToolbarView;
+        private View container;
+        private ImageView cardMarker;
         private TextView title;
         private TextView info;
         private TextView createdTimestamp;
@@ -117,7 +119,8 @@ public class OnMyMindsRecyclerViewAdapter extends
         public ViewHolder(View view) {
             super(view);
 
-            cardToolbarView = view.findViewById(R.id.toolbar_omm);
+            container = (View) view.findViewById(R.id.omm_item_container);
+            cardMarker = (ImageView) view.findViewById(R.id.omm_item_marker_iv);
 
             title = (TextView) view.findViewById(R.id.title_tv);
             info = (TextView) view.findViewById(R.id.info_tv);

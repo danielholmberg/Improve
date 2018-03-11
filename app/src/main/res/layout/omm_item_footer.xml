@@ -2,9 +2,7 @@
 <RelativeLayout android:id="@+id/footer_omm"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/cardFooterColor"
     android:gravity="center_vertical"
-    android:elevation="@dimen/card_footer_elevation"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <TextView
         android:id="@+id/footer_omm_created_label_tv"
@@ -13,9 +11,6 @@
         android:text="@string/footer_omm_created_label"
         android:textStyle="italic"
         android:textSize="@dimen/footer_omm_details_timestamp_text_size"
-        android:paddingTop="@dimen/footer_omm_padding"
-        android:paddingStart="@dimen/footer_omm_padding"
-        android:paddingEnd="@dimen/footer_omm_padding"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"/>
     <TextView
@@ -24,9 +19,6 @@
         android:layout_height="wrap_content"
         android:textStyle="italic"
         android:textSize="@dimen/footer_omm_details_timestamp_text_size"
-        android:paddingBottom="@dimen/footer_omm_padding"
-        android:paddingEnd="@dimen/footer_omm_padding"
-        android:paddingStart="@dimen/footer_omm_padding"
         android:layout_alignParentEnd="true"
         android:layout_below="@id/footer_omm_created_label_tv"/>
     <TextView
@@ -36,9 +28,6 @@
         android:text="@string/footer_omm_updated_label"
         android:textStyle="italic"
         android:textSize="@dimen/footer_omm_details_timestamp_text_size"
-        android:paddingTop="@dimen/footer_omm_padding"
-        android:paddingStart="@dimen/footer_omm_padding"
-        android:paddingEnd="@dimen/footer_omm_padding"
         android:visibility="gone"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"/>
@@ -48,9 +37,6 @@
         android:layout_height="wrap_content"
         android:textStyle="italic"
         android:textSize="@dimen/footer_omm_details_timestamp_text_size"
-        android:paddingBottom="@dimen/footer_omm_padding"
-        android:paddingEnd="@dimen/footer_omm_padding"
-        android:paddingStart="@dimen/footer_omm_padding"
         android:visibility="gone"
         android:layout_alignParentStart="true"
         android:layout_below="@id/footer_omm_updated_label_tv"/>

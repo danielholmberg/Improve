@@ -23,7 +23,7 @@
             android:visibility="gone"
             android:paddingTop="64dp"
             android:textSize="28sp"
-            android:textColor="#50000000"
+            android:textColor="@color/emptyListTextColor"
             android:gravity="center_horizontal"/>
 
         <android.support.v7.widget.RecyclerView

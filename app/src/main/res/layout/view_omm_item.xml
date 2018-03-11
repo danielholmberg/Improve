@@ -7,63 +7,62 @@
     android:layout_height="wrap_content"
     android:focusable="true"
     android:clickable="true"
-    android:layout_margin="@dimen/card_item_margin"
-    app:cardBackgroundColor="@color/cardBackground">
+    android:elevation="@dimen/card_elevation"
+    android:layout_margin="@dimen/card_item_margin">
     <LinearLayout
-        android:id="@+id/card_omm_container"
+        android:id="@+id/omm_item_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar_omm"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/colorPrimary"
-            android:elevation="@dimen/card_toolbar_elevation"
-            app:layout_scrollFlags="scroll|enterAlways"
-            app:popupTheme="@style/AppTheme.Base">
+        <ImageView
+            android:id="@+id/omm_item_marker_iv"
+            android:layout_width="@dimen/omm_item_marker_width"
+            android:layout_height="match_parent"
+            android:background="@color/ommOrange"/>
 
-            <!-- Toolbar content -->
-            <TextView
-                android:id="@+id/title_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:padding="@dimen/toolbar_omm_title_padding"
-                android:maxLines="@integer/omm_item_title_max_lines"
-                android:ellipsize="end"
-                android:textColor="@color/cardTitleColor"
-                android:textStyle="bold"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </android.support.v7.widget.Toolbar>
-
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/omm_body_content"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/cardInfoBackground"
-            android:padding="@dimen/omm_item_body_padding">
-
-            <TextView
-                android:id="@+id/info_tv"
+            android:orientation="vertical"
+            android:padding="@dimen/omm_item_body_padding"
+            android:background="@color/cardInfoBackground">
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/omm_body_content"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="@integer/omm_item_info_max_lines"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:layout_height="wrap_content">
 
-        </android.support.constraint.ConstraintLayout>
+                <TextView
+                    android:id="@+id/title_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:paddingBottom="@dimen/omm_title_padding"
+                    android:maxLines="@integer/omm_item_title_max_lines"
+                    android:ellipsize="end"
+                    android:textStyle="bold"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-        <include
-            android:id="@+id/footer_omm"
-            layout="@layout/omm_item_footer"/>
+                <TextView
+                    android:id="@+id/info_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="@integer/omm_item_info_max_lines"
+                    android:paddingBottom="@dimen/omm_item_body_padding"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/title_tv" />
+
+            </android.support.constraint.ConstraintLayout>
+
+            <include
+                android:id="@+id/footer_omm"
+                layout="@layout/omm_item_footer"/>
+        </LinearLayout>
 
     </LinearLayout>
 </android.support.v7.widget.CardView>

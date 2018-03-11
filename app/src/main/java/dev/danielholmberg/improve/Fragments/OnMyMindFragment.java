@@ -39,7 +39,6 @@ import dev.danielholmberg.improve.R;
 
 public class OnMyMindFragment extends Fragment {
     private static final String TAG = "OnMyMindFragment";
-    private static final int FORM_REQUEST_CODE = 9995;
 
     private FirebaseFirestore firestoreDB;
     private String userId;

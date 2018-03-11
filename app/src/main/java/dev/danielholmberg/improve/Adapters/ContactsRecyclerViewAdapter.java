@@ -12,8 +12,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,13 +30,10 @@ public class ContactsRecyclerViewAdapter extends
     public List<Contact> contactsList;
     public List<Contact> contactsListCopy;
     private Context context;
-    private FirebaseFirestore firestoreDB;
-    private View parentLayout;
 
-    public ContactsRecyclerViewAdapter(List<Contact> list, Context ctx, FirebaseFirestore firestore) {
+    public ContactsRecyclerViewAdapter(List<Contact> list, Context ctx) {
         this.contactsList = list;
         this.context = ctx;
-        this.firestoreDB = firestore;
     }
 
     public void setAdapterList(List<Contact> list) {
@@ -53,10 +48,8 @@ public class ContactsRecyclerViewAdapter extends
     }
 
     @Override
-    public ContactsRecyclerViewAdapter.ViewHolder
-    onCreateViewHolder(ViewGroup parent, int viewType) {
-        parentLayout = parent;
-        View view = LayoutInflater.from(parent.getContext())
+    public ContactsRecyclerViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context)
                 .inflate(R.layout.view_contact_item, parent, false);
 
         ContactsRecyclerViewAdapter.ViewHolder viewHolder =
@@ -66,32 +59,11 @@ public class ContactsRecyclerViewAdapter extends
 
     @Override
     public void onBindViewHolder(ContactsRecyclerViewAdapter.ViewHolder holder, int position) {
-        final int itemPos = position;
-        final Contact contact = contactsList.get(position);
+        final Contact contact = (Contact) contactsList.get(position);
 
         // Fill the list-item with all the necessary content.
         holder.name.setText(contact.getName());
         holder.company.setText(contact.getCompany());
-
-        if(contact.getEmail() != null) {
-            if (contact.getEmail().isEmpty()) {
-                holder.mailBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_email_grey));
-                holder.mailBtn.setEnabled(false);
-            }
-        } else {
-            holder.mailBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_email_grey));
-            holder.mailBtn.setEnabled(false);
-        }
-        if(contact.getMobile() != null) {
-            if (contact.getMobile().isEmpty()) {
-                holder.callBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_mobile_grey));
-                holder.callBtn.setEnabled(false);
-            }
-        } else {
-            holder.callBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_mobile_grey));
-            holder.callBtn.setEnabled(false);
-        }
-
         holder.callBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -109,8 +81,18 @@ public class ContactsRecyclerViewAdapter extends
             }
         });
 
+        if (contact.getEmail().isEmpty()) {
+            holder.mailBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_email_grey));
+            holder.mailBtn.setEnabled(false);
+        }
+
+        if (contact.getMobile().isEmpty()) {
+            holder.callBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_mobile_grey));
+            holder.callBtn.setEnabled(false);
+        }
+
         // Handle what happens when the user clicks on the contact card.
-        setUpOnClickListener(holder.cardBodyView, contact, itemPos);
+        setUpOnClickListener(holder.cardBodyView, contact, position);
     }
 
     private void setUpOnClickListener(View view, final Contact contact, final int itemPos) {

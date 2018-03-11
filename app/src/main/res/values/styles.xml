@@ -3,7 +3,7 @@
     <!-- Default application theme. -->
     <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- color for the app bar and other primary UI elements -->
-        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/colorPrimaryDark</item>
         <!-- a darker variant of the primary color, used for
            the status bar (on Android 5.0+) and contextual app bars -->
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -12,7 +12,7 @@
         <!-- color for the back-button and other controls -->
         <item name="colorControlNormal">@color/controlColor</item>
         <!-- color for the background of the activity -->
-        <item name="android:windowBackground">@color/windowBackground</item>
+        <item name="android:windowBackground">@drawable/gradient_background</item>
         <!-- enable window content transitions -->
         <!-- no used, but can be implemented <item name="android:windowActivityTransitions">true</item> -->
     </style>

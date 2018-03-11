@@ -12,7 +12,7 @@
         android:id="@+id/toolbar_omm_details"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
+        android:background="@color/ommOrange"
         android:elevation="@dimen/card_toolbar_elevation"
         app:layout_scrollFlags="scroll|enterAlways"
         app:popupTheme="@style/AppTheme.Base">
@@ -26,14 +26,6 @@
             android:layout_gravity="start|center_vertical"
             android:layout_marginEnd="16dp"
             style="?android:attr/borderlessButtonStyle"/>
-
-        <TextView
-            android:id="@+id/toolbar_omm_details_title_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_omm_details"
-            style="@style/AppTheme.Base.ActivityTitle"
-            android:layout_gravity="center_vertical"/>
 
         <Button
             android:id="@+id/delete_omm_btn"
@@ -55,41 +47,48 @@
 
     </android.support.v7.widget.Toolbar>
 
-    <android.support.constraint.ConstraintLayout
+    <LinearLayout
         android:id="@+id/omm_details_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/cardInfoBackground"
-        android:padding="@dimen/omm_details_padding">
-
-        <TextView
-            android:id="@+id/omm_details_title_tv"
+        android:orientation="vertical"
+        android:padding="@dimen/omm_details_padding"
+        android:background="@color/cardInfoBackground">
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/omm_details_body_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:paddingBottom="@dimen/omm_details_padding"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_height="wrap_content">
 
-        <ScrollView
-            android:id="@+id/omm_details_info_scroll_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/omm_details_title_tv">
             <TextView
-                android:id="@+id/omm_details_info_tv"
+                android:id="@+id/omm_details_title_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/omm_details_info_text_size" />
-        </ScrollView>
+                android:textStyle="bold"
+                android:paddingBottom="@dimen/omm_title_padding"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    </android.support.constraint.ConstraintLayout>
+            <ScrollView
+                android:id="@+id/omm_details_info_scroll_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/omm_details_padding"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/omm_details_title_tv">
+                <TextView
+                    android:id="@+id/omm_details_info_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/omm_details_info_text_size" />
+            </ScrollView>
 
-    <include
-        android:id="@+id/footer_omm_details"
-        layout="@layout/omm_item_footer"/>
+        </android.support.constraint.ConstraintLayout>
+
+        <include
+            android:id="@+id/footer_omm_details"
+            layout="@layout/omm_item_footer"/>
+    </LinearLayout>
 
 </android.widget.LinearLayout>
