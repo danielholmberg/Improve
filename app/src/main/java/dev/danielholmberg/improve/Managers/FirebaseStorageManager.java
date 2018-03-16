@@ -5,13 +5,9 @@ import android.util.Log;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
-import dev.danielholmberg.improve.Callbacks.FirebaseRequestCallback;
 import dev.danielholmberg.improve.Components.Contact;
 import dev.danielholmberg.improve.Components.OnMyMind;
 import dev.danielholmberg.improve.Improve;
@@ -43,45 +39,6 @@ public class FirebaseStorageManager {
                 .getReference(USERS_REF).child(userId).child(CONTACTS_REF);
         contactsRef.keepSynced(true);
         return contactsRef;
-    }
-
-    public void getAllOnMyMinds(final FirebaseRequestCallback callback) {
-        Log.d(TAG, "--- Loading OnMyMinds from Firebase storage...");
-
-        getOnMyMindsRef().orderByChild("updatedTimestamp")
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        callback.onComplete(dataSnapshot);
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        // Getting OnMyMinds failed, log a message
-                        Log.e(TAG, "!!! Failed to load OnMyMinds from Firebase storage: "
-                                + databaseError.toException());
-                        callback.onFailure(databaseError.toException());
-                    }
-                });
-    }
-
-    public void getAllContacts(final FirebaseRequestCallback callback) {
-        Log.d(TAG, "--- Loading Contacts from Firebase storage...");
-
-        getContactsRef().orderByChild("company")
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        callback.onComplete(dataSnapshot);
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        // Getting Contacts failed, log a message
-                        Log.e(TAG, "!!! Failed to load Contacts from Firebase storage: "
-                                + databaseError.toException());
-                    }
-                });
     }
 
     public void writeOnMyMindToFirebase(OnMyMind onMyMind) {

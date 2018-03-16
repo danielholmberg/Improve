@@ -5,11 +5,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,7 +15,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -50,9 +47,9 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
     private List<Contact> cachedContacts;
     private TextView emptyListText;
     private FirebaseRecyclerAdapter recyclerAdapter;
-    private ProgressBar progressBar;
-    private SwipeRefreshLayout swipeRefreshLayout;
     private FloatingActionButton fab;
+
+    private Query query;
 
     public ContactsFragment() {
         // Required empty public constructor
@@ -77,8 +74,6 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
         // Initialize View components to be used.
         contactsRecyclerView = (RecyclerView) view.findViewById(R.id.contacts_list);
         emptyListText = (TextView) view.findViewById(R.id.empty_contact_list_tv);
-        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
-        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh_contacts);
         fab = (FloatingActionButton) view.findViewById(R.id.add_contact);
 
         // Initialize the LinearLayoutManager
@@ -89,16 +84,6 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
         // Initialize the adapter for RecycleView.
         initAdapter();
         contactsRecyclerView.setAdapter(recyclerAdapter);
-
-        // Add a RefreshListener to retrieve the newest instance of the Firestore Database.
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                Log.d(TAG, "--- Refreshing OnMyMinds...");
-                recyclerAdapter.notifyDataSetChanged();
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        });
 
         // Add a OnScrollListener to change when to show the Floating Action Button for adding a new OnMyMind.
         contactsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener(){
@@ -130,7 +115,7 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
     }
 
     private void initAdapter() {
-        Query query = storageManager.getContactsRef();
+        query = storageManager.getContactsRef();
 
         FirebaseRecyclerOptions<Contact> options =
                 new FirebaseRecyclerOptions.Builder<Contact>()
@@ -181,14 +166,14 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
     @Override
     public boolean onQueryTextSubmit(String query) {
         // Filter the contact list.
-        //filter(query);
+        filter(query);
         return false;
     }
 
     @Override
     public boolean onQueryTextChange(String newText) {
         // Filter the contact list.
-        //filter(newText);
+        filter(newText);
         return false;
     }
 
@@ -200,21 +185,9 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
         startActivity(addContactIntent);
     }
 
-    /*
+
     public void filter(String text) {
-        if(contactsList != null && contactsListCopy != null) {
-            contactsList.clear();
-            if (text.isEmpty()) {
-                contactsList.addAll(contactsListCopy);
-            } else {
-                text = text.toLowerCase();
-                for (Contact contact : contactsListCopy) {
-                    if (contact.getName().toLowerCase().contains(text) || contact.getCompany().toLowerCase().contains(text)) {
-                        contactsList.add(contact);
-                    }
-                }
-            }
-            recyclerAdapter.notifyDataSetChanged();
-        }
-    }*/
+        //TODO - Filter properly.
+        //this.query = query.startAt(text);
+    }
 }

@@ -5,14 +5,11 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -27,8 +24,8 @@ import dev.danielholmberg.improve.Activities.AddOnMyMindActivity;
 import dev.danielholmberg.improve.Components.OnMyMind;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
-import dev.danielholmberg.improve.ViewHolders.OnMyMindViewHolder;
 import dev.danielholmberg.improve.R;
+import dev.danielholmberg.improve.ViewHolders.OnMyMindViewHolder;
 
 /**
  * Created by DanielHolmberg on 2018-01-20.
@@ -46,8 +43,6 @@ public class OnMyMindFragment extends Fragment {
     private List<OnMyMind> onMyMindList = new ArrayList<>();
     private FirebaseRecyclerAdapter recyclerAdapter;
     private TextView emptyListText;
-    private ProgressBar progressBar;
-    private SwipeRefreshLayout swipeRefreshLayout;
     private FloatingActionButton fab;
 
     public OnMyMindFragment() {
@@ -71,8 +66,6 @@ public class OnMyMindFragment extends Fragment {
         // Initialize View components to be used.
         ommsRecyclerView = (RecyclerView) view.findViewById(R.id.omms_list);
         emptyListText = (TextView) view.findViewById(R.id.empty_omms_list_tv);
-        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
-        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh_omms);
         fab = (FloatingActionButton) view.findViewById(R.id.add_omm);
 
         // Initialize the LinearLayoutManager
@@ -82,16 +75,6 @@ public class OnMyMindFragment extends Fragment {
         // Initialize the adapter for RecyclerView.
         initAdapter();
         ommsRecyclerView.setAdapter(recyclerAdapter);
-
-        // Add a RefreshListener to retrieve the the newest instance of stored OnMyMinds.
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                Log.d(TAG, "--- Refreshing OnMyMinds...");
-                recyclerAdapter.notifyDataSetChanged();
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        });
 
         // Add a OnScrollListener to change when to show the Floating Action Button for adding
         // a new OnMyMind.

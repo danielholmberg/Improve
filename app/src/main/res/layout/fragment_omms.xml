@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.SwipeRefreshLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/swiperefresh_omms"
+    android:id="@+id/layout_fragment_omms"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:fitsSystemWindows="true">
     <android.support.constraint.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -20,7 +21,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/empty_omms_list_text"
-            android:visibility="gone"
             android:paddingTop="64dp"
             android:textSize="28sp"
             android:textColor="@color/emptyListTextColor"
@@ -30,7 +30,8 @@
             android:id="@+id/omms_list"
             android:scrollbars="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:translationZ="1dp"
             android:paddingStart="@dimen/omm_list_padding"
             android:paddingEnd="@dimen/omm_list_padding"
             android:paddingTop="@dimen/omm_list_padding"
@@ -48,27 +49,9 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_fab_add_omm_white" />
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:minHeight="50dp"
-            android:minWidth="50dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
     </android.support.constraint.ConstraintLayout>
 
     <!-- Dialog Fragment for OnMyMind details -->
     <include layout="@layout/fragment_omm_details"/>
 
-</android.support.v4.widget.SwipeRefreshLayout>
+</LinearLayout>
