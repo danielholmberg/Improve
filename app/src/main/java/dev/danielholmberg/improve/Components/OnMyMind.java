@@ -13,13 +13,25 @@ public class OnMyMind implements Serializable{
     private String color;
     private String createdTimestamp;
     private String updatedTimestamp;
+    private boolean isDone;
 
     public OnMyMind() {}
 
-    public OnMyMind(String id, String title, String info) {
+    public OnMyMind(String id, String title, String info, String color, String createdTimestamp) {
         this.id = id;
         this.title = title;
         this.info = info;
+        this.color = color;
+        this.createdTimestamp = createdTimestamp;
+    }
+
+    public OnMyMind(String id, String title, String info, String color, String createdTimestamp, String updatedTimestamp) {
+        this.id = id;
+        this.title = title;
+        this.info = info;
+        this.color = color;
+        this.createdTimestamp = createdTimestamp;
+        this.updatedTimestamp = updatedTimestamp;
     }
 
     public void setId(String id) {
@@ -46,6 +58,10 @@ public class OnMyMind implements Serializable{
         this.updatedTimestamp = updatedTimestamp;
     }
 
+    public void setIsDone(boolean isDone) {
+        this.isDone = isDone;
+    }
+
     public String getId() {
         return this.id;
     }
@@ -70,4 +86,7 @@ public class OnMyMind implements Serializable{
         return updatedTimestamp;
     }
 
-}
+    public boolean getIsDone(){
+        return isDone;
+    }
+ }

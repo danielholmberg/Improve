@@ -2,7 +2,6 @@ package dev.danielholmberg.improve.Fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -21,22 +20,19 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.Query;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import dev.danielholmberg.improve.Activities.AddContactActivity;
-import dev.danielholmberg.improve.Adapters.ContactsRecyclerViewAdapter;
 import dev.danielholmberg.improve.Components.Contact;
-import dev.danielholmberg.improve.InternalStorage;
+import dev.danielholmberg.improve.Improve;
+import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
 import dev.danielholmberg.improve.R;
+import dev.danielholmberg.improve.ViewHolders.ContactViewHolder;
 
 /**
  * Created by DanielHolmberg on 2018-01-18.
@@ -45,14 +41,15 @@ import dev.danielholmberg.improve.R;
 public class ContactsFragment extends Fragment implements SearchView.OnQueryTextListener{
     private static final String TAG = "ContactsFragment";
 
-    private FirebaseFirestore firestoreDB;
-    private String userId;
+    private Improve app;
+    private FirebaseStorageManager storageManager;
+
     private View view;
     private RecyclerView contactsRecyclerView;
     private List<Contact> contactList = new ArrayList<>();
     private List<Contact> cachedContacts;
     private TextView emptyListText;
-    public ContactsRecyclerViewAdapter recyclerViewAdapter;
+    private FirebaseRecyclerAdapter recyclerAdapter;
     private ProgressBar progressBar;
     private SwipeRefreshLayout swipeRefreshLayout;
     private FloatingActionButton fab;
@@ -64,6 +61,8 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        app = Improve.getInstance();
+        storageManager = app.getFirebaseStorageManager();
         // Enable the OptionsMenu to show the SearchView.
         setHasOptionsMenu(true);
     }
@@ -75,12 +74,6 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
         view = inflater.inflate(R.layout.fragment_contacts,
                 container, false);
 
-        // Initialize Firestore Database.
-        firestoreDB = FirebaseFirestore.getInstance();
-
-        // Get current userId.
-        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
         // Initialize View components to be used.
         contactsRecyclerView = (RecyclerView) view.findViewById(R.id.contacts_list);
         emptyListText = (TextView) view.findViewById(R.id.empty_contact_list_tv);
@@ -88,19 +81,21 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh_contacts);
         fab = (FloatingActionButton) view.findViewById(R.id.add_contact);
 
+        // Initialize the LinearLayoutManager
         LinearLayoutManager recyclerLayoutManager =
                 new LinearLayoutManager(getActivity().getApplicationContext());
         contactsRecyclerView.setLayoutManager(recyclerLayoutManager);
 
         // Initialize the adapter for RecycleView.
         initAdapter();
+        contactsRecyclerView.setAdapter(recyclerAdapter);
 
         // Add a RefreshListener to retrieve the newest instance of the Firestore Database.
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                Log.d(TAG, "Refreshing OnMyMinds");
-                getDataFromFirestore();
+                Log.d(TAG, "--- Refreshing OnMyMinds...");
+                recyclerAdapter.notifyDataSetChanged();
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
@@ -134,44 +129,40 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
         return view;
     }
 
-    /**
-     * Initializes a custom RecycleViewAdapter.
-     */
     private void initAdapter() {
-        recyclerViewAdapter = new
-                ContactsRecyclerViewAdapter(contactList,
-                getActivity());
-        contactsRecyclerView.setAdapter(recyclerViewAdapter);
+        Query query = storageManager.getContactsRef();
 
-        try {
-            // Try to read the already stored list of contacts in Internal Storage.
-            cachedContacts = (ArrayList<Contact>) InternalStorage.readObject(InternalStorage.contacts);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to read from Internal Storage: ");
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        FirebaseRecyclerOptions<Contact> options =
+                new FirebaseRecyclerOptions.Builder<Contact>()
+                        .setQuery(query, Contact.class)
+                        .build();
 
-        if(cachedContacts != null) {
-            // The Internal Storage list has been initialized in a previous session.
-            if(cachedContacts.isEmpty()) {
-                // The list of already stored list of contacts is empty.
-                // Get the list from the Firestore Database instead.
-                getDataFromFirestore();
-            } else {
-                // The list of already stored list of contacts is NOT empty.
-                // Add the stored list of contacts to the custom RecycleViewAdapter.
-                Log.d(TAG, "*** Using data from Internal Storage ***");
-                recyclerViewAdapter.setAdapterList(cachedContacts);
-                recyclerViewAdapter.notifyDataSetChanged();
-                contactsRecyclerView.setVisibility(View.VISIBLE);
+        recyclerAdapter = new FirebaseRecyclerAdapter<Contact, ContactViewHolder>(options) {
+            @Override
+            public ContactViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                View view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.item_contact, parent, false);
+
+                return new ContactViewHolder(view);
             }
-        } else {
-            // Get the list from the Firestore Database instead.
-            Log.d(TAG, "Getting contacts from Firestore Database");
-            getDataFromFirestore();
-        }
+
+            @Override
+            protected void onBindViewHolder(ContactViewHolder holder, int position, Contact model) {
+                holder.bindModelToView(model);
+            }
+        };
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        recyclerAdapter.startListening();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        recyclerAdapter.stopListening();
     }
 
     @Override
@@ -190,14 +181,14 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
     @Override
     public boolean onQueryTextSubmit(String query) {
         // Filter the contact list.
-        recyclerViewAdapter.filter(query);
+        //filter(query);
         return false;
     }
 
     @Override
     public boolean onQueryTextChange(String newText) {
         // Filter the contact list.
-        recyclerViewAdapter.filter(newText);
+        //filter(newText);
         return false;
     }
 
@@ -209,72 +200,21 @@ public class ContactsFragment extends Fragment implements SearchView.OnQueryText
         startActivity(addContactIntent);
     }
 
-    /**
-     * Retrieves Contacts stored in Firestore Database.
-     */
-    private void getDataFromFirestore() {
-        Log.d(TAG, "Getting data from Firestore...");
-        contactsRecyclerView.setVisibility(View.GONE);
-        progressBar.setVisibility(View.VISIBLE);
-        // Run the Query on a new thread for performance purposes.
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                firestoreDB.collection("users")
-                        .document(userId)
-                        .collection("contacts")
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    // Empty the list so that it can be refilled.
-                                    contactList.clear();
-
-                                    if (task.getResult().isEmpty()) {
-                                        // No companies exists.
-                                        Log.e(TAG, "No contacts exists.");
-                                        try {
-                                            // Writing a empty list to the Internal Storage.
-                                            InternalStorage.writeObject(InternalStorage.contacts, contactList);
-                                        } catch (IOException e) {
-                                            Log.e(TAG, "Failed to write an empty contact list to Internal Storage file: ");
-                                            e.printStackTrace();
-                                        }
-                                        recyclerViewAdapter.setAdapterList(contactList);
-                                        recyclerViewAdapter.notifyDataSetChanged();
-                                        emptyListText.setVisibility(View.VISIBLE);
-                                    } else {
-                                        // Get stored contacts.
-                                        for (DocumentSnapshot contact : task.getResult()) {
-                                            Log.d(TAG, "Getting data from contact: " + contact.getId());
-                                            Contact c = contact.toObject(Contact.class);
-                                            c.setCID(contact.getId());
-                                            contactList.add(c);
-                                        }
-                                        try {
-                                            // Writing all the retrieved contacts to Internal Storage for offline use.
-                                            InternalStorage.writeObject(InternalStorage.contacts, contactList);
-                                            Log.d(TAG, "Wrote contacts to Internal Storage");
-                                        } catch (IOException e) {
-                                            Log.e(TAG, "Failed to write data from Firestore to Internal Storage file: ");
-                                            e.printStackTrace();
-                                        }
-                                        recyclerViewAdapter.setAdapterList(contactList);
-                                        recyclerViewAdapter.notifyDataSetChanged();
-                                        emptyListText.setVisibility(View.GONE);
-                                    }
-                                } else {
-                                    // Error occured when retrieving contacts from Firestore Database.
-                                    Log.e(TAG, "Error getting contacts: ", task.getException());
-                                }
-                                // Done getting all the contacts stored in Firestore Database.
-                                Log.d(TAG, "*** Done getting data from Firestore ***");
-                                progressBar.setVisibility(View.GONE);
-                                contactsRecyclerView.setVisibility(View.VISIBLE);
-                            }
-                        });
+    /*
+    public void filter(String text) {
+        if(contactsList != null && contactsListCopy != null) {
+            contactsList.clear();
+            if (text.isEmpty()) {
+                contactsList.addAll(contactsListCopy);
+            } else {
+                text = text.toLowerCase();
+                for (Contact contact : contactsListCopy) {
+                    if (contact.getName().toLowerCase().contains(text) || contact.getCompany().toLowerCase().contains(text)) {
+                        contactsList.add(contact);
+                    }
+                }
             }
-        }).start();
-    }
+            recyclerAdapter.notifyDataSetChanged();
+        }
+    }*/
 }

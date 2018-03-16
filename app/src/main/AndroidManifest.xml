@@ -11,6 +11,7 @@
         android:launchMode="singleInstance"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:name=".Improve"
         android:theme="@style/AppTheme.Base"
         android:windowSoftInputMode="stateAlwaysHidden">
         <activity

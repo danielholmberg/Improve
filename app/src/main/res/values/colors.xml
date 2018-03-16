@@ -48,5 +48,7 @@
     <color name="cardFooterColor">#FFFFFFFF</color>
     <color name="contactCardBackgroundColor">#FFFFFFFF</color>
     <color name="emptyListTextColor">#80FFFFFF</color>
+    <color name="doneBackground">#66BB6A</color>
+    <color name="doneTextColor">#FFFFFFFF</color>
 
 </resources>

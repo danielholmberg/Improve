@@ -3,7 +3,6 @@ package dev.danielholmberg.improve.Activities;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -11,34 +10,25 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
 
-import java.io.IOException;
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 
 import dev.danielholmberg.improve.Components.OnMyMind;
-import dev.danielholmberg.improve.InternalStorage;
+import dev.danielholmberg.improve.Improve;
+import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
 import dev.danielholmberg.improve.R;
+import dev.danielholmberg.improve.Utilities.OnMyMindInputValidator;
 
 /**
  * Created by DanielHolmberg on 2018-01-27.
@@ -49,7 +39,9 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
     public static final int OMM_ADDED = 9998;
     public static final int OMM_UPDATED = 9999;
 
-    private List<OnMyMind> storedOnMyMinds;
+    private Improve app;
+    private FirebaseStorageManager storageManager;
+    private OnMyMindInputValidator validator;
 
     private EditText inputTitle, inputInfo;
     private TextInputLayout inputLayoutTitle, inputLayoutInfo;
@@ -58,7 +50,7 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
     private Toolbar toolbar;
     private View contentLayout;
 
-    private Bundle ommBundle;
+    private Bundle onMyMindBundle;
     private String userId;
     private boolean isEdit;
     private String oldId, oldTitle, oldColor, oldInfo, oldCreatedTimestamp, oldUpdatedTimestamp;
@@ -70,60 +62,53 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_omm);
 
-        firestoreDB = FirebaseFirestore.getInstance();
+        app = Improve.getInstance();
+        storageManager = app.getFirebaseStorageManager();
+        userId = app.getAuthManager().getCurrentUserId();
 
+        // Toolbar
         toolbar = (Toolbar) findViewById(R.id.toolbar_add_omm);
         toolbar.setBackgroundColor(getResources().getColor(R.color.colorAccent));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        // Main Layout
         contentLayout = (View) findViewById(R.id.add_omm_layout);
 
+        // Input Components
         inputLayoutTitle = (TextInputLayout) findViewById(R.id.input_layout_title);
         inputLayoutInfo = (TextInputLayout) findViewById(R.id.input_layout_info);
         inputTitle = (TextInputEditText) findViewById(R.id.input_title);
         inputInfo = (TextInputEditText) findViewById(R.id.input_info);
 
-        ommBundle = getIntent().getBundleExtra("ommBundle");
-        OnMyMind omm = ommBundle != null ? (OnMyMind) ommBundle.getSerializable("omm") : null;
+        // Incoming OnMyMind
+        onMyMindBundle = getIntent().getBundleExtra("onMyMindBundle");
+        OnMyMind onMyMind = onMyMindBundle != null ? (OnMyMind) onMyMindBundle.getSerializable("onMyMind") : null;
 
-        // Get current userId.
-        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        if(omm != null){
+        if(onMyMind != null){
             isEdit = true;
             ((TextView) findViewById(R.id.toolbar_add_omm_title_tv)).setText(R.string.title_edit_onmymind);
 
-            oldId = omm.getId();
-            oldTitle = omm.getTitle();
-            oldInfo = omm.getInfo();
-            oldColor = omm.getColor();
-            oldCreatedTimestamp = omm.getCreatedTimestamp();
-            if(omm.getUpdatedTimestamp() != null) {
-                if (!omm.getUpdatedTimestamp().isEmpty()) {
-                    oldUpdatedTimestamp = omm.getUpdatedTimestamp();
+            oldId = onMyMind.getId();
+            oldTitle = onMyMind.getTitle();
+            oldInfo = onMyMind.getInfo();
+            oldColor = onMyMind.getColor();
+            oldCreatedTimestamp = onMyMind.getCreatedTimestamp();
+            if(onMyMind.getUpdatedTimestamp() != null) {
+                if (!onMyMind.getUpdatedTimestamp().isEmpty()) {
+                    oldUpdatedTimestamp = onMyMind.getUpdatedTimestamp();
                 }
             }
-            ommPosition = ommBundle.getInt("position");
+            ommPosition = onMyMindBundle.getInt("position");
 
             toolbar.setBackgroundColor(Color.parseColor(oldColor));
             inputTitle.setText(oldTitle);
             inputInfo.setText(oldInfo);
         }
 
-        try {
-            storedOnMyMinds = (ArrayList<OnMyMind>) InternalStorage.readObject(InternalStorage.onmyminds);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to read from Internal Storage: ");
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        if(storedOnMyMinds.isEmpty()) {
-            storedOnMyMinds = new ArrayList<>();
-        }
+        // Initialize the OnMyMind InputValidator
+        validator = new OnMyMindInputValidator(this, contentLayout);
     }
 
     @Override
@@ -141,12 +126,12 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
                 chooseBackgroundColor();
                 return true;
             case R.id.ommDone:
-                if(!isEdit) {
-                    if(validateTitle() && valitdateInfo()) {
+                if(validator.formIsValid()) {
+                    if(!isEdit) {
                         addOnMyMind();
+                    } else {
+                        updateOnMyMind();
                     }
-                } else {
-                    updateOnMyMind();
                 }
                 return true;
             default:
@@ -171,150 +156,42 @@ public class AddOnMyMindActivity extends AppCompatActivity implements View.OnCli
         colorPickerDialog.show();
     }
 
-    private boolean validateTitle() {
-        if(TextUtils.isEmpty(inputTitle.getText())) {
-            inputLayoutTitle.setError(getString(R.string.err_msg_title));
-            requestFocus(inputTitle);
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    private boolean valitdateInfo() {
-        if(TextUtils.isEmpty(inputInfo.getText())) {
-            inputLayoutInfo.setError(getString(R.string.err_msg_info));
-            requestFocus(inputInfo);
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    /**
-     * Requests focus of the incoming view.
-     * @param view
-     */
-    private void requestFocus(View view) {
-        if (view.requestFocus()) {
-            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-        }
-    }
-
     public void addOnMyMind(){
-        OnMyMind omm = createOnMyMindObj();
-        addOnMyMind(omm);
+        String id = storageManager.getOnMyMindsRef().push().getKey();
+        String title = ((TextView) findViewById(R.id.input_title)).getText().toString();
+        String info = ((TextView) findViewById(R.id.input_info)).getText().toString();
+        String color = "#" + Integer.toHexString(((ColorDrawable) toolbar.getBackground()).getColor());
+        String createdTimestamp = getCurrentTimestamp();
+
+        OnMyMind newOnMymind = new OnMyMind(id, title, info, color, createdTimestamp);
+        storageManager.writeOnMyMindToFirebase(newOnMymind);
+        showParentActivity();
     }
 
     public void updateOnMyMind(){
-        OnMyMind omm = createOnMyMindObj();
-        updateOnMyMind(omm);
-    }
+        String id = oldId;
+        String title = ((TextView) findViewById(R.id.input_title)).getText().toString();
+        String info = ((TextView) findViewById(R.id.input_info)).getText().toString();
+        String color = "#" + Integer.toHexString(((ColorDrawable) toolbar.getBackground()).getColor());
+        String createdTimestamp = oldCreatedTimestamp;
+        String updatedTimestamp = getCurrentTimestamp();
 
-    private OnMyMind createOnMyMindObj(){
-        final OnMyMind omm = new OnMyMind();
-        omm.setTitle(((TextView) findViewById(R.id.input_title)).getText().toString());
-        omm.setInfo(((TextView) findViewById(R.id.input_info)).getText().toString());
-        if(((ColorDrawable)toolbar.getBackground()) != null) {
-            omm.setColor("#" + Integer.toHexString(((ColorDrawable) toolbar.getBackground()).getColor()));
-        } else {
-            omm.setColor("#" + Integer.toHexString(getResources().getColor(R.color.colorAccent)));
-        }
-        omm.setCreatedTimestamp(oldCreatedTimestamp);
-
-        return omm;
-    }
-
-    /**
-     * Add a new OnMyMind to the Firestore Database.
-     * @param omm
-     */
-    private void addOnMyMind(final OnMyMind omm) {
-        omm.setId(UUID.randomUUID().toString());
-        // Create timestamp
-        omm.setCreatedTimestamp(getCurrentTimestamp());
-        storedOnMyMinds.add(omm);
-        try {
-            InternalStorage.writeObject(InternalStorage.onmyminds, storedOnMyMinds);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to write to Internal Storage: ");
-            e.printStackTrace();
-        }
-
-        firestoreDB.collection("users")
-                .document(userId)
-                .collection("onmyminds")
-                .document(omm.getId())
-                .set(omm)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void avoid) {
-                        Log.d(TAG, "OnMyMind document added - id: "
-                                + omm.getId());
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                    Log.e(TAG, "Error adding OnMyMind document: " + e);
-                    e.printStackTrace();
-                    Toast.makeText(getApplicationContext(),
-                        "Adding new OnMyMind failed",
-                        Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-        showMainActivity();
+        OnMyMind updatedOnMyMind = new OnMyMind(id, title, info, color, createdTimestamp, updatedTimestamp);
+        storageManager.writeOnMyMindToFirebase(updatedOnMyMind);
+        showParentActivity();
     }
 
     private String getCurrentTimestamp() {
         return DateFormat.getDateTimeInstance().format(new Date());
     }
 
-    /**
-     * Update a OnMyMind in Firestore Database
-     * @param updatedOnMyMind
-     */
-    private void updateOnMyMind(final OnMyMind updatedOnMyMind) {
-        updatedOnMyMind.setId(oldId);
-        updatedOnMyMind.setUpdatedTimestamp(getCurrentTimestamp());
-        storedOnMyMinds.set(ommPosition, updatedOnMyMind);
-        try {
-            InternalStorage.writeObject(InternalStorage.onmyminds, storedOnMyMinds);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to write to Internal Storage: ");
-            e.printStackTrace();
-        }
-        Log.d(TAG, "oldId: " + oldId);
-        firestoreDB.collection("users")
-                .document(userId)
-                .collection("onmyminds")
-                .document(oldId)
-                .set(updatedOnMyMind, SetOptions.merge())
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG,  "*** Successfully updated OnMyMind ***");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Error adding OnMyMind document: " + e);
-                        Toast.makeText(getApplicationContext(),
-                                "Error: OnMyMind document could not be added",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-        showMainActivity();
-    }
-
-    private void showMainActivity() {
-        restUi();
+    private void showParentActivity() {
+        restUI();
         NavUtils.navigateUpFromSameTask(this);
         finish();
     }
 
-    private void restUi(){
+    private void restUI(){
         inputTitle.getText().clear();
         inputInfo.getText().clear();
     }

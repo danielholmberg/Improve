@@ -47,4 +47,5 @@
     <dimen name="omm_item_marker_width">16dp</dimen>
     <dimen name="omm_form_padding">16dp</dimen>
     <dimen name="contact_form_padding">16dp</dimen>
+    <dimen name="omm_list_padding">8dp</dimen>
 </resources>

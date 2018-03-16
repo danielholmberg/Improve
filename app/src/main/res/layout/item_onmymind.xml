@@ -2,21 +2,21 @@
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/omm_cardview"
+    android:id="@+id/item_onmymind_cardview"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:focusable="true"
     android:clickable="true"
     android:elevation="@dimen/card_elevation"
-    android:layout_margin="@dimen/card_item_margin">
+    android:layout_marginBottom="@dimen/card_item_margin">
     <LinearLayout
-        android:id="@+id/omm_item_container"
+        android:id="@+id/item_onmymind_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <ImageView
-            android:id="@+id/omm_item_marker_iv"
+            android:id="@+id/item_onmymind_marker_iv"
             android:layout_width="@dimen/omm_item_marker_width"
             android:layout_height="match_parent"
             android:background="@color/ommOrange"/>
@@ -28,12 +28,12 @@
             android:padding="@dimen/omm_item_body_padding"
             android:background="@color/cardInfoBackground">
             <android.support.constraint.ConstraintLayout
-                android:id="@+id/omm_body_content"
+                android:id="@+id/item_onmymind_body_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/title_tv"
+                    android:id="@+id/item_onmymind_title_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
@@ -46,7 +46,7 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/info_tv"
+                    android:id="@+id/item_onmymind_info_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
@@ -55,13 +55,13 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/title_tv" />
+                    app:layout_constraintTop_toBottomOf="@id/item_onmymind_title_tv" />
 
             </android.support.constraint.ConstraintLayout>
 
             <include
                 android:id="@+id/footer_omm"
-                layout="@layout/omm_item_footer"/>
+                layout="@layout/footer_item_onmymind"/>
         </LinearLayout>
 
     </LinearLayout>

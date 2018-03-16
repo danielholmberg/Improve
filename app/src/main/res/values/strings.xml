@@ -48,5 +48,7 @@
     <string name="contact_details_empty_comment_text">Add a comment</string>
     <string name="ommDone">Done</string>
     <string name="contactDone">Done</string>
+    <string name="nav_archive">Archive</string>
+    <string name="empty_archived_omms_list_text">No archived OnMyMinds</string>
 
 </resources>

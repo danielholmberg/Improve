@@ -19,41 +19,39 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
 
-import dev.danielholmberg.improve.CircleTransform;
 import dev.danielholmberg.improve.Fragments.ContactsFragment;
 import dev.danielholmberg.improve.Fragments.OnMyMindFragment;
+import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.R;
+import dev.danielholmberg.improve.Utilities.CircleTransform;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String TAG_ONMYMINDS_FRAGMENT = "ONMYMINDS_FRAGMENT";
     private static final String TAG_CONTACTS_FRAGMENT = "CONTACTS_FRAGMENT";
-    private static final String TAG_ARCHIVE_FRAGMENT = "ARCHIVE_FRAGMENT";
     private static String CURRENT_TAG = TAG_ONMYMINDS_FRAGMENT;
+
+    private Improve app;
 
     // index to identify current nav menu item
     public static int navItemIndex = 0;
     private static final String[] subTitles = {
             "OnMyMinds",
             "Contacts",
-            "Archive",
-            "Settings",
     };
-    // flag to load home fragment when googleAcc presses back key
+    // flag to load home fragment when currentUser presses back key
     private boolean shouldLoadHomeFragOnBackPress = true;
     private Handler mHandler;
 
     private FirebaseAuth fireAuth;
-    private GoogleSignInAccount googleAcc;
+    private FirebaseUser currentUser;
     private GoogleSignInClient mGoogleSignInClient;
     private Toolbar toolbar;
     private DrawerLayout drawer;
@@ -65,19 +63,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        app = Improve.getInstance();
+
         // Initializing the Toolbar
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        // Getting current signed in User references.
-        fireAuth = FirebaseAuth.getInstance();
-        googleAcc = GoogleSignIn.getLastSignedInAccount(this);
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        // Getting current signed in User reference.
+        currentUser = app.getAuthManager().getCurrentUser();
+        mGoogleSignInClient = app.getAuthManager().getmGoogleSignInClient();
 
         // Initalizing NavigationDrawer
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -86,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
 
+        // Initializing the Handler for fragment transactions.
         mHandler = new Handler();
 
         // Setting the Image, Name and Email in the NavigationDrawer Header.
@@ -94,24 +90,23 @@ public class MainActivity extends AppCompatActivity {
         TextView drawer_header_name = (TextView)  navigationView.getHeaderView(0).findViewById(R.id.drawer_header_name_tv);
         TextView drawer_header_email = (TextView)  navigationView.getHeaderView(0).findViewById(R.id.drawer_header_email_tv);
         Picasso.with(this)
-                .load(googleAcc.getPhotoUrl())
+                .load(currentUser.getPhotoUrl())
                 .error(R.drawable.ic_error_no_photo_white)
                 .transform(new CircleTransform())
                 .resize(200, 200)
                 .centerCrop()
                 .into(drawer_header_image);
-        drawer_header_name.setText(googleAcc.getDisplayName());
-        drawer_header_email.setText(googleAcc.getEmail());
+        drawer_header_name.setText(currentUser.getDisplayName());
+        drawer_header_email.setText(currentUser.getEmail());
 
         // Initializing navigation menu
         setUpNavigationView();
 
         loadCurrentFragment();
-
     }
 
     /***
-     * Returns respected fragment that googleAcc
+     * Returns respected fragment that currentUser
      * selected from navigation menu
      */
     private void loadCurrentFragment() {
@@ -121,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         // set toolbar title
         setToolbarTitle();
 
-        // if googleAcc select the current navigation menu again, don't do anything
+        // if currentUser select the current navigation menu again, don't do anything
         // just close the navigation drawer
         if (getSupportFragmentManager().findFragmentByTag(CURRENT_TAG) != null) {
             drawer.closeDrawers();
@@ -158,18 +153,10 @@ public class MainActivity extends AppCompatActivity {
         switch (navItemIndex) {
             case 0:
                 // OnMyMinds
-                OnMyMindFragment ommFragment = new OnMyMindFragment();
-                return ommFragment;
+                return new OnMyMindFragment();
             case 1:
                 // Contacts
-                ContactsFragment contactsFragment = new ContactsFragment();
-                return contactsFragment;
-            case 2:
-                // Archive fragment
-                return null;
-            case 3:
-                // Settings fragment
-                return null;
+                return new ContactsFragment();
             default:
                 return new OnMyMindFragment();
         }
@@ -221,8 +208,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Called when a googleAcc clicks on the navigation option "Sign out" and shows a dialog window to
-     * make sure that the googleAcc really wants to sign out.
+     * Called when a currentUser clicks on the navigation option "Sign out" and shows a dialog window to
+     * make sure that the currentUser really wants to sign out.
      */
     private void startSignOut() {
         AlertDialog.Builder alertDialogBuilder =
@@ -244,11 +231,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void signOutUser() {
+        // Disconnects the Google account.
         mGoogleSignInClient.signOut()
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        fireAuth.signOut();
+                        app.getAuthManager().getFireAuth().signOut();
+
                         Log.d(TAG, "*** User successfully Signed Out ***");
                         Intent i = new Intent(getApplicationContext(), LoginActivity.class);
                         startActivity(i);
@@ -266,9 +255,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // This code loads home fragment when back key is pressed
-        // when googleAcc is in other fragment than home
+        // when currentUser is in other fragment than home
         if (shouldLoadHomeFragOnBackPress) {
-            // checking if googleAcc is on other navigation menu
+            // checking if currentUser is on other navigation menu
             // rather than home
             if (navItemIndex != 0) {
                 navItemIndex = 0;
@@ -283,6 +272,7 @@ public class MainActivity extends AppCompatActivity {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         // Terminate the application.
+                                        // This does not disconnect the account!
                                         finish();
                                     }
                                 }).setNegativeButton("No", new DialogInterface.OnClickListener() {

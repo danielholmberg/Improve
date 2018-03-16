@@ -7,19 +7,26 @@ import java.io.Serializable;
  */
 
 public class Contact implements Serializable{
-    private String cid;
+    private String id;
     private String name;
     private String company;
     private String email = "";
-    private String mobile = "";
+    private String phone = "";
     private String comment = "";
 
-    public Contact() {
+    public Contact() {}
 
+    public Contact(String id, String name, String company, String email, String phone, String comment) {
+        this.id = id;
+        this.name = name;
+        this.company = company;
+        this.email = email;
+        this.phone = phone;
+        this.comment = comment;
     }
 
-    public String getCID() {
-        return this.cid;
+    public String getId() {
+        return this.id;
     }
 
     public String getName() {
@@ -34,16 +41,16 @@ public class Contact implements Serializable{
         return this.email;
     }
 
-    public String getMobile() {
-        return this.mobile;
+    public String getPhone() {
+        return this.phone;
     }
 
     public String getComment() {
         return this.comment;
     }
 
-    public void setCID(String cid) {
-        this.cid = cid;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setName(String name) {
@@ -60,9 +67,9 @@ public class Contact implements Serializable{
         }
     }
 
-    public void setMobile(String mobile) {
-        if(mobile != null) {
-            this.mobile = mobile;
+    public void setPhone(String phone) {
+        if(phone != null) {
+            this.phone = phone;
         }
     }
 
