@@ -27,13 +27,15 @@
             android:name=".Activities.MainActivity"
             android:windowSoftInputMode="adjustResize"/>
         <activity
-            android:name=".Activities.AddOnMyMindActivity"
-            android:label="@string/lable_add_onmymind"
+            android:name=".Activities.AddNoteActivity"
+            android:label="@string/title_add_note"
+            android:launchMode="singleTask"
             android:parentActivityName=".Activities.MainActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".Activities.AddContactActivity"
-            android:label="@string/lable_add_contact"
+            android:label="@string/title_add_contact"
+            android:launchMode="singleTask"
             android:parentActivityName=".Activities.MainActivity"
             android:windowSoftInputMode="adjustPan" />
     </application>

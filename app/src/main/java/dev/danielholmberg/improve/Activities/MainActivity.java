@@ -27,23 +27,23 @@ import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
 
 import dev.danielholmberg.improve.Fragments.ContactsFragment;
-import dev.danielholmberg.improve.Fragments.OnMyMindFragment;
+import dev.danielholmberg.improve.Fragments.NotesFragment;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Utilities.CircleTransform;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final String TAG_ONMYMINDS_FRAGMENT = "ONMYMINDS_FRAGMENT";
+    private static final String TAG_NOTES_FRAGMENT = "NOTES_FRAGMENT";
     private static final String TAG_CONTACTS_FRAGMENT = "CONTACTS_FRAGMENT";
-    private static String CURRENT_TAG = TAG_ONMYMINDS_FRAGMENT;
+    private static String CURRENT_TAG = TAG_NOTES_FRAGMENT;
 
     private Improve app;
 
     // index to identify current nav menu item
     public static int navItemIndex = 0;
     private static final String[] subTitles = {
-            "OnMyMinds",
+            "Notes",
             "Contacts",
     };
     // flag to load home fragment when currentUser presses back key
@@ -153,12 +153,12 @@ public class MainActivity extends AppCompatActivity {
         switch (navItemIndex) {
             case 0:
                 // OnMyMinds
-                return new OnMyMindFragment();
+                return new NotesFragment();
             case 1:
                 // Contacts
                 return new ContactsFragment();
             default:
-                return new OnMyMindFragment();
+                return new NotesFragment();
         }
     }
 
@@ -181,9 +181,9 @@ public class MainActivity extends AppCompatActivity {
                 // Check to see which item was being clicked and perform appropriate action
                 switch (menuItem.getItemId()) {
                     // Replacing the main content with correct fragment.
-                    case R.id.nav_onmyminds:
+                    case R.id.nav_notes:
                         navItemIndex = 0;
-                        CURRENT_TAG = TAG_ONMYMINDS_FRAGMENT;
+                        CURRENT_TAG = TAG_NOTES_FRAGMENT;
                         break;
                     case R.id.nav_contacts:
                         navItemIndex = 1;
@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
             // rather than home
             if (navItemIndex != 0) {
                 navItemIndex = 0;
-                CURRENT_TAG = TAG_ONMYMINDS_FRAGMENT;
+                CURRENT_TAG = TAG_NOTES_FRAGMENT;
                 loadCurrentFragment();
                 return;
             } else {

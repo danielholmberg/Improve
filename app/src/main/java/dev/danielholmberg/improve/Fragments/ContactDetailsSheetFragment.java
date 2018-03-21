@@ -56,9 +56,9 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
         Button actionCallContact = (Button) view.findViewById(R.id.details_call_contact_btn);
         Button actionSendMailToContact = (Button) view.findViewById(R.id.details_mail_contact_btn);
 
+        TextView title = (TextView) view.findViewById(R.id.toolbar_contact_details_company_tv);
         TextView name = (TextView) view.findViewById(R.id.contact_details_name_tv);
         TextView email = (TextView) view.findViewById(R.id.contact_details_email_tv);
-        TextView company = (TextView) view.findViewById(R.id.contact_details_company_tv);
         TextView mobile = (TextView) view.findViewById(R.id.contact_details_mobile_tv);
         TextView comment = (TextView) view.findViewById(R.id.contact_details_comment_tv);
 
@@ -69,13 +69,35 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
             contactPos = contactBundle.getInt("position");
         }
         if(contact != null){
+            title.setText(contact.getCompany());
             name.setText(contact.getName());
             email.setText(contact.getEmail());
-            company.setText(contact.getCompany());
             mobile.setText(contact.getPhone());
             comment.setText(contact.getComment());
 
             // Handle if the voluntary contact information fields is empty
+            // Change e-mail field
+            if(contact.getEmail() != null) {
+                if (contact.getEmail().isEmpty()) {
+                    // Change text and disable mail action
+                    email.setText(getString(R.string.contact_details_empty_email_text));
+                    email.setTextColor(getResources().getColor(R.color.contact_form_icon));
+                    actionSendMailToContact.setEnabled(false);
+                    actionSendMailToContact.setTextColor(getResources().getColor(R.color.contact_form_icon));
+                    actionSendMailToContact.setCompoundDrawablesWithIntrinsicBounds(
+                            getResources().getDrawable(R.drawable.ic_contact_email_grey),
+                            null, null, null);
+                }
+            } else {
+                email.setText(getString(R.string.contact_details_empty_email_text));
+                email.setTextColor(getResources().getColor(R.color.contact_form_icon));
+                actionSendMailToContact.setEnabled(false);
+                actionSendMailToContact.setTextColor(getResources().getColor(R.color.contact_form_icon));
+                actionSendMailToContact.setCompoundDrawablesWithIntrinsicBounds(
+                        getResources().getDrawable(R.drawable.ic_contact_email_grey),
+                        null, null, null);
+            }
+            // Change phone field
             if(contact.getPhone() != null) {
                 if (contact.getPhone().isEmpty()) {
                     // Change text and disable call action
@@ -96,26 +118,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
                         getResources().getDrawable(R.drawable.ic_contact_mobile_grey),
                         null, null, null);
             }
-            if(contact.getEmail() != null) {
-                if (contact.getEmail().isEmpty()) {
-                    // Change text and disable mail action
-                    email.setText(getString(R.string.contact_details_empty_mobile_text));
-                    email.setTextColor(getResources().getColor(R.color.contact_form_icon));
-                    actionSendMailToContact.setEnabled(false);
-                    actionSendMailToContact.setTextColor(getResources().getColor(R.color.contact_form_icon));
-                    actionSendMailToContact.setCompoundDrawablesWithIntrinsicBounds(
-                            getResources().getDrawable(R.drawable.ic_contact_email_grey),
-                            null, null, null);
-                }
-            } else {
-                email.setText(getString(R.string.contact_details_empty_mobile_text));
-                email.setTextColor(getResources().getColor(R.color.contact_form_icon));
-                actionSendMailToContact.setEnabled(false);
-                actionSendMailToContact.setTextColor(getResources().getColor(R.color.contact_form_icon));
-                actionSendMailToContact.setCompoundDrawablesWithIntrinsicBounds(
-                        getResources().getDrawable(R.drawable.ic_contact_email_grey),
-                        null, null, null);
-            }
+            // Change comment field
             if(contact.getComment() != null) {
                 if (contact.getComment().isEmpty()) {
                     // Change text

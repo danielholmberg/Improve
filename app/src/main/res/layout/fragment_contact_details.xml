@@ -4,11 +4,47 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingBottom="@dimen/contact_details_extra_padding_bottom"
     android:background="@color/contactCardBackgroundColor">
 
-    <include
-        android:id="@+id/include_toolbar_contact_details"
-        layout="@layout/app_bar_contact_details"/>
+    <RelativeLayout
+        android:id="@+id/toolbar_contact_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/toolbar_contact_details_padding">
+
+        <TextView
+            android:id="@+id/toolbar_contact_details_company_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/placeholder_company"
+            android:paddingEnd="@dimen/toolbar_label_padding"
+            style="@style/AppTheme.Base.ActivityTitle"
+            android:textColor="@color/contactDetailsTitleColor"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"/>
+
+        <Button
+            android:id="@+id/delete_contact_btn"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/ic_menu_delete_accent"
+            android:layout_gravity="end"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"/>
+
+        <Button
+            android:id="@+id/update_contact_btn"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/ic_mode_edit_accent"
+            android:layout_gravity="end"
+            android:layout_marginEnd="16dp"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_toStartOf="@id/delete_contact_btn"
+            android:layout_centerVertical="true"/>
+    </RelativeLayout>
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/contact_details_container"
@@ -25,7 +61,7 @@
             android:text="@string/hint_name"
             android:drawableStart="@drawable/ic_contact_person_grey"
             android:drawablePadding="@dimen/contact_form_icons_padding"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:paddingBottom="@dimen/contact_details_vertical_padding"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
@@ -66,18 +102,6 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/contact_details_company_tv"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/hint_company"
-            android:drawableStart="@drawable/ic_contact_company_grey"
-            android:drawablePadding="@dimen/contact_form_icons_padding"
-            android:textSize="@dimen/contact_details_text_size"
-            android:paddingBottom="@dimen/contact_details_vertical_padding"
-            app:layout_constraintTop_toBottomOf="@id/contact_details_actions"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-        <TextView
             android:id="@+id/contact_details_email_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -86,7 +110,7 @@
             android:drawablePadding="@dimen/contact_form_icons_padding"
             android:textSize="@dimen/contact_details_text_size"
             android:paddingBottom="@dimen/contact_details_vertical_padding"
-            app:layout_constraintTop_toBottomOf="@id/contact_details_company_tv"
+            app:layout_constraintTop_toBottomOf="@id/contact_details_actions"
             app:layout_constraintStart_toStartOf="parent"/>
 
         <TextView

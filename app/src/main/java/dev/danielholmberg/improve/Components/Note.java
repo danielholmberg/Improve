@@ -6,32 +6,22 @@ import java.io.Serializable;
  * Created by DanielHolmberg on 2018-01-21.
  */
 
-public class OnMyMind implements Serializable{
+public class Note implements Serializable{
     private String id;
     private String title;
     private String info;
     private String color;
-    private String createdTimestamp;
-    private String updatedTimestamp;
+    private String timestamp;
     private boolean isDone;
 
-    public OnMyMind() {}
+    public Note() {}
 
-    public OnMyMind(String id, String title, String info, String color, String createdTimestamp) {
+    public Note(String id, String title, String info, String color, String timestamp) {
         this.id = id;
         this.title = title;
         this.info = info;
         this.color = color;
-        this.createdTimestamp = createdTimestamp;
-    }
-
-    public OnMyMind(String id, String title, String info, String color, String createdTimestamp, String updatedTimestamp) {
-        this.id = id;
-        this.title = title;
-        this.info = info;
-        this.color = color;
-        this.createdTimestamp = createdTimestamp;
-        this.updatedTimestamp = updatedTimestamp;
+        this.timestamp = timestamp;
     }
 
     public void setId(String id) {
@@ -50,12 +40,8 @@ public class OnMyMind implements Serializable{
         this.color = color;
     }
 
-    public void setCreatedTimestamp(String timestamp) {
-        this.createdTimestamp = timestamp;
-    }
-
-    public void setUpdatedTimestamp(String updatedTimestamp) {
-        this.updatedTimestamp = updatedTimestamp;
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     public void setIsDone(boolean isDone) {
@@ -78,12 +64,8 @@ public class OnMyMind implements Serializable{
         return this.color;
     }
 
-    public String getCreatedTimestamp() {
-        return createdTimestamp;
-    }
-
-    public String getUpdatedTimestamp() {
-        return updatedTimestamp;
+    public String getTimestamp() {
+        return timestamp;
     }
 
     public boolean getIsDone(){

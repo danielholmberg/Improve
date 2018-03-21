@@ -9,60 +9,75 @@
     android:clickable="true"
     android:elevation="@dimen/card_elevation"
     android:layout_marginBottom="@dimen/card_item_margin">
+
     <LinearLayout
         android:id="@+id/item_onmymind_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/item_onmymind_marker_iv"
-            android:layout_width="@dimen/omm_item_marker_width"
+        <TextView
+            android:id="@+id/item_note_marker_iv"
+            android:layout_width="@dimen/note_item_marker_width"
             android:layout_height="match_parent"
-            android:background="@color/ommOrange"/>
+            android:background="@color/noteOrange"/>
 
         <LinearLayout
+            android:id="@+id/item_omm_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="@dimen/omm_item_body_padding"
+            android:padding="@dimen/note_item_body_padding"
             android:background="@color/cardInfoBackground">
-            <android.support.constraint.ConstraintLayout
+
+            <RelativeLayout
                 android:id="@+id/item_onmymind_body_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:id="@+id/item_onmymind_title_tv"
+                    android:id="@+id/item_note_title_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:paddingBottom="@dimen/omm_title_padding"
-                    android:maxLines="@integer/omm_item_title_max_lines"
+                    android:paddingBottom="@dimen/note_title_padding"
+                    android:maxLines="@integer/note_item_title_max_lines"
                     android:ellipsize="end"
+                    android:text="@string/hint_title"
                     android:textStyle="bold"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_toStartOf="@id/done_mark"/>
 
                 <TextView
-                    android:id="@+id/item_onmymind_info_tv"
+                    android:id="@+id/item_note_info_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
-                    android:maxLines="@integer/omm_item_info_max_lines"
-                    android:paddingBottom="@dimen/omm_item_body_padding"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/item_onmymind_title_tv" />
+                    android:maxLines="@integer/note_item_info_max_lines"
+                    android:paddingBottom="@dimen/note_item_body_padding"
+                    android:text="@string/hint_info"
+                    android:layout_below="@id/item_note_title_tv"
+                    android:layout_alignParentStart="true"
+                    android:layout_toStartOf="@id/done_mark"/>
 
-            </android.support.constraint.ConstraintLayout>
+                <TextView
+                    android:id="@+id/done_mark"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/ic_done_outline_green"
+                    android:visibility="gone"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"/>
+
+            </RelativeLayout>
 
             <include
-                android:id="@+id/footer_omm"
-                layout="@layout/footer_item_onmymind"/>
+                android:id="@+id/footer_note"
+                layout="@layout/footer_item_note"/>
         </LinearLayout>
 
     </LinearLayout>
+
 </android.support.v7.widget.CardView>

@@ -7,7 +7,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar_add_omm"
+        android:id="@+id/toolbar_add_note"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:elevation="4dp"
@@ -17,10 +17,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/lable_add_onmymind"
+            android:text="@string/title_add_note"
             style="@style/AppTheme.Base.ActivityTitle"
             android:layout_gravity="center"
-            android:id="@+id/toolbar_add_omm_title_tv" />
+            android:id="@+id/toolbar_add_note_title_tv" />
 
     </android.support.v7.widget.Toolbar>
 

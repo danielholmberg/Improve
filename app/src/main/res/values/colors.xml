@@ -13,15 +13,33 @@
     <color name="cardBackground">#ffffff</color>
     <color name="colorNavigationBackground">#ffffff</color>
 
+    <color name="emptyListTextColor">#80FFFFFF</color>
     <color name="editTextTint">#00ffffff</color>
+    <color name="cardInfoBackground">#FAFAFA</color>
+    <color name="iconColorWhite">#FFFFFFFF</color>
 
-    <!-- OnMyMind colors -->
-    <color name="ommOrange">#FFA726</color>
-    <color name="ommYellow">#FDD835</color>
-    <color name="ommBlue">#448aff</color>
-    <color name="ommPink">#E91E63</color>
-    <color name="ommGrey">#9E9E9E</color>
+    <!-- Note Material-UI colors -->
+    <color name="noteOrange">#FFA726</color>    <!-- Orange 400 -->
+    <color name="noteYellow">#FDD835</color>    <!-- Yellow 600 -->
+    <color name="noteBlue">#448aff</color>      <!-- Blue A200 -->
+    <color name="notePink">#E91E63</color>      <!-- Pink 500 -->
+    <color name="noteGrey">#9E9E9E</color>      <!-- Grey 500 -->
+
+    <color name="noteBrown">#795548</color>     <!-- Brown 500 -->
+    <color name="noteGreen">#4CAF50</color>     <!-- Green 500 -->
+    <color name="noteCyan">#00BCD4</color>      <!-- Cyan 500 -->
+    <color name="notePurple">#AB47BC</color>    <!-- Purple 400 -->
+    <color name="noteIndigo">#1A237E</color>    <!-- Indigo 900 -->
+
     <color name="cardTitleColor">#FFFFFFFF</color>
+    <color name="doneMarkerColor">#00E676</color>
+    <color name="note_form_icon">#FFE0E0E0</color>
+
+    <!-- Contact colors -->
+    <color name="contactCardBackgroundColor">#FFFFFFFF</color>
+    <color name="contactDetailsTitleColor">#000000</color>
+    <color name="cardFooterColor">#FFFFFFFF</color>
+    <color name="contact_form_icon">#E0E0E0</color>
 
     <!-- Colors for *potential* Theme changes -->
     <!-- Theme Sweden colors -->
@@ -40,15 +58,5 @@
     <color name="darkWindowBackground">#303030</color>
     <color name="darkCardBackground">#424242</color>
     <color name="darkTextColorHint">#90ffffff</color>
-    <color name="searchHintTextColor">#90FFFFFF</color>
-    <color name="contact_form_icon">#E0E0E0</color>
-    <color name="iconColorWhite">#FFFFFFFF</color>
-    <color name="omm_form_icon">#FFE0E0E0</color>
-    <color name="cardInfoBackground">#FAFAFA</color>
-    <color name="cardFooterColor">#FFFFFFFF</color>
-    <color name="contactCardBackgroundColor">#FFFFFFFF</color>
-    <color name="emptyListTextColor">#80FFFFFF</color>
-    <color name="doneBackground">#66BB6A</color>
-    <color name="doneTextColor">#FFFFFFFF</color>
 
 </resources>

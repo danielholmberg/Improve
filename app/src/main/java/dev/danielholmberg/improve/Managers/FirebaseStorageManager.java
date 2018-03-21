@@ -9,7 +9,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import dev.danielholmberg.improve.Components.Contact;
-import dev.danielholmberg.improve.Components.OnMyMind;
+import dev.danielholmberg.improve.Components.Note;
 import dev.danielholmberg.improve.Improve;
 
 /**
@@ -20,17 +20,17 @@ public class FirebaseStorageManager {
     private static final String TAG = FirebaseStorageManager.class.getSimpleName();
 
     private static final String USERS_REF = "users";
-    private static final String ONMYMINDS_REF = "onmyminds";
+    private static final String NOTES_REF = "notes";
     private static final String CONTACTS_REF = "contacts";
 
     public FirebaseStorageManager() {}
 
-    public DatabaseReference getOnMyMindsRef() {
+    public DatabaseReference getNotesRef() {
         String userId = Improve.getInstance().getAuthManager().getCurrentUserId();
-        DatabaseReference onMyMindsRef = FirebaseDatabase.getInstance()
-                .getReference(USERS_REF).child(userId).child(ONMYMINDS_REF);
-        onMyMindsRef.keepSynced(true);
-        return onMyMindsRef;
+        DatabaseReference notesRef = FirebaseDatabase.getInstance()
+                .getReference(USERS_REF).child(userId).child(NOTES_REF);
+        notesRef.keepSynced(true);
+        return notesRef;
     }
 
     public DatabaseReference getContactsRef() {
@@ -41,19 +41,19 @@ public class FirebaseStorageManager {
         return contactsRef;
     }
 
-    public void writeOnMyMindToFirebase(OnMyMind onMyMind) {
-        getOnMyMindsRef().child(onMyMind.getId()).setValue(onMyMind)
+    public void writeNoteToFirebase(Note note) {
+        getNotesRef().child(note.getId()).setValue(note)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        // Successfully added new OnMyMind.
-                        Log.d(TAG, "*** Successfully added new OnMyMind to Firebase storage ***");
+                        // Successfully added new Note.
+                        Log.d(TAG, "*** Successfully added new Note to Firebase storage ***");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "!!! Failed to add new OnMyMind to Firebase storage: " + e);
+                        Log.e(TAG, "!!! Failed to add new Note to Firebase storage: " + e);
                     }
                 });
     }
@@ -75,19 +75,19 @@ public class FirebaseStorageManager {
                 });
     }
 
-    public void deleteOnMymind(OnMyMind onMyMindToDelete) {
-        getOnMyMindsRef().child(onMyMindToDelete.getId()).removeValue()
+    public void deleteNote(Note noteToDelete) {
+        getNotesRef().child(noteToDelete.getId()).removeValue()
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        // Successfully deleted the OnMyMind.
-                        Log.d(TAG, "*** Successfully deleted the OnMyMind in Firebase storage ***");
+                        // Successfully deleted the Note.
+                        Log.d(TAG, "*** Successfully deleted the Note in Firebase storage ***");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "!!! Failed to delete the OnMyMind in Firebase storage: " + e);
+                        Log.e(TAG, "!!! Failed to delete the Note in Firebase storage: " + e);
                     }
                 });
     }

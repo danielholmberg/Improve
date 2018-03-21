@@ -40,6 +40,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         // Initialize Singleton.
         app = Improve.getInstance();
 
+        // The getFireAuth().getCurrentUser() is not null, then the user has been previously authenticated.
+        if(app.getAuthManager().getFireAuth().getCurrentUser() != null) {
+            startMainActivity();
+        }
+
         setContentView(R.layout.activity_signin);
 
         // ProgressBar
@@ -67,12 +72,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             try {
                 Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
                 // Google Sign In was successful!
-                // Authenticate with Firebase!
+                // authenticating with Firebase
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 app.getAuthManager().authWithFirebase(account, new FirebaseAuthCallback() {
                     @Override
                     public void onSuccess() {
                         // Authentication with Firebase was successful.
+                        progressBar.setVisibility(View.GONE);
                         startMainActivity();
                     }
 
@@ -97,7 +103,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
      * Called when the user is correctly authenticated with Google and Firebase.
      */
     private void startMainActivity() {
-        progressBar.setVisibility(View.GONE);
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(i);
         finish();

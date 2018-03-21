@@ -12,7 +12,7 @@
         <!-- color for the back-button and other controls -->
         <item name="colorControlNormal">@color/controlColor</item>
         <!-- color for the background of the activity -->
-        <item name="android:windowBackground">@drawable/gradient_background</item>
+        <item name="android:windowBackground">@color/colorPrimaryDark</item>
         <!-- enable window content transitions -->
         <!-- no used, but can be implemented <item name="android:windowActivityTransitions">true</item> -->
     </style>

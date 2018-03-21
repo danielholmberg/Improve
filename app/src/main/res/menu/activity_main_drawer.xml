@@ -4,10 +4,10 @@
         android:id="@+id/top"
         android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_onmyminds"
-            android:icon="@drawable/ic_menu_omms_white"
+            android:id="@+id/nav_notes"
+            android:icon="@drawable/ic_menu_notes_white"
             android:checked="true"
-            android:title="@string/nav_onmyminds" />
+            android:title="@string/nav_notes" />
         <item
             android:id="@+id/nav_contacts"
             android:icon="@drawable/ic_menu_contacts_white"
