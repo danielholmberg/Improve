@@ -28,13 +28,13 @@
             android:windowSoftInputMode="adjustResize"/>
         <activity
             android:name=".Activities.AddNoteActivity"
-            android:label="@string/title_add_note"
+            android:label="@string/title_new_note"
             android:launchMode="singleTask"
             android:parentActivityName=".Activities.MainActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".Activities.AddContactActivity"
-            android:label="@string/title_add_contact"
+            android:label="@string/title_new_contact"
             android:launchMode="singleTask"
             android:parentActivityName=".Activities.MainActivity"
             android:windowSoftInputMode="adjustPan" />
