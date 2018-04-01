@@ -43,5 +43,6 @@
     <string name="nav_notes">Notes</string>
     <string name="nav_contacts">Contacts</string>
     <string name="sign_out">Sign Out</string>
+    <string name="err_msg_phone">Please enter a non-empty phone number</string>
 
 </resources>

@@ -54,5 +54,6 @@
     <dimen name="contact_form_padding">16dp</dimen>
     <dimen name="toolbar_contact_details_padding">16dp</dimen>
     <dimen name="contact_details_extra_padding_bottom">16dp</dimen>
+    <dimen name="note_item_done_marker_padding">8dp</dimen>
 
 </resources>

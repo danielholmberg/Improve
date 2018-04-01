@@ -14,6 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -164,7 +165,7 @@ public class NotesFragment extends Fragment {
 
         public void bindModelToView(final Note note) {
             // Body views
-            TextView marker = (TextView) mView.findViewById(R.id.item_note_marker_iv);
+            LinearLayout marker = (LinearLayout) mView.findViewById(R.id.item_note_marker);
             TextView title = (TextView) mView.findViewById(R.id.item_note_title_tv);
             TextView info = (TextView) mView.findViewById(R.id.item_note_info_tv);
 
@@ -185,6 +186,8 @@ public class NotesFragment extends Fragment {
                 info.setVisibility(View.GONE);
                 footer.setVisibility(View.GONE);
                 doneMarker.setVisibility(View.VISIBLE);
+                marker.setLayoutParams(new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
             }
 
             // Setting OnClickListener on the Root View.

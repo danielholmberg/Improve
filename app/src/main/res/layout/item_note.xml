@@ -16,11 +16,22 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/item_note_marker_iv"
+        <LinearLayout
+            android:id="@+id/item_note_marker"
+            android:orientation="vertical"
             android:layout_width="@dimen/note_item_marker_width"
             android:layout_height="match_parent"
-            android:background="@color/noteOrange"/>
+            android:gravity="center"
+            android:elevation="@dimen/card_toolbar_elevation"
+            android:background="@color/noteOrange">
+            <TextView
+                android:id="@+id/done_mark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/note_item_done_marker_padding"
+                android:visibility="gone"
+                android:drawableStart="@drawable/ic_done_green" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/item_omm_content"
@@ -47,8 +58,7 @@
                     android:textStyle="bold"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large"
                     android:layout_alignParentTop="true"
-                    android:layout_alignParentStart="true"
-                    android:layout_toStartOf="@id/done_mark"/>
+                    android:layout_alignParentStart="true"/>
 
                 <TextView
                     android:id="@+id/item_note_info_tv"
@@ -59,17 +69,7 @@
                     android:paddingBottom="@dimen/note_item_body_padding"
                     android:text="@string/hint_info"
                     android:layout_below="@id/item_note_title_tv"
-                    android:layout_alignParentStart="true"
-                    android:layout_toStartOf="@id/done_mark"/>
-
-                <TextView
-                    android:id="@+id/done_mark"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:drawableStart="@drawable/ic_done_outline_green"
-                    android:visibility="gone"
-                    android:layout_centerVertical="true"
-                    android:layout_alignParentEnd="true"/>
+                    android:layout_alignParentStart="true"/>
 
             </RelativeLayout>
 

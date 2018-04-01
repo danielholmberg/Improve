@@ -46,7 +46,7 @@ public class ContactInputValidator {
      * return true if both Name- and Company-field is not empty.
      */
     public boolean formIsValid() {
-        return validateName() && validateCompany();
+        return validateName() && validateCompany() && validatePhone();
     }
 
     /**
@@ -108,6 +108,23 @@ public class ContactInputValidator {
      */
     private static boolean isValidEmail(String email) {
         return !TextUtils.isEmpty(email) && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
+    /**
+     * Validate if the user has entered a non-empty phone number.
+     * @return true if phone is not empty.
+     */
+    private boolean validatePhone() {
+        String phone = inputPhone.getText().toString();
+
+        if(phone.isEmpty()){
+            return true;
+        } else if(TextUtils.isEmpty(phone.trim())) {
+            inputLayoutPhone.setError(context.getString(R.string.err_msg_title));
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /**

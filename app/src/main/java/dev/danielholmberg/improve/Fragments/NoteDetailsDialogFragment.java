@@ -11,7 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,9 +55,11 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
         view = inflater.inflate(R.layout.fragment_note_details, container, false);
         parentLayout = (View) container;
 
-        LinearLayout toolbar = (LinearLayout) view.findViewById(R.id.note_details_toolbar);
+        RelativeLayout toolbar = (RelativeLayout) view.findViewById(R.id.note_details_toolbar);
         View layout = (View) view.findViewById(R.id.note_details_container);
 
+        Button close = (Button) view.findViewById(R.id.close_note_btn);
+        close.setOnClickListener(this);
         Button update = (Button) view.findViewById(R.id.update_note_btn);
         update.setOnClickListener(this);
         Button done = (Button) view.findViewById(R.id.done_note_btn);
@@ -83,8 +85,8 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
 
             if(isDone) {
                 // Change the Note Detail layout
-                done.setBackground(getResources().getDrawable(R.drawable.ic_menu_delete_white));
-                done.setOnClickListener(new View.OnClickListener() {
+                update.setBackground(getResources().getDrawable(R.drawable.ic_menu_delete_white));
+                update.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         // Delete Note
@@ -106,8 +108,8 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
                         dialog.show();
                     }
                 });
-                update.setBackground(getResources().getDrawable(R.drawable.ic_menu_undo_white));
-                update.setOnClickListener(new View.OnClickListener() {
+                done.setBackground(getResources().getDrawable(R.drawable.ic_menu_undo_white));
+                done.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         note.setIsDone(false);
@@ -133,6 +135,9 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
+            case R.id.close_note_btn:
+                detailsDialog.dismiss();
+                break;
             case R.id.update_note_btn:
                 detailsDialog.dismiss();
                 Intent updateNote = new Intent(getContext(), AddNoteActivity.class);
