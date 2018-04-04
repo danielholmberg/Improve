@@ -5,11 +5,11 @@
     <color name="controlColor">#ffffff</color>                  <!-- White -->
 
     <!-- Theme Default colors -->
-    <color name="colorPrimary">#00ACC1</color>                  <!-- Cyan 600 -->
-    <color name="colorPrimaryDark">#00ACC1</color>              <!-- Cyan 600 -->
+    <color name="colorPrimary">#0097A7</color>                  <!-- Cyan 700 -->
+    <color name="colorPrimaryDark">#0097A7</color>              <!-- Cyan 700 -->
     <color name="colorAccent">#FFA726</color>                   <!-- Orange 400 -->
     <color name="textColorPrimary">#000000</color>              <!-- Black -->
-    <color name="windowBackground">#00ACC1</color>              <!-- Cyan 600 -->
+    <color name="windowBackground">#80DEEA</color>              <!-- Cyan 200 -->
     <color name="cardBackground">#ffffff</color>                <!-- White -->
     <color name="colorNavigationBackground">#ffffff</color>     <!-- White -->
 
