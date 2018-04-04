@@ -5,6 +5,7 @@
     <dimen name="fab_margin">16dp</dimen>
 
     <!-- Toolbar dimens -->
+    <dimen name="toolbar_elevation">4dp</dimen>
     <dimen name="toolbar_padding">8dp</dimen>
     <dimen name="toolbar_label_padding">16dp</dimen>
     <dimen name="toolbar_icon_padding">16dp</dimen>
@@ -17,7 +18,7 @@
 
     <!-- General card dimens -->
     <dimen name="card_footer_elevation">2dp</dimen>
-    <dimen name="card_toolbar_elevation">4dp</dimen>
+    <dimen name="card_toolbar_elevation">2dp</dimen>
     <dimen name="card_item_margin">8dp</dimen>
 
     <!-- Note dimens -->

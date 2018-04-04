@@ -12,7 +12,7 @@
     tools:context="dev.danielholmberg.improve.Activities.AddNoteActivity">
 
     <include
-        android:id="@+id/include_toolbar_add_omm"
+        android:id="@+id/include_toolbar_add_note"
         layout="@layout/app_bar_add_note" />
 
     <ScrollView
@@ -20,7 +20,7 @@
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/omm_form_container"
+            android:id="@+id/note_form_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="@dimen/note_form_padding"

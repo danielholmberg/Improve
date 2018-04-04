@@ -26,7 +26,6 @@ import dev.danielholmberg.improve.Utilities.ContactInputValidator;
 
 public class AddContactActivity extends AppCompatActivity {
     private static final String TAG = AddContactActivity.class.getSimpleName();
-    private static final int CONTACT_UPDATED = 9997;
 
     private Improve app;
     private FirebaseStorageManager storageManager;
