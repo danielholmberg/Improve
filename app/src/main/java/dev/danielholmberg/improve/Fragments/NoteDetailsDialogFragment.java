@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,6 +69,9 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
         TextView title = (TextView) view.findViewById(R.id.note_details_title_tv);
         TextView info = (TextView) view.findViewById(R.id.note_details_info_tv);
         TextView timestamp = (TextView) view.findViewById(R.id.footer_note_timestamp_tv);
+
+        // Making Text View scrollable when taking up max height.
+        info.setMovementMethod(new ScrollingMovementMethod());
 
         noteBundle =  this.getArguments();
 

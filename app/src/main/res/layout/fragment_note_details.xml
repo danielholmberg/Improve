@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/omm_details_dialog_fragment_layout"
+    android:id="@+id/note_details_dialog_fragment_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -56,8 +56,9 @@
         android:orientation="vertical"
         android:padding="@dimen/note_details_padding"
         android:background="@color/cardInfoBackground">
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/omm_details_body_container"
+
+        <RelativeLayout
+            android:id="@+id/note_details_body_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -68,28 +69,24 @@
                 android:textStyle="bold"
                 android:paddingBottom="@dimen/note_title_padding"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"/>
 
-            <ScrollView
-                android:id="@+id/omm_details_info_scroll_container"
+            <TextView
+                android:id="@+id/note_details_info_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingBottom="@dimen/note_details_padding"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/note_details_title_tv">
-                <TextView
-                    android:id="@+id/note_details_info_tv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/note_details_info_text_size" />
-            </ScrollView>
+                android:paddingBottom="@dimen/note_info_padding"
+                android:isScrollContainer="true"
+                android:scrollbars="vertical"
+                android:textSize="@dimen/note_details_info_text_size"
+                android:layout_alignParentStart="true"
+                android:layout_below="@id/note_details_title_tv"/>
 
-        </android.support.constraint.ConstraintLayout>
+        </RelativeLayout>
 
         <include
-            android:id="@+id/footer_omm_details"
+            android:id="@+id/footer_note_details"
             layout="@layout/footer_item_note"/>
     </LinearLayout>
 
