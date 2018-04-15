@@ -7,7 +7,7 @@
 
     <!-- First row -->
     <LinearLayout
-        android:id="@+id/color_picker_first_row"
+        android:id="@+id/note_color_picker_first_row"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -61,7 +61,7 @@
 
     <!-- Second row -->
     <LinearLayout
-        android:id="@+id/color_picker_second_row"
+        android:id="@+id/note_color_picker_second_row"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"

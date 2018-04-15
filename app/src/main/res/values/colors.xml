@@ -18,7 +18,11 @@
     <color name="cardInfoBackground">#FAFAFA</color>            <!-- Grey 50 -->
     <color name="iconColorWhite">#FFFFFFFF</color>              <!-- White -->
 
-    <!-- Note Material-UI colors -->
+    <!-- Note colors -->
+    <color name="cardTitleColor">#FFFFFFFF</color>              <!-- White -->
+    <color name="doneMarkerColor">#388E3C</color>               <!-- Green 700 -->
+    <color name="note_form_icon">#FFE0E0E0</color>              <!-- Grey 300 -->
+
     <color name="noteOrange">#FFA726</color>                    <!-- Orange 400 -->
     <color name="noteYellow">#FFD600</color>                    <!-- Yellow A700 -->
     <color name="noteBlue">#448aff</color>                      <!-- Blue A200 -->
@@ -31,32 +35,22 @@
     <color name="notePurple">#AB47BC</color>                    <!-- Purple 400 -->
     <color name="noteIndigo">#1A237E</color>                    <!-- Indigo 900 -->
 
-    <color name="cardTitleColor">#FFFFFFFF</color>              <!-- White -->
-    <color name="doneMarkerColor">#388E3C</color>               <!-- Green 700 -->
-    <color name="note_form_icon">#FFE0E0E0</color>              <!-- Grey 300 -->
-
     <!-- Contact colors -->
     <color name="contactCardBackgroundColor">#FFFFFFFF</color>  <!-- White -->
     <color name="contactDetailsTitleColor">#000000</color>      <!-- Black -->
     <color name="cardFooterColor">#FFFFFFFF</color>             <!-- White -->
     <color name="contact_form_icon">#E0E0E0</color>             <!-- Grey 300 -->
 
-    <!-- Colors for *potential* Theme changes -->
-    <!-- Theme Sweden colors -->
-    <color name="swedenPrimary">#006aa7</color>
-    <color name="swedenPrimaryDark">#004b78</color>
-    <color name="swedenAccent">#fecc00</color>
-    <color name="swedenTextColorPrimary">#ffffff</color>
-    <color name="swedenWindowBackground">#c8e8ff</color>
-    <color name="swedenCardBackground">#FF018EDF</color>
+    <color name="contactGreen">#c8e6c9</color>                  <!-- Green 100 -->
+    <color name="contactLightGreen">#dcedc8</color>             <!-- LightGreen 100 -->
+    <color name="contactAmber">#ffecb3</color>                  <!-- Amber 100 -->
+    <color name="contactDeepOrange">#ffccbc</color>             <!-- DeepOrange 100 -->
+    <color name="contactBrown">#d7ccc8</color>                  <!-- Brown 100 -->
 
-    <!-- Theme Dark colors -->
-    <color name="darkPrimary">#212121</color>
-    <color name="darkPrimaryDark">#000000</color>
-    <color name="darkAccent">#36d939</color>
-    <color name="darkTextColorPrimary">#FFFFFF</color>
-    <color name="darkWindowBackground">#303030</color>
-    <color name="darkCardBackground">#424242</color>
-    <color name="darkTextColorHint">#90ffffff</color>
+    <color name="contactBlueGrey">#cfd8dc</color>               <!-- BlueGrey 100 -->
+    <color name="contactRed">#ffcdd2</color>                    <!-- Red 100 -->
+    <color name="contactPink">#f8bbd0</color>                   <!-- Pink 100 -->
+    <color name="contactDeepPurple">#d1c4e9</color>             <!-- DeepPurple 100 -->
+    <color name="contactIndigo">#c5cae9</color>                 <!-- Indigo 100 -->
 
 </resources>

@@ -2,6 +2,7 @@ package dev.danielholmberg.improve.Fragments;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetDialogFragment;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,6 +58,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
         Button actionCallContact = (Button) view.findViewById(R.id.details_call_contact_btn);
         Button actionSendMailToContact = (Button) view.findViewById(R.id.details_mail_contact_btn);
 
+        RelativeLayout toolbar = (RelativeLayout) view.findViewById(R.id.toolbar_contact_details);
         TextView title = (TextView) view.findViewById(R.id.toolbar_contact_details_company_tv);
         TextView name = (TextView) view.findViewById(R.id.contact_details_name_tv);
         TextView email = (TextView) view.findViewById(R.id.contact_details_email_tv);
@@ -69,6 +72,8 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
             contactPos = contactBundle.getInt("position");
         }
         if(contact != null){
+            toolbar.setBackgroundColor(contact.getColor() != null ? Color.parseColor(contact.getColor()) :
+                    getResources().getColor(R.color.contactIndigo));
             title.setText(contact.getCompany());
             name.setText(contact.getName());
             email.setText(contact.getEmail());

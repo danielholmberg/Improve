@@ -57,5 +57,6 @@
     <dimen name="contact_details_extra_padding_bottom">16dp</dimen>
     <dimen name="note_item_done_marker_padding">8dp</dimen>
     <dimen name="note_info_padding">8dp</dimen>
+    <dimen name="contact_item_marker_width">16dp</dimen>
 
 </resources>

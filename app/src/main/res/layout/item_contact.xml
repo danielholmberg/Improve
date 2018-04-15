@@ -11,62 +11,84 @@
     android:layout_marginBottom="@dimen/contact_item_bottom_margin"
     android:elevation="@dimen/card_elevation"
     android:background="@color/contactCardBackgroundColor">
-    <android.widget.RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/card_contact_container"
+
+    <LinearLayout
+        android:id="@+id/item_contact_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/contact_card_top_margin"
-        android:layout_marginStart="@dimen/contact_card_start_margin"
-        android:layout_marginEnd="@dimen/contact_card_end_margin"
-        android:layout_marginBottom="@dimen/contact_card_bottom_margin"
-        tools:context=".Activities.MainActivity">
+        android:orientation="horizontal">
+
         <LinearLayout
+            android:id="@+id/item_contact_marker"
+            android:orientation="vertical"
+            android:layout_width="@dimen/contact_item_marker_width"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:elevation="@dimen/card_toolbar_elevation"
+            android:background="@color/contactIndigo"/>
+
+        <android.widget.RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/card_contact_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_centerVertical="true"
-            android:layout_alignParentStart="true"
-            android:layout_toStartOf="@id/call_contact_btn">
-            <TextView
-                android:id="@+id/company_tv"
-                android:layout_width="wrap_content"
+            android:layout_marginTop="@dimen/contact_card_top_margin"
+            android:layout_marginStart="@dimen/contact_card_start_margin"
+            android:layout_marginEnd="@dimen/contact_card_end_margin"
+            android:layout_marginBottom="@dimen/contact_card_bottom_margin"
+            tools:context=".Activities.MainActivity">
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:textStyle="bold"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
-            <TextView
-                android:id="@+id/name_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
-        </LinearLayout>
+                android:orientation="vertical"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@id/call_contact_btn">
 
-        <Button
-            android:id="@+id/call_contact_btn"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:textSize="@dimen/contact_details_actions_text_size"
-            android:background="@drawable/ic_contact_mobile_active"
-            android:layout_margin="@dimen/contact_details_action_margin"
-            android:layout_alignParentEnd="true"
-            style="?android:attr/borderlessButtonStyle"/>
+                <TextView
+                    android:id="@+id/company_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textStyle="bold"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
-        <Button
-            android:id="@+id/mail_contact_btn"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:textSize="@dimen/contact_details_actions_text_size"
-            android:background="@drawable/ic_contact_email_active"
-            android:layout_margin="@dimen/contact_details_action_margin"
-            android:layout_below="@id/call_contact_btn"
-            android:layout_alignParentEnd="true"
-            style="?android:attr/borderlessButtonStyle"/>
+                <TextView
+                    android:id="@+id/name_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
 
-    </android.widget.RelativeLayout>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/call_contact_btn"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:textSize="@dimen/contact_details_actions_text_size"
+                android:background="@drawable/ic_contact_mobile_active"
+                android:layout_margin="@dimen/contact_details_action_margin"
+                android:layout_alignParentEnd="true"
+                style="?android:attr/borderlessButtonStyle"/>
+
+            <Button
+                android:id="@+id/mail_contact_btn"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:textSize="@dimen/contact_details_actions_text_size"
+                android:background="@drawable/ic_contact_email_active"
+                android:layout_margin="@dimen/contact_details_action_margin"
+                android:layout_below="@id/call_contact_btn"
+                android:layout_alignParentEnd="true"
+                style="?android:attr/borderlessButtonStyle"/>
+
+        </android.widget.RelativeLayout>
+
+    </LinearLayout>
 </android.support.v7.widget.CardView>

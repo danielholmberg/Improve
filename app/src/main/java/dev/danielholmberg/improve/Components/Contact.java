@@ -13,40 +13,18 @@ public class Contact implements Serializable{
     private String email = "";
     private String phone = "";
     private String comment = "";
+    private String color;
 
     public Contact() {}
 
-    public Contact(String id, String name, String company, String email, String phone, String comment) {
+    public Contact(String id, String name, String company, String email, String phone, String comment, String color) {
         this.id = id;
         this.name = name;
         this.company = company;
         this.email = email;
         this.phone = phone;
         this.comment = comment;
-    }
-
-    public String getId() {
-        return this.id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getCompany() {
-        return this.company;
-    }
-
-    public String getEmail() {
-        return this.email;
-    }
-
-    public String getPhone() {
-        return this.phone;
-    }
-
-    public String getComment() {
-        return this.comment;
+        this.color = color;
     }
 
     public void setId(String id) {
@@ -78,4 +56,37 @@ public class Contact implements Serializable{
             this.comment = comment;
         }
     }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getId() {
+        return this.id;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getCompany() {
+        return this.company;
+    }
+
+    public String getEmail() {
+        return this.email;
+    }
+
+    public String getPhone() {
+        return this.phone;
+    }
+
+    public String getComment() {
+        return this.comment;
+    }
+
+    public String getColor() {
+        return this.color;
+    }
+
 }

@@ -95,7 +95,8 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
 
             notePosition = noteBundle.getInt("position");
 
-            toolbar.setBackgroundColor(Color.parseColor(oldColor));
+            toolbar.setBackgroundColor(oldColor != null ? Color.parseColor(oldColor) :
+                    getResources().getColor(R.color.noteOrange));
             inputTitle.setText(oldTitle);
             inputInfo.setText(oldInfo);
         }
@@ -133,7 +134,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void chooseBackgroundColor() {
-        LinearLayout colorPickerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.color_picker, null, false);
+        LinearLayout colorPickerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.note_color_picker, null, false);
 
         // First row
         colorPickerLayout.findViewById(R.id.buttonColorOrange).setOnClickListener(this);

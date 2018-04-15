@@ -2,6 +2,7 @@ package dev.danielholmberg.improve.Fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -15,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -173,20 +175,23 @@ public class ContactsFragment extends Fragment{
         }
 
         public void bindModelToView(final Contact contact) {
-            this.contact = contact;
-
+            // Body views
             Button callBtn = (Button) mView.findViewById(R.id.call_contact_btn);
             Button mailBtn = (Button) mView.findViewById(R.id.mail_contact_btn);
 
             ((TextView) mView.findViewById(R.id.name_tv)).setText(contact.getName());
             ((TextView) mView.findViewById(R.id.company_tv)).setText(contact.getCompany());
 
-            if (contact.getEmail().isEmpty()) {
+            ((LinearLayout) mView.findViewById(R.id.item_contact_marker))
+                    .setBackgroundColor(contact.getColor() != null ? Color.parseColor(contact.getColor()) :
+                    getResources().getColor(R.color.contactIndigo));
+
+            if (contact.getEmail() == null || contact.getEmail().isEmpty()) {
                 mailBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_email_grey));
                 mailBtn.setEnabled(false);
             }
 
-            if (contact.getPhone().isEmpty()) {
+            if (contact.getPhone() == null || contact.getPhone().isEmpty()) {
                 callBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_mobile_grey));
                 callBtn.setEnabled(false);
             }

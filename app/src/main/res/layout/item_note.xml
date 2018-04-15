@@ -24,6 +24,7 @@
             android:gravity="center"
             android:elevation="@dimen/card_toolbar_elevation"
             android:background="@color/noteOrange">
+
             <TextView
                 android:id="@+id/done_mark"
                 android:layout_width="wrap_content"
@@ -31,6 +32,7 @@
                 android:padding="@dimen/note_item_done_marker_padding"
                 android:visibility="gone"
                 android:drawableStart="@drawable/ic_done_green" />
+
         </LinearLayout>
 
         <LinearLayout
