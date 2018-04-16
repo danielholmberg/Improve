@@ -184,7 +184,7 @@ public class ContactsFragment extends Fragment{
 
             ((LinearLayout) mView.findViewById(R.id.item_contact_marker))
                     .setBackgroundColor(contact.getColor() != null ? Color.parseColor(contact.getColor()) :
-                    getResources().getColor(R.color.contactIndigo));
+                    getResources().getColor(R.color.colorPickerIndigo));
 
             if (contact.getEmail() == null || contact.getEmail().isEmpty()) {
                 mailBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_email_grey));

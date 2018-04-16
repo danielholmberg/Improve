@@ -25,7 +25,7 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:elevation="@dimen/card_toolbar_elevation"
-            android:background="@color/contactIndigo"/>
+            android:background="@color/colorPickerIndigo"/>
 
         <android.widget.RelativeLayout
             xmlns:android="http://schemas.android.com/apk/res/android"

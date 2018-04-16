@@ -7,37 +7,82 @@
 
     <!-- First row -->
     <LinearLayout
-        android:id="@+id/note_color_picker_first_row"
+        android:id="@+id/color_picker_first_row"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="5">
         <Button
-            android:id="@+id/buttonColorOrange"
+            android:id="@+id/buttonColorGreen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:elevation="@dimen/cardview_default_elevation"
             android:layout_weight="1"
             android:layout_margin="@dimen/color_button_margin"
-            android:background="@color/colorAccent"
+            android:background="@color/colorPickerGreen"
             style="?android:borderlessButtonStyle"/>
         <Button
-            android:id="@+id/buttonColorYellow"
+            android:id="@+id/buttonColorLightGreen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:elevation="@dimen/cardview_default_elevation"
             android:layout_weight="1"
             android:layout_margin="@dimen/color_button_margin"
-            android:background="@color/noteYellow"
+            android:background="@color/colorPickerLightGreen"
             style="?android:borderlessButtonStyle"/>
         <Button
-            android:id="@+id/buttonColorBlue"
+            android:id="@+id/buttonColorAmber"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:elevation="@dimen/cardview_default_elevation"
             android:layout_weight="1"
             android:layout_margin="@dimen/color_button_margin"
-            android:background="@color/noteBlue"
+            android:background="@color/colorPickerAmber"
+            style="?android:borderlessButtonStyle"/>
+        <Button
+            android:id="@+id/buttonColorDeepOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/cardview_default_elevation"
+            android:layout_weight="1"
+            android:layout_margin="@dimen/color_button_margin"
+            android:background="@color/colorPickerDeepOrange"
+            style="?android:borderlessButtonStyle"/>
+        <Button
+            android:id="@+id/buttonColorBrown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/cardview_default_elevation"
+            android:layout_weight="1"
+            android:layout_margin="@dimen/color_button_margin"
+            android:background="@color/colorPickerBrown"
+            style="?android:borderlessButtonStyle"/>
+    </LinearLayout>
+
+    <!-- Second row -->
+    <LinearLayout
+        android:id="@+id/contact_color_picker_second_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="5">
+        <Button
+            android:id="@+id/buttonColorBlueGrey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/cardview_default_elevation"
+            android:layout_weight="1"
+            android:layout_margin="@dimen/color_button_margin"
+            android:background="@color/colorPickerBlueGrey"
+            style="?android:borderlessButtonStyle"/>
+        <Button
+            android:id="@+id/buttonColorRed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/cardview_default_elevation"
+            android:layout_weight="1"
+            android:layout_margin="@dimen/color_button_margin"
+            android:background="@color/colorPickerRed"
             style="?android:borderlessButtonStyle"/>
         <Button
             android:id="@+id/buttonColorPink"
@@ -46,61 +91,16 @@
             android:elevation="@dimen/cardview_default_elevation"
             android:layout_weight="1"
             android:layout_margin="@dimen/color_button_margin"
-            android:background="@color/notePink"
+            android:background="@color/colorPickerPink"
             style="?android:borderlessButtonStyle"/>
         <Button
-            android:id="@+id/buttonColorGrey"
+            android:id="@+id/buttonColorDeepPurple"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:elevation="@dimen/cardview_default_elevation"
             android:layout_weight="1"
             android:layout_margin="@dimen/color_button_margin"
-            android:background="@color/noteGrey"
-            style="?android:borderlessButtonStyle"/>
-    </LinearLayout>
-
-    <!-- Second row -->
-    <LinearLayout
-        android:id="@+id/note_color_picker_second_row"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="5">
-        <Button
-            android:id="@+id/buttonColorBrown"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:elevation="@dimen/cardview_default_elevation"
-            android:layout_weight="1"
-            android:layout_margin="@dimen/color_button_margin"
-            android:background="@color/noteBrown"
-            style="?android:borderlessButtonStyle"/>
-        <Button
-            android:id="@+id/buttonColorGreen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:elevation="@dimen/cardview_default_elevation"
-            android:layout_weight="1"
-            android:layout_margin="@dimen/color_button_margin"
-            android:background="@color/noteGreen"
-            style="?android:borderlessButtonStyle"/>
-        <Button
-            android:id="@+id/buttonColorCyan"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:elevation="@dimen/cardview_default_elevation"
-            android:layout_weight="1"
-            android:layout_margin="@dimen/color_button_margin"
-            android:background="@color/noteCyan"
-            style="?android:borderlessButtonStyle"/>
-        <Button
-            android:id="@+id/buttonColorPurple"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:elevation="@dimen/cardview_default_elevation"
-            android:layout_weight="1"
-            android:layout_margin="@dimen/color_button_margin"
-            android:background="@color/notePurple"
+            android:background="@color/colorPickerDeepPurple"
             style="?android:borderlessButtonStyle"/>
         <Button
             android:id="@+id/buttonColorIndigo"
@@ -109,7 +109,7 @@
             android:elevation="@dimen/cardview_default_elevation"
             android:layout_weight="1"
             android:layout_margin="@dimen/color_button_margin"
-            android:background="@color/noteIndigo"
+            android:background="@color/colorPickerIndigo"
             style="?android:borderlessButtonStyle"/>
     </LinearLayout>
 </LinearLayout>

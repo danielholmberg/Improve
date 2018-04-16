@@ -73,7 +73,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
         }
         if(contact != null){
             toolbar.setBackgroundColor(contact.getColor() != null ? Color.parseColor(contact.getColor()) :
-                    getResources().getColor(R.color.contactIndigo));
+                    getResources().getColor(R.color.colorPickerIndigo));
             title.setText(contact.getCompany());
             name.setText(contact.getName());
             email.setText(contact.getEmail());

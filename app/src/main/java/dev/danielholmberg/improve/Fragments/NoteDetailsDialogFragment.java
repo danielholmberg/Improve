@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.method.ScrollingMovementMethod;
@@ -26,7 +27,7 @@ import dev.danielholmberg.improve.R;
  * Created by Daniel Holmberg.
  */
 
-public class NoteDetailsDialogFragment extends DialogFragment implements View.OnClickListener{
+public class NoteDetailsDialogFragment extends BottomSheetDialogFragment implements View.OnClickListener{
     private static final String TAG = NoteDetailsDialogFragment.class.getSimpleName();
 
     private Improve app;
@@ -50,9 +51,9 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
         detailsDialog = this;
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_note_details, container, false);
         parentLayout = (View) container;
 

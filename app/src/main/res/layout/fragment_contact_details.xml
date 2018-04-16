@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="@dimen/contact_toolbar_elevation"
+        android:background="@color/colorPickerDeepOrange"
         android:padding="@dimen/toolbar_contact_details_padding">
 
         <TextView

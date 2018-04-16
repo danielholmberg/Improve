@@ -23,34 +23,23 @@
     <color name="doneMarkerColor">#388E3C</color>               <!-- Green 700 -->
     <color name="note_form_icon">#FFE0E0E0</color>              <!-- Grey 300 -->
 
-    <color name="noteOrange">#FFA726</color>                    <!-- Orange 400 -->
-    <color name="noteYellow">#FFD600</color>                    <!-- Yellow A700 -->
-    <color name="noteBlue">#448aff</color>                      <!-- Blue A200 -->
-    <color name="notePink">#E91E63</color>                      <!-- Pink 500 -->
-    <color name="noteGrey">#9E9E9E</color>                      <!-- Grey 500 -->
-
-    <color name="noteBrown">#795548</color>                     <!-- Brown 500 -->
-    <color name="noteGreen">#4CAF50</color>                     <!-- Green 500 -->
-    <color name="noteCyan">#00BCD4</color>                      <!-- Cyan 500 -->
-    <color name="notePurple">#AB47BC</color>                    <!-- Purple 400 -->
-    <color name="noteIndigo">#1A237E</color>                    <!-- Indigo 900 -->
-
     <!-- Contact colors -->
     <color name="contactCardBackgroundColor">#FFFFFFFF</color>  <!-- White -->
     <color name="contactDetailsTitleColor">#FFFFFFFF</color>    <!-- White -->
     <color name="cardFooterColor">#FFFFFFFF</color>             <!-- White -->
     <color name="contact_form_icon">#E0E0E0</color>             <!-- Grey 300 -->
 
-    <color name="contactGreen">#c8e6c9</color>                  <!-- Green 100 -->
-    <color name="contactLightGreen">#dcedc8</color>             <!-- LightGreen 100 -->
-    <color name="contactAmber">#ffecb3</color>                  <!-- Amber 100 -->
-    <color name="contactDeepOrange">#ffccbc</color>             <!-- DeepOrange 100 -->
-    <color name="contactBrown">#d7ccc8</color>                  <!-- Brown 100 -->
+    <!-- Color picker -->
+    <color name="colorPickerGreen">#c8e6c9</color>                  <!-- Green 100 -->
+    <color name="colorPickerLightGreen">#dcedc8</color>             <!-- LightGreen 100 -->
+    <color name="colorPickerAmber">#ffecb3</color>                  <!-- Amber 100 -->
+    <color name="colorPickerDeepOrange">#ffccbc</color>             <!-- DeepOrange 100 -->
+    <color name="colorPickerBrown">#d7ccc8</color>                  <!-- Brown 100 -->
 
-    <color name="contactBlueGrey">#cfd8dc</color>               <!-- BlueGrey 100 -->
-    <color name="contactRed">#ffcdd2</color>                    <!-- Red 100 -->
-    <color name="contactPink">#f8bbd0</color>                   <!-- Pink 100 -->
-    <color name="contactDeepPurple">#d1c4e9</color>             <!-- DeepPurple 100 -->
-    <color name="contactIndigo">#c5cae9</color>                 <!-- Indigo 100 -->
+    <color name="colorPickerBlueGrey">#cfd8dc</color>               <!-- BlueGrey 100 -->
+    <color name="colorPickerRed">#ffcdd2</color>                    <!-- Red 100 -->
+    <color name="colorPickerPink">#f8bbd0</color>                   <!-- Pink 100 -->
+    <color name="colorPickerDeepPurple">#d1c4e9</color>             <!-- DeepPurple 100 -->
+    <color name="colorPickerIndigo">#c5cae9</color>                 <!-- Indigo 100 -->
 
 </resources>

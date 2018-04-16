@@ -133,20 +133,20 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void chooseBackgroundColor() {
-        LinearLayout colorPickerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.note_color_picker, null, false);
+        LinearLayout colorPickerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.color_picker, null, false);
 
         // First row
-        colorPickerLayout.findViewById(R.id.buttonColorOrange).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorYellow).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorBlue).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorPink).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorGrey).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorGreen).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorLightGreen).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorAmber).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorDeepOrange).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorBrown).setOnClickListener(this);
 
         // Second row
-        colorPickerLayout.findViewById(R.id.buttonColorBrown).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorGreen).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorCyan).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorPurple).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorBlueGrey).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorRed).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorPink).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorDeepPurple).setOnClickListener(this);
         colorPickerLayout.findViewById(R.id.buttonColorIndigo).setOnClickListener(this);
 
         AlertDialog.Builder alertDialogBuilder =
@@ -200,38 +200,38 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.buttonColorOrange:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+            case R.id.buttonColorGreen:
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerGreen));
                 break;
-            case R.id.buttonColorYellow:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.noteYellow));
+            case R.id.buttonColorLightGreen:
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerLightGreen));
                 break;
-            case R.id.buttonColorBlue:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.noteBlue));
+            case R.id.buttonColorAmber:
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerAmber));
                 break;
-            case R.id.buttonColorPink:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.notePink));
-                break;
-            case R.id.buttonColorGrey:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.noteGrey));
+            case R.id.buttonColorDeepOrange:
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerDeepOrange));
                 break;
             case R.id.buttonColorBrown:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.noteBrown));
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerBrown));
                 break;
-            case R.id.buttonColorGreen:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.noteGreen));
+            case R.id.buttonColorBlueGrey:
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerBlueGrey));
                 break;
-            case R.id.buttonColorCyan:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.noteCyan));
+            case R.id.buttonColorRed:
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerRed));
                 break;
-            case R.id.buttonColorPurple:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.notePurple));
+            case R.id.buttonColorPink:
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerPink));
+                break;
+            case R.id.buttonColorDeepPurple:
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerDeepPurple));
                 break;
             case R.id.buttonColorIndigo:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.noteIndigo));
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerIndigo));
                 break;
             default:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerIndigo));
                 break;
         }
         colorPickerDialog.dismiss();

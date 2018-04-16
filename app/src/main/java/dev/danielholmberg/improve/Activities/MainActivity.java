@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -48,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
     };
     // flag to load home fragment when currentUser presses back key
     private boolean shouldLoadHomeFragOnBackPress = true;
+    private int backPressCounter = 0;
+
     private Handler mHandler;
 
     private FirebaseAuth fireAuth;
@@ -263,26 +266,15 @@ public class MainActivity extends AppCompatActivity {
                 navItemIndex = 0;
                 CURRENT_TAG = TAG_NOTES_FRAGMENT;
                 loadCurrentFragment();
-                return;
             } else {
-                AlertDialog.Builder alertDialogBuilder =
-                        new AlertDialog.Builder(this).setTitle("Exit application")
-                                .setMessage("You are about to exit the application, do you want to continue?")
-                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        // Terminate the application.
-                                        // This does not disconnect the account!
-                                        finish();
-                                    }
-                                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.dismiss();
-                            }
-                        });
-                final AlertDialog dialog = alertDialogBuilder.create();
-                dialog.show();
+                backPressCounter++;
+                Toast exitToast = Toast.makeText(this, "Press again to exit", Toast.LENGTH_SHORT);
+                exitToast.show();
+                if(backPressCounter >= 2) {
+                    exitToast.cancel();
+                    backPressCounter = 0;
+                    finish();
+                }
             }
         }
     }
