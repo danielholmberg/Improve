@@ -71,4 +71,30 @@ public class Note implements Serializable{
     public boolean getIsDone(){
         return isDone;
     }
- }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Note note = (Note) o;
+
+        if (isDone != note.isDone) return false;
+        if (!id.equals(note.id)) return false;
+        if (!title.equals(note.title)) return false;
+        if (info != null ? !info.equals(note.info) : note.info != null) return false;
+        if (!color.equals(note.color)) return false;
+        return timestamp.equals(note.timestamp);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + title.hashCode();
+        result = 31 * result + (info != null ? info.hashCode() : 0);
+        result = 31 * result + color.hashCode();
+        result = 31 * result + timestamp.hashCode();
+        result = 31 * result + (isDone ? 1 : 0);
+        return result;
+    }
+}

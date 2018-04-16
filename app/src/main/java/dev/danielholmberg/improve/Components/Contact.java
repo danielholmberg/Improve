@@ -89,4 +89,32 @@ public class Contact implements Serializable{
         return this.color;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Contact contact = (Contact) o;
+
+        if (!id.equals(contact.id)) return false;
+        if (!name.equals(contact.name)) return false;
+        if (!company.equals(contact.company)) return false;
+        if (email != null ? !email.equals(contact.email) : contact.email != null) return false;
+        if (phone != null ? !phone.equals(contact.phone) : contact.phone != null) return false;
+        if (comment != null ? !comment.equals(contact.comment) : contact.comment != null)
+            return false;
+        return color.equals(contact.color);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + name.hashCode();
+        result = 31 * result + company.hashCode();
+        result = 31 * result + (email != null ? email.hashCode() : 0);
+        result = 31 * result + (phone != null ? phone.hashCode() : 0);
+        result = 31 * result + (comment != null ? comment.hashCode() : 0);
+        result = 31 * result + color.hashCode();
+        return result;
+    }
 }
