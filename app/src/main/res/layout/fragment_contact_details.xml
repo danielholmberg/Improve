@@ -11,7 +11,7 @@
         android:id="@+id/toolbar_contact_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="@dimen/toolbar_elevation"
+        android:elevation="@dimen/contact_toolbar_elevation"
         android:padding="@dimen/toolbar_contact_details_padding">
 
         <TextView
@@ -20,10 +20,12 @@
             android:layout_height="wrap_content"
             android:text="@string/placeholder_company"
             android:paddingEnd="@dimen/toolbar_label_padding"
+            android:paddingStart="0dp"
             style="@style/AppTheme.Base.ActivityTitle"
             android:textColor="@color/contactDetailsTitleColor"
             android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"/>
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/update_contact_btn"/>
 
         <Button
             android:id="@+id/delete_contact_btn"
@@ -42,6 +44,7 @@
             android:background="@drawable/ic_mode_edit_white"
             android:layout_gravity="end"
             android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
             style="?android:attr/borderlessButtonStyle"
             android:layout_toStartOf="@id/delete_contact_btn"
             android:layout_centerVertical="true"/>

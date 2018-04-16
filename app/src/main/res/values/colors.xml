@@ -37,7 +37,7 @@
 
     <!-- Contact colors -->
     <color name="contactCardBackgroundColor">#FFFFFFFF</color>  <!-- White -->
-    <color name="contactDetailsTitleColor">#000000</color>      <!-- Black -->
+    <color name="contactDetailsTitleColor">#FFFFFFFF</color>    <!-- White -->
     <color name="cardFooterColor">#FFFFFFFF</color>             <!-- White -->
     <color name="contact_form_icon">#E0E0E0</color>             <!-- Grey 300 -->
 

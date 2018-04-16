@@ -65,7 +65,6 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
 
         // Toolbar
         toolbar = (Toolbar) findViewById(R.id.toolbar_add_note);
-        toolbar.setBackgroundColor(getResources().getColor(R.color.colorAccent));
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
