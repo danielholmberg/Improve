@@ -72,9 +72,36 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
             contactPos = contactBundle.getInt("position");
         }
         if(contact != null){
-            toolbar.setBackgroundColor(contact.getColor() != null ? Color.parseColor(contact.getColor()) :
-                    getResources().getColor(R.color.colorPickerIndigo));
+            int contactColor = getResources().getColor(R.color.colorPickerDeepOrange);
+            int titleColor = getResources().getColor(R.color.titleColorDeepOrange);
+
+            if(contact.getColor() != null) {
+                contactColor = Color.parseColor(contact.getColor());
+                if(contactColor == getResources().getColor(R.color.colorPickerGreen))
+                    titleColor = getResources().getColor(R.color.titleColorGreen);
+                else if(contactColor == getResources().getColor(R.color.colorPickerLightGreen))
+                    titleColor = getResources().getColor(R.color.titleColorLightGreen);
+                else if(contactColor == getResources().getColor(R.color.colorPickerAmber))
+                    titleColor = getResources().getColor(R.color.titleColorAmber);
+                else if(contactColor == getResources().getColor(R.color.colorPickerDeepOrange))
+                    titleColor = getResources().getColor(R.color.titleColorDeepOrange);
+                else if(contactColor == getResources().getColor(R.color.colorPickerBrown))
+                    titleColor = getResources().getColor(R.color.titleColorBrown);
+                else if(contactColor == getResources().getColor(R.color.colorPickerBlueGrey))
+                    titleColor = getResources().getColor(R.color.titleColorBlueGrey);
+                else if(contactColor == getResources().getColor(R.color.colorPickerTurquoise))
+                    titleColor = getResources().getColor(R.color.titleColorTurquoise);
+                else if(contactColor == getResources().getColor(R.color.colorPickerPink))
+                    titleColor = getResources().getColor(R.color.titleColorPink);
+                else if(contactColor == getResources().getColor(R.color.colorPickerDeepPurple))
+                    titleColor = getResources().getColor(R.color.titleColorDeepPurple);
+                else if(contactColor == getResources().getColor(R.color.colorPickerIndigo))
+                    titleColor = getResources().getColor(R.color.titleColorIndigo);
+            }
+
+            toolbar.setBackgroundColor(contactColor);
             title.setText(contact.getCompany());
+            title.setTextColor(titleColor);
             name.setText(contact.getName());
             email.setText(contact.getEmail());
             mobile.setText(contact.getPhone());
@@ -140,8 +167,8 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
             Toast.makeText(getContext(), "Unable to show contact details", Toast.LENGTH_SHORT).show();
         }
 
-        ((Button) view.findViewById(R.id.update_contact_btn)).setOnClickListener(this);
-        ((Button) view.findViewById(R.id.delete_contact_btn)).setOnClickListener(this);
+        view.findViewById(R.id.edit_contact_btn).setOnClickListener(this);
+        view.findViewById(R.id.delete_contact_btn).setOnClickListener(this);
         actionCallContact.setOnClickListener(this);
         actionSendMailToContact.setOnClickListener(this);
 
@@ -157,7 +184,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.update_contact_btn:
+            case R.id.edit_contact_btn:
                 Intent updateContact = new Intent(getContext(), AddContactActivity.class);
                 updateContact.putExtra("contactBundle", contactBundle);
                 startActivity(updateContact);

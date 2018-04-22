@@ -32,6 +32,8 @@
     <dimen name="note_item_marker_width">16dp</dimen>
     <dimen name="note_form_padding">16dp</dimen>
     <dimen name="note_list_padding">8dp</dimen>
+    <dimen name="note_item_done_marker_padding">8dp</dimen>
+    <dimen name="note_info_padding">8dp</dimen>
 
     <dimen name="color_button_margin">8dp</dimen>
     <dimen name="card_elevation">4dp</dimen>
@@ -43,21 +45,17 @@
     <dimen name="contact_details_vertical_padding">8dp</dimen>
     <dimen name="contact_details_action_margin">8dp</dimen>
     <dimen name="contact_details_actions_text_size">12sp</dimen>
-    <dimen name="contact_item_start_margin">8dp</dimen>
-    <dimen name="contact_list_top_margin">8dp</dimen>
-    <dimen name="contact_item_end_margin">8dp</dimen>
-    <dimen name="contact_item_bottom_margin">4dp</dimen>
+    <dimen name="contact_item_bottom_margin">8dp</dimen>
     <dimen name="contact_card_top_margin">8dp</dimen>
     <dimen name="contact_card_start_margin">16dp</dimen>
     <dimen name="contact_card_end_margin">16dp</dimen>
-    <dimen name="contact_card_bottom_margin">8dp</dimen>
+    <dimen name="contact_card_margin">8dp</dimen>
     <dimen name="contact_details_name_text_size">22sp</dimen>
     <dimen name="contact_form_padding">16dp</dimen>
     <dimen name="toolbar_contact_details_padding">16dp</dimen>
     <dimen name="contact_details_extra_padding_bottom">16dp</dimen>
-    <dimen name="note_item_done_marker_padding">8dp</dimen>
-    <dimen name="note_info_padding">8dp</dimen>
     <dimen name="contact_item_marker_width">16dp</dimen>
     <dimen name="contact_toolbar_elevation">1dp</dimen>
+    <dimen name="contact_list_padding">8dp</dimen>
 
 </resources>

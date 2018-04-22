@@ -45,5 +45,9 @@
     <string name="sign_out">Sign Out</string>
     <string name="err_msg_phone">Please enter a non-empty phone number</string>
     <string name="contact_background_color">Contact Background Color</string>
+    <string name="editNoteButtonContentDesc">EditNoteButton</string>
+    <string name="doneNoteButtonContentDesc">DoneNoteButton</string>
+    <string name="editContactButtonContentDesc">EditContactButton</string>
+    <string name="deleteContactButtonContentDesc">DeleteContactButton</string>
 
 </resources>

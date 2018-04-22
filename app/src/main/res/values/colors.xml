@@ -30,16 +30,29 @@
     <color name="contact_form_icon">#E0E0E0</color>             <!-- Grey 300 -->
 
     <!-- Color picker -->
-    <color name="colorPickerGreen">#c8e6c9</color>                  <!-- Green 100 -->
-    <color name="colorPickerLightGreen">#dcedc8</color>             <!-- LightGreen 100 -->
-    <color name="colorPickerAmber">#ffecb3</color>                  <!-- Amber 100 -->
-    <color name="colorPickerDeepOrange">#ffccbc</color>             <!-- DeepOrange 100 -->
-    <color name="colorPickerBrown">#d7ccc8</color>                  <!-- Brown 100 -->
+    <color name="colorPickerGreen">#A5D6A7</color>              <!-- Green 200 -->
+    <color name="colorPickerLightGreen">#C5E1A5</color>         <!-- LightGreen 200 -->
+    <color name="colorPickerAmber">#FFE082</color>              <!-- Amber 200 -->
+    <color name="colorPickerDeepOrange">#FFAB91</color>         <!-- DeepOrange 200 -->
+    <color name="colorPickerBrown">#BCAAA4</color>              <!-- Brown 200 -->
 
-    <color name="colorPickerBlueGrey">#cfd8dc</color>               <!-- BlueGrey 100 -->
-    <color name="colorPickerRed">#ffcdd2</color>                    <!-- Red 100 -->
-    <color name="colorPickerPink">#f8bbd0</color>                   <!-- Pink 100 -->
-    <color name="colorPickerDeepPurple">#d1c4e9</color>             <!-- DeepPurple 100 -->
-    <color name="colorPickerIndigo">#c5cae9</color>                 <!-- Indigo 100 -->
+    <color name="colorPickerBlueGrey">#B0BEC5</color>           <!-- BlueGrey 200 -->
+    <color name="colorPickerTurquoise">#8FE8D2</color>          <!-- Turquoise -->
+    <color name="colorPickerPink">#F48FB1</color>               <!-- Pink 200 -->
+    <color name="colorPickerDeepPurple">#B39DDB</color>         <!-- DeepPurple 200 -->
+    <color name="colorPickerIndigo">#9FA8DA</color>             <!-- Indigo 200 -->
+
+    <!-- Title colors -->
+    <color name="titleColorGreen">#445945</color>               <!-- Dark Green -->
+    <color name="titleColorLightGreen">#7A8C66</color>          <!-- Dark LightGreen -->
+    <color name="titleColorAmber">#A59154</color>               <!-- Dark Amber -->
+    <color name="titleColorDeepOrange">#7F5548</color>          <!-- Dark DeepOrange -->
+    <color name="titleColorBrown">#514946</color>               <!-- Dark Brown -->
+
+    <color name="titleColorBlueGrey">#4F5559</color>            <!-- Dark BlueGrey -->
+    <color name="titleColorTurquoise">#3F665C</color>           <!-- Dark Turquoise -->
+    <color name="titleColorPink">#663C4A</color>                <!-- Dark Pink -->
+    <color name="titleColorDeepPurple">#3E374C</color>          <!-- Dark DeepPurple -->
+    <color name="titleColorIndigo">#4A4E66</color>              <!-- Dark Indigo -->
 
 </resources>

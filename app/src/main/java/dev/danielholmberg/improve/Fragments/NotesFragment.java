@@ -188,16 +188,18 @@ public class NotesFragment extends Fragment {
                 doneMarker.setVisibility(View.VISIBLE);
                 marker.setLayoutParams(new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            } else if(info.getText().toString().trim().isEmpty()){
+                info.setVisibility(View.GONE);
             }
 
             // Setting OnClickListener on the Root View.
             mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    NoteDetailsDialogFragment noteDetailsDialogFragment = new NoteDetailsDialogFragment();
-                    noteDetailsDialogFragment.setArguments(createBundle(note, getAdapterPosition()));
-                    noteDetailsDialogFragment.show(((AppCompatActivity)context).getSupportFragmentManager(),
-                            noteDetailsDialogFragment.getTag());
+                    NoteDetailsSheetFragment noteDetailsSheetFragment = new NoteDetailsSheetFragment();
+                    noteDetailsSheetFragment.setArguments(createBundle(note, getAdapterPosition()));
+                    noteDetailsSheetFragment.show(((AppCompatActivity)context).getSupportFragmentManager(),
+                            noteDetailsSheetFragment.getTag());
                 }
             });
         }
@@ -206,7 +208,6 @@ public class NotesFragment extends Fragment {
             Bundle bundle = new Bundle();
             bundle.putSerializable("note", note);
             bundle.putInt("position", itemPos);
-            bundle.putBoolean("isDone", note.getIsDone());
             return bundle;
         }
     }

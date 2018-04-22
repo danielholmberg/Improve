@@ -31,9 +31,11 @@
             android:scrollbars="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:translationZ="1dp"
-            android:layout_marginTop="@dimen/contact_list_top_margin"
-            android:layout_marginBottom="@dimen/contact_item_bottom_margin"
+            android:paddingStart="@dimen/contact_list_padding"
+            android:paddingTop="@dimen/contact_list_padding"
+            android:paddingEnd="@dimen/contact_list_padding"
+            android:clipToPadding="false"
+            android:scrollbarStyle="outsideOverlay"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"/>
 

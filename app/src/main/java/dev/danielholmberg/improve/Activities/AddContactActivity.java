@@ -82,7 +82,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
             contactPosition = intentBundle.getInt("position");
 
             toolbar.setBackgroundColor(oldColor != null ? Color.parseColor(oldColor) :
-                    getResources().getColor(R.color.colorPickerIndigo));
+                    getResources().getColor(R.color.colorPickerDeepOrange));
             inputName.setText(contact.getName());
             inputCompany.setText(contact.getCompany());
             inputEmail.setText(contact.getEmail());
@@ -212,7 +212,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
                 toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerBlueGrey));
                 break;
             case R.id.buttonColorRed:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerRed));
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerTurquoise));
                 break;
             case R.id.buttonColorPink:
                 toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerPink));
@@ -224,7 +224,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
                 toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerIndigo));
                 break;
             default:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerIndigo));
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerDeepOrange));
                 break;
         }
         colorPickerDialog.dismiss();

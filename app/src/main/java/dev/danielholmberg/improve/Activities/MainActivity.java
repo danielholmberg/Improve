@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
     };
     // flag to load home fragment when currentUser presses back key
     private boolean shouldLoadHomeFragOnBackPress = true;
-    private int backPressCounter = 0;
+    private boolean doubleBackToExitPressedOnce = false;
 
     private Handler mHandler;
 
@@ -257,24 +257,28 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // This code loads home fragment when back key is pressed
-        // when currentUser is in other fragment than home
         if (shouldLoadHomeFragOnBackPress) {
-            // checking if currentUser is on other navigation menu
-            // rather than home
             if (navItemIndex != 0) {
                 navItemIndex = 0;
                 CURRENT_TAG = TAG_NOTES_FRAGMENT;
                 loadCurrentFragment();
             } else {
-                backPressCounter++;
-                Toast exitToast = Toast.makeText(this, "Press again to exit", Toast.LENGTH_SHORT);
-                exitToast.show();
-                if(backPressCounter >= 2) {
-                    exitToast.cancel();
-                    backPressCounter = 0;
-                    finish();
+
+                if (doubleBackToExitPressedOnce) {
+                    super.onBackPressed();
+                    return;
                 }
+
+                this.doubleBackToExitPressedOnce = true;
+                Toast.makeText(this, "Press BACK again to exit", Toast.LENGTH_SHORT).show();
+
+                new Handler().postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        doubleBackToExitPressedOnce=false;
+                    }
+                }, 2000);
             }
         }
     }

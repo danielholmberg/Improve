@@ -2,16 +2,17 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/layout_fragment_omms"
+    android:id="@+id/layout_fragment_notes"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:fitsSystemWindows="true">
+
     <android.support.constraint.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/omm_fragment_container"
+        android:id="@+id/note_fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".Activities.MainActivity">
@@ -31,10 +32,11 @@
             android:scrollbars="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:translationZ="1dp"
             android:paddingStart="@dimen/note_list_padding"
-            android:paddingEnd="@dimen/note_list_padding"
             android:paddingTop="@dimen/note_list_padding"
+            android:paddingEnd="@dimen/note_list_padding"
+            android:clipToPadding="false"
+            android:scrollbarStyle="outsideOverlay"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"/>
 
@@ -51,7 +53,7 @@
 
     </android.support.constraint.ConstraintLayout>
 
-    <!-- Dialog Fragment NoteMind details -->
+    <!-- Dialog Fragment Note details -->
     <include layout="@layout/fragment_note_details"/>
 
 </LinearLayout>

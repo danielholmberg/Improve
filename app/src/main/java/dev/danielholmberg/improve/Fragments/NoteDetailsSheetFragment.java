@@ -12,7 +12,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,8 +27,8 @@ import dev.danielholmberg.improve.R;
  * Created by Daniel Holmberg.
  */
 
-public class NoteDetailsDialogFragment extends BottomSheetDialogFragment implements View.OnClickListener{
-    private static final String TAG = NoteDetailsDialogFragment.class.getSimpleName();
+public class NoteDetailsSheetFragment extends BottomSheetDialogFragment implements View.OnClickListener{
+    private static final String TAG = NoteDetailsSheetFragment.class.getSimpleName();
 
     private Improve app;
     private DialogFragment detailsDialog;
@@ -60,11 +60,9 @@ public class NoteDetailsDialogFragment extends BottomSheetDialogFragment impleme
         RelativeLayout toolbar = (RelativeLayout) view.findViewById(R.id.note_details_toolbar);
         View layout = (View) view.findViewById(R.id.note_details_container);
 
-        Button close = (Button) view.findViewById(R.id.close_note_btn);
-        close.setOnClickListener(this);
-        Button update = (Button) view.findViewById(R.id.update_note_btn);
-        update.setOnClickListener(this);
-        Button done = (Button) view.findViewById(R.id.done_note_btn);
+        ImageButton edit = (ImageButton) view.findViewById(R.id.edit_note_btn);
+        edit.setOnClickListener(this);
+        ImageButton done = (ImageButton) view.findViewById(R.id.done_note_btn);
         done.setOnClickListener(this);
 
         TextView title = (TextView) view.findViewById(R.id.note_details_title_tv);
@@ -79,19 +77,23 @@ public class NoteDetailsDialogFragment extends BottomSheetDialogFragment impleme
         if(noteBundle != null){
             note = (Note) noteBundle.getSerializable("note");
             position = noteBundle.getInt("position");
-            isDone = noteBundle.getBoolean("isDone");
+            isDone = note.getIsDone();
         }
 
         if(note != null) {
-            toolbar.setBackgroundColor(Color.parseColor(note.getColor()));
+            int noteColor = getResources().getColor(R.color.colorPickerDeepOrange);
+            if(note.getColor() != null) {
+                noteColor = Color.parseColor(note.getColor());
+            }
+            toolbar.setBackgroundColor(noteColor);
             title.setText(note.getTitle());
             info.setText(note.getInfo());
             timestamp.setText(note.getTimestamp());
 
             if(isDone) {
                 // Change the Note Detail layout
-                update.setBackground(getResources().getDrawable(R.drawable.ic_menu_delete_white));
-                update.setOnClickListener(new View.OnClickListener() {
+                edit.setImageResource(R.drawable.ic_menu_delete_white);
+                edit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         // Delete Note
@@ -113,7 +115,7 @@ public class NoteDetailsDialogFragment extends BottomSheetDialogFragment impleme
                         dialog.show();
                     }
                 });
-                done.setBackground(getResources().getDrawable(R.drawable.ic_menu_undo_white));
+                done.setImageResource(R.drawable.ic_menu_undo_white);
                 done.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -122,6 +124,8 @@ public class NoteDetailsDialogFragment extends BottomSheetDialogFragment impleme
                         detailsDialog.dismiss();
                     }
                 });
+            } else if(info.getText().toString().trim().isEmpty()){
+                info.setVisibility(View.GONE);
             }
         } else {
             // Dismiss dialog and show Toast.
@@ -140,10 +144,7 @@ public class NoteDetailsDialogFragment extends BottomSheetDialogFragment impleme
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.close_note_btn:
-                detailsDialog.dismiss();
-                break;
-            case R.id.update_note_btn:
+            case R.id.edit_note_btn:
                 detailsDialog.dismiss();
                 Intent updateNote = new Intent(getContext(), AddNoteActivity.class);
                 updateNote.putExtra("noteBundle", noteBundle);

@@ -1,93 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.widget.LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/note_details_dialog_fragment_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
-
-    <RelativeLayout
-        android:id="@+id/note_details_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:elevation="@dimen/card_toolbar_elevation"
-        android:background="@color/colorPickerGreen"
-        android:padding="@dimen/toolbar_padding">
-
-        <!-- Toolbar content -->
-        <Button
-            android:id="@+id/close_note_btn"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="@drawable/ic_menu_close_white"
-            android:layout_margin="@dimen/toolbar_padding"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_centerVertical="true"
-            android:layout_alignParentStart="true"/>
-
-        <Button
-            android:id="@+id/done_note_btn"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="@drawable/ic_done_white"
-            android:layout_margin="@dimen/toolbar_padding"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_centerVertical="true"
-            android:layout_toStartOf="@id/update_note_btn"/>
-
-        <Button
-            android:id="@+id/update_note_btn"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="@drawable/ic_mode_edit_white"
-            android:layout_margin="@dimen/toolbar_padding"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true" />
-
-    </RelativeLayout>
+    app:behavior_hideable="true"
+    app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
     <LinearLayout
-        android:id="@+id/note_details_container"
+        android:id="@+id/note_details_dialog_fragment_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="@dimen/note_details_padding"
-        android:background="@color/cardInfoBackground">
+        android:orientation="vertical">
 
         <RelativeLayout
-            android:id="@+id/note_details_body_container"
+            android:id="@+id/note_details_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="?attr/actionBarSize"
+            android:elevation="@dimen/card_toolbar_elevation"
+            android:background="@color/colorPickerDeepOrange">
 
-            <TextView
-                android:id="@+id/note_details_title_tv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:paddingBottom="@dimen/note_title_padding"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"/>
+            <!-- Toolbar content -->
+            <ImageButton
+                android:id="@+id/done_note_btn"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_done_white"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_marginEnd="@dimen/toolbar_padding"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@id/edit_note_btn"
+                android:contentDescription="@string/editNoteButtonContentDesc" />
 
-            <TextView
-                android:id="@+id/note_details_info_tv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/note_info_padding"
-                android:isScrollContainer="true"
-                android:scrollbars="vertical"
-                android:textSize="@dimen/note_details_info_text_size"
-                android:layout_alignParentStart="true"
-                android:layout_below="@id/note_details_title_tv"/>
+            <ImageButton
+                android:id="@+id/edit_note_btn"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_mode_edit_white"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_marginStart="@dimen/toolbar_padding"
+                android:layout_marginEnd="16dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:contentDescription="@string/doneNoteButtonContentDesc"/>
 
         </RelativeLayout>
 
-        <include
-            android:id="@+id/footer_note_details"
-            layout="@layout/footer_item_note"/>
+        <LinearLayout
+            android:id="@+id/note_details_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/note_details_padding"
+            android:background="@color/cardInfoBackground">
+
+            <RelativeLayout
+                android:id="@+id/note_details_body_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/note_details_title_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:paddingBottom="@dimen/note_title_padding"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"/>
+
+                <TextView
+                    android:id="@+id/note_details_info_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="@dimen/note_info_padding"
+                    android:isScrollContainer="true"
+                    android:scrollbars="vertical"
+                    android:textSize="@dimen/note_details_info_text_size"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@id/note_details_title_tv"/>
+
+            </RelativeLayout>
+
+            <include
+                android:id="@+id/footer_note_details"
+                layout="@layout/footer_item_note"/>
+        </LinearLayout>
+
     </LinearLayout>
 
-</android.widget.LinearLayout>
+</android.support.v4.widget.NestedScrollView>

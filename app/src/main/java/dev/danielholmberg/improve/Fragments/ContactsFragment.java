@@ -175,6 +175,8 @@ public class ContactsFragment extends Fragment{
         }
 
         public void bindModelToView(final Contact contact) {
+            this.contact = contact;
+
             // Body views
             Button callBtn = (Button) mView.findViewById(R.id.call_contact_btn);
             Button mailBtn = (Button) mView.findViewById(R.id.mail_contact_btn);
@@ -184,7 +186,7 @@ public class ContactsFragment extends Fragment{
 
             ((LinearLayout) mView.findViewById(R.id.item_contact_marker))
                     .setBackgroundColor(contact.getColor() != null ? Color.parseColor(contact.getColor()) :
-                    getResources().getColor(R.color.colorPickerIndigo));
+                    getResources().getColor(R.color.colorPickerDeepOrange));
 
             if (contact.getEmail() == null || contact.getEmail().isEmpty()) {
                 mailBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_email_grey));
