@@ -49,5 +49,8 @@
     <string name="doneNoteButtonContentDesc">DoneNoteButton</string>
     <string name="editContactButtonContentDesc">EditContactButton</string>
     <string name="deleteContactButtonContentDesc">DeleteContactButton</string>
+    <string name="sort">Sort</string>
+    <string name="sort_by_company_alphabetical">Sort by company</string>
+    <string name="sort_by_marker">Sort by marker color</string>
 
 </resources>

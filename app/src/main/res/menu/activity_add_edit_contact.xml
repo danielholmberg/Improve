@@ -4,7 +4,7 @@
     <item
         android:id="@+id/chooseBackgroundColor"
         android:title="@string/contact_background_color"
-        android:icon="@drawable/ic_menu_background_color_white"
+        android:icon="@drawable/ic_menu_colorpalette_white"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/contactDone"

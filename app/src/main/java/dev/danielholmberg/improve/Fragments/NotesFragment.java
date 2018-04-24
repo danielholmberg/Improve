@@ -163,36 +163,50 @@ public class NotesFragment extends Fragment {
             context = itemView.getContext();
         }
 
+        // OBS! Due to RecyclerView:
+        // We need to define all views of each note!
+        // Otherwise each note view won't be unique.
         public void bindModelToView(final Note note) {
-            // Body views
+
+            // [START] All views of a contact
             LinearLayout marker = (LinearLayout) mView.findViewById(R.id.item_note_marker);
             TextView title = (TextView) mView.findViewById(R.id.item_note_title_tv);
             TextView info = (TextView) mView.findViewById(R.id.item_note_info_tv);
 
-            // Footer views
             View footer = (View) mView.findViewById(R.id.footer_note);
             TextView doneMarker = (TextView) mView.findViewById(R.id.done_mark);
             TextView timestamp = (TextView) mView.findViewById(R.id.footer_note_timestamp_tv);
+            // [END] All views of a note
 
-            // Setting Note content.
+            // [START] Define each view
             marker.setBackgroundColor(Color.parseColor(note.getColor()));
             title.setText(note.getTitle());
             info.setText(note.getInfo());
             timestamp.setText(note.getTimestamp());
 
-            // Hiding Note Info and Footer.
-            // Showing a mark to symbolize that the Note is completed.
             if(note.getIsDone()) {
                 info.setVisibility(View.GONE);
                 footer.setVisibility(View.GONE);
                 doneMarker.setVisibility(View.VISIBLE);
                 marker.setLayoutParams(new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            } else if(info.getText().toString().trim().isEmpty()){
-                info.setVisibility(View.GONE);
-            }
+            } else {
+                if(info.getText().toString().trim().isEmpty()){
+                    info.setVisibility(View.GONE);
+                } else {
+                    info.setVisibility(View.VISIBLE);
+                }
+                footer.setVisibility(View.VISIBLE);
+                doneMarker.setVisibility(View.GONE);
 
-            // Setting OnClickListener on the Root View.
+                // Convert (16)dp to pixel
+                final float scale = getContext().getResources().getDisplayMetrics().density;
+                int pixels = (int) (16 * scale + 0.5f);
+                marker.setLayoutParams(new LinearLayout.LayoutParams(
+                        pixels, ViewGroup.LayoutParams.MATCH_PARENT));
+            }
+            // [END] Define each view
+
             mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

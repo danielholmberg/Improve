@@ -13,11 +13,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -115,7 +119,7 @@ public class ContactsFragment extends Fragment{
     }
 
     private void initAdapter() {
-        query = storageManager.getContactsRef().orderByChild("company");
+        query = storageManager.getContactsRef().orderByChild("color");
 
         FirebaseRecyclerOptions<Contact> options =
                 new FirebaseRecyclerOptions.Builder<Contact>()
@@ -136,6 +140,36 @@ public class ContactsFragment extends Fragment{
                 holder.bindModelToView(model);
             }
         };
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_contacts, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.sort_contacts_by_company_alphabetical:
+                // TODO: Sort contacts by company alphabetical
+                sortContactsByCompany();
+                Toast.makeText(app, "Sorted by company", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.sort_contacts_by_marker:
+                // TODO: Sort contacts by marker color
+                sortContactsByMarkerColor();
+                Toast.makeText(app, "Sorted by marker color", Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                break;
+        }
+        return false;
+    }
+
+    private void sortContactsByMarkerColor() {
+    }
+
+    private void sortContactsByCompany() {
     }
 
     @Override
@@ -174,32 +208,46 @@ public class ContactsFragment extends Fragment{
             context = itemView.getContext();
         }
 
+        // OBS! Due to RecyclerView:
+        // We need to define all views of each contact!
+        // Otherwise each contact view won't be unique.
         public void bindModelToView(final Contact contact) {
             this.contact = contact;
 
-            // Body views
+            // [START] All views of a contact
             Button callBtn = (Button) mView.findViewById(R.id.call_contact_btn);
             Button mailBtn = (Button) mView.findViewById(R.id.mail_contact_btn);
 
-            ((TextView) mView.findViewById(R.id.name_tv)).setText(contact.getName());
-            ((TextView) mView.findViewById(R.id.company_tv)).setText(contact.getCompany());
+            TextView name = (TextView) mView.findViewById(R.id.name_tv);
+            TextView company = (TextView) mView.findViewById(R.id.company_tv);
 
-            ((LinearLayout) mView.findViewById(R.id.item_contact_marker))
-                    .setBackgroundColor(contact.getColor() != null ? Color.parseColor(contact.getColor()) :
+            LinearLayout marker = (LinearLayout) mView.findViewById(R.id.item_contact_marker);
+            // [END] All views of a note
+
+            // [START] Define each view
+            name.setText(contact.getName());
+            company.setText(contact.getCompany());
+            marker.setBackgroundColor(contact.getColor() != null ? Color.parseColor(contact.getColor()) :
                     getResources().getColor(R.color.colorPickerDeepOrange));
 
             if (contact.getEmail() == null || contact.getEmail().isEmpty()) {
                 mailBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_email_grey));
                 mailBtn.setEnabled(false);
+            } else {
+                mailBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_email_active));
+                mailBtn.setEnabled(true);
             }
+            mailBtn.setOnClickListener(this);
 
             if (contact.getPhone() == null || contact.getPhone().isEmpty()) {
                 callBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_mobile_grey));
                 callBtn.setEnabled(false);
+            } else {
+                callBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_mobile_active));
+                callBtn.setEnabled(true);
             }
-
             callBtn.setOnClickListener(this);
-            mailBtn.setOnClickListener(this);
+            // [END] Define each view
 
             mView.setOnClickListener(new View.OnClickListener() {
                 @Override
