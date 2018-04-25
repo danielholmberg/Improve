@@ -9,6 +9,10 @@
             android:checked="true"
             android:title="@string/nav_notes" />
         <item
+            android:id="@+id/nav_archived_notes"
+            android:icon="@drawable/ic_menu_archive_white"
+            android:title="@string/nav_archived_notes" />
+        <item
             android:id="@+id/nav_contacts"
             android:icon="@drawable/ic_menu_contacts_white"
             android:title="@string/nav_contacts" />

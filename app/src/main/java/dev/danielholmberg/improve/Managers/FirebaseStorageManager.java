@@ -21,6 +21,7 @@ public class FirebaseStorageManager {
 
     private static final String USERS_REF = "users";
     private static final String NOTES_REF = "notes";
+    private static final String ARCHIVED_NOTES_REF = "archived_notes";
     private static final String CONTACTS_REF = "contacts";
 
     public FirebaseStorageManager() {}
@@ -33,6 +34,14 @@ public class FirebaseStorageManager {
         return notesRef;
     }
 
+    public DatabaseReference getArchivedNotesRef() {
+        String userId = Improve.getInstance().getAuthManager().getCurrentUserId();
+        DatabaseReference archivedNotesRef = FirebaseDatabase.getInstance()
+                .getReference(USERS_REF).child(userId).child(ARCHIVED_NOTES_REF);
+        archivedNotesRef.keepSynced(true);
+        return archivedNotesRef;
+    }
+
     public DatabaseReference getContactsRef() {
         String userId = Improve.getInstance().getAuthManager().getCurrentUserId();
         DatabaseReference contactsRef = FirebaseDatabase.getInstance()
@@ -41,21 +50,40 @@ public class FirebaseStorageManager {
         return contactsRef;
     }
 
-    public void writeNoteToFirebase(Note note) {
-        getNotesRef().child(note.getId()).setValue(note)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        // Successfully added new Note.
-                        Log.d(TAG, "*** Successfully added new Note to Firebase storage ***");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "!!! Failed to add new Note to Firebase storage: " + e);
-                    }
-                });
+    public void writeNoteToFirebase(Note note, boolean archive) {
+        if(archive) {
+            getArchivedNotesRef().child(note.getId()).setValue(note)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            // Successfully updated Note.
+                            Log.d(TAG, "*** Successfully updated Note in Firebase storage ***");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(TAG, "!!! Failed to update Note in Firebase storage: " + e);
+                        }
+                    });
+            deleteNote(note, false);
+        } else {
+            getNotesRef().child(note.getId()).setValue(note)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            // Successfully added new Note.
+                            Log.d(TAG, "*** Successfully added new Note to Firebase storage ***");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(TAG, "!!! Failed to add new Note to Firebase storage: " + e);
+                        }
+                    });
+            deleteNote(note, true);
+        }
     }
 
     public void writeContactToFirebase(Contact contact) {
@@ -75,21 +103,38 @@ public class FirebaseStorageManager {
                 });
     }
 
-    public void deleteNote(Note noteToDelete) {
-        getNotesRef().child(noteToDelete.getId()).removeValue()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        // Successfully deleted the Note.
-                        Log.d(TAG, "*** Successfully deleted the Note in Firebase storage ***");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "!!! Failed to delete the Note in Firebase storage: " + e);
-                    }
-                });
+    public void deleteNote(Note noteToDelete, boolean fromArchive) {
+        if(fromArchive){
+            getArchivedNotesRef().child(noteToDelete.getId()).removeValue()
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            // Successfully deleted the Note.
+                            Log.d(TAG, "*** Successfully deleted the Note in Firebase storage ***");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(TAG, "!!! Failed to delete the Note in Firebase storage: " + e);
+                        }
+                    });
+        } else {
+            getNotesRef().child(noteToDelete.getId()).removeValue()
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            // Successfully deleted the Note.
+                            Log.d(TAG, "*** Successfully deleted the Note in Firebase storage ***");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(TAG, "!!! Failed to delete the Note in Firebase storage: " + e);
+                        }
+                    });
+        }
     }
 
     public void deleteContact(Contact contactToDelete) {

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/item_archived_note_cardview"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:focusable="true"
+    android:clickable="true"
+    android:elevation="@dimen/card_elevation"
+    android:layout_marginBottom="@dimen/card_item_margin">
+
+    <LinearLayout
+        android:id="@+id/item_archived_note_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/item_archived_note_marker"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:elevation="@dimen/card_toolbar_elevation"
+            android:background="@color/colorPickerDeepOrange">
+
+            <TextView
+                android:id="@+id/archived_done_mark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/note_item_done_marker_padding"
+                android:visibility="visible"
+                android:drawableStart="@drawable/ic_done_green" />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/item_archived_note_body_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/note_item_body_padding"
+            android:background="@color/cardInfoBackground">
+
+            <TextView
+                android:id="@+id/item_archived_note_title_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:paddingBottom="@dimen/note_title_padding"
+                android:maxLines="@integer/note_item_title_max_lines"
+                android:ellipsize="end"
+                android:text="@string/hint_title"
+                android:textStyle="bold"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"/>
+
+        </RelativeLayout>
+
+
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>

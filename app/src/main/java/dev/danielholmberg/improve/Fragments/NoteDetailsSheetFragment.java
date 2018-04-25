@@ -62,8 +62,8 @@ public class NoteDetailsSheetFragment extends BottomSheetDialogFragment implemen
 
         ImageButton edit = (ImageButton) view.findViewById(R.id.edit_note_btn);
         edit.setOnClickListener(this);
-        ImageButton done = (ImageButton) view.findViewById(R.id.done_note_btn);
-        done.setOnClickListener(this);
+        ImageButton archive = (ImageButton) view.findViewById(R.id.done_note_btn);
+        archive.setOnClickListener(this);
 
         TextView title = (TextView) view.findViewById(R.id.note_details_title_tv);
         TextView info = (TextView) view.findViewById(R.id.note_details_info_tv);
@@ -115,12 +115,12 @@ public class NoteDetailsSheetFragment extends BottomSheetDialogFragment implemen
                         dialog.show();
                     }
                 });
-                done.setImageResource(R.drawable.ic_menu_undo_white);
-                done.setOnClickListener(new View.OnClickListener() {
+                archive.setImageResource(R.drawable.ic_menu_unarchive_white);
+                archive.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         note.setIsDone(false);
-                        storageManager.writeNoteToFirebase(note);
+                        storageManager.writeNoteToFirebase(note, false);
                         detailsDialog.dismiss();
                     }
                 });
@@ -137,7 +137,7 @@ public class NoteDetailsSheetFragment extends BottomSheetDialogFragment implemen
     }
 
     private void deleteNote(Note note) {
-        storageManager.deleteNote(note);
+        storageManager.deleteNote(note, true);
         detailsDialog.dismiss();
     }
 
@@ -152,7 +152,7 @@ public class NoteDetailsSheetFragment extends BottomSheetDialogFragment implemen
                 break;
             case R.id.done_note_btn:
                 note.setIsDone(true);
-                storageManager.writeNoteToFirebase(note);
+                storageManager.writeNoteToFirebase(note, true);
                 detailsDialog.dismiss();
                 break;
             default:

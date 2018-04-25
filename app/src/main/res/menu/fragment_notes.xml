@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/sort_notes"
+        android:title="@string/sort"
+        android:icon="@drawable/ic_sort_white"
+        app:showAsAction="always">
+        <!-- Submenu -->
+        <menu>
+            <item android:id="@+id/sort_notes_by_title_alphabetical"
+                android:title="@string/sort_by_title_alphabetical"
+                android:icon="@drawable/ic_menu_sort_alphabetical_accent"/>
+            <item android:id="@+id/sort_notes_by_timestamp"
+                android:title="@string/sort_by_timestamp"
+                android:icon="@drawable/ic_menu_sort_timestamp_accent"/>
+            <item android:id="@+id/sort_notes_by_marker"
+                android:title="@string/sort_by_marker"
+                android:icon="@drawable/ic_menu_colorpalette_accent"/>
+        </menu>
+    </item>
+</menu>

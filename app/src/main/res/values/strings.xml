@@ -52,5 +52,9 @@
     <string name="sort">Sort</string>
     <string name="sort_by_company_alphabetical">Sort by company</string>
     <string name="sort_by_marker">Sort by marker color</string>
+    <string name="sort_by_title_alphabetical">Sort by title</string>
+    <string name="sort_by_timestamp">Sort by timestamp</string>
+    <string name="empty_archived_notes_list_text">No archived notes</string>
+    <string name="nav_archived_notes">Archive</string>
 
 </resources>

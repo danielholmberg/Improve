@@ -27,6 +27,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
 
+import dev.danielholmberg.improve.Fragments.ArchivedNotesFragment;
 import dev.danielholmberg.improve.Fragments.ContactsFragment;
 import dev.danielholmberg.improve.Fragments.NotesFragment;
 import dev.danielholmberg.improve.Improve;
@@ -36,6 +37,7 @@ import dev.danielholmberg.improve.Utilities.CircleTransform;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String TAG_NOTES_FRAGMENT = "NOTES_FRAGMENT";
+    private static final String TAG_ARCHIVED_NOTES_FRAGMENT = "ARCHIVED_NOTES_FRAGMENT";
     private static final String TAG_CONTACTS_FRAGMENT = "CONTACTS_FRAGMENT";
     private static String CURRENT_TAG = TAG_NOTES_FRAGMENT;
 
@@ -45,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     public static int navItemIndex = 0;
     private static final String[] subTitles = {
             "Notes",
+            "Archive",
             "Contacts",
     };
     // flag to load home fragment when currentUser presses back key
@@ -155,9 +158,12 @@ public class MainActivity extends AppCompatActivity {
     private Fragment getCurrentFragment() {
         switch (navItemIndex) {
             case 0:
-                // OnMyMinds
+                // Notes
                 return new NotesFragment();
             case 1:
+                // Archive
+                return new ArchivedNotesFragment();
+            case 2:
                 // Contacts
                 return new ContactsFragment();
             default:
@@ -188,8 +194,12 @@ public class MainActivity extends AppCompatActivity {
                         navItemIndex = 0;
                         CURRENT_TAG = TAG_NOTES_FRAGMENT;
                         break;
-                    case R.id.nav_contacts:
+                    case R.id.nav_archived_notes:
                         navItemIndex = 1;
+                        CURRENT_TAG = TAG_ARCHIVED_NOTES_FRAGMENT;
+                        break;
+                    case R.id.nav_contacts:
+                        navItemIndex = 2;
                         CURRENT_TAG = TAG_CONTACTS_FRAGMENT;
                         break;
                     case R.id.nav_sign_out:

@@ -42,7 +42,7 @@ import dev.danielholmberg.improve.R;
  */
 
 public class ContactsFragment extends Fragment{
-    private static final String TAG = "ContactsFragment";
+    private static final String TAG = ContactsFragment.class.getSimpleName();
 
     private Improve app;
     private FirebaseStorageManager storageManager;
@@ -157,7 +157,7 @@ public class ContactsFragment extends Fragment{
                 return true;
             case R.id.sort_contacts_by_marker:
                 // TODO: Sort contacts by marker color
-                sortContactsByMarkerColor();
+                sortContactsByMarker();
                 Toast.makeText(app, "Sorted by marker color", Toast.LENGTH_SHORT).show();
                 return true;
             default:
@@ -166,10 +166,12 @@ public class ContactsFragment extends Fragment{
         return false;
     }
 
-    private void sortContactsByMarkerColor() {
+    private void sortContactsByMarker() {
+
     }
 
     private void sortContactsByCompany() {
+
     }
 
     @Override

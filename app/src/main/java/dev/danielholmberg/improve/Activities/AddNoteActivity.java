@@ -166,7 +166,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         String timestamp = getCurrentTimestamp();
 
         Note newNote = new Note(id, title, info, color, timestamp);
-        storageManager.writeNoteToFirebase(newNote);
+        storageManager.writeNoteToFirebase(newNote, false);
         showParentActivity();
     }
 
@@ -178,7 +178,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         String updatedTimestamp = getCurrentTimestamp();
 
         Note updatedNote = new Note(id, title, info, color, updatedTimestamp);
-        storageManager.writeNoteToFirebase(updatedNote);
+        storageManager.writeNoteToFirebase(updatedNote, false);
         showParentActivity();
     }
 

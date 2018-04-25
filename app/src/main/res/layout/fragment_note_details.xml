@@ -24,7 +24,7 @@
                 android:id="@+id/done_note_btn"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/ic_done_white"
+                android:src="@drawable/ic_menu_archive_white"
                 style="?android:attr/borderlessButtonStyle"
                 android:layout_marginEnd="@dimen/toolbar_padding"
                 android:layout_centerVertical="true"
