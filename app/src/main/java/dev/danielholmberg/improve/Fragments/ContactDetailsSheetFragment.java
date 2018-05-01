@@ -6,7 +6,9 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetDialogFragment;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import dev.danielholmberg.improve.Activities.AddContactActivity;
+import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Components.Contact;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
@@ -37,6 +40,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
 
     private ContactDetailsSheetFragment detailsDialog;
     private View view;
+    private ViewGroup parentLayout;
 
     public ContactDetailsSheetFragment() {
         // Required empty public constructor
@@ -54,6 +58,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_contact_details, container, false);
+        parentLayout = getActivity().findViewById(R.id.main_fragment_container);
 
         Button actionCallContact = (Button) view.findViewById(R.id.details_call_contact_btn);
         Button actionSendMailToContact = (Button) view.findViewById(R.id.details_mail_contact_btn);
@@ -176,8 +181,40 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
         return view;
     }
 
-    private void deleteContact(Contact contact) {
-        storageManager.deleteContact(contact);
+    private void deleteContact(final Contact contact) {
+        storageManager.deleteContact(contact, new FirebaseStorageCallback() {
+            @Override
+            public void onSuccess() {
+                Snackbar.make(parentLayout, "Deleted contact", Snackbar.LENGTH_LONG)
+                        .setAction("UNDO", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                storageManager.writeContactToFirebase(contact, new FirebaseStorageCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "*** Successfully undid 'Delete contact' ***");
+                                    }
+
+                                    @Override
+                                    public void onFailure(String errorMessage) {
+                                        Log.e(TAG, "Failed to undo 'Delete contact': "+ errorMessage);
+                                    }
+                                });
+                            }
+                        }).show();
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Snackbar.make(parentLayout, "Failed to delete contact", Snackbar.LENGTH_LONG)
+                        .setAction("RETRY", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                deleteContact(contact);
+                            }
+                        }).show();
+            }
+        });
         detailsDialog.dismiss();
     }
 

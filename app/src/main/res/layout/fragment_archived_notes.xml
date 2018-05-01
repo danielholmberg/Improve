@@ -13,16 +13,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/empty_archived_notes_list_tv"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/empty_archived_notes_list_text"
-            android:paddingTop="64dp"
-            android:textSize="28sp"
-            android:textColor="@color/emptyListTextColor"
-            android:gravity="center_horizontal"/>
-
         <android.support.v7.widget.RecyclerView
             android:id="@+id/archived_notes_list"
             android:scrollbars="vertical"

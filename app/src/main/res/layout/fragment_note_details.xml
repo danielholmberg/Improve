@@ -21,7 +21,7 @@
 
             <!-- Toolbar content -->
             <ImageButton
-                android:id="@+id/done_note_btn"
+                android:id="@+id/archive_note_btn"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_menu_archive_white"

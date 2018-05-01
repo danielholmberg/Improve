@@ -17,12 +17,14 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DateFormat;
 import java.util.Date;
 
+import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Components.Note;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
@@ -166,7 +168,17 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         String timestamp = getCurrentTimestamp();
 
         Note newNote = new Note(id, title, info, color, timestamp);
-        storageManager.writeNoteToFirebase(newNote, false);
+        storageManager.writeNoteToFirebase(newNote, false, new FirebaseStorageCallback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(app, "Added new note", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Toast.makeText(app, "Failed to add new note", Toast.LENGTH_SHORT).show();
+            }
+        });
         showParentActivity();
     }
 
@@ -178,7 +190,17 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         String updatedTimestamp = getCurrentTimestamp();
 
         Note updatedNote = new Note(id, title, info, color, updatedTimestamp);
-        storageManager.writeNoteToFirebase(updatedNote, false);
+        storageManager.writeNoteToFirebase(updatedNote, false, new FirebaseStorageCallback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(app, "Updated note", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Toast.makeText(app, "Failed to update note", Toast.LENGTH_SHORT).show();
+            }
+        });
         showParentActivity();
     }
 

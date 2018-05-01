@@ -7,14 +7,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:fitsSystemWindows="true">
-    <android.support.constraint.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+
+    <android.support.design.widget.CoordinatorLayout
         android:id="@+id/contacts_fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".Activities.MainActivity">
+        android:layout_height="match_parent">
 
         <TextView
             android:id="@+id/empty_contact_list_tv"
@@ -50,7 +47,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_fab_add_contact_white" />
 
-    </android.support.constraint.ConstraintLayout>
+    </android.support.design.widget.CoordinatorLayout>
 
     <!-- Bottom sheet for contact details -->
     <include layout="@layout/fragment_contact_details"/>

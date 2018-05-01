@@ -40,7 +40,6 @@ public class ArchivedNotesFragment extends Fragment {
 
     private View view;
     private RecyclerView archivedNotesRecyclerView;
-    private TextView emptyListText;
 
     private FirebaseRecyclerAdapter recyclerAdapter;
 
@@ -53,7 +52,7 @@ public class ArchivedNotesFragment extends Fragment {
         super.onCreate(savedInstanceState);
         app = Improve.getInstance();
         storageManager = app.getFirebaseStorageManager();
-        //setHasOptionsMenu(true);
+        setHasOptionsMenu(true);
     }
 
     @Nullable
@@ -65,7 +64,6 @@ public class ArchivedNotesFragment extends Fragment {
 
         // Initialize View components to be used.
         archivedNotesRecyclerView = (RecyclerView) view.findViewById(R.id.archived_notes_list);
-        emptyListText = (TextView) view.findViewById(R.id.empty_archived_notes_list_tv);
 
         // Initialize the LinearLayoutManager
         LinearLayoutManager recyclerLayoutManager = new LinearLayoutManager(getActivity());
@@ -100,6 +98,7 @@ public class ArchivedNotesFragment extends Fragment {
                 holder.bindModelToView(model);
             }
         };
+
     }
 
     @Override

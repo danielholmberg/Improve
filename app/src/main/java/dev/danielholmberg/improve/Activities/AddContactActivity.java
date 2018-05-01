@@ -15,9 +15,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
+import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Components.Contact;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
@@ -150,7 +152,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
 
     public void addContact(){
         String id = storageManager.getContactsRef().push().getKey();
-        String name = inputName.getText().toString();
+        final String name = inputName.getText().toString();
         String company = inputCompany.getText().toString();
         String email = inputEmail.getText().toString();
         String phone = inputPhone.getText().toString();
@@ -158,7 +160,17 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
         String color = "#" + Integer.toHexString(((ColorDrawable) toolbar.getBackground()).getColor());
 
         Contact newContact = new Contact(id, name, company, email, phone, comment, color);
-        storageManager.writeContactToFirebase(newContact);
+        storageManager.writeContactToFirebase(newContact, new FirebaseStorageCallback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(app, "Added new contact" , Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Toast.makeText(app, "Failed to add new contact", Toast.LENGTH_SHORT).show();
+            }
+        });
         showParentActivity();
     }
 
@@ -172,7 +184,17 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
         String color = "#" + Integer.toHexString(((ColorDrawable) toolbar.getBackground()).getColor());
 
         Contact updatedContact = new Contact(id, name, company, email, phone, comment, color);
-        storageManager.writeContactToFirebase(updatedContact);
+        storageManager.writeContactToFirebase(updatedContact, new FirebaseStorageCallback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(app,"Updated contact", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Toast.makeText(app,"Failed to update contact", Toast.LENGTH_SHORT).show();
+            }
+        });
         showParentActivity();
     }
 

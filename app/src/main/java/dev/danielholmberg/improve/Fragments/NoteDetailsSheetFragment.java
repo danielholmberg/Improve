@@ -6,9 +6,11 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialogFragment;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import dev.danielholmberg.improve.Activities.AddNoteActivity;
+import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Components.Note;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
@@ -55,14 +58,14 @@ public class NoteDetailsSheetFragment extends BottomSheetDialogFragment implemen
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_note_details, container, false);
-        parentLayout = (View) container;
+        parentLayout = getActivity().findViewById(R.id.main_fragment_container);
 
         RelativeLayout toolbar = (RelativeLayout) view.findViewById(R.id.note_details_toolbar);
         View layout = (View) view.findViewById(R.id.note_details_container);
 
         ImageButton edit = (ImageButton) view.findViewById(R.id.edit_note_btn);
         edit.setOnClickListener(this);
-        ImageButton archive = (ImageButton) view.findViewById(R.id.done_note_btn);
+        ImageButton archive = (ImageButton) view.findViewById(R.id.archive_note_btn);
         archive.setOnClickListener(this);
 
         TextView title = (TextView) view.findViewById(R.id.note_details_title_tv);
@@ -120,7 +123,34 @@ public class NoteDetailsSheetFragment extends BottomSheetDialogFragment implemen
                     @Override
                     public void onClick(View view) {
                         note.setIsDone(false);
-                        storageManager.writeNoteToFirebase(note, false);
+                        storageManager.writeNoteToFirebase(note, false, new FirebaseStorageCallback() {
+                            @Override
+                            public void onSuccess() {
+                                Snackbar.make(parentLayout, "Moved note from archive", Snackbar.LENGTH_SHORT)
+                                        .setAction("UNDO", new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view) {
+                                                note.setIsDone(true);
+                                                storageManager.writeNoteToFirebase(note, true, new FirebaseStorageCallback() {
+                                                    @Override
+                                                    public void onSuccess() {
+                                                        Log.d(TAG, "*** Successfully undid 'Move note from archive' ***");
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(String errorMessage) {
+                                                        Log.e(TAG, "Failed to undo 'Move note from archive': "+ errorMessage);
+                                                    }
+                                                });
+                                            }
+                                        }).show();
+                            }
+
+                            @Override
+                            public void onFailure(String errorMessage) {
+
+                            }
+                        });
                         detailsDialog.dismiss();
                     }
                 });
@@ -136,8 +166,40 @@ public class NoteDetailsSheetFragment extends BottomSheetDialogFragment implemen
         return view;
     }
 
-    private void deleteNote(Note note) {
-        storageManager.deleteNote(note, true);
+    private void deleteNote(final Note note) {
+        storageManager.deleteNote(note, true, new FirebaseStorageCallback() {
+            @Override
+            public void onSuccess() {
+                Snackbar.make(parentLayout, "Deleted note", Snackbar.LENGTH_LONG)
+                        .setAction("UNDO", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                storageManager.writeNoteToFirebase(note, true, new FirebaseStorageCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "*** Successfully undid 'Delete note' ***");
+                                    }
+
+                                    @Override
+                                    public void onFailure(String errorMessage) {
+                                        Log.e(TAG, "Failed to undo 'Delete note': "+ errorMessage);
+                                    }
+                                });
+                            }
+                        }).show();
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Snackbar.make(parentLayout, "Failed to delete note", Snackbar.LENGTH_LONG)
+                        .setAction("RETRY", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                deleteNote(note);
+                            }
+                        }).show();
+            }
+        });
         detailsDialog.dismiss();
     }
 
@@ -150,9 +212,36 @@ public class NoteDetailsSheetFragment extends BottomSheetDialogFragment implemen
                 updateNote.putExtra("noteBundle", noteBundle);
                 startActivity(updateNote);
                 break;
-            case R.id.done_note_btn:
+            case R.id.archive_note_btn:
                 note.setIsDone(true);
-                storageManager.writeNoteToFirebase(note, true);
+                storageManager.writeNoteToFirebase(note, true, new FirebaseStorageCallback() {
+                    @Override
+                    public void onSuccess() {
+                        Snackbar.make(parentLayout, "Archived note", Snackbar.LENGTH_SHORT)
+                                .setAction("UNDO", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        note.setIsDone(false);
+                                        storageManager.writeNoteToFirebase(note, false, new FirebaseStorageCallback() {
+                                            @Override
+                                            public void onSuccess() {
+                                                Log.d(TAG, "*** Successfully undid 'Archived note' ***");
+                                            }
+
+                                            @Override
+                                            public void onFailure(String errorMessage) {
+                                                Log.e(TAG, "Failed to undo 'Archived note': "+ errorMessage);
+                                            }
+                                        });
+                                    }
+                                }).show();
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+
+                    }
+                });
                 detailsDialog.dismiss();
                 break;
             default:
