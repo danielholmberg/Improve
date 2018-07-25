@@ -46,7 +46,11 @@ public class AuthManager {
     }
 
     public String getCurrentUserId() {
-        return getCurrentUser().getUid();
+        if(getCurrentUser() != null) {
+            return getCurrentUser().getUid();
+        } else {
+            return null;
+        }
     }
 
     public DatabaseReference getUserRef() {

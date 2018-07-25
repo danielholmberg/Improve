@@ -22,6 +22,7 @@
     <color name="cardTitleColor">#FFFFFFFF</color>              <!-- White -->
     <color name="doneMarkerColor">#388E3C</color>               <!-- Green 700 -->
     <color name="note_form_icon">#FFE0E0E0</color>              <!-- Grey 300 -->
+    <color name="note_icon_grey">#FFE0E0E0</color>
 
     <!-- Contact colors -->
     <color name="contactCardBackgroundColor">#FFFFFFFF</color>  <!-- White -->

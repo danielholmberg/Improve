@@ -21,9 +21,13 @@ public class FirebaseIDService extends FirebaseInstanceIdService {
         // Get updated InstanceID token.
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         String userId = Improve.getInstance().getAuthManager().getCurrentUserId();
-        DatabaseReference tokenRef = FirebaseDatabase.getInstance().getReference("users/"+userId+"/notificationToken");
-        tokenRef.setValue(refreshedToken);
 
+        if(userId != null) {
+            DatabaseReference tokenRef = FirebaseDatabase.getInstance().getReference("users/"+userId+"/notificationToken");
+            tokenRef.setValue(refreshedToken);
+        } else {
+            // TODO: Do something...
+        }
 
         Log.d(TAG, "Refreshed token: " + refreshedToken);
 

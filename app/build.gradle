@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion '26.0.2'
+    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "dev.danielholmberg.careercontacts"
         minSdkVersion 21
@@ -54,9 +54,9 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    compile 'com.android.support.test.espresso:espresso-idling-resource:3.0.1';
-    androidTestCompile 'com.android.support.test.espresso:espresso-intents:3.0.1'
-    androidTestCompile 'com.android.support.test.espresso:espresso-contrib:3.0.1'
+    compile 'com.android.support.test.espresso:espresso-idling-resource:3.0.2';
+    androidTestCompile 'com.android.support.test.espresso:espresso-intents:3.0.2'
+    androidTestCompile 'com.android.support.test.espresso:espresso-contrib:3.0.2'
 
 }
 

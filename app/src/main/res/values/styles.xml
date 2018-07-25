@@ -20,9 +20,14 @@
 
     <!-- [Base] Toolbar title text style -->
     <style name="AppTheme.Base.ActivityTitle" parent="AppTheme.Base">
-        <item name="android:textColor">@color/titleTextColor</item>
+        <item name="android:textColor">@color/colorPrimary</item>
         <item name="android:textSize">@dimen/title_text_size</item>
         <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AppTheme.Base.FlatToolbar" parent="AppTheme.Base">
+        <item name="elevation">0dp</item>
+        <item name="colorControlNormal">@color/colorPrimary</item>
     </style>
 
     <!-- [Base] Application Title text style -->

@@ -56,5 +56,10 @@
     <string name="sort_by_timestamp">Sort by timestamp</string>
     <string name="empty_archived_notes_list_text">No archived notes</string>
     <string name="nav_archived_notes">Archive</string>
+    <string name="menu_note_edit">Edit</string>
+    <string name="menu_note_archive">Archive</string>
+    <string name="note_activity_details">Note details</string>
+    <string name="menu_note_delete">Delete</string>
+    <string name="menu_note_unarchive">Unarchive</string>
 
 </resources>

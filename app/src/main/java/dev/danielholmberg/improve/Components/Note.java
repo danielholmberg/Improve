@@ -1,6 +1,7 @@
 package dev.danielholmberg.improve.Components;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Created by DanielHolmberg on 2018-01-21.
@@ -12,7 +13,7 @@ public class Note implements Serializable{
     private String info;
     private String color;
     private String timestamp;
-    private boolean isDone;
+    private boolean archived;
 
     public Note() {}
 
@@ -44,8 +45,8 @@ public class Note implements Serializable{
         this.timestamp = timestamp;
     }
 
-    public void setIsDone(boolean isDone) {
-        this.isDone = isDone;
+    public void setArchived(boolean isDone) {
+        this.archived = isDone;
     }
 
     public String getId() {
@@ -68,33 +69,26 @@ public class Note implements Serializable{
         return timestamp;
     }
 
-    public boolean getIsDone(){
-        return isDone;
+    public boolean getArchived(){
+        return archived;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Note note = (Note) o;
-
-        if (isDone != note.isDone) return false;
-        if (!id.equals(note.id)) return false;
-        if (!title.equals(note.title)) return false;
-        if (info != null ? !info.equals(note.info) : note.info != null) return false;
-        if (!color.equals(note.color)) return false;
-        return timestamp.equals(note.timestamp);
+        return archived == note.archived &&
+                Objects.equals(id, note.id) &&
+                Objects.equals(title, note.title) &&
+                Objects.equals(info, note.info) &&
+                Objects.equals(color, note.color) &&
+                Objects.equals(timestamp, note.timestamp);
     }
 
     @Override
     public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + title.hashCode();
-        result = 31 * result + (info != null ? info.hashCode() : 0);
-        result = 31 * result + color.hashCode();
-        result = 31 * result + timestamp.hashCode();
-        result = 31 * result + (isDone ? 1 : 0);
-        return result;
+
+        return Objects.hash(id, title, info, color, timestamp, archived);
     }
 }

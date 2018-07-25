@@ -9,7 +9,7 @@
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar_add_contact"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="?android:attr/actionBarSize"
         android:elevation="@dimen/toolbar_elevation"
         android:background="@color/colorPickerDeepOrange"
         app:layout_scrollFlags="scroll|enterAlways"
@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:text="@string/title_new_contact"
             style="@style/AppTheme.Base.ActivityTitle"
-            android:layout_gravity="center"
+            android:layout_gravity="start"
             android:id="@+id/toolbar_add_contact_title_tv" />
 
     </android.support.v7.widget.Toolbar>

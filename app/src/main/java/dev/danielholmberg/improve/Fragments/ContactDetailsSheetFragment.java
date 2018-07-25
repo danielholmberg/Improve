@@ -185,7 +185,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
         storageManager.deleteContact(contact, new FirebaseStorageCallback() {
             @Override
             public void onSuccess() {
-                Snackbar.make(parentLayout, "Deleted contact", Snackbar.LENGTH_LONG)
+                Snackbar.make(app.getContactsFragmentRef().getView().findViewById(R.id.contacts_fragment_container), "Deleted contact", Snackbar.LENGTH_LONG)
                         .setAction("UNDO", new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {

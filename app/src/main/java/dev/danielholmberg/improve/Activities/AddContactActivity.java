@@ -99,7 +99,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.activity_add_edit_contact, menu);
+        inflater.inflate(R.menu.activity_contact_mode_edit, menu);
         return true;
     }
 

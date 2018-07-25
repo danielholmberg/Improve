@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -26,6 +25,7 @@ import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.Query;
 
 import dev.danielholmberg.improve.Activities.AddNoteActivity;
+import dev.danielholmberg.improve.Activities.NoteActivity;
 import dev.danielholmberg.improve.Components.Note;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
@@ -56,6 +56,7 @@ public class NotesFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         app = Improve.getInstance();
+        app.setNotesFragmentRef(this);
         storageManager = app.getFirebaseStorageManager();
         setHasOptionsMenu(true);
     }
@@ -227,7 +228,7 @@ public class NotesFragment extends Fragment {
             info.setText(note.getInfo());
             timestamp.setText(note.getTimestamp());
 
-            if(note.getIsDone()) {
+            if(note.getArchived()) {
                 info.setVisibility(View.GONE);
                 footer.setVisibility(View.GONE);
                 doneMarker.setVisibility(View.VISIBLE);
@@ -253,10 +254,10 @@ public class NotesFragment extends Fragment {
             mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    NoteDetailsSheetFragment noteDetailsSheetFragment = new NoteDetailsSheetFragment();
-                    noteDetailsSheetFragment.setArguments(createBundle(note, getAdapterPosition()));
-                    noteDetailsSheetFragment.show(((AppCompatActivity)context).getSupportFragmentManager(),
-                            noteDetailsSheetFragment.getTag());
+                    Intent showNoteDetails = new Intent(context, NoteActivity.class);
+                    Bundle noteBundle = createBundle(note, getAdapterPosition());
+                    showNoteDetails.putExtra("noteBundle", noteBundle);
+                    startActivity(showNoteDetails);
                 }
             });
         }
@@ -265,6 +266,7 @@ public class NotesFragment extends Fragment {
             Bundle bundle = new Bundle();
             bundle.putSerializable("note", note);
             bundle.putInt("position", itemPos);
+            bundle.putInt("parentFragment", R.integer.NOTES_FRAGMENT);
             return bundle;
         }
     }

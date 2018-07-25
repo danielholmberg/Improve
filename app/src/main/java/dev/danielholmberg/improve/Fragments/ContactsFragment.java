@@ -63,6 +63,7 @@ public class ContactsFragment extends Fragment{
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         app = Improve.getInstance();
+        app.setContactFragmentRef(this);
         storageManager = app.getFirebaseStorageManager();
         // Enable the OptionsMenu to show the SearchView.
         setHasOptionsMenu(true);

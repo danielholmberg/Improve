@@ -51,8 +51,8 @@ public class FirebaseStorageManager {
         return contactsRef;
     }
 
-    public void writeNoteToFirebase(Note note, boolean archive, final FirebaseStorageCallback callback) {
-        if(archive) {
+    public void writeNoteToFirebase(Note note, boolean toArchive, final FirebaseStorageCallback callback) {
+        if(toArchive) {
             getArchivedNotesRef().child(note.getId()).setValue(note)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override

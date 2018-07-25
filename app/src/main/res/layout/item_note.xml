@@ -75,7 +75,7 @@
 
             <include
                 android:id="@+id/footer_note"
-                layout="@layout/footer_item_note"/>
+                layout="@layout/footer_item_note" />
         </LinearLayout>
 
     </LinearLayout>
