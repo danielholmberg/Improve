@@ -6,5 +6,6 @@
     <integer name="note_item_info_max_lines">4</integer>
     <integer name="NOTES_FRAGMENT">1</integer>
     <integer name="ARCHIVED_NOTES_FRAGMENT">2</integer>
+    <integer name="CONTACT_FRAGMENT">3</integer>
 
 </resources>

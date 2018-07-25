@@ -11,8 +11,7 @@
         android:id="@+id/toolbar_contact_details"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
-        android:elevation="@dimen/contact_toolbar_elevation"
-        android:background="@color/colorPickerDeepOrange">
+        android:background="@color/cardInfoBackground">
 
         <HorizontalScrollView
             android:layout_width="wrap_content"
@@ -38,7 +37,7 @@
             android:id="@+id/delete_contact_btn"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_menu_delete_white"
+            android:src="@drawable/ic_menu_delete_primary"
             android:layout_gravity="end"
             android:layout_marginEnd="16dp"
             style="?android:attr/borderlessButtonStyle"
@@ -50,7 +49,7 @@
             android:id="@+id/edit_contact_btn"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_mode_edit_white"
+            android:src="@drawable/ic_mode_edit_primary"
             android:layout_gravity="end"
             android:layout_marginEnd="16dp"
             style="?android:attr/borderlessButtonStyle"
@@ -63,7 +62,21 @@
         android:id="@+id/contact_details_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/cardInfoBackground"
         android:padding="@dimen/contact_details_padding">
+
+        <LinearLayout
+            android:id="@+id/item_marker_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <include
+                android:id="@+id/include_item_marker"
+                layout="@layout/item_marker" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/contact_details_name_tv"
@@ -77,7 +90,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:paddingBottom="@dimen/contact_details_vertical_padding"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/item_marker_layout"/>
 
         <LinearLayout
             android:id="@+id/contact_details_actions"

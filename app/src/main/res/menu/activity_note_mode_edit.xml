@@ -2,7 +2,7 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/chooseBackgroundColor"
+        android:id="@+id/chooseMarkerColor"
         android:title="@string/note_background_color"
         android:icon="@drawable/ic_menu_colorpalette_primary"
         app:showAsAction="ifRoom" />

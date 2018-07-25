@@ -2,6 +2,18 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/noteEdit"
+        android:title="@string/menu_note_edit"
+        android:icon="@drawable/ic_mode_edit_primary"
+        app:showAsAction="always"
+        />
+    <item
+        android:id="@+id/noteDelete"
+        android:title="@string/menu_note_delete"
+        android:icon="@drawable/ic_menu_delete_primary"
+        app:showAsAction="ifRoom"
+        />
+    <item
         android:id="@+id/noteUnarchive"
         android:title="@string/menu_note_unarchive"
         android:icon="@drawable/ic_menu_unarchive_primary"
@@ -12,16 +24,4 @@
         android:title="@string/menu_note_archive"
         android:icon="@drawable/ic_menu_archive_primary"
         app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/noteDelete"
-        android:title="@string/menu_note_delete"
-        android:icon="@drawable/ic_menu_delete_primary"
-        app:showAsAction="ifRoom"
-        />
-    <item
-        android:id="@+id/noteEdit"
-        android:title="@string/menu_note_edit"
-        android:icon="@drawable/ic_mode_edit_primary"
-        app:showAsAction="always"
-        />
 </menu>

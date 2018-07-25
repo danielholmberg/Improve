@@ -1,8 +1,5 @@
 package dev.danielholmberg.improve.Activities;
 
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,14 +8,11 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.DateFormat;
@@ -44,7 +38,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
 
     private LinearLayout marker;
     private int markerColor;
-    private EditText inputTitle, inputInfo;
+    private TextInputEditText inputTitle, inputInfo;
 
     private Toolbar toolbar;
     private View inputLayout;
@@ -66,10 +60,11 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
 
         marker = (LinearLayout) findViewById(R.id.include_item_marker);
         markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
+
+        inputLayout = (View) findViewById(R.id.add_note_layout);
         inputTitle = (TextInputEditText) findViewById(R.id.input_title);
         inputInfo = (TextInputEditText) findViewById(R.id.input_info);
 
-        inputLayout = (View) findViewById(R.id.add_note_layout);
         validator = new NoteInputValidator(this, inputLayout);
     }
 
@@ -84,8 +79,8 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.chooseBackgroundColor:
-                chooseBackgroundColor();
+            case R.id.chooseMarkerColor:
+                chooseMarkerColor();
                 return true;
             case R.id.noteDone:
                 if(validator.formIsValid()) {
@@ -97,7 +92,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
-    private void chooseBackgroundColor() {
+    private void chooseMarkerColor() {
         LinearLayout colorPickerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.color_picker, null, false);
 
         // First row
@@ -109,13 +104,20 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
 
         // Second row
         colorPickerLayout.findViewById(R.id.buttonColorBlueGrey).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorRed).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorTurquoise).setOnClickListener(this);
         colorPickerLayout.findViewById(R.id.buttonColorPink).setOnClickListener(this);
         colorPickerLayout.findViewById(R.id.buttonColorDeepPurple).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorIndigo).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorDarkGrey).setOnClickListener(this);
+
+        // Third row
+        colorPickerLayout.findViewById(R.id.buttonColorRed).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorPurple).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorBlue).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorDarkOrange).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorBabyBlue).setOnClickListener(this);
 
         AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(this).setTitle("Choose a color")
+                new AlertDialog.Builder(this).setTitle("Marker color")
                         .setMessage("Assign a specific color to your Note")
                         .setCancelable(true)
                         .setView(colorPickerLayout);
@@ -142,7 +144,9 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
                 Toast.makeText(app, "Failed to add new note, please try again", Toast.LENGTH_SHORT).show();
             }
         });
+
         showParentActivity();
+
     }
 
     private String getCurrentTimestamp() {
@@ -188,7 +192,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
                 markerColor = getResources().getColor(R.color.colorPickerBlueGrey);
                 marker_shape.setColor(markerColor);
                 break;
-            case R.id.buttonColorRed:
+            case R.id.buttonColorTurquoise:
                 markerColor = getResources().getColor(R.color.colorPickerTurquoise);
                 marker_shape.setColor(markerColor);
                 break;
@@ -200,8 +204,28 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
                 markerColor = getResources().getColor(R.color.colorPickerDeepPurple);
                 marker_shape.setColor(markerColor);
                 break;
-            case R.id.buttonColorIndigo:
-                markerColor = getResources().getColor(R.color.colorPickerIndigo);
+            case R.id.buttonColorDarkGrey:
+                markerColor = getResources().getColor(R.color.colorPickerDarkGrey);
+                marker_shape.setColor(markerColor);
+                break;
+            case R.id.buttonColorRed:
+                markerColor = getResources().getColor(R.color.colorPickerRed);
+                marker_shape.setColor(markerColor);
+                break;
+            case R.id.buttonColorPurple:
+                markerColor = getResources().getColor(R.color.colorPickerPurple);
+                marker_shape.setColor(markerColor);
+                break;
+            case R.id.buttonColorBlue:
+                markerColor = getResources().getColor(R.color.colorPickerBlue);
+                marker_shape.setColor(markerColor);
+                break;
+            case R.id.buttonColorDarkOrange:
+                markerColor = getResources().getColor(R.color.colorPickerDarkOrange);
+                marker_shape.setColor(markerColor);
+                break;
+            case R.id.buttonColorBabyBlue:
+                markerColor = getResources().getColor(R.color.colorPickerBabyBlue);
                 marker_shape.setColor(markerColor);
                 break;
             default:

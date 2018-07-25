@@ -2,6 +2,7 @@ package dev.danielholmberg.improve.Activities;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
@@ -16,8 +17,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.List;
 
 import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Components.Contact;
@@ -35,18 +34,19 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
 
     private Improve app;
     private FirebaseStorageManager storageManager;
+    private ContactInputValidator validator;
 
-    private List<Contact> storedContacts;
-
-    private String userId;
-    private boolean isEdit;
-    private String oldCID, oldColor;
-    private int contactPosition;
+    private LinearLayout marker;
+    private int markerColor;
+    private TextInputEditText inputName, inputEmail, inputCompany, inputPhone, inputComment;
 
     private Toolbar toolbar;
-    private TextInputEditText inputName, inputEmail, inputCompany, inputPhone, inputComment;
-    private ContactInputValidator validator;
+    private View inputLayout;
+
     private AlertDialog colorPickerDialog;
+
+    private boolean isEdit;
+    private String oldCID, oldColor;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,16 +56,15 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
         app = Improve.getInstance();
         storageManager = app.getFirebaseStorageManager();
 
-        // Toolbar
         toolbar = (Toolbar) findViewById(R.id.toolbar_add_contact);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Main Layout
-        View layout = (View) findViewById(R.id.add_contact_layout);
+        marker = (LinearLayout) findViewById(R.id.include_item_marker);
+        markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
 
-        // Input Components
+        inputLayout = (View) findViewById(R.id.add_contact_layout);
         inputName = (TextInputEditText) findViewById(R.id.input_name);
         inputCompany = (TextInputEditText) findViewById(R.id.input_company);
         inputEmail = (TextInputEditText) findViewById(R.id.input_email);
@@ -81,10 +80,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
 
             oldCID = contact.getId();
             oldColor = contact.getColor();
-            contactPosition = intentBundle.getInt("position");
 
-            toolbar.setBackgroundColor(oldColor != null ? Color.parseColor(oldColor) :
-                    getResources().getColor(R.color.colorPickerDeepOrange));
             inputName.setText(contact.getName());
             inputCompany.setText(contact.getCompany());
             inputEmail.setText(contact.getEmail());
@@ -92,8 +88,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
             inputComment.setText(contact.getComment());
         }
 
-        // Initialize input validator
-        validator = new ContactInputValidator(this, layout);
+        validator = new ContactInputValidator(this, inputLayout);
     }
 
     @Override
@@ -107,8 +102,8 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.chooseBackgroundColor:
-                chooseBackgroundColor();
+            case R.id.chooseMarkerColor:
+                chooseMarkerColor();
                 return true;
             case R.id.contactDone:
                 if(validator.formIsValid()) {
@@ -124,7 +119,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    private void chooseBackgroundColor() {
+    private void chooseMarkerColor() {
         LinearLayout colorPickerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.color_picker, null, false);
 
         // First row
@@ -136,13 +131,20 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
 
         // Second row
         colorPickerLayout.findViewById(R.id.buttonColorBlueGrey).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorRed).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorTurquoise).setOnClickListener(this);
         colorPickerLayout.findViewById(R.id.buttonColorPink).setOnClickListener(this);
         colorPickerLayout.findViewById(R.id.buttonColorDeepPurple).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorIndigo).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorDarkGrey).setOnClickListener(this);
+
+        // Third row
+        colorPickerLayout.findViewById(R.id.buttonColorRed).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorPurple).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorBlue).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorDarkOrange).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorBabyBlue).setOnClickListener(this);
 
         AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(this).setTitle("Choose a color")
+                new AlertDialog.Builder(this).setTitle("Marker color")
                         .setMessage("Assign a specific color to your Contact")
                         .setCancelable(true)
                         .setView(colorPickerLayout);
@@ -157,7 +159,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
         String email = inputEmail.getText().toString();
         String phone = inputPhone.getText().toString();
         String comment = inputComment.getText().toString();
-        String color = "#" + Integer.toHexString(((ColorDrawable) toolbar.getBackground()).getColor());
+        String color = "#" + Integer.toHexString(markerColor);
 
         Contact newContact = new Contact(id, name, company, email, phone, comment, color);
         storageManager.writeContactToFirebase(newContact, new FirebaseStorageCallback() {
@@ -171,7 +173,9 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
                 Toast.makeText(app, "Failed to add new contact", Toast.LENGTH_SHORT).show();
             }
         });
+
         showParentActivity();
+
     }
 
     public void updateContact(){
@@ -181,7 +185,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
         String email = inputEmail.getText().toString();
         String phone = inputPhone.getText().toString();
         String comment = inputComment.getText().toString();
-        String color = "#" + Integer.toHexString(((ColorDrawable) toolbar.getBackground()).getColor());
+        String color = "#" + Integer.toHexString(markerColor);
 
         Contact updatedContact = new Contact(id, name, company, email, phone, comment, color);
         storageManager.writeContactToFirebase(updatedContact, new FirebaseStorageCallback() {
@@ -195,7 +199,9 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
                 Toast.makeText(app,"Failed to update contact", Toast.LENGTH_SHORT).show();
             }
         });
+
         showParentActivity();
+
     }
 
     private void showParentActivity() {
@@ -214,39 +220,71 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     public void onClick(View view) {
+        GradientDrawable marker_shape = (GradientDrawable) marker.getBackground();
         switch (view.getId()) {
             case R.id.buttonColorGreen:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerGreen));
+                markerColor = getResources().getColor(R.color.colorPickerGreen);
+                marker_shape.setColor(markerColor);
                 break;
             case R.id.buttonColorLightGreen:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerLightGreen));
+                markerColor = getResources().getColor(R.color.colorPickerLightGreen);
+                marker_shape.setColor(markerColor);
                 break;
             case R.id.buttonColorAmber:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerAmber));
+                markerColor = getResources().getColor(R.color.colorPickerAmber);
+                marker_shape.setColor(markerColor);
                 break;
             case R.id.buttonColorDeepOrange:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerDeepOrange));
+                markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
+                marker_shape.setColor(markerColor);
                 break;
             case R.id.buttonColorBrown:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerBrown));
+                markerColor = getResources().getColor(R.color.colorPickerBrown);
+                marker_shape.setColor(markerColor);
                 break;
             case R.id.buttonColorBlueGrey:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerBlueGrey));
+                markerColor = getResources().getColor(R.color.colorPickerBlueGrey);
+                marker_shape.setColor(markerColor);
                 break;
-            case R.id.buttonColorRed:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerTurquoise));
+            case R.id.buttonColorTurquoise:
+                markerColor = getResources().getColor(R.color.colorPickerTurquoise);
+                marker_shape.setColor(markerColor);
                 break;
             case R.id.buttonColorPink:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerPink));
+                markerColor = getResources().getColor(R.color.colorPickerPink);
+                marker_shape.setColor(markerColor);
                 break;
             case R.id.buttonColorDeepPurple:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerDeepPurple));
+                markerColor = getResources().getColor(R.color.colorPickerDeepPurple);
+                marker_shape.setColor(markerColor);
                 break;
-            case R.id.buttonColorIndigo:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerIndigo));
+            case R.id.buttonColorDarkGrey:
+                markerColor = getResources().getColor(R.color.colorPickerDarkGrey);
+                marker_shape.setColor(markerColor);
+                break;
+            case R.id.buttonColorRed:
+                markerColor = getResources().getColor(R.color.colorPickerRed);
+                marker_shape.setColor(markerColor);
+                break;
+            case R.id.buttonColorPurple:
+                markerColor = getResources().getColor(R.color.colorPickerPurple);
+                marker_shape.setColor(markerColor);
+                break;
+            case R.id.buttonColorBlue:
+                markerColor = getResources().getColor(R.color.colorPickerBlue);
+                marker_shape.setColor(markerColor);
+                break;
+            case R.id.buttonColorDarkOrange:
+                markerColor = getResources().getColor(R.color.colorPickerDarkOrange);
+                marker_shape.setColor(markerColor);
+                break;
+            case R.id.buttonColorBabyBlue:
+                markerColor = getResources().getColor(R.color.colorPickerBabyBlue);
+                marker_shape.setColor(markerColor);
                 break;
             default:
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPickerDeepOrange));
+                markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
+                marker_shape.setColor(markerColor);
                 break;
         }
         colorPickerDialog.dismiss();

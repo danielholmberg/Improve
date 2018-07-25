@@ -47,10 +47,9 @@ import dev.danielholmberg.improve.Utilities.NoteInputValidator;
 public class NoteActivity extends AppCompatActivity implements View.OnClickListener{
     private static final String TAG = AddNoteActivity.class.getSimpleName();
 
-    // **** [START] General variables ****
-
     private Improve app;
     private FirebaseStorageManager storageManager;
+
     private Toolbar toolbar;
     private LinearLayout marker;
     private int markerColor;
@@ -59,13 +58,11 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
     private Bundle noteBundle;
     private Note note;
     private int parentFragment;
-    private int position;
-    private boolean isDone = false;
 
     private boolean editMode = false;
     private Menu menu;
 
-    // **** [END] General variables ****
+    private View targetView;
 
     // **** [START] EditMode variables ****
 
@@ -85,8 +82,6 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note);
-
-        // **** [START] General components ****
 
         app = Improve.getInstance();
         storageManager = app.getFirebaseStorageManager();
@@ -113,10 +108,6 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
         marker = (LinearLayout) findViewById(R.id.include_marker);
         markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
 
-        // **** [END] General components ****
-
-        // **** [START] EditMode components ****
-
         setUpViewSwitcher();
 
         if(note != null) {
@@ -126,7 +117,6 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
             showParentActivity();
         }
 
-        // **** [END] EditMode components ****
     }
 
     private void setUpViewSwitcher() {
@@ -163,6 +153,8 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
 
+        // Change which Archive/Unarchive menu item that is shown
+        // depending on parent fragment.
         if(parentFragment == R.integer.NOTES_FRAGMENT) {
             menu.findItem(R.id.noteArchive).setVisible(true);
             menu.findItem(R.id.noteUnarchive).setVisible(false);
@@ -182,12 +174,13 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
             switch (item.getItemId()) {
                 case android.R.id.home:
                     editMode = false;
+                    populateShowMode();
                     titleViewSwitcher.showNext();
                     infoViewSwitcher.showNext();
                     this.onCreateOptionsMenu(menu);
                     return true;
-                case R.id.chooseBackgroundColor:
-                    chooseBackgroundColor();
+                case R.id.chooseMarkerColor:
+                    chooseMarkerColor();
                     return true;
                 case R.id.noteDone:
                     if (validator.formIsValid()) {
@@ -205,7 +198,7 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
                     unarchiveNote();
                     return true;
                 case R.id.noteArchive:
-                    archiveNote();
+                    showArchiveDialog();
                     return true;
                 case R.id.noteDelete:
                     showDeleteNoteDialog();
@@ -227,6 +220,7 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
     public void onBackPressed() {
         if(editMode) {
             editMode = false;
+            populateShowMode();
             titleViewSwitcher.showNext();
             infoViewSwitcher.showNext();
             this.onCreateOptionsMenu(menu);
@@ -235,6 +229,9 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * Populates Note Details layout with the Note received through Activity bundle.
+     */
     private void populateShowMode() {
         noteId = note.getId();
         noteTitle = note.getTitle();
@@ -251,6 +248,9 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * Populates Edit Mode layout with relevant Note information.
+     */
     private void populateEditMode() {
         inputTitle = (TextInputEditText) findViewById(R.id.input_title);
         inputInfo = (TextInputEditText) findViewById(R.id.input_info);
@@ -258,14 +258,35 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
         inputTitle.setText(noteTitle);
         inputInfo.setText(noteInfo);
 
+        inputTitle.requestFocus();
+
         inputLayout = (View) findViewById(R.id.note_activity_layout);
         validator = new NoteInputValidator(this, inputLayout);
+    }
+
+    private void showArchiveDialog() {
+        AlertDialog.Builder alertDialogBuilder =
+                new AlertDialog.Builder(this).setTitle("Archive Note")
+                        .setMessage("Do you want to archive this note? ")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                archiveNote();
+                            }
+                        }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+        final AlertDialog dialog = alertDialogBuilder.create();
+        dialog.show();
     }
 
     private void showDeleteNoteDialog() {
         AlertDialog.Builder alertDialogBuilder =
                 new AlertDialog.Builder(this).setTitle("Permanently Delete Note")
-                        .setMessage("Do you really want to delete this note? ")
+                        .setMessage("Do you want to delete this note? ")
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -286,7 +307,6 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onSuccess() {
                 boolean error = false;
-                View targetView = null;
 
                 if(parentFragment == R.integer.ARCHIVED_NOTES_FRAGMENT) {
                     targetView = app.getArchivedNotesFragmentRef().getView().findViewById(R.id.archivednote_fragment_container);
@@ -325,18 +345,33 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onFailure(String errorMessage) {
-                Snackbar.make(getParent().findViewById(R.id.layout_fragment_notes),
-                        "Failed to delete note", Snackbar.LENGTH_LONG)
-                        .setAction("RETRY", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                deleteNote(note);
-                            }
-                        }).show();
+                boolean error = false;
+
+                if(parentFragment == R.integer.ARCHIVED_NOTES_FRAGMENT) {
+                    targetView = app.getArchivedNotesFragmentRef().getView().findViewById(R.id.archivednote_fragment_container);
+                } else if(parentFragment == R.integer.NOTES_FRAGMENT){
+                    targetView = app.getNotesFragmentRef().getView().findViewById(R.id.note_fragment_container);
+                } else {
+                    error = true;
+                }
+
+                if(!error) {
+                    Snackbar.make(targetView,
+                            "Failed to delete note", Snackbar.LENGTH_LONG)
+                            .setAction("RETRY", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    deleteNote(note);
+                                }
+                            }).show();
+                } else {
+                    showParentActivity();
+                }
             }
         });
 
         showParentActivity();
+
     }
 
     private void unarchiveNote() {
@@ -443,7 +478,7 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
         showParentActivity();
     }
 
-    private void chooseBackgroundColor() {
+    private void chooseMarkerColor() {
         LinearLayout colorPickerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.color_picker, null, false);
 
         // First row
@@ -455,13 +490,20 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
 
         // Second row
         colorPickerLayout.findViewById(R.id.buttonColorBlueGrey).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorRed).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorTurquoise).setOnClickListener(this);
         colorPickerLayout.findViewById(R.id.buttonColorPink).setOnClickListener(this);
         colorPickerLayout.findViewById(R.id.buttonColorDeepPurple).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorIndigo).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorDarkGrey).setOnClickListener(this);
+
+        // Third row
+        colorPickerLayout.findViewById(R.id.buttonColorRed).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorPurple).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorBlue).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorDarkOrange).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorBabyBlue).setOnClickListener(this);
 
         AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(this).setTitle("Choose a color")
+                new AlertDialog.Builder(this).setTitle("Marker color")
                         .setMessage("Assign a specific color to your Note")
                         .setCancelable(true)
                         .setView(colorPickerLayout);
@@ -536,7 +578,7 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
                 markerColor = getResources().getColor(R.color.colorPickerBlueGrey);
                 marker_shape.setColor(markerColor);
                 break;
-            case R.id.buttonColorRed:
+            case R.id.buttonColorTurquoise:
                 markerColor = getResources().getColor(R.color.colorPickerTurquoise);
                 marker_shape.setColor(markerColor);
                 break;
@@ -548,8 +590,28 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
                 markerColor = getResources().getColor(R.color.colorPickerDeepPurple);
                 marker_shape.setColor(markerColor);
                 break;
-            case R.id.buttonColorIndigo:
-                markerColor = getResources().getColor(R.color.colorPickerIndigo);
+            case R.id.buttonColorDarkGrey:
+                markerColor = getResources().getColor(R.color.colorPickerDarkGrey);
+                marker_shape.setColor(markerColor);
+                break;
+            case R.id.buttonColorRed:
+                markerColor = getResources().getColor(R.color.colorPickerRed);
+                marker_shape.setColor(markerColor);
+                break;
+            case R.id.buttonColorPurple:
+                markerColor = getResources().getColor(R.color.colorPickerPurple);
+                marker_shape.setColor(markerColor);
+                break;
+            case R.id.buttonColorBlue:
+                markerColor = getResources().getColor(R.color.colorPickerBlue);
+                marker_shape.setColor(markerColor);
+                break;
+            case R.id.buttonColorDarkOrange:
+                markerColor = getResources().getColor(R.color.colorPickerDarkOrange);
+                marker_shape.setColor(markerColor);
+                break;
+            case R.id.buttonColorBabyBlue:
+                markerColor = getResources().getColor(R.color.colorPickerBabyBlue);
                 marker_shape.setColor(markerColor);
                 break;
             default:

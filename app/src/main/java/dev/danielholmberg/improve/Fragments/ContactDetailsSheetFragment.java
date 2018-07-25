@@ -3,6 +3,7 @@ package dev.danielholmberg.improve.Fragments;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetDialogFragment;
@@ -13,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,7 +27,7 @@ import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
 import dev.danielholmberg.improve.R;
 
 /**
- * Class ${CLASS}
+ * Created by DanielHolmberg on 2018-02-21.
  */
 
 public class ContactDetailsSheetFragment extends BottomSheetDialogFragment implements View.OnClickListener{
@@ -34,13 +36,19 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     private Improve app;
     private FirebaseStorageManager storageManager;
 
-    private Contact contact;
-    private int contactPos;
     private Bundle contactBundle;
+    private Contact contact;
 
     private ContactDetailsSheetFragment detailsDialog;
     private View view;
-    private ViewGroup parentLayout;
+    private int parentFragment;
+
+    private RelativeLayout toolbar;
+    private LinearLayout marker;
+    private String markerColor;
+    private TextView title, name, email, mobile, comment;
+
+    private View targetView;
 
     public ContactDetailsSheetFragment() {
         // Required empty public constructor
@@ -58,59 +66,43 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_contact_details, container, false);
-        parentLayout = getActivity().findViewById(R.id.main_fragment_container);
 
         Button actionCallContact = (Button) view.findViewById(R.id.details_call_contact_btn);
         Button actionSendMailToContact = (Button) view.findViewById(R.id.details_mail_contact_btn);
 
-        RelativeLayout toolbar = (RelativeLayout) view.findViewById(R.id.toolbar_contact_details);
-        TextView title = (TextView) view.findViewById(R.id.toolbar_contact_details_company_tv);
-        TextView name = (TextView) view.findViewById(R.id.contact_details_name_tv);
-        TextView email = (TextView) view.findViewById(R.id.contact_details_email_tv);
-        TextView mobile = (TextView) view.findViewById(R.id.contact_details_mobile_tv);
-        TextView comment = (TextView) view.findViewById(R.id.contact_details_comment_tv);
+        toolbar = (RelativeLayout) view.findViewById(R.id.toolbar_contact_details);
 
         contactBundle =  this.getArguments();
-        contact = (Contact) contactBundle.getSerializable("contact");
 
-        if(contactBundle != null){
-            contactPos = contactBundle.getInt("position");
+        if(contactBundle != null) {
+            parentFragment = contactBundle.getInt("parentFragment");
+            contact = (Contact) contactBundle.getSerializable("contact");
+        } else {
+            Toast.makeText(getContext(), "Unable to show contact details", Toast.LENGTH_SHORT).show();
+            detailsDialog.dismiss();
         }
+
+        title = (TextView) view.findViewById(R.id.toolbar_contact_details_company_tv);
+        name = (TextView) view.findViewById(R.id.contact_details_name_tv);
+        email = (TextView) view.findViewById(R.id.contact_details_email_tv);
+        mobile = (TextView) view.findViewById(R.id.contact_details_mobile_tv);
+        comment = (TextView) view.findViewById(R.id.contact_details_comment_tv);
+
+        marker = (LinearLayout) view.findViewById(R.id.include_item_marker);
+
         if(contact != null){
-            int contactColor = getResources().getColor(R.color.colorPickerDeepOrange);
-            int titleColor = getResources().getColor(R.color.titleColorDeepOrange);
+            markerColor = contact.getColor();
 
-            if(contact.getColor() != null) {
-                contactColor = Color.parseColor(contact.getColor());
-                if(contactColor == getResources().getColor(R.color.colorPickerGreen))
-                    titleColor = getResources().getColor(R.color.titleColorGreen);
-                else if(contactColor == getResources().getColor(R.color.colorPickerLightGreen))
-                    titleColor = getResources().getColor(R.color.titleColorLightGreen);
-                else if(contactColor == getResources().getColor(R.color.colorPickerAmber))
-                    titleColor = getResources().getColor(R.color.titleColorAmber);
-                else if(contactColor == getResources().getColor(R.color.colorPickerDeepOrange))
-                    titleColor = getResources().getColor(R.color.titleColorDeepOrange);
-                else if(contactColor == getResources().getColor(R.color.colorPickerBrown))
-                    titleColor = getResources().getColor(R.color.titleColorBrown);
-                else if(contactColor == getResources().getColor(R.color.colorPickerBlueGrey))
-                    titleColor = getResources().getColor(R.color.titleColorBlueGrey);
-                else if(contactColor == getResources().getColor(R.color.colorPickerTurquoise))
-                    titleColor = getResources().getColor(R.color.titleColorTurquoise);
-                else if(contactColor == getResources().getColor(R.color.colorPickerPink))
-                    titleColor = getResources().getColor(R.color.titleColorPink);
-                else if(contactColor == getResources().getColor(R.color.colorPickerDeepPurple))
-                    titleColor = getResources().getColor(R.color.titleColorDeepPurple);
-                else if(contactColor == getResources().getColor(R.color.colorPickerIndigo))
-                    titleColor = getResources().getColor(R.color.titleColorIndigo);
-            }
-
-            toolbar.setBackgroundColor(contactColor);
-            title.setText(contact.getCompany());
-            title.setTextColor(titleColor);
             name.setText(contact.getName());
             email.setText(contact.getEmail());
             mobile.setText(contact.getPhone());
             comment.setText(contact.getComment());
+
+            if (markerColor != null && !markerColor.isEmpty()) {
+                GradientDrawable marker_shape = (GradientDrawable) marker.getBackground();
+                marker_shape.setColor(Color.parseColor(markerColor));
+            }            title.setText(contact.getCompany());
+
 
             // Handle if the voluntary contact information fields is empty
             // Change e-mail field
@@ -185,37 +177,68 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
         storageManager.deleteContact(contact, new FirebaseStorageCallback() {
             @Override
             public void onSuccess() {
-                Snackbar.make(app.getContactsFragmentRef().getView().findViewById(R.id.contacts_fragment_container), "Deleted contact", Snackbar.LENGTH_LONG)
-                        .setAction("UNDO", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                storageManager.writeContactToFirebase(contact, new FirebaseStorageCallback() {
-                                    @Override
-                                    public void onSuccess() {
-                                        Log.d(TAG, "*** Successfully undid 'Delete contact' ***");
-                                    }
+                boolean error = false;
 
-                                    @Override
-                                    public void onFailure(String errorMessage) {
-                                        Log.e(TAG, "Failed to undo 'Delete contact': "+ errorMessage);
-                                    }
-                                });
-                            }
-                        }).show();
+                if(parentFragment == R.integer.CONTACT_FRAGMENT) {
+                    targetView = app.getContactsFragmentRef().getView().findViewById(R.id.contacts_fragment_container);
+                } else {
+                    error = true;
+                }
+
+                if(!error) {
+                    Snackbar.make(app.getContactsFragmentRef().getView().findViewById(R.id.contacts_fragment_container), "Deleted contact", Snackbar.LENGTH_LONG)
+                            .setAction("UNDO", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    storageManager.writeContactToFirebase(contact, new FirebaseStorageCallback() {
+                                        @Override
+                                        public void onSuccess() {
+                                            Log.d(TAG, "*** Successfully undid 'Delete contact' ***");
+                                        }
+
+                                        @Override
+                                        public void onFailure(String errorMessage) {
+                                            Log.e(TAG, "Failed to undo 'Delete contact': " + errorMessage);
+                                        }
+                                    });
+                                }
+                            }).show();
+                } else {
+                    Toast.makeText(getContext(), "Failed to delete note",
+                            Toast.LENGTH_SHORT).show();
+                    detailsDialog.dismiss();
+                }
             }
 
             @Override
             public void onFailure(String errorMessage) {
-                Snackbar.make(parentLayout, "Failed to delete contact", Snackbar.LENGTH_LONG)
-                        .setAction("RETRY", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                deleteContact(contact);
-                            }
-                        }).show();
+                boolean error = false;
+
+                if(parentFragment == R.integer.ARCHIVED_NOTES_FRAGMENT) {
+                    targetView = app.getArchivedNotesFragmentRef().getView().findViewById(R.id.archivednote_fragment_container);
+                } else if(parentFragment == R.integer.NOTES_FRAGMENT){
+                    targetView = app.getNotesFragmentRef().getView().findViewById(R.id.note_fragment_container);
+                } else {
+                    error = true;
+                }
+
+                if(!error) {
+                    Snackbar.make(targetView,
+                            "Failed to delete contact", Snackbar.LENGTH_LONG)
+                            .setAction("RETRY", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    deleteContact(contact);
+                                }
+                            }).show();
+                } else {
+                    detailsDialog.dismiss();
+                }
             }
         });
+
         detailsDialog.dismiss();
+
     }
 
     @Override

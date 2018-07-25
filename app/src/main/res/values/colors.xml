@@ -31,17 +31,17 @@
     <color name="contact_form_icon">#E0E0E0</color>             <!-- Grey 300 -->
 
     <!-- Color picker -->
-    <color name="colorPickerGreen">#A5D6A7</color>              <!-- Green 200 -->
+    <color name="colorPickerGreen">#00C853</color>              <!-- Green A700 -->
     <color name="colorPickerLightGreen">#C5E1A5</color>         <!-- LightGreen 200 -->
     <color name="colorPickerAmber">#FFE082</color>              <!-- Amber 200 -->
     <color name="colorPickerDeepOrange">#FFAB91</color>         <!-- DeepOrange 200 -->
-    <color name="colorPickerBrown">#BCAAA4</color>              <!-- Brown 200 -->
+    <color name="colorPickerBrown">#8D6E63</color>              <!-- Brown 400 -->
 
     <color name="colorPickerBlueGrey">#B0BEC5</color>           <!-- BlueGrey 200 -->
     <color name="colorPickerTurquoise">#8FE8D2</color>          <!-- Turquoise -->
     <color name="colorPickerPink">#F48FB1</color>               <!-- Pink 200 -->
     <color name="colorPickerDeepPurple">#B39DDB</color>         <!-- DeepPurple 200 -->
-    <color name="colorPickerIndigo">#9FA8DA</color>             <!-- Indigo 200 -->
+    <color name="colorPickerDarkGrey">#424242</color>             <!-- Grey 800 -->
 
     <!-- Title colors -->
     <color name="titleColorGreen">#445945</color>               <!-- Dark Green -->
@@ -54,6 +54,11 @@
     <color name="titleColorTurquoise">#3F665C</color>           <!-- Dark Turquoise -->
     <color name="titleColorPink">#663C4A</color>                <!-- Dark Pink -->
     <color name="titleColorDeepPurple">#3E374C</color>          <!-- Dark DeepPurple -->
-    <color name="titleColorIndigo">#4A4E66</color>              <!-- Dark Indigo -->
+    <color name="titleColorIndigo">#4A4E66</color>
+    <color name="colorPickerRed">#ff1744</color>
+    <color name="colorPickerPurple">#D500F9</color>
+    <color name="colorPickerBlue">#2979FF</color>
+    <color name="colorPickerDarkOrange">#f57c00</color>
+    <color name="colorPickerBabyBlue">#89cff0</color>              <!-- Dark Indigo -->
 
 </resources>

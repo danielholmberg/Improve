@@ -284,6 +284,7 @@ public class ContactsFragment extends Fragment{
             Bundle bundle = new Bundle();
             bundle.putSerializable("contact", contact);
             bundle.putInt("position", itemPos);
+            bundle.putInt("parentFragment", R.integer.CONTACT_FRAGMENT);
             return bundle;
         }
 

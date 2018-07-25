@@ -17,11 +17,11 @@
 
         <TextView
             android:id="@+id/toolbar_add_note_title_tv"
-            style="@style/AppTheme.Base.ActivityTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:text="@string/title_new_note" />
+            android:text="@string/title_new_note"
+            style="@style/AppTheme.Base.ActivityTitle" />
 
     </android.support.v7.widget.Toolbar>
 
