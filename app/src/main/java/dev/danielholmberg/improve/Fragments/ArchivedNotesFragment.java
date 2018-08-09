@@ -22,7 +22,10 @@ import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import dev.danielholmberg.improve.Activities.NoteActivity;
 import dev.danielholmberg.improve.Components.Note;
@@ -42,7 +45,9 @@ public class ArchivedNotesFragment extends Fragment {
 
     private View view;
     private RecyclerView archivedNotesRecyclerView;
+    private TextView emptyListText;
 
+    private String noteListOrderBy = "timestamp";
     private FirebaseRecyclerAdapter recyclerAdapter;
 
     public ArchivedNotesFragment() {
@@ -67,9 +72,12 @@ public class ArchivedNotesFragment extends Fragment {
 
         // Initialize View components to be used.
         archivedNotesRecyclerView = (RecyclerView) view.findViewById(R.id.archived_notes_list);
+        emptyListText = (TextView) view.findViewById(R.id.empty_archive_list_tv);
 
         // Initialize the LinearLayoutManager
         LinearLayoutManager recyclerLayoutManager = new LinearLayoutManager(getActivity());
+        recyclerLayoutManager.setReverseLayout(true);
+        recyclerLayoutManager.setStackFromEnd(true);
         archivedNotesRecyclerView.setLayoutManager(recyclerLayoutManager);
 
         // Setting RecyclerAdapter to RecyclerList.
@@ -80,7 +88,25 @@ public class ArchivedNotesFragment extends Fragment {
     }
 
     private void initAdapter() {
-        Query query = storageManager.getArchivedNotesRef().orderByChild("isDone");
+        Query query = storageManager.getArchivedNotesRef().orderByChild(noteListOrderBy);
+
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren()) {
+                    archivedNotesRecyclerView.setVisibility(View.VISIBLE);
+                    emptyListText.setVisibility(View.GONE);
+                } else {
+                    archivedNotesRecyclerView.setVisibility(View.GONE);
+                    emptyListText.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         FirebaseRecyclerOptions<Note> options =
                 new FirebaseRecyclerOptions.Builder<Note>()

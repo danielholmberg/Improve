@@ -53,6 +53,7 @@ public class FirebaseStorageManager {
 
     public void writeNoteToFirebase(Note note, boolean toArchive, final FirebaseStorageCallback callback) {
         if(toArchive) {
+            note.setArchived(true);
             getArchivedNotesRef().child(note.getId()).setValue(note)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
@@ -81,6 +82,7 @@ public class FirebaseStorageManager {
                 }
             });
         } else {
+            note.setArchived(false);
             getNotesRef().child(note.getId()).setValue(note)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override

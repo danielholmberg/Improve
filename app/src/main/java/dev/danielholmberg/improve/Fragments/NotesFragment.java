@@ -22,7 +22,13 @@ import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import java.text.DateFormat;
+import java.util.Calendar;
 
 import dev.danielholmberg.improve.Activities.AddNoteActivity;
 import dev.danielholmberg.improve.Activities.NoteActivity;
@@ -43,6 +49,7 @@ public class NotesFragment extends Fragment {
 
     private View view;
     private RecyclerView notesRecyclerView;
+    private String noteListOrderBy = "timestamp";
     private TextView emptyListText;
     private FloatingActionButton fab;
 
@@ -75,11 +82,12 @@ public class NotesFragment extends Fragment {
 
         // Initialize the LinearLayoutManager
         LinearLayoutManager recyclerLayoutManager = new LinearLayoutManager(getActivity());
+        recyclerLayoutManager.setReverseLayout(true);
+        recyclerLayoutManager.setStackFromEnd(true);
         notesRecyclerView.setLayoutManager(recyclerLayoutManager);
 
         // Setting RecyclerAdapter to RecyclerList.
-        initAdapter();
-        notesRecyclerView.setAdapter(recyclerAdapter);
+        setUpAdapter();
 
         // Add a OnScrollListener to change when to show the Floating Action Button for adding
         // a new Note.
@@ -110,14 +118,32 @@ public class NotesFragment extends Fragment {
         return view;
     }
 
-    private void initAdapter() {
-        Query query = storageManager.getNotesRef().orderByChild("color");
+    private void setUpAdapter() {
+        Query query = storageManager.getNotesRef().orderByChild(noteListOrderBy);
+
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren()) {
+                    notesRecyclerView.setVisibility(View.VISIBLE);
+                    emptyListText.setVisibility(View.GONE);
+                } else {
+                    notesRecyclerView.setVisibility(View.GONE);
+                    emptyListText.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         FirebaseRecyclerOptions<Note> options =
                 new FirebaseRecyclerOptions.Builder<Note>()
                         .setQuery(query, Note.class)
                         .build();
-
+        
         recyclerAdapter = new FirebaseRecyclerAdapter<Note, NoteViewHolder>(options) {
             @Override
             public NoteViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -132,6 +158,8 @@ public class NotesFragment extends Fragment {
                 holder.bindModelToView(model);
             }
         };
+
+        notesRecyclerView.setAdapter(recyclerAdapter);
     }
 
     @Override
@@ -143,11 +171,9 @@ public class NotesFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sort_notes_by_title_alphabetical:
-                // TODO: Sort notes by title alphabetical
                 sortNotesByTitle();
                 return true;
             case R.id.sort_notes_by_timestamp:
-                // TODO: Sort note by timestamp
                 sortNotesByTimestamp();
                 return true;
             case R.id.sort_notes_by_marker:
@@ -160,15 +186,23 @@ public class NotesFragment extends Fragment {
     }
 
     private void sortNotesByMarker() {
+        noteListOrderBy = "color";
+        setUpAdapter();
+
         Toast.makeText(app, "Sorted by marker color", Toast.LENGTH_SHORT).show();
     }
 
     private void sortNotesByTimestamp() {
-        Toast.makeText(app, "Sorted by timestamp", Toast.LENGTH_SHORT).show();
+        noteListOrderBy = "timestamp";
+        setUpAdapter();
 
+        Toast.makeText(app, "Sorted by timestamp", Toast.LENGTH_SHORT).show();
     }
 
     private void sortNotesByTitle() {
+        noteListOrderBy = "title";
+        setUpAdapter();
+
         Toast.makeText(app, "Sorted by title", Toast.LENGTH_SHORT).show();
     }
 
@@ -223,10 +257,15 @@ public class NotesFragment extends Fragment {
             // [END] All views of a note
 
             // [START] Define each view
-            marker.setBackgroundColor(Color.parseColor(note.getColor()));
+            try {
+                marker.setBackgroundColor(note.getColor() != null ? Color.parseColor(note.getColor()) :
+                        getResources().getColor(R.color.noColor));
+            } catch (Exception e) {
+                marker.setBackgroundColor(getResources().getColor(R.color.noColor));
+            }
             title.setText(note.getTitle());
             info.setText(note.getInfo());
-            timestamp.setText(note.getTimestamp());
+            timestamp.setText(tranformMillisToDateSring(Long.parseLong(note.getTimestamp())));
 
             if(note.getArchived()) {
                 info.setVisibility(View.GONE);
@@ -242,12 +281,6 @@ public class NotesFragment extends Fragment {
                 }
                 footer.setVisibility(View.VISIBLE);
                 doneMarker.setVisibility(View.GONE);
-
-                // Convert (16)dp to pixel
-                final float scale = getContext().getResources().getDisplayMetrics().density;
-                int pixels = (int) (16 * scale + 0.5f);
-                marker.setLayoutParams(new LinearLayout.LayoutParams(
-                        pixels, ViewGroup.LayoutParams.MATCH_PARENT));
             }
             // [END] Define each view
 
@@ -260,6 +293,13 @@ public class NotesFragment extends Fragment {
                     startActivity(showNoteDetails);
                 }
             });
+        }
+
+        private String tranformMillisToDateSring(long timeInMillis) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(timeInMillis);
+
+            return DateFormat.getDateTimeInstance().format(calendar.getTime());
         }
 
         private Bundle createBundle(Note note, int itemPos) {

@@ -63,6 +63,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
 
         marker = (LinearLayout) findViewById(R.id.include_item_marker);
         markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
+        ((GradientDrawable) marker.getBackground()).setColor(markerColor);
 
         inputLayout = (View) findViewById(R.id.add_contact_layout);
         inputName = (TextInputEditText) findViewById(R.id.input_name);
@@ -81,6 +82,10 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
             oldCID = contact.getId();
             oldColor = contact.getColor();
 
+            if(oldColor != null && !oldColor.isEmpty()) {
+                markerColor = Color.parseColor(oldColor);
+            }
+
             inputName.setText(contact.getName());
             inputCompany.setText(contact.getCompany());
             inputEmail.setText(contact.getEmail());
@@ -89,6 +94,13 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
         }
 
         validator = new ContactInputValidator(this, inputLayout);
+
+        marker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                chooseMarkerColor();
+            }
+        });
     }
 
     @Override
@@ -207,7 +219,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
     private void showParentActivity() {
         restUI();
         NavUtils.navigateUpFromSameTask(this);
-        finish();
+        finishAfterTransition();
     }
 
     private void restUI(){

@@ -52,6 +52,7 @@ public class ContactsFragment extends Fragment{
     private TextView emptyListText;
     private FloatingActionButton fab;
 
+    private String contactOrderBy = "color";
     private FirebaseRecyclerAdapter recyclerAdapter;
     private Query query;
 
@@ -84,11 +85,12 @@ public class ContactsFragment extends Fragment{
         // Initialize the LinearLayoutManager
         LinearLayoutManager recyclerLayoutManager =
                 new LinearLayoutManager(getActivity().getApplicationContext());
+        recyclerLayoutManager.setReverseLayout(true);
+        recyclerLayoutManager.setStackFromEnd(true);
         contactsRecyclerView.setLayoutManager(recyclerLayoutManager);
 
         // Setting RecyclerAdapter to RecyclerList.
-        initAdapter();
-        contactsRecyclerView.setAdapter(recyclerAdapter);
+        setUpAdapter();
 
         // Add a OnScrollListener to change when to show the Floating Action Button for adding a new Note.
         contactsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener(){
@@ -119,8 +121,28 @@ public class ContactsFragment extends Fragment{
         return view;
     }
 
-    private void initAdapter() {
-        query = storageManager.getContactsRef().orderByChild("color");
+    private void setUpAdapter() {
+        query = storageManager.getContactsRef().orderByChild(contactOrderBy);
+
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren()) {
+                    contactsRecyclerView.setVisibility(View.VISIBLE);
+                    emptyListText.setVisibility(View.GONE);
+                } else {
+                    contactsRecyclerView.setVisibility(View.GONE);
+                    emptyListText.setVisibility(View.VISIBLE);
+                }
+
+                fab.show();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         FirebaseRecyclerOptions<Contact> options =
                 new FirebaseRecyclerOptions.Builder<Contact>()
@@ -141,6 +163,8 @@ public class ContactsFragment extends Fragment{
                 holder.bindModelToView(model);
             }
         };
+
+        contactsRecyclerView.setAdapter(recyclerAdapter);
     }
 
     @Override
@@ -152,14 +176,10 @@ public class ContactsFragment extends Fragment{
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sort_contacts_by_company_alphabetical:
-                // TODO: Sort contacts by company alphabetical
                 sortContactsByCompany();
-                Toast.makeText(app, "Sorted by company", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.sort_contacts_by_marker:
-                // TODO: Sort contacts by marker color
                 sortContactsByMarker();
-                Toast.makeText(app, "Sorted by marker color", Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 break;
@@ -168,11 +188,11 @@ public class ContactsFragment extends Fragment{
     }
 
     private void sortContactsByMarker() {
-
+        Toast.makeText(app, "Sorted by marker color", Toast.LENGTH_SHORT).show();
     }
 
     private void sortContactsByCompany() {
-
+        Toast.makeText(app, "Sorted by company", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -230,8 +250,12 @@ public class ContactsFragment extends Fragment{
             // [START] Define each view
             name.setText(contact.getName());
             company.setText(contact.getCompany());
-            marker.setBackgroundColor(contact.getColor() != null ? Color.parseColor(contact.getColor()) :
-                    getResources().getColor(R.color.colorPickerDeepOrange));
+            try {
+                marker.setBackgroundColor(contact.getColor() != null ? Color.parseColor(contact.getColor()) :
+                        getResources().getColor(R.color.noColor));
+            } catch (Exception e) {
+                marker.setBackgroundColor(getResources().getColor(R.color.noColor));
+            }
 
             if (contact.getEmail() == null || contact.getEmail().isEmpty()) {
                 mailBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_email_grey));

@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -97,11 +98,13 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
             email.setText(contact.getEmail());
             mobile.setText(contact.getPhone());
             comment.setText(contact.getComment());
+            comment.setMovementMethod(new ScrollingMovementMethod());
 
             if (markerColor != null && !markerColor.isEmpty()) {
                 GradientDrawable marker_shape = (GradientDrawable) marker.getBackground();
                 marker_shape.setColor(Color.parseColor(markerColor));
-            }            title.setText(contact.getCompany());
+            }
+            title.setText(contact.getCompany());
 
 
             // Handle if the voluntary contact information fields is empty
@@ -245,6 +248,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.edit_contact_btn:
+                this.dismiss();
                 Intent updateContact = new Intent(getContext(), AddContactActivity.class);
                 updateContact.putExtra("contactBundle", contactBundle);
                 startActivity(updateContact);
@@ -260,26 +264,30 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
                 startActivity(mailIntent);
                 break;
             case R.id.delete_contact_btn:
-                AlertDialog.Builder alertDialogBuilder =
-                        new AlertDialog.Builder(getContext()).setTitle("Delete contact")
-                                .setMessage("Do you really want to delete: " + contact.getName())
-                                .setIcon(R.drawable.ic_menu_delete_grey)
-                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        deleteContact(contact);
-                                    }
-                                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.dismiss();
-                            }
-                        });
-                final AlertDialog dialog = alertDialogBuilder.create();
-                dialog.show();
+                showDeleteContactDialog();
                 break;
             default:
                 break;
         }
+    }
+
+    private void showDeleteContactDialog() {
+        AlertDialog.Builder alertDialogBuilder =
+                new AlertDialog.Builder(getContext()).setTitle("Permanently delete contact")
+                        .setMessage("Do you want to delete this contact?")
+                        .setIcon(R.drawable.ic_menu_delete_grey)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                deleteContact(contact);
+                            }
+                        }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+        final AlertDialog dialog = alertDialogBuilder.create();
+        dialog.show();
     }
 }

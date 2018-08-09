@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -16,15 +17,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ViewSwitcher;
 
 import java.text.DateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
@@ -69,8 +69,6 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
     private View inputLayout;
     private NoteInputValidator validator;
 
-    private ViewSwitcher titleViewSwitcher;
-    private ViewSwitcher infoViewSwitcher;
     private EditText inputTitle, inputInfo;
     private String noteId, noteTitle, noteColor, noteInfo, noteTimestamp;
     private int notePosition;
@@ -102,36 +100,34 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
             showParentActivity();
         }
 
-        noteDetailTitle = (TextView) findViewById(R.id.note_activity_title_tv);
-        noteDetailInfo = (TextView) findViewById(R.id.note_activity_info_tv);
+        inputLayout = (TextInputLayout) findViewById(R.id.input_layout);
+
         noteDetailTimestamp = (TextView) findViewById(R.id.footer_note_timestamp_tv);
+        inputTitle = (TextInputEditText) findViewById(R.id.input_title);
+        inputInfo = (TextInputEditText) findViewById(R.id.input_info);
+
+        validator = new NoteInputValidator(this, inputLayout);
+
+        toggleMode(editMode);
+
         marker = (LinearLayout) findViewById(R.id.include_marker);
         markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
-
-        setUpViewSwitcher();
+        ((GradientDrawable) marker.getBackground()).setColor(markerColor);
 
         if(note != null) {
-            populateShowMode();
+            populateNoteDetails();
         } else {
             Toast.makeText(this, "Unable to show Note details", Toast.LENGTH_SHORT).show();
             showParentActivity();
         }
 
-    }
-
-    private void setUpViewSwitcher() {
-        titleViewSwitcher = findViewById(R.id.view_switcher_title);
-        infoViewSwitcher = findViewById(R.id.view_switcher_info);
-
-        Animation titleIn = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
-        Animation titleOut = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
-        titleViewSwitcher.setInAnimation(titleIn);
-        titleViewSwitcher.setOutAnimation(titleOut);
-
-        Animation infoIn = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
-        Animation infoOut = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
-        infoViewSwitcher.setInAnimation(infoIn);
-        infoViewSwitcher.setOutAnimation(infoOut);
+        marker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(editMode)
+                    chooseMarkerColor();
+            }
+        });
     }
 
     @Override
@@ -174,9 +170,7 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
             switch (item.getItemId()) {
                 case android.R.id.home:
                     editMode = false;
-                    populateShowMode();
-                    titleViewSwitcher.showNext();
-                    infoViewSwitcher.showNext();
+                    toggleMode(editMode);
                     this.onCreateOptionsMenu(menu);
                     return true;
                 case R.id.chooseMarkerColor:
@@ -184,8 +178,6 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
                     return true;
                 case R.id.noteDone:
                     if (validator.formIsValid()) {
-                        editMode = false;
-                        this.onCreateOptionsMenu(menu);
                         updateNote();
                     }
                     return true;
@@ -205,9 +197,7 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
                     return true;
                 case R.id.noteEdit:
                     editMode = true;
-                    titleViewSwitcher.showNext();
-                    infoViewSwitcher.showNext();
-                    populateEditMode();
+                    toggleMode(editMode);
                     this.onCreateOptionsMenu(menu);
                     return true;
                 default:
@@ -216,13 +206,24 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    private void toggleMode(boolean editMode) {
+        inputTitle.setEnabled(editMode);
+        inputInfo.setEnabled(editMode);
+
+        if(editMode) {
+            inputTitle.requestFocus();
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        } else {
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
+        }
+    }
+
     @Override
     public void onBackPressed() {
         if(editMode) {
             editMode = false;
-            populateShowMode();
-            titleViewSwitcher.showNext();
-            infoViewSwitcher.showNext();
+            toggleMode(editMode);
             this.onCreateOptionsMenu(menu);
         } else {
             super.onBackPressed();
@@ -232,42 +233,37 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
     /**
      * Populates Note Details layout with the Note received through Activity bundle.
      */
-    private void populateShowMode() {
+    private void populateNoteDetails() {
         noteId = note.getId();
         noteTitle = note.getTitle();
         noteInfo = note.getInfo();
         noteColor = note.getColor();
-        noteTimestamp = note.getTimestamp();
+        noteTimestamp = tranformMillisToDateSring(Long.parseLong(note.getTimestamp()));
 
-        noteDetailTitle.setText(noteTitle);
-        noteDetailInfo.setText(noteInfo);
+        Log.d(TAG, "noteTitle: " + noteTitle + " with archived: " + note.getArchived());
+
         noteDetailTimestamp.setText(noteTimestamp);
-        if (noteColor != null && !noteColor.isEmpty()) {
-            GradientDrawable marker_shape = (GradientDrawable) marker.getBackground();
-            marker_shape.setColor(Color.parseColor(noteColor));
-        }
-    }
-
-    /**
-     * Populates Edit Mode layout with relevant Note information.
-     */
-    private void populateEditMode() {
-        inputTitle = (TextInputEditText) findViewById(R.id.input_title);
-        inputInfo = (TextInputEditText) findViewById(R.id.input_info);
-
         inputTitle.setText(noteTitle);
         inputInfo.setText(noteInfo);
 
-        inputTitle.requestFocus();
+        if (noteColor != null && !noteColor.isEmpty()) {
+            GradientDrawable marker_shape = (GradientDrawable) marker.getBackground();
+            marker_shape.setColor(Color.parseColor(noteColor));
+            markerColor = Color.parseColor(noteColor);
+        }
+    }
 
-        inputLayout = (View) findViewById(R.id.note_activity_layout);
-        validator = new NoteInputValidator(this, inputLayout);
+    private String tranformMillisToDateSring(long timeInMillis) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timeInMillis);
+
+        return DateFormat.getDateTimeInstance().format(calendar.getTime());
     }
 
     private void showArchiveDialog() {
         AlertDialog.Builder alertDialogBuilder =
                 new AlertDialog.Builder(this).setTitle("Archive Note")
-                        .setMessage("Do you want to archive this note? ")
+                        .setMessage("Do you want to archive this note?")
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -286,7 +282,7 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
     private void showDeleteNoteDialog() {
         AlertDialog.Builder alertDialogBuilder =
                 new AlertDialog.Builder(this).setTitle("Permanently Delete Note")
-                        .setMessage("Do you want to delete this note? ")
+                        .setMessage("Do you want to delete this note?")
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -390,14 +386,10 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
                 if (!error) {
-                    note.setArchived(false);
-
                     Snackbar.make(targetView, "Unarchived note", Snackbar.LENGTH_SHORT)
                             .setAction("UNDO", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    note.setArchived(true);
-
                                     storageManager.writeNoteToFirebase(note, true, new FirebaseStorageCallback() {
                                         @Override
                                         public void onSuccess() {
@@ -442,14 +434,10 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
                 if(!error) {
-                    note.setArchived(true);
-
                     Snackbar.make(targetView, "Archived note", Snackbar.LENGTH_SHORT)
                             .setAction("UNDO", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    note.setArchived(false);
-
                                     storageManager.writeNoteToFirebase(note, false, new FirebaseStorageCallback() {
                                         @Override
                                         public void onSuccess() {
@@ -513,14 +501,16 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
 
     public void updateNote(){
         String id = noteId;
+        boolean archived = note.getArchived();
         String newTitle = inputTitle.getText().toString();
         String newInfo = inputInfo.getText().toString();
         String newColor = "#" + Integer.toHexString(markerColor);
-        String updatedTimestamp = getCurrentTimestamp();
+        String updatedTimestamp = Long.toString(System.currentTimeMillis());
 
         Note updatedNote = new Note(id, newTitle, newInfo, newColor, updatedTimestamp);
+        updatedNote.setArchived(archived);
 
-        storageManager.writeNoteToFirebase(updatedNote, false, new FirebaseStorageCallback() {
+        storageManager.writeNoteToFirebase(updatedNote, updatedNote.getArchived(), new FirebaseStorageCallback() {
             @Override
             public void onSuccess() {
                 Toast.makeText(app, "Note successfully updated", Toast.LENGTH_SHORT).show();
@@ -532,22 +522,13 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        if(parentFragment == R.integer.NOTES_FRAGMENT) {
-            showParentActivity();
-        } else if(parentFragment == R.integer.ARCHIVED_NOTES_FRAGMENT) {
-            titleViewSwitcher.showNext();
-            infoViewSwitcher.showNext();
-        }
+        showParentActivity();
 
-    }
-
-    private String getCurrentTimestamp() {
-        return DateFormat.getDateTimeInstance().format(new Date());
     }
 
     private void showParentActivity() {
         NavUtils.navigateUpFromSameTask(this);
-        finish();
+        finishAfterTransition();
     }
 
     @Override

@@ -1,6 +1,9 @@
 package dev.danielholmberg.improve.Components;
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Objects;
 
 /**
@@ -45,8 +48,8 @@ public class Note implements Serializable{
         this.timestamp = timestamp;
     }
 
-    public void setArchived(boolean isDone) {
-        this.archived = isDone;
+    public void setArchived(boolean archived) {
+        this.archived = archived;
     }
 
     public String getId() {
@@ -54,11 +57,11 @@ public class Note implements Serializable{
     }
 
     public String getTitle() {
-        return title;
+        return this.title;
     }
 
     public String getInfo() {
-        return info;
+        return this.info;
     }
 
     public String getColor() {
@@ -66,11 +69,11 @@ public class Note implements Serializable{
     }
 
     public String getTimestamp() {
-        return timestamp;
+        return this.timestamp;
     }
 
     public boolean getArchived(){
-        return archived;
+        return this.archived;
     }
 
     @Override

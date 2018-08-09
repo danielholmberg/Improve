@@ -1,8 +1,10 @@
 package dev.danielholmberg.improve.Utilities;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
@@ -19,18 +21,13 @@ public class NoteInputValidator {
     private static final String TAG = NoteInputValidator.class.getSimpleName();
 
     private Context context;
-
-    private EditText inputTitle, inputInfo;
-    private TextInputLayout inputLayoutTitle, inputLayoutInfo;
+    private EditText inputTitle;
 
     public NoteInputValidator(Context context, View inputLayoutConatiner) {
         this.context = context;
 
         // Input Components
-        inputLayoutTitle = (TextInputLayout) inputLayoutConatiner.findViewById(R.id.input_layout_title);
-        inputLayoutInfo = (TextInputLayout) inputLayoutConatiner.findViewById(R.id.input_layout_info);
         inputTitle = (TextInputEditText) inputLayoutConatiner.findViewById(R.id.input_title);
-        inputInfo = (TextInputEditText) inputLayoutConatiner.findViewById(R.id.input_info);
     }
 
     /**
@@ -43,18 +40,8 @@ public class NoteInputValidator {
 
     private boolean validateTitle() {
         if(TextUtils.isEmpty(inputTitle.getText())) {
-            inputLayoutTitle.setError(context.getString(R.string.err_msg_title));
+            inputTitle.setError(context.getString(R.string.err_msg_title));
             requestFocus(inputTitle);
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    private boolean valitdateInfo() {
-        if(TextUtils.isEmpty(inputInfo.getText())) {
-            inputLayoutInfo.setError(context.getString(R.string.err_msg_info));
-            requestFocus(inputInfo);
             return false;
         } else {
             return true;
@@ -67,7 +54,8 @@ public class NoteInputValidator {
      */
     private void requestFocus(View view) {
         if (view.requestFocus()) {
-            ((AppCompatActivity)context).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            ((AppCompatActivity) context).getWindow()
+                    .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         }
     }
 

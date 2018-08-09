@@ -12,22 +12,32 @@
 
     <include
         android:id="@+id/include_toolbar_add_contact"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:layout_weight="0"
         layout="@layout/app_bar_add_contact" />
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="vertical"
+        android:scrollbarStyle="outsideOverlay"
+        android:nestedScrollingEnabled="true"
+        android:fillViewport="true">
 
         <LinearLayout
             android:id="@+id/contact_form_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:layout_weight="1"
             android:padding="@dimen/contact_form_padding">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="0"
                 android:layout_gravity="end">
 
                 <include
@@ -40,6 +50,7 @@
                 android:id="@+id/input_layout_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="0"
                 android:paddingBottom="@dimen/contact_form_padding">
                 <android.support.design.widget.TextInputEditText
                     android:id="@+id/input_name"
@@ -55,6 +66,7 @@
                 android:id="@+id/input_layout_company"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="0"
                 android:paddingBottom="@dimen/contact_form_padding">
                 <android.support.design.widget.TextInputEditText
                     android:id="@+id/input_company"
@@ -70,6 +82,7 @@
                 android:id="@+id/input_layout_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="0"
                 android:paddingBottom="@dimen/contact_form_padding">
                 <android.support.design.widget.TextInputEditText
                     android:id="@+id/input_email"
@@ -85,6 +98,7 @@
                 android:id="@+id/input_layout_mobile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="0"
                 android:paddingBottom="@dimen/contact_form_padding">
                 <android.support.design.widget.TextInputEditText
                     android:id="@+id/input_mobile"
@@ -96,16 +110,16 @@
                     android:drawablePadding="@dimen/contact_form_icons_padding"
                     android:hint="@string/hint_phone"/>
             </android.support.design.widget.TextInputLayout>
+
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/input_layout_comment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/contact_form_padding">
+                android:layout_weight="1">
                 <android.support.design.widget.TextInputEditText
                     android:id="@+id/input_comment"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:maxLines="5"
                     android:isScrollContainer="true"
                     android:scrollbars="vertical"
                     android:backgroundTint="@color/editTextTint"

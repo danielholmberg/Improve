@@ -1,5 +1,6 @@
 package dev.danielholmberg.improve.Activities;
 
+import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,10 +13,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
@@ -60,12 +64,23 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
 
         marker = (LinearLayout) findViewById(R.id.include_item_marker);
         markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
+        ((GradientDrawable) marker.getBackground()).setColor(markerColor);
 
-        inputLayout = (View) findViewById(R.id.add_note_layout);
+        inputLayout = (View) findViewById(R.id.input_layout);
         inputTitle = (TextInputEditText) findViewById(R.id.input_title);
         inputInfo = (TextInputEditText) findViewById(R.id.input_info);
 
+        inputTitle.requestFocus();
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
         validator = new NoteInputValidator(this, inputLayout);
+
+        marker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                chooseMarkerColor();
+            }
+        });
     }
 
     @Override
@@ -130,9 +145,10 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         String title = inputTitle.getText().toString();
         String info = inputInfo.getText().toString();
         String color = "#" + Integer.toHexString(markerColor);
-        String timestamp = getCurrentTimestamp();
+        String timestamp = Long.toString(System.currentTimeMillis());
 
         Note newNote = new Note(id, title, info, color, timestamp);
+
         storageManager.writeNoteToFirebase(newNote, false, new FirebaseStorageCallback() {
             @Override
             public void onSuccess() {
@@ -149,19 +165,16 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
 
     }
 
-    private String getCurrentTimestamp() {
-        return DateFormat.getDateTimeInstance().format(new Date());
-    }
-
     private void showParentActivity() {
         restUI();
         NavUtils.navigateUpFromSameTask(this);
-        finish();
+        finishAfterTransition();
     }
 
     private void restUI(){
         inputTitle.getText().clear();
         inputInfo.getText().clear();
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
     @Override

@@ -25,4 +25,5 @@
             android:icon="@drawable/ic_menu_sign_out_white"
             android:title="@string/sign_out" />
     </group>
+
 </menu>

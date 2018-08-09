@@ -54,11 +54,12 @@
     <color name="titleColorTurquoise">#3F665C</color>           <!-- Dark Turquoise -->
     <color name="titleColorPink">#663C4A</color>                <!-- Dark Pink -->
     <color name="titleColorDeepPurple">#3E374C</color>          <!-- Dark DeepPurple -->
-    <color name="titleColorIndigo">#4A4E66</color>
+    <color name="titleColorIndigo">#4A4E66</color>              <!-- Dark Indigo -->
     <color name="colorPickerRed">#ff1744</color>
     <color name="colorPickerPurple">#D500F9</color>
     <color name="colorPickerBlue">#2979FF</color>
     <color name="colorPickerDarkOrange">#f57c00</color>
-    <color name="colorPickerBabyBlue">#89cff0</color>              <!-- Dark Indigo -->
+    <color name="colorPickerBabyBlue">#89cff0</color>
+    <color name="noColor">#E0E0E0</color>
 
 </resources>

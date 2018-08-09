@@ -2,6 +2,9 @@ package dev.danielholmberg.improve.Activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.media.AudioAttributes;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -16,7 +19,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +33,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
+
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import dev.danielholmberg.improve.Fragments.ArchivedNotesFragment;
 import dev.danielholmberg.improve.Fragments.ContactsFragment;
@@ -62,7 +73,14 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private DrawerLayout drawer;
     private NavigationView navigationView;
+    private boolean hasloadedNavView = false;
     private ActionBarDrawerToggle actionBarDrawerToggle;
+
+    private String currentQuote;
+    private TextSwitcher quoteTextSwitcher;
+    private int quoteUpdateTime = 20000;
+    private SoundPool soundPool;
+    private int quoteSound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +108,28 @@ public class MainActivity extends AppCompatActivity {
         // Initializing the Handler for fragment transactions.
         mHandler = new Handler();
 
+        initNavDrawer();
+
+        loadCurrentFragment();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            if(hasloadedNavView) {
+                quoteTextSwitcher.setVisibility(View.GONE);
+            }
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+            if(hasloadedNavView) {
+                quoteTextSwitcher.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    private void initNavDrawer() {
         // Setting the Image, Name and Email in the NavigationDrawer Header.
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         ImageView drawer_header_image = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.drawer_header_image_iv);
@@ -108,7 +148,69 @@ public class MainActivity extends AppCompatActivity {
         // Initializing navigation menu
         setUpNavigationView();
 
-        loadCurrentFragment();
+        quoteTextSwitcher = (TextSwitcher) navigationView.findViewById(R.id.nav_view_bottom_quote);
+
+        loadAnimations();
+        loadQuoteSound();
+
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(
+                new TimerTask() {
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                setQuoteText();
+                            }
+                        });
+                    }
+                }, 0, quoteUpdateTime);
+
+        quoteTextSwitcher.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setQuoteText();
+                soundPool.play(quoteSound, 1, 1, 0, 0, 1);
+            }
+        });
+
+        hasloadedNavView = true;
+    }
+
+    private void loadQuoteSound() {
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+        soundPool = new SoundPool.Builder()
+                .setMaxStreams(1)
+                .setAudioAttributes(audioAttributes)
+                .build();
+        quoteSound = soundPool.load(this, R.raw.quote_easter_egg, 1);
+    }
+
+    private void setQuoteText() {
+        String[] quotesArray = getResources().getStringArray(R.array.quotes);
+        currentQuote = quotesArray[new Random().nextInt(quotesArray.length)];
+
+        if(currentQuote == null || currentQuote.isEmpty()) {
+            currentQuote = "There is always room for improvement.";
+        }
+
+        quoteTextSwitcher.setText(currentQuote);
+    }
+
+    private void loadAnimations() {
+        // Declare the in and out animations and initialize them
+        Animation in = AnimationUtils.loadAnimation(this,
+                android.R.anim.fade_in);
+        Animation out = AnimationUtils.loadAnimation(this,
+                android.R.anim.fade_out);
+
+        // set the animation type of textSwitcher
+        quoteTextSwitcher.setInAnimation(in);
+        quoteTextSwitcher.setOutAnimation(out);
+        quoteTextSwitcher.setAnimateFirstView(false);
     }
 
     /***
@@ -254,7 +356,8 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(TAG, "*** User successfully Signed Out ***");
                         Intent i = new Intent(getApplicationContext(), LoginActivity.class);
                         startActivity(i);
-                        finish();
+                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                        finishAfterTransition();
                     }
                 });
 

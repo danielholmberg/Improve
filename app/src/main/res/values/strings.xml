@@ -62,4 +62,18 @@
     <string name="menu_note_delete">Delete</string>
     <string name="menu_note_unarchive">Unarchive</string>
 
+    <!-- Quotes -->
+    <string-array name="quotes">
+        <item>There is always room for improvement.</item>
+        <item>If you always do what you have always done, you will always be where you have always been.</item>
+        <item>The health of your brain is much more about your actions than your age.</item>
+        <item>Change is your friend not your foe, change is a brilliant opportunity to grow.</item>
+        <item>The dreaming has to be backed up by the doing.</item>
+        <item>Be the type of person you want to meet.</item>
+        <item>Die with memories, not dreams.</item>
+        <item>Aspire to inspire before we expire.</item>
+        <item>Determine your priorities and focus on them.</item>
+        <item>The best preparation for tomorrow is doing your best today.</item>
+    </string-array>
+
 </resources>
