@@ -23,18 +23,11 @@ public class ContactInputValidator {
     private Context context;
 
     private EditText inputName, inputCompany, inputEmail, inputPhone;
-    private TextInputLayout inputLayoutName, inputLayoutCompany, inputLayoutEmail, inputLayoutPhone;
-    private boolean nameIsValid, emailIsValid = false;
-
 
     public ContactInputValidator(Context context, View inputLayoutContainer) {
         this.context = context;
         this.inputLayoutContainer = (View) inputLayoutContainer;
 
-        inputLayoutName = (TextInputLayout) inputLayoutContainer.findViewById(R.id.input_layout_name);
-        inputLayoutCompany = (TextInputLayout) inputLayoutContainer.findViewById(R.id.input_layout_company);
-        inputLayoutEmail = (TextInputLayout) inputLayoutContainer.findViewById(R.id.input_layout_email);
-        inputLayoutPhone = (TextInputLayout) inputLayoutContainer.findViewById(R.id.input_layout_mobile);
         inputName = (EditText) inputLayoutContainer.findViewById(R.id.input_name);
         inputCompany = (EditText) inputLayoutContainer.findViewById(R.id.input_company);
         inputEmail = (EditText) inputLayoutContainer.findViewById(R.id.input_email);
@@ -56,11 +49,9 @@ public class ContactInputValidator {
      */
     private boolean validateName() {
         if (inputName.getText().toString().trim().isEmpty()) {
-            inputLayoutName.setError(context.getString(R.string.err_msg_name));
+            inputName.setError(context.getString(R.string.err_msg_name));
             requestFocus(inputName);
             return false;
-        } else {
-            inputLayoutName.setErrorEnabled(false);
         }
 
         return true;
@@ -73,11 +64,9 @@ public class ContactInputValidator {
      */
     private boolean validateCompany() {
         if (inputCompany.getText().toString().isEmpty()) {
-            inputLayoutCompany.setError(context.getString(R.string.err_msg_company));
+            inputCompany.setError(context.getString(R.string.err_msg_company));
             requestFocus(inputCompany);
             return false;
-        } else {
-            inputLayoutCompany.setErrorEnabled(false);
         }
 
         return true;
@@ -91,11 +80,9 @@ public class ContactInputValidator {
         String email = inputEmail.getText().toString().trim();
 
         if (!isValidEmail(email)) {
-            inputLayoutEmail.setError(context.getString(R.string.err_msg_email));
+            inputEmail.setError(context.getString(R.string.err_msg_email));
             requestFocus(inputEmail);
             return false;
-        } else {
-            inputLayoutEmail.setErrorEnabled(false);
         }
 
         return true;
@@ -120,11 +107,11 @@ public class ContactInputValidator {
         if(phone.isEmpty()){
             return true;
         } else if(TextUtils.isEmpty(phone.trim())) {
-            inputLayoutPhone.setError(context.getString(R.string.err_msg_title));
+            inputPhone.setError(context.getString(R.string.err_msg_title));
             return false;
-        } else {
-            return true;
         }
+
+        return true;
     }
 
     /**

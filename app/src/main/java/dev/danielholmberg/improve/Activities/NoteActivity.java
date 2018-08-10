@@ -438,6 +438,8 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
                             .setAction("UNDO", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
+                                    note.setArchived(false);
+
                                     storageManager.writeNoteToFirebase(note, false, new FirebaseStorageCallback() {
                                         @Override
                                         public void onSuccess() {

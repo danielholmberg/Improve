@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Created by DanielHolmberg on 2018-01-17.
  */
 
-public class Contact implements Serializable{
+public class Contact implements Serializable {
     private String id;
     private String name;
     private String company;

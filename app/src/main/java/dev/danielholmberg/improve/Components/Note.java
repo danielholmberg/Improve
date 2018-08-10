@@ -10,7 +10,7 @@ import java.util.Objects;
  * Created by DanielHolmberg on 2018-01-21.
  */
 
-public class Note implements Serializable{
+public class Note implements Serializable {
     private String id;
     private String title;
     private String info;

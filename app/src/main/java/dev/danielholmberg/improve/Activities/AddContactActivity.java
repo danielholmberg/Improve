@@ -38,6 +38,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
 
     private LinearLayout marker;
     private int markerColor;
+    private GradientDrawable markerBackground;
     private TextInputEditText inputName, inputEmail, inputCompany, inputPhone, inputComment;
 
     private Toolbar toolbar;
@@ -63,9 +64,10 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
 
         marker = (LinearLayout) findViewById(R.id.include_item_marker);
         markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
-        ((GradientDrawable) marker.getBackground()).setColor(markerColor);
+        markerBackground = (GradientDrawable) marker.getBackground();
+        markerBackground.setColor(markerColor);
 
-        inputLayout = (View) findViewById(R.id.add_contact_layout);
+        inputLayout = (View) findViewById(R.id.input_contact_layout);
         inputName = (TextInputEditText) findViewById(R.id.input_name);
         inputCompany = (TextInputEditText) findViewById(R.id.input_company);
         inputEmail = (TextInputEditText) findViewById(R.id.input_email);
@@ -84,6 +86,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
 
             if(oldColor != null && !oldColor.isEmpty()) {
                 markerColor = Color.parseColor(oldColor);
+                markerBackground.setColor(markerColor);
             }
 
             inputName.setText(contact.getName());

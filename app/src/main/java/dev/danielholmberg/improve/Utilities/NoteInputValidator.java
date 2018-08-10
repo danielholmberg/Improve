@@ -43,9 +43,8 @@ public class NoteInputValidator {
             inputTitle.setError(context.getString(R.string.err_msg_title));
             requestFocus(inputTitle);
             return false;
-        } else {
-            return true;
         }
+        return true;
     }
 
     /**

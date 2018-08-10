@@ -24,29 +24,31 @@ public class FirebaseStorageManager {
     private static final String NOTES_REF = "notes";
     private static final String ARCHIVED_NOTES_REF = "archived_notes";
     private static final String CONTACTS_REF = "contacts";
+    private static final String CONTACTS_COMPANY_REF = "companies";
 
     public FirebaseStorageManager() {}
 
-    public DatabaseReference getNotesRef() {
+    private DatabaseReference getUserRef() {
         String userId = Improve.getInstance().getAuthManager().getCurrentUserId();
-        DatabaseReference notesRef = FirebaseDatabase.getInstance()
-                .getReference(USERS_REF).child(userId).child(NOTES_REF);
+        return FirebaseDatabase.getInstance().getReference(USERS_REF).child(userId);
+    }
+
+    public DatabaseReference getNotesRef() {
+        DatabaseReference notesRef = getUserRef().child(NOTES_REF);
         notesRef.keepSynced(true);
         return notesRef;
     }
 
     public DatabaseReference getArchivedNotesRef() {
         String userId = Improve.getInstance().getAuthManager().getCurrentUserId();
-        DatabaseReference archivedNotesRef = FirebaseDatabase.getInstance()
-                .getReference(USERS_REF).child(userId).child(ARCHIVED_NOTES_REF);
+        DatabaseReference archivedNotesRef = getUserRef().child(ARCHIVED_NOTES_REF);
         archivedNotesRef.keepSynced(true);
         return archivedNotesRef;
     }
 
     public DatabaseReference getContactsRef() {
         String userId = Improve.getInstance().getAuthManager().getCurrentUserId();
-        DatabaseReference contactsRef = FirebaseDatabase.getInstance()
-                .getReference(USERS_REF).child(userId).child(CONTACTS_REF);
+        DatabaseReference contactsRef = getUserRef().child(CONTACTS_REF);
         contactsRef.keepSynced(true);
         return contactsRef;
     }
@@ -130,6 +132,8 @@ public class FirebaseStorageManager {
                         callback.onFailure(e.toString());
                     }
                 });
+        getUserRef().child(CONTACTS_COMPANY_REF).child(contact.getCompany().toUpperCase()).child(contact.getId())
+                .setValue(true);
     }
 
     public void deleteNote(Note noteToDelete, boolean fromArchive, final FirebaseStorageCallback callback) {
@@ -187,5 +191,7 @@ public class FirebaseStorageManager {
                         callback.onFailure(e.toString());
                     }
                 });
+        getUserRef().child(CONTACTS_COMPANY_REF).child(contactToDelete.getCompany().toUpperCase())
+                .child(contactToDelete.getId()).removeValue();
     }
 }
