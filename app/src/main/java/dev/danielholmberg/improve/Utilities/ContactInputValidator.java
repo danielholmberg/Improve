@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Patterns;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
@@ -39,16 +40,18 @@ public class ContactInputValidator {
      * return true if both Name- and Company-field is not empty.
      */
     public boolean formIsValid() {
-        return validateName() && validateCompany() && validatePhone();
+        return validateName() && validateCompany() && validateEmail() && validatePhone();
     }
 
     /**
      * REQUIRED FIELD
      * Validate if the user has entered a name.
-     * @return false if first name is empty.
+     * @return false if name field is empty.
      */
     private boolean validateName() {
-        if (inputName.getText().toString().trim().isEmpty()) {
+        String name = inputName.getText().toString().trim();
+
+        if (TextUtils.isEmpty(name)) {
             inputName.setError(context.getString(R.string.err_msg_name));
             requestFocus(inputName);
             return false;
@@ -60,10 +63,12 @@ public class ContactInputValidator {
     /**
      * REQUIRED FIELD
      * Validate if the user has entered a company.
-     * @return false if last name is empty.
+     * @return false company field is empty.
      */
     private boolean validateCompany() {
-        if (inputCompany.getText().toString().isEmpty()) {
+        String company = inputCompany.getText().toString().trim();
+
+        if (TextUtils.isEmpty(company)) {
             inputCompany.setError(context.getString(R.string.err_msg_company));
             requestFocus(inputCompany);
             return false;
@@ -79,7 +84,9 @@ public class ContactInputValidator {
     private boolean validateEmail() {
         String email = inputEmail.getText().toString().trim();
 
-        if (!isValidEmail(email)) {
+        if(TextUtils.isEmpty(email)) {
+          return true;
+        } else if (!isValidEmail(email)) {
             inputEmail.setError(context.getString(R.string.err_msg_email));
             requestFocus(inputEmail);
             return false;
@@ -89,12 +96,10 @@ public class ContactInputValidator {
     }
 
     /**
-     * Check if the entered company is of correct format.
-     * @param email
-     * @return true if the company is of correct format.
+     * @return true if the email is of correct format.
      */
     private static boolean isValidEmail(String email) {
-        return !TextUtils.isEmpty(email) && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+        return !TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
     /**
@@ -102,16 +107,24 @@ public class ContactInputValidator {
      * @return true if phone is not empty.
      */
     private boolean validatePhone() {
-        String phone = inputPhone.getText().toString();
+        String phone = inputPhone.getText().toString().trim();
 
-        if(phone.isEmpty()){
+        if(TextUtils.isEmpty(phone)) {
             return true;
-        } else if(TextUtils.isEmpty(phone.trim())) {
-            inputPhone.setError(context.getString(R.string.err_msg_title));
+        } else if(!isValidPhone(phone)) {
+            inputPhone.setError(context.getString(R.string.err_msg_phone));
+            requestFocus(inputPhone);
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * @return true if the phone is of correct format.
+     */
+    private static boolean isValidPhone(String phone) {
+        return !TextUtils.isEmpty(phone) && Patterns.PHONE.matcher(phone).matches();
     }
 
     /**
@@ -123,37 +136,4 @@ public class ContactInputValidator {
             ((AppCompatActivity) context).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         }
     }
-
-    /**
-     * Class to live-check if the input is valid.
-     */
-    private class MyTextWatcher implements TextWatcher {
-
-        private View view;
-
-        private MyTextWatcher(View view) {
-            this.view = view;
-        }
-
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        }
-
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        }
-
-        public void afterTextChanged(Editable editable) {
-            switch (view.getId()) {
-                case R.id.input_name:
-                    validateName();
-                    break;
-                case R.id.input_company:
-                    validateCompany();
-                    break;
-                case R.id.input_email:
-                    validateEmail();
-                    break;
-            }
-        }
-    }
-
 }

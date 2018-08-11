@@ -9,6 +9,7 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -146,6 +147,10 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         String info = inputInfo.getText().toString();
         String color = "#" + Integer.toHexString(markerColor);
         String timestamp = Long.toString(System.currentTimeMillis());
+
+        if(TextUtils.isEmpty(info)) {
+            info = "";
+        }
 
         Note newNote = new Note(id, title, info, color, timestamp);
 

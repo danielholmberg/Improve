@@ -1,12 +1,15 @@
 package dev.danielholmberg.improve.Components;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.Serializable;
 
 /**
  * Created by DanielHolmberg on 2018-01-17.
  */
 
-public class Contact implements Serializable {
+public class Contact implements Parcelable {
     private String id;
     private String name;
     private String company;
@@ -26,6 +29,28 @@ public class Contact implements Serializable {
         this.comment = comment;
         this.color = color;
     }
+
+    protected Contact(Parcel in) {
+        id = in.readString();
+        name = in.readString();
+        company = in.readString();
+        email = in.readString();
+        phone = in.readString();
+        comment = in.readString();
+        color = in.readString();
+    }
+
+    public static final Creator<Contact> CREATOR = new Creator<Contact>() {
+        @Override
+        public Contact createFromParcel(Parcel in) {
+            return new Contact(in);
+        }
+
+        @Override
+        public Contact[] newArray(int size) {
+            return new Contact[size];
+        }
+    };
 
     public void setId(String id) {
         this.id = id;
@@ -90,31 +115,18 @@ public class Contact implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Contact contact = (Contact) o;
-
-        if (!id.equals(contact.id)) return false;
-        if (!name.equals(contact.name)) return false;
-        if (!company.equals(contact.company)) return false;
-        if (email != null ? !email.equals(contact.email) : contact.email != null) return false;
-        if (phone != null ? !phone.equals(contact.phone) : contact.phone != null) return false;
-        if (comment != null ? !comment.equals(contact.comment) : contact.comment != null)
-            return false;
-        return color.equals(contact.color);
+    public int describeContents() {
+        return 0;
     }
 
     @Override
-    public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + name.hashCode();
-        result = 31 * result + company.hashCode();
-        result = 31 * result + (email != null ? email.hashCode() : 0);
-        result = 31 * result + (phone != null ? phone.hashCode() : 0);
-        result = 31 * result + (comment != null ? comment.hashCode() : 0);
-        result = 31 * result + color.hashCode();
-        return result;
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(id);
+        parcel.writeString(name);
+        parcel.writeString(company);
+        parcel.writeString(email);
+        parcel.writeString(phone);
+        parcel.writeString(comment);
+        parcel.writeString(color);
     }
 }

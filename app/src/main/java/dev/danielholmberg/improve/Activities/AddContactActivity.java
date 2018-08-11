@@ -10,6 +10,7 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -75,7 +76,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
         inputComment = (TextInputEditText) findViewById(R.id.input_comment);
 
         Bundle intentBundle = getIntent().getBundleExtra("contactBundle");
-        Contact contact =  intentBundle != null ? (Contact) intentBundle.getSerializable("contact") : null;
+        Contact contact =  intentBundle != null ? (Contact) intentBundle.getParcelable("contact") : null;
 
         if(contact != null){
             isEdit = true;
@@ -170,11 +171,15 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
     public void addContact(){
         String id = storageManager.getContactsRef().push().getKey();
         final String name = inputName.getText().toString();
-        String company = inputCompany.getText().toString();
-        String email = inputEmail.getText().toString();
-        String phone = inputPhone.getText().toString();
+        String company = inputCompany.getText().toString().toUpperCase();
+        String email = inputEmail.getText().toString().trim();
+        String phone = inputPhone.getText().toString().trim();
         String comment = inputComment.getText().toString();
         String color = "#" + Integer.toHexString(markerColor);
+
+        if(TextUtils.isEmpty(comment)) {
+            comment = "";
+        }
 
         Contact newContact = new Contact(id, name, company, email, phone, comment, color);
         storageManager.writeContactToFirebase(newContact, new FirebaseStorageCallback() {
@@ -196,9 +201,9 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
     public void updateContact(){
         String id = oldCID;
         String name = inputName.getText().toString();
-        String company = inputCompany.getText().toString();
-        String email = inputEmail.getText().toString();
-        String phone = inputPhone.getText().toString();
+        String company = inputCompany.getText().toString().toUpperCase();
+        String email = inputEmail.getText().toString().trim();
+        String phone = inputPhone.getText().toString().trim();
         String comment = inputComment.getText().toString();
         String color = "#" + Integer.toHexString(markerColor);
 

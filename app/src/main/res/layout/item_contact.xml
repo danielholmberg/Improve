@@ -41,21 +41,13 @@
                 android:layout_toStartOf="@id/call_contact_btn">
 
                 <TextView
-                    android:id="@+id/company_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    android:textStyle="bold"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Large" />
-
-                <TextView
                     android:id="@+id/name_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:singleLine="true"
                     android:ellipsize="end"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
+                    android:textStyle="bold"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
 
             </LinearLayout>
 

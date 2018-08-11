@@ -39,11 +39,14 @@ public class NoteInputValidator {
     }
 
     private boolean validateTitle() {
-        if(TextUtils.isEmpty(inputTitle.getText())) {
+        String title = inputTitle.getText().toString().trim();
+
+        if(TextUtils.isEmpty(title)) {
             inputTitle.setError(context.getString(R.string.err_msg_title));
             requestFocus(inputTitle);
             return false;
         }
+
         return true;
     }
 

@@ -20,15 +20,14 @@ import dev.danielholmberg.improve.Improve;
 public class FirebaseStorageManager {
     private static final String TAG = FirebaseStorageManager.class.getSimpleName();
 
-    private static final String USERS_REF = "users";
-    private static final String NOTES_REF = "notes";
-    private static final String ARCHIVED_NOTES_REF = "archived_notes";
-    private static final String CONTACTS_REF = "contacts";
-    private static final String CONTACTS_COMPANY_REF = "companies";
+    public static final String USERS_REF = "users";
+    public static final String NOTES_REF = "notes";
+    public static final String ARCHIVED_NOTES_REF = "archived_notes";
+    public static final String CONTACTS_REF = "contacts";
 
     public FirebaseStorageManager() {}
 
-    private DatabaseReference getUserRef() {
+    public DatabaseReference getUserRef() {
         String userId = Improve.getInstance().getAuthManager().getCurrentUserId();
         return FirebaseDatabase.getInstance().getReference(USERS_REF).child(userId);
     }
@@ -116,7 +115,8 @@ public class FirebaseStorageManager {
     }
 
     public void writeContactToFirebase(Contact contact, final FirebaseStorageCallback callback) {
-        getContactsRef().child(contact.getId()).setValue(contact)
+        getContactsRef().child(contact.getCompany().toUpperCase())
+                .child(contact.getId()).setValue(contact)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -132,8 +132,6 @@ public class FirebaseStorageManager {
                         callback.onFailure(e.toString());
                     }
                 });
-        getUserRef().child(CONTACTS_COMPANY_REF).child(contact.getCompany().toUpperCase()).child(contact.getId())
-                .setValue(true);
     }
 
     public void deleteNote(Note noteToDelete, boolean fromArchive, final FirebaseStorageCallback callback) {
@@ -175,7 +173,8 @@ public class FirebaseStorageManager {
     }
 
     public void deleteContact(Contact contactToDelete, final FirebaseStorageCallback callback) {
-        getContactsRef().child(contactToDelete.getId()).removeValue()
+        getContactsRef().child(contactToDelete.getCompany().toUpperCase())
+                .child(contactToDelete.getId()).removeValue()
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -191,7 +190,5 @@ public class FirebaseStorageManager {
                         callback.onFailure(e.toString());
                     }
                 });
-        getUserRef().child(CONTACTS_COMPANY_REF).child(contactToDelete.getCompany().toUpperCase())
-                .child(contactToDelete.getId()).removeValue();
     }
 }

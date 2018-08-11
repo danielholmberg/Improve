@@ -64,6 +64,7 @@
                         android:backgroundTint="@color/editTextTint"
                         android:drawableStart="@drawable/ic_contact_person_grey"
                         android:drawablePadding="@dimen/contact_form_icons_padding"
+                        android:textStyle="bold"
                         android:hint="@string/hint_name" />
 
                     <android.support.design.widget.TextInputEditText
@@ -74,6 +75,7 @@
                         android:backgroundTint="@color/editTextTint"
                         android:drawableStart="@drawable/ic_contact_company_grey"
                         android:drawablePadding="@dimen/contact_form_icons_padding"
+                        android:textStyle="bold"
                         android:hint="@string/hint_company"/>
 
                     <android.support.design.widget.TextInputEditText

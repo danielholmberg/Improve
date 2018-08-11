@@ -12,6 +12,7 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -211,11 +212,14 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
         inputInfo.setEnabled(editMode);
 
         if(editMode) {
+            inputInfo.setVisibility(View.VISIBLE);
             inputTitle.requestFocus();
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         } else {
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-
+            if(TextUtils.isEmpty(noteInfo)) {
+                inputInfo.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -240,8 +244,6 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
         noteColor = note.getColor();
         noteTimestamp = tranformMillisToDateSring(Long.parseLong(note.getTimestamp()));
 
-        Log.d(TAG, "noteTitle: " + noteTitle + " with archived: " + note.getArchived());
-
         noteDetailTimestamp.setText(noteTimestamp);
         inputTitle.setText(noteTitle);
         inputInfo.setText(noteInfo);
@@ -250,6 +252,12 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
             GradientDrawable marker_shape = (GradientDrawable) marker.getBackground();
             marker_shape.setColor(Color.parseColor(noteColor));
             markerColor = Color.parseColor(noteColor);
+        }
+
+        if(TextUtils.isEmpty(noteInfo)) {
+            inputInfo.setVisibility(View.GONE);
+        } else {
+            inputInfo.setVisibility(View.VISIBLE);
         }
     }
 
@@ -508,6 +516,10 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
         String newInfo = inputInfo.getText().toString();
         String newColor = "#" + Integer.toHexString(markerColor);
         String updatedTimestamp = Long.toString(System.currentTimeMillis());
+
+        if(TextUtils.isEmpty(newInfo.trim())) {
+            newInfo = "";
+        }
 
         Note updatedNote = new Note(id, newTitle, newInfo, newColor, updatedTimestamp);
         updatedNote.setArchived(archived);

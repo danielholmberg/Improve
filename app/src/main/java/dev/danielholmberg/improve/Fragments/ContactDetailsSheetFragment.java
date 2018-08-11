@@ -77,7 +77,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
 
         if(contactBundle != null) {
             parentFragment = contactBundle.getInt("parentFragment");
-            contact = (Contact) contactBundle.getSerializable("contact");
+            contact = (Contact) contactBundle.getParcelable("contact");
         } else {
             Toast.makeText(getContext(), "Unable to show contact details", Toast.LENGTH_SHORT).show();
             detailsDialog.dismiss();
