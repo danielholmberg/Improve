@@ -94,8 +94,6 @@ public class ContactsFragment extends Fragment{
         // Initialize the LinearLayoutManager
         LinearLayoutManager recyclerLayoutManager =
                 new LinearLayoutManager(getActivity().getApplicationContext());
-        recyclerLayoutManager.setReverseLayout(true);
-        recyclerLayoutManager.setStackFromEnd(true);
         contactsRecyclerView.setLayoutManager(recyclerLayoutManager);
 
         // Setting RecyclerAdapter to RecyclerList.
@@ -158,13 +156,12 @@ public class ContactsFragment extends Fragment{
                                         System.err.print("Failed to read Contact values. " + databaseError.toString());
                                     }
                                 });
-
-                        // DONE retrieving all Contacts related to current Company.
-                        Companies.add(new CompanyList(Company.getKey(), CompanyContacts));
-                        adapter = new DocExpandableRecyclerAdapter(Companies);
-                        contactsRecyclerView.setAdapter(adapter);
                     }
 
+                    // DONE retrieving all Contacts related to current Company.
+                    Companies.add(new CompanyList(Company.getKey(), CompanyContacts));
+                    adapter = new DocExpandableRecyclerAdapter(Companies);
+                    contactsRecyclerView.setAdapter(adapter);
                 }
 
                 if(dataSnapshot.hasChildren()) {
