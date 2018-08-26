@@ -57,7 +57,7 @@
     <string name="nav_archived_notes">Archive</string>
     <string name="menu_note_edit">Edit</string>
     <string name="menu_note_archive">Archive</string>
-    <string name="note_activity_details">Note details</string>
+    <string name="note_activity_details">Details</string>
     <string name="menu_note_delete">Delete</string>
     <string name="menu_note_unarchive">Unarchive</string>
 

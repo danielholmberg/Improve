@@ -50,6 +50,6 @@
     </android.support.design.widget.CoordinatorLayout>
 
     <!-- Dialog Fragment Note details -->
-    <include layout="@layout/activity_note"/>
+    <include layout="@layout/fragment_note_details"/>
 
 </LinearLayout>

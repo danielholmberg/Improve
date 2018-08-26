@@ -37,6 +37,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
     private FirebaseStorageManager storageManager;
     private ContactInputValidator validator;
 
+    private Contact contact;
     private LinearLayout marker;
     private int markerColor;
     private GradientDrawable markerBackground;
@@ -76,7 +77,7 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
         inputComment = (TextInputEditText) findViewById(R.id.input_comment);
 
         Bundle intentBundle = getIntent().getBundleExtra("contactBundle");
-        Contact contact =  intentBundle != null ? (Contact) intentBundle.getParcelable("contact") : null;
+        contact =  intentBundle != null ? (Contact) intentBundle.getParcelable("contact") : null;
 
         if(contact != null){
             isEdit = true;
@@ -207,11 +208,21 @@ public class AddContactActivity extends AppCompatActivity implements View.OnClic
         String comment = inputComment.getText().toString();
         String color = "#" + Integer.toHexString(markerColor);
 
-        Contact updatedContact = new Contact(id, name, company, email, phone, comment, color);
-        storageManager.writeContactToFirebase(updatedContact, new FirebaseStorageCallback() {
+        final Contact updatedContact = new Contact(id, name, company, email, phone, comment, color);
+        storageManager.deleteContact(contact, new FirebaseStorageCallback() {
             @Override
             public void onSuccess() {
-                Toast.makeText(app,"Updated contact", Toast.LENGTH_SHORT).show();
+                storageManager.writeContactToFirebase(updatedContact, new FirebaseStorageCallback() {
+                    @Override
+                    public void onSuccess() {
+                        Toast.makeText(app,"Updated contact", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        Toast.makeText(app,"Failed to update contact", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
             @Override

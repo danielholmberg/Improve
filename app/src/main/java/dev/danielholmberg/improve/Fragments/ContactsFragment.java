@@ -136,8 +136,6 @@ public class ContactsFragment extends Fragment{
                 for(final DataSnapshot Company: dataSnapshot.getChildren()) {
                     final List<Contact> CompanyContacts = new ArrayList<>();
 
-                    Log.d(TAG, "Company - " + Company.getValue() + " - ChildrenCount: " + dataSnapshot.getChildrenCount());
-
                     // For Each ContactRef
                     for(final DataSnapshot ContactRef: Company.getChildren()) {
                         final String contactKey = ContactRef.getKey();

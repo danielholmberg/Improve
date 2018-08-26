@@ -44,11 +44,6 @@
             android:launchMode="singleInstance"
             android:parentActivityName=".Activities.MainActivity"
             android:windowSoftInputMode="adjustPan" />
-        <activity
-            android:name=".Activities.NoteActivity"
-            android:parentActivityName=".Activities.MainActivity"
-            android:windowSoftInputMode="adjustPan"
-            android:launchMode="singleInstance"/>
 
         <service android:name=".Services.MyFirebaseMessagingService">
             <intent-filter>

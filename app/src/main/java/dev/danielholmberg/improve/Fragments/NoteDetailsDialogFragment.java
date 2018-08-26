@@ -1,23 +1,25 @@
-package dev.danielholmberg.improve.Activities;
+package dev.danielholmberg.improve.Fragments;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.NavUtils;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -26,7 +28,7 @@ import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.Objects;
 
 import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Components.Note;
@@ -35,33 +37,29 @@ import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Utilities.NoteInputValidator;
 
-/**
- *  Created by DanielHolmberg
- *
- *  Activity with 2 modes:
- *      1. Show note details
- *          1.1 Active note
- *          1.2 Completed note
- *      2. Edit note details
- */
+public class NoteDetailsDialogFragment extends DialogFragment implements View.OnClickListener{
+    public static final String TAG = NoteDetailsDialogFragment.class.getSimpleName();
 
-public class NoteActivity extends AppCompatActivity implements View.OnClickListener{
-    private static final String TAG = AddNoteActivity.class.getSimpleName();
+    public static final String NOTE_PARENT_FRAGMENT_KEY = "parentFragment";
+    public static final String NOTE_ADAPTER_POS_KEY = "adapterItemPos";
+    public static final String NOTE_KEY = "note";
 
     private Improve app;
     private FirebaseStorageManager storageManager;
 
+    private Context context;
+    private View view;
+
     private Toolbar toolbar;
     private LinearLayout marker;
     private int markerColor;
-    private TextView noteDetailTitle, noteDetailInfo, noteDetailTimestamp;
+    private TextView noteDetailTimestamp;
 
     private Bundle noteBundle;
     private Note note;
     private int parentFragment;
 
     private boolean editMode = false;
-    private Menu menu;
 
     private View targetView;
 
@@ -75,51 +73,108 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
     private int notePosition;
     private AlertDialog colorPickerDialog;
 
-    // **** [END] EditMode variables ****
+    public static NoteDetailsDialogFragment newInstance() {
+        return new NoteDetailsDialogFragment();
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_note);
-
         app = Improve.getInstance();
         storageManager = app.getFirebaseStorageManager();
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar_note_activity);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        noteBundle = getIntent().getBundleExtra("noteBundle");
+        noteBundle = getArguments();
 
         if(noteBundle != null) {
-            parentFragment = noteBundle.getInt("parentFragment");
-            note = (Note) noteBundle.getSerializable("note");
+            parentFragment = noteBundle.getInt(NOTE_PARENT_FRAGMENT_KEY);
+            note = (Note) noteBundle.getSerializable(NOTE_KEY);
         } else {
-            Toast.makeText(getApplicationContext(), "Failed to show Note details, please try again",
+            Toast.makeText(context, "Failed to show Note details, please try again",
                     Toast.LENGTH_SHORT).show();
-            showParentActivity();
+            dismissDialog();
         }
+    }
 
-        inputLayout = (TextInputLayout) findViewById(R.id.input_layout);
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_note_details, container);
+    }
 
-        noteDetailTimestamp = (TextView) findViewById(R.id.footer_note_timestamp_tv);
-        inputTitle = (TextInputEditText) findViewById(R.id.input_title);
-        inputInfo = (TextInputEditText) findViewById(R.id.input_info);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        validator = new NoteInputValidator(this, inputLayout);
+        toolbar = (Toolbar) view.findViewById(R.id.toolbar_note_activity);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if(editMode) {
+                    switch (item.getItemId()) {
+                        case android.R.id.home:
+                            editMode = false;
+                            createOptionsMenu();
+                            toggleMode(editMode);
+                            return true;
+                        case R.id.chooseMarkerColor:
+                            chooseMarkerColor();
+                            return true;
+                        case R.id.noteDone:
+                            if (validator.formIsValid()) {
+                                updateNote();
+                            }
+                            return true;
+                        default:
+                            return true;
+                    }
+                } else {
+                    switch (item.getItemId()) {
+                        case R.id.noteUnarchive:
+                            unarchiveNote();
+                            return true;
+                        case R.id.noteArchive:
+                            showArchiveDialog();
+                            return true;
+                        case R.id.noteDelete:
+                            showDeleteNoteDialog();
+                            return true;
+                        case R.id.noteEdit:
+                            editMode = true;
+                            createOptionsMenu();
+                            toggleMode(editMode);
+                            return true;
+                        default:
+                            return true;
+                    }
+                }
+            }
+        });
+        createOptionsMenu();
+
+        inputLayout = (TextInputLayout) view.findViewById(R.id.input_layout);
+
+        noteDetailTimestamp = (TextView) view.findViewById(R.id.footer_note_timestamp_tv);
+        inputTitle = (TextInputEditText) view.findViewById(R.id.input_title);
+        inputInfo = (TextInputEditText) view.findViewById(R.id.input_info);
+
+        validator = new NoteInputValidator(context, inputLayout);
 
         toggleMode(editMode);
 
-        marker = (LinearLayout) findViewById(R.id.include_marker);
+        marker = (LinearLayout) view.findViewById(R.id.include_marker);
         markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
         ((GradientDrawable) marker.getBackground()).setColor(markerColor);
 
         if(note != null) {
             populateNoteDetails();
         } else {
-            Toast.makeText(this, "Unable to show Note details", Toast.LENGTH_SHORT).show();
-            showParentActivity();
+            Toast.makeText(context, "Unable to show Note details", Toast.LENGTH_SHORT).show();
+            dismissDialog();
         }
 
         marker.setOnClickListener(new View.OnClickListener() {
@@ -132,77 +187,41 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        this.menu = menu;
-        MenuInflater inflater = getMenuInflater();
-        menu.clear();
-
-        if(editMode) {
-            ((TextView) findViewById(R.id.toolbar_note_activity_title_tv)).setText(R.string.title_edit_note);
-            inflater.inflate(R.menu.activity_note_mode_edit, menu);
-        } else {
-            ((TextView) findViewById(R.id.toolbar_note_activity_title_tv)).setText(R.string.note_activity_details);
-            inflater.inflate(R.menu.activity_note_mode_show, menu);
-        }
-        return true;
+    public void onResume() {
+        super.onResume();
+        Objects.requireNonNull(getDialog().getWindow())
+                .setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
     }
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-
-        // Change which Archive/Unarchive menu item that is shown
-        // depending on parent fragment.
-        if(parentFragment == R.integer.NOTES_FRAGMENT) {
-            menu.findItem(R.id.noteArchive).setVisible(true);
-            menu.findItem(R.id.noteUnarchive).setVisible(false);
-        } else if(parentFragment == R.integer.ARCHIVED_NOTES_FRAGMENT){
-            menu.findItem(R.id.noteUnarchive).setVisible(true);
-            menu.findItem(R.id.noteArchive).setVisible(false);
-        }
-
-        return true;
-
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
+    private void createOptionsMenu() {
+        toolbar.getMenu().clear();
         if(editMode) {
-            switch (item.getItemId()) {
-                case android.R.id.home:
+            ((TextView) toolbar.findViewById(R.id.toolbar_note_activity_title_tv)).setText(R.string.title_edit_note);
+            toolbar.inflateMenu(R.menu.activity_note_mode_edit);
+            toolbar.findViewById(R.id.close_dialog_btn).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
                     editMode = false;
                     toggleMode(editMode);
-                    this.onCreateOptionsMenu(menu);
-                    return true;
-                case R.id.chooseMarkerColor:
-                    chooseMarkerColor();
-                    return true;
-                case R.id.noteDone:
-                    if (validator.formIsValid()) {
-                        updateNote();
-                    }
-                    return true;
-                default:
-                    return super.onOptionsItemSelected(item);
-            }
+                    populateNoteDetails();
+                    createOptionsMenu();
+                }
+            });
         } else {
-            switch (item.getItemId()) {
-                case R.id.noteUnarchive:
-                    unarchiveNote();
-                    return true;
-                case R.id.noteArchive:
-                    showArchiveDialog();
-                    return true;
-                case R.id.noteDelete:
-                    showDeleteNoteDialog();
-                    return true;
-                case R.id.noteEdit:
-                    editMode = true;
-                    toggleMode(editMode);
-                    this.onCreateOptionsMenu(menu);
-                    return true;
-                default:
-                    return super.onOptionsItemSelected(item);
+            ((TextView) toolbar.findViewById(R.id.toolbar_note_activity_title_tv)).setText(R.string.note_activity_details);
+            toolbar.inflateMenu(R.menu.activity_note_mode_show);
+            toolbar.findViewById(R.id.close_dialog_btn).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dismissDialog();
+                }
+            });
+            if(parentFragment == R.integer.NOTES_FRAGMENT) {
+                toolbar.getMenu().findItem(R.id.noteArchive).setVisible(true);
+                toolbar.getMenu().findItem(R.id.noteUnarchive).setVisible(false);
+            } else if(parentFragment == R.integer.ARCHIVED_NOTES_FRAGMENT){
+                toolbar.getMenu().findItem(R.id.noteUnarchive).setVisible(true);
+                toolbar.getMenu().findItem(R.id.noteArchive).setVisible(false);
             }
         }
     }
@@ -214,29 +233,15 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
         if(editMode) {
             inputInfo.setVisibility(View.VISIBLE);
             inputTitle.requestFocus();
-            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+            ((AppCompatActivity)context).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         } else {
-            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+            ((AppCompatActivity)context).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
             if(TextUtils.isEmpty(noteInfo)) {
                 inputInfo.setVisibility(View.GONE);
             }
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        if(editMode) {
-            editMode = false;
-            toggleMode(editMode);
-            this.onCreateOptionsMenu(menu);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    /**
-     * Populates Note Details layout with the Note received through Activity bundle.
-     */
     private void populateNoteDetails() {
         noteId = note.getId();
         noteTitle = note.getTitle();
@@ -270,7 +275,7 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
 
     private void showArchiveDialog() {
         AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(this).setTitle("Archive Note")
+                new AlertDialog.Builder(context).setTitle("Archive Note")
                         .setMessage("Do you want to archive this note?")
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
@@ -289,7 +294,7 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
 
     private void showDeleteNoteDialog() {
         AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(this).setTitle("Permanently Delete Note")
+                new AlertDialog.Builder(context).setTitle("Permanently Delete Note")
                         .setMessage("Do you want to delete this note?")
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
@@ -340,9 +345,9 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
                                 }
                             }).show();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Failed to delete note",
+                    Toast.makeText(context, "Failed to delete note",
                             Toast.LENGTH_SHORT).show();
-                    showParentActivity();
+                    dismissDialog();
                 }
 
             }
@@ -369,12 +374,12 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
                                 }
                             }).show();
                 } else {
-                    showParentActivity();
+                    dismissDialog();
                 }
             }
         });
 
-        showParentActivity();
+        dismissDialog();
 
     }
 
@@ -418,11 +423,11 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onFailure(String errorMessage) {
-                Toast.makeText(getApplicationContext(), "Failed to unarchive note", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "Failed to unarchive note", Toast.LENGTH_LONG).show();
             }
         });
 
-        showParentActivity();
+        dismissDialog();
 
     }
 
@@ -469,44 +474,12 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onFailure(String errorMessage) {
-                Toast.makeText(getApplicationContext(), "Failed to archive note", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "Failed to archive note", Toast.LENGTH_LONG).show();
             }
         });
 
-        showParentActivity();
-    }
+        dismissDialog();
 
-    private void chooseMarkerColor() {
-        LinearLayout colorPickerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.color_picker, null, false);
-
-        // First row
-        colorPickerLayout.findViewById(R.id.buttonColorGreen).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorLightGreen).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorAmber).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorDeepOrange).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorBrown).setOnClickListener(this);
-
-        // Second row
-        colorPickerLayout.findViewById(R.id.buttonColorBlueGrey).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorTurquoise).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorPink).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorDeepPurple).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorDarkGrey).setOnClickListener(this);
-
-        // Third row
-        colorPickerLayout.findViewById(R.id.buttonColorRed).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorPurple).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorBlue).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorDarkOrange).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorBabyBlue).setOnClickListener(this);
-
-        AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(this).setTitle("Marker color")
-                        .setMessage("Assign a specific color to your Note")
-                        .setCancelable(true)
-                        .setView(colorPickerLayout);
-        colorPickerDialog = alertDialogBuilder.create();
-        colorPickerDialog.show();
     }
 
     public void updateNote(){
@@ -536,13 +509,47 @@ public class NoteActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        showParentActivity();
+        dismissDialog();
 
     }
 
-    private void showParentActivity() {
-        NavUtils.navigateUpFromSameTask(this);
-        finishAfterTransition();
+    private void dismissDialog() {
+        this.dismiss();
+
+        // TODO - Finish dialog trough SharedElementTransition...
+    }
+
+    private void chooseMarkerColor() {
+        LinearLayout colorPickerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.color_picker, null, false);
+
+        // First row
+        colorPickerLayout.findViewById(R.id.buttonColorGreen).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorLightGreen).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorAmber).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorDeepOrange).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorBrown).setOnClickListener(this);
+
+        // Second row
+        colorPickerLayout.findViewById(R.id.buttonColorBlueGrey).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorTurquoise).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorPink).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorDeepPurple).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorDarkGrey).setOnClickListener(this);
+
+        // Third row
+        colorPickerLayout.findViewById(R.id.buttonColorRed).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorPurple).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorBlue).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorDarkOrange).setOnClickListener(this);
+        colorPickerLayout.findViewById(R.id.buttonColorBabyBlue).setOnClickListener(this);
+
+        AlertDialog.Builder alertDialogBuilder =
+                new AlertDialog.Builder(context).setTitle("Marker color")
+                        .setMessage("Assign a specific color to your Note")
+                        .setCancelable(true)
+                        .setView(colorPickerLayout);
+        colorPickerDialog = alertDialogBuilder.create();
+        colorPickerDialog.show();
     }
 
     @Override
