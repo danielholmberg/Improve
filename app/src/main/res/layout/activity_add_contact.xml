@@ -32,22 +32,10 @@
             android:orientation="vertical"
             android:padding="@dimen/contact_form_padding">
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:layout_gravity="end">
-
-                <include
-                    android:id="@+id/include_item_marker"
-                    layout="@layout/item_marker" />
-
-            </LinearLayout>
-
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/input_contact_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 android:paddingBottom="@dimen/contact_form_padding">
 
@@ -67,11 +55,11 @@
                         android:textStyle="bold"
                         android:hint="@string/hint_name" />
 
-                    <android.support.design.widget.TextInputEditText
+                    <AutoCompleteTextView
                         android:id="@+id/input_company"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textCapWords"
+                        android:inputType="textCapCharacters"
                         android:backgroundTint="@color/editTextTint"
                         android:drawableStart="@drawable/ic_contact_company_grey"
                         android:drawablePadding="@dimen/contact_form_icons_padding"

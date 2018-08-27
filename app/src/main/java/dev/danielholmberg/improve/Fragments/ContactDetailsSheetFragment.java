@@ -33,6 +33,9 @@ import dev.danielholmberg.improve.R;
 
 public class ContactDetailsSheetFragment extends BottomSheetDialogFragment implements View.OnClickListener{
     private static final String TAG = ContactDetailsSheetFragment.class.getSimpleName();
+    public static final String CONTACT_KEY = "contact";
+    public static final String PARENT_FRAGMENT_KEY = "parentFragment";
+    public static final String ADAPTER_POS_KEY = "itemPos";
 
     private Improve app;
     private FirebaseStorageManager storageManager;
@@ -44,9 +47,6 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     private View view;
     private int parentFragment;
 
-    private RelativeLayout toolbar;
-    private LinearLayout marker;
-    private String markerColor;
     private TextView title, name, email, mobile, comment;
 
     private View targetView;
@@ -71,13 +71,11 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
         Button actionCallContact = (Button) view.findViewById(R.id.details_call_contact_btn);
         Button actionSendMailToContact = (Button) view.findViewById(R.id.details_mail_contact_btn);
 
-        toolbar = (RelativeLayout) view.findViewById(R.id.toolbar_contact_details);
-
         contactBundle =  this.getArguments();
 
         if(contactBundle != null) {
-            parentFragment = contactBundle.getInt("parentFragment");
-            contact = (Contact) contactBundle.getParcelable("contact");
+            parentFragment = contactBundle.getInt(PARENT_FRAGMENT_KEY);
+            contact = (Contact) contactBundle.getParcelable(CONTACT_KEY);
         } else {
             Toast.makeText(getContext(), "Unable to show contact details", Toast.LENGTH_SHORT).show();
             detailsDialog.dismiss();
@@ -89,23 +87,14 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
         mobile = (TextView) view.findViewById(R.id.contact_details_mobile_tv);
         comment = (TextView) view.findViewById(R.id.contact_details_comment_tv);
 
-        marker = (LinearLayout) view.findViewById(R.id.include_item_marker);
-
         if(contact != null){
-            markerColor = contact.getColor();
-
             name.setText(contact.getName());
             email.setText(contact.getEmail());
             mobile.setText(contact.getPhone());
             comment.setText(contact.getComment());
             comment.setMovementMethod(new ScrollingMovementMethod());
 
-            if (markerColor != null && !markerColor.isEmpty()) {
-                GradientDrawable marker_shape = (GradientDrawable) marker.getBackground();
-                marker_shape.setColor(Color.parseColor(markerColor));
-            }
             title.setText(contact.getCompany());
-
 
             // Handle if the voluntary contact information fields is empty
             // Change e-mail field
@@ -250,7 +239,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
             case R.id.edit_contact_btn:
                 this.dismiss();
                 Intent updateContact = new Intent(getContext(), AddContactActivity.class);
-                updateContact.putExtra("contactBundle", contactBundle);
+                updateContact.putExtra(AddContactActivity.CONTACT_BUNDLE_KEY, contactBundle);
                 startActivity(updateContact);
                 break;
             case R.id.details_call_contact_btn:

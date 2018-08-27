@@ -17,27 +17,17 @@
         <LinearLayout
             android:id="@+id/item_archived_note_marker"
             android:orientation="vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/note_item_marker_width"
             android:layout_height="match_parent"
             android:gravity="center"
             android:elevation="@dimen/card_toolbar_elevation"
-            android:background="@color/colorPickerDeepOrange">
-
-            <TextView
-                android:id="@+id/archived_done_mark"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/note_item_done_marker_padding"
-                android:visibility="visible"
-                android:drawableStart="@drawable/ic_done_green" />
-
-        </LinearLayout>
+            android:background="@color/noColor"/>
 
         <RelativeLayout
             android:id="@+id/item_archived_note_body_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/note_item_body_padding"
+            android:padding="@dimen/note_archived_padding"
             android:background="@color/cardInfoBackground">
 
             <TextView
@@ -45,7 +35,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:paddingBottom="@dimen/note_title_padding"
                 android:maxLines="@integer/note_item_title_max_lines"
                 android:ellipsize="end"
                 android:text="@string/hint_title"

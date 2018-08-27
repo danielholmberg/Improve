@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -17,9 +16,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_alignParentStart="true"
+            android:layout_marginEnd="8dp"
             android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
             android:layout_toStartOf="@id/edit_contact_btn"
             android:requiresFadingEdge="horizontal"
             android:fadingEdgeLength="32dp">
@@ -58,6 +57,7 @@
             android:layout_toStartOf="@id/delete_contact_btn"
             android:layout_centerVertical="true"
             android:contentDescription="@string/editContactButtonContentDesc" />
+
     </RelativeLayout>
 
     <ScrollView
@@ -80,34 +80,9 @@
             android:paddingEnd="@dimen/contact_details_padding">
 
             <LinearLayout
-                android:id="@+id/item_marker_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="end"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <include
-                    android:id="@+id/include_item_marker"
-                    layout="@layout/item_marker" />
-
-            </LinearLayout>
-
-            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/contact_details_name_tv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:textStyle="bold"
-                    android:text="@string/hint_name"
-                    android:drawableStart="@drawable/ic_contact_person_grey"
-                    android:drawablePadding="@dimen/contact_form_icons_padding"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:paddingBottom="@dimen/contact_details_vertical_padding"/>
 
                 <LinearLayout
                     android:id="@+id/contact_details_actions"
@@ -141,6 +116,18 @@
                         style="?android:attr/borderlessButtonStyle"/>
 
                 </LinearLayout>
+
+                <TextView
+                    android:id="@+id/contact_details_name_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:textStyle="bold"
+                    android:text="@string/hint_name"
+                    android:drawableStart="@drawable/ic_contact_person_grey"
+                    android:drawablePadding="@dimen/contact_form_icons_padding"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:paddingBottom="@dimen/contact_details_vertical_padding"/>
 
                 <TextView
                     android:id="@+id/contact_details_email_tv"

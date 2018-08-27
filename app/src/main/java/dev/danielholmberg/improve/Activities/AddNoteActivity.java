@@ -133,8 +133,8 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         colorPickerLayout.findViewById(R.id.buttonColorBabyBlue).setOnClickListener(this);
 
         AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(this).setTitle("Marker color")
-                        .setMessage("Assign a specific color to your Note")
+                new AlertDialog.Builder(this).setTitle("Note color")
+                        .setMessage("Choose a color to more easily characterize Notes")
                         .setCancelable(true)
                         .setView(colorPickerLayout);
         colorPickerDialog = alertDialogBuilder.create();

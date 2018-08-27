@@ -1,15 +1,19 @@
 package dev.danielholmberg.improve.Fragments;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -20,15 +24,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.thoughtbot.expandablerecyclerview.ExpandableRecyclerViewAdapter;
 import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup;
@@ -39,7 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dev.danielholmberg.improve.Activities.AddContactActivity;
-import dev.danielholmberg.improve.Components.CompanyList;
+import dev.danielholmberg.improve.Components.Company;
 import dev.danielholmberg.improve.Components.Contact;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
@@ -61,9 +65,7 @@ public class ContactsFragment extends Fragment{
     private TextView emptyListText;
     private FloatingActionButton fab;
 
-    private String contactOrderBy = "color";
-    private FirebaseRecyclerAdapter recyclerAdapter;
-    private Query query;
+    private ArrayList<String> COMPANIES;
 
     public ContactsFragment() {
         // Required empty public constructor
@@ -77,6 +79,7 @@ public class ContactsFragment extends Fragment{
         storageManager = app.getFirebaseStorageManager();
         // Enable the OptionsMenu to show the SearchView.
         setHasOptionsMenu(true);
+        COMPANIES = new ArrayList<String>();
     }
 
     @Nullable
@@ -130,23 +133,27 @@ public class ContactsFragment extends Fragment{
         storageManager.getContactsRef().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                final List<CompanyList> Companies = new ArrayList<>();
+                final List<Company> companies = new ArrayList<>();
 
                 // For Each Company.
-                for(final DataSnapshot Company: dataSnapshot.getChildren()) {
-                    final List<Contact> CompanyContacts = new ArrayList<>();
+                for(final DataSnapshot company: dataSnapshot.getChildren()) {
+                    final List<Contact> companyContacts = new ArrayList<>();
+
+                    // Add Company key to list of existing companies.
+                    COMPANIES.add(company.getKey());
 
                     // For Each ContactRef
-                    for(final DataSnapshot ContactRef: Company.getChildren()) {
-                        final String contactKey = ContactRef.getKey();
+                    for(final DataSnapshot contactRef: company.child(FirebaseStorageManager.COMPANY_CONTACTS_KEY).getChildren()) {
+                        final String contactKey = contactRef.getKey();
 
                         // Retrieve the Contact-values for corresponding ContactKey.
-                        storageManager.getContactsRef().child(Company.getKey()).child(contactKey)
+                        storageManager.getContactsRef().child(company.getKey()).child(FirebaseStorageManager.COMPANY_CONTACTS_KEY)
+                                .child(contactKey)
                                 .addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
                                         final Contact contact = dataSnapshot.getValue(Contact.class);
-                                        CompanyContacts.add(contact);
+                                        companyContacts.add(contact);
                                     }
 
                                     @Override
@@ -157,8 +164,11 @@ public class ContactsFragment extends Fragment{
                     }
 
                     // DONE retrieving all Contacts related to current Company.
-                    Companies.add(new CompanyList(Company.getKey(), CompanyContacts));
-                    adapter = new DocExpandableRecyclerAdapter(Companies);
+                    Company newCompany = new Company(company.getKey(), companyContacts);
+                    newCompany.setColor((String) company.child("color").getValue());
+                    companies.add(newCompany);
+
+                    adapter = new DocExpandableRecyclerAdapter(companies);
                     contactsRecyclerView.setAdapter(adapter);
                 }
 
@@ -223,6 +233,7 @@ public class ContactsFragment extends Fragment{
 
     public void addContact() {
         Intent addContactIntent = new Intent(getContext(), AddContactActivity.class);
+        addContactIntent.putStringArrayListExtra(AddContactActivity.COMPANIES_KEY, COMPANIES);
         startActivity(addContactIntent);
     }
 
@@ -233,7 +244,7 @@ public class ContactsFragment extends Fragment{
     public class DocExpandableRecyclerAdapter extends ExpandableRecyclerViewAdapter<CompanyGroupViewHolder, ContactViewHolder> {
 
 
-        public DocExpandableRecyclerAdapter(List<CompanyList> groups) {
+        public DocExpandableRecyclerAdapter(List<Company> groups) {
             super(groups);
         }
 
@@ -251,34 +262,221 @@ public class ContactsFragment extends Fragment{
 
         @Override
         public void onBindChildViewHolder(ContactViewHolder holder, int flatPosition, ExpandableGroup group, int childIndex) {
-            final Contact contact = ((CompanyList) group).getItems().get(childIndex);
-            Log.d(TAG, "contact: " + contact.getName());
+            final Contact contact = ((Company) group).getItems().get(childIndex);
             holder.bindModelToView(contact);
+            Log.d(TAG,"Contact: " + contact.getName());
         }
 
         @Override
         public void onBindGroupViewHolder(CompanyGroupViewHolder holder, int flatPosition, final ExpandableGroup group) {
-            holder.setParentTitle(group);
+            holder.bindModelToView((Company) group);
         }
 
     }
 
     /**
-     * ViewHolder class for each CompanyList view.
+     * ViewHolder class for each Company view.
      */
     public class CompanyGroupViewHolder extends GroupViewHolder {
 
-        public TextView companyName;
+        private View mView;
+        private Context context;
+        private Company company;
+
+        private TextView companyName;
+        private LinearLayout companyMarker;
+        private int markerColor;
+        private String previousColor;
+        private ImageButton addColorBtn, editColorBtn;
+        private AlertDialog colorPickerDialog;
 
         public CompanyGroupViewHolder(View companyView) {
             super(companyView);
-            companyName = companyView.findViewById(R.id.company_list_tv);
+            mView = companyView;
+            context = companyView.getContext();
         }
 
-        public void setParentTitle(ExpandableGroup group) {
-            companyName.setText(group.getTitle());
+        public void bindModelToView(final Company company) {
+            this.company = company;
+            companyName = (TextView) mView.findViewById(R.id.company_list_tv);
+            companyMarker = (LinearLayout) mView.findViewById(R.id.item_company_marker);
+            addColorBtn = (ImageButton) mView.findViewById(R.id.add_company_color_btn);
+            editColorBtn = (ImageButton) mView.findViewById(R.id.edit_company_color_btn);
+
+            companyName.setText(company.getTitle());
+
+            if(company.getColor() != null) {
+                previousColor = company.getColor();
+                companyMarker.setBackgroundColor(Color.parseColor(company.getColor()));
+                addColorBtn.setVisibility(View.GONE);
+                editColorBtn.setVisibility(View.VISIBLE);
+            } else {
+                previousColor = "#" + Integer.toHexString(getResources().getColor(R.color.noColor));
+                companyMarker.setBackgroundColor(getResources().getColor(R.color.noColor));
+                editColorBtn.setVisibility(View.GONE);
+                addColorBtn.setVisibility(View.VISIBLE);
+            }
+
+            addColorBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    chooseMarkerColor();
+                }
+            });
+            editColorBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    chooseMarkerColor();
+                }
+            });
         }
 
+        private void chooseMarkerColor() {
+            LinearLayout colorPickerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.color_picker, null, false);
+
+            // First row
+            colorPickerLayout.findViewById(R.id.buttonColorGreen).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerColor = getResources().getColor(R.color.colorPickerGreen);
+                    companyMarker.setBackgroundColor(markerColor);
+                }
+            });
+            colorPickerLayout.findViewById(R.id.buttonColorLightGreen).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerColor = getResources().getColor(R.color.colorPickerLightGreen);
+                    companyMarker.setBackgroundColor(markerColor);
+                }
+            });
+            colorPickerLayout.findViewById(R.id.buttonColorAmber).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerColor = getResources().getColor(R.color.colorPickerAmber);
+                    companyMarker.setBackgroundColor(markerColor);
+                }
+            });
+            colorPickerLayout.findViewById(R.id.buttonColorDeepOrange).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
+                    companyMarker.setBackgroundColor(markerColor);
+                }
+            });
+            colorPickerLayout.findViewById(R.id.buttonColorBrown).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerColor = getResources().getColor(R.color.colorPickerBrown);
+                    companyMarker.setBackgroundColor(markerColor);
+                }
+            });
+
+            // Second row
+            colorPickerLayout.findViewById(R.id.buttonColorBlueGrey).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerColor = getResources().getColor(R.color.colorPickerBlueGrey);
+                    companyMarker.setBackgroundColor(markerColor);
+                }
+            });
+            colorPickerLayout.findViewById(R.id.buttonColorTurquoise).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerColor = getResources().getColor(R.color.colorPickerTurquoise);
+                    companyMarker.setBackgroundColor(markerColor);
+                }
+            });
+            colorPickerLayout.findViewById(R.id.buttonColorPink).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerColor = getResources().getColor(R.color.colorPickerPink);
+                    companyMarker.setBackgroundColor(markerColor);
+                }
+            });
+            colorPickerLayout.findViewById(R.id.buttonColorDeepPurple).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerColor = getResources().getColor(R.color.colorPickerDeepPurple);
+                    companyMarker.setBackgroundColor(markerColor);
+                }
+            });
+            colorPickerLayout.findViewById(R.id.buttonColorDarkGrey).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerColor = getResources().getColor(R.color.colorPickerDarkGrey);
+                    companyMarker.setBackgroundColor(markerColor);
+                }
+            });
+
+            // Third row
+            colorPickerLayout.findViewById(R.id.buttonColorRed).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerColor = getResources().getColor(R.color.colorPickerRed);
+                    companyMarker.setBackgroundColor(markerColor);
+                }
+            });
+            colorPickerLayout.findViewById(R.id.buttonColorPurple).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerColor = getResources().getColor(R.color.colorPickerPurple);
+                    companyMarker.setBackgroundColor(markerColor);
+                }
+            });
+            colorPickerLayout.findViewById(R.id.buttonColorBlue).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerColor = getResources().getColor(R.color.colorPickerBlue);
+                    companyMarker.setBackgroundColor(markerColor);
+                }
+            });
+            colorPickerLayout.findViewById(R.id.buttonColorDarkOrange).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerColor = getResources().getColor(R.color.colorPickerDarkOrange);
+                    companyMarker.setBackgroundColor(markerColor);
+                }
+            });
+            colorPickerLayout.findViewById(R.id.buttonColorBabyBlue).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markerColor = getResources().getColor(R.color.colorPickerBabyBlue);
+                    companyMarker.setBackgroundColor(markerColor);
+                }
+            });
+
+            AlertDialog.Builder alertDialogBuilder =
+                    new AlertDialog.Builder(context).setTitle("Company color")
+                            .setMessage("Choose a color to more easily characterize companies")
+                            .setCancelable(true)
+                            .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    updateCompany();
+                                }
+                            })
+                            .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                @Override
+                                public void onDismiss(DialogInterface dialogInterface) {
+                                    companyMarker.setBackgroundColor(Color.parseColor(previousColor));
+                                }
+                            })
+                            .setView(colorPickerLayout);
+            colorPickerDialog = alertDialogBuilder.create();
+            colorPickerDialog.show();
+        }
+
+        private void updateCompany() {
+            String color = "#" + Integer.toHexString(markerColor);
+            storageManager.getContactsRef().child(company.getTitle()).child("color").setValue(color)
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(context, "Failed to update Company color, please try again.", Toast.LENGTH_SHORT).show();
+                }
+            });
+            colorPickerDialog.cancel();
+        }
     }
 
     /**
@@ -308,19 +506,10 @@ public class ContactsFragment extends Fragment{
             Button mailBtn = mView.findViewById(R.id.mail_contact_btn);
 
             TextView name = mView.findViewById(R.id.name_tv);
-
-            LinearLayout marker = mView.findViewById(R.id.item_contact_marker);
             // [END] All views of a note
 
             // [START] Define each view
             name.setText(contact.getName());
-
-            try {
-                marker.setBackgroundColor(contact.getColor() != null ? Color.parseColor(contact.getColor()) :
-                        getResources().getColor(R.color.noColor));
-            } catch (Exception e) {
-                marker.setBackgroundColor(getResources().getColor(R.color.noColor));
-            }
 
             if (contact.getEmail() == null || contact.getEmail().isEmpty()) {
                 mailBtn.setBackground(context.getResources().getDrawable(R.drawable.ic_contact_email_grey));
@@ -357,9 +546,10 @@ public class ContactsFragment extends Fragment{
 
         private Bundle createBundle(Contact contact, int itemPos) {
             Bundle bundle = new Bundle();
-            bundle.putParcelable("contact", contact);
-            bundle.putInt("position", itemPos);
-            bundle.putInt("parentFragment", R.integer.CONTACT_FRAGMENT);
+            bundle.putParcelable(ContactDetailsSheetFragment.CONTACT_KEY, contact);
+            bundle.putInt(ContactDetailsSheetFragment.ADAPTER_POS_KEY, itemPos);
+            bundle.putInt(ContactDetailsSheetFragment.PARENT_FRAGMENT_KEY, R.integer.CONTACT_FRAGMENT);
+            bundle.putStringArrayList(AddContactActivity.COMPANIES_KEY, COMPANIES);
             return bundle;
         }
 

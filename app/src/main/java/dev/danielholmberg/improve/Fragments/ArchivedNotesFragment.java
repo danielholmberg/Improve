@@ -205,7 +205,6 @@ public class ArchivedNotesFragment extends Fragment {
             // [START] All views of a contact
             LinearLayout marker = (LinearLayout) mView.findViewById(R.id.item_archived_note_marker);
             TextView title = (TextView) mView.findViewById(R.id.item_archived_note_title_tv);
-            TextView doneMarker = (TextView) mView.findViewById(R.id.archived_done_mark);
             // [END] All views of a note
 
             // [START] Define each view

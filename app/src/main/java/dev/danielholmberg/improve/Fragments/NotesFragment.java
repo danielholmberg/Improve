@@ -253,7 +253,6 @@ public class NotesFragment extends Fragment {
             TextView info = (TextView) mView.findViewById(R.id.item_note_info_tv);
 
             View footer = (View) mView.findViewById(R.id.footer_note);
-            TextView doneMarker = (TextView) mView.findViewById(R.id.done_mark);
             TextView timestamp = (TextView) mView.findViewById(R.id.footer_note_timestamp_tv);
             // [END] All views of a note
 
@@ -271,7 +270,6 @@ public class NotesFragment extends Fragment {
             if(note.getArchived()) {
                 info.setVisibility(View.GONE);
                 footer.setVisibility(View.GONE);
-                doneMarker.setVisibility(View.VISIBLE);
                 marker.setLayoutParams(new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
             } else {
@@ -281,7 +279,6 @@ public class NotesFragment extends Fragment {
                     info.setVisibility(View.VISIBLE);
                 }
                 footer.setVisibility(View.VISIBLE);
-                doneMarker.setVisibility(View.GONE);
             }
             // [END] Define each view
 

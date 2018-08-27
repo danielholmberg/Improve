@@ -16,18 +16,16 @@ public class Contact implements Parcelable {
     private String email = "";
     private String phone = "";
     private String comment = "";
-    private String color;
 
     public Contact() {}
 
-    public Contact(String id, String name, String company, String email, String phone, String comment, String color) {
+    public Contact(String id, String name, String company, String email, String phone, String comment) {
         this.id = id;
         this.name = name;
         this.company = company;
         this.email = email;
         this.phone = phone;
         this.comment = comment;
-        this.color = color;
     }
 
     protected Contact(Parcel in) {
@@ -37,7 +35,6 @@ public class Contact implements Parcelable {
         email = in.readString();
         phone = in.readString();
         comment = in.readString();
-        color = in.readString();
     }
 
     public static final Creator<Contact> CREATOR = new Creator<Contact>() {
@@ -82,10 +79,6 @@ public class Contact implements Parcelable {
         }
     }
 
-    public void setColor(String color) {
-        this.color = color;
-    }
-
     public String getId() {
         return this.id;
     }
@@ -110,10 +103,6 @@ public class Contact implements Parcelable {
         return this.comment;
     }
 
-    public String getColor() {
-        return this.color;
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -127,6 +116,5 @@ public class Contact implements Parcelable {
         parcel.writeString(email);
         parcel.writeString(phone);
         parcel.writeString(comment);
-        parcel.writeString(color);
     }
 }
