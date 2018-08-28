@@ -143,12 +143,11 @@ public class ContactsFragment extends Fragment{
                     COMPANIES.add(company.getKey());
 
                     // For Each ContactRef
-                    for(final DataSnapshot contactRef: company.child(FirebaseStorageManager.COMPANY_CONTACTS_KEY).getChildren()) {
+                    for(final DataSnapshot contactRef: company.getChildren()) {
                         final String contactKey = contactRef.getKey();
 
                         // Retrieve the Contact-values for corresponding ContactKey.
-                        storageManager.getContactsRef().child(company.getKey()).child(FirebaseStorageManager.COMPANY_CONTACTS_KEY)
-                                .child(contactKey)
+                        storageManager.getContactsRef().child(company.getKey()).child(contactKey)
                                 .addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -164,9 +163,7 @@ public class ContactsFragment extends Fragment{
                     }
 
                     // DONE retrieving all Contacts related to current Company.
-                    Company newCompany = new Company(company.getKey(), companyContacts);
-                    newCompany.setColor((String) company.child("color").getValue());
-                    companies.add(newCompany);
+                    companies.add(new Company(company.getKey(), companyContacts));
 
                     adapter = new DocExpandableRecyclerAdapter(companies);
                     contactsRecyclerView.setAdapter(adapter);
@@ -264,7 +261,6 @@ public class ContactsFragment extends Fragment{
         public void onBindChildViewHolder(ContactViewHolder holder, int flatPosition, ExpandableGroup group, int childIndex) {
             final Contact contact = ((Company) group).getItems().get(childIndex);
             holder.bindModelToView(contact);
-            Log.d(TAG,"Contact: " + contact.getName());
         }
 
         @Override
@@ -281,14 +277,8 @@ public class ContactsFragment extends Fragment{
 
         private View mView;
         private Context context;
-        private Company company;
 
         private TextView companyName;
-        private LinearLayout companyMarker;
-        private int markerColor;
-        private String previousColor;
-        private ImageButton addColorBtn, editColorBtn;
-        private AlertDialog colorPickerDialog;
 
         public CompanyGroupViewHolder(View companyView) {
             super(companyView);
@@ -297,185 +287,8 @@ public class ContactsFragment extends Fragment{
         }
 
         public void bindModelToView(final Company company) {
-            this.company = company;
             companyName = (TextView) mView.findViewById(R.id.company_list_tv);
-            companyMarker = (LinearLayout) mView.findViewById(R.id.item_company_marker);
-            addColorBtn = (ImageButton) mView.findViewById(R.id.add_company_color_btn);
-            editColorBtn = (ImageButton) mView.findViewById(R.id.edit_company_color_btn);
-
             companyName.setText(company.getTitle());
-
-            if(company.getColor() != null) {
-                previousColor = company.getColor();
-                companyMarker.setBackgroundColor(Color.parseColor(company.getColor()));
-                addColorBtn.setVisibility(View.GONE);
-                editColorBtn.setVisibility(View.VISIBLE);
-            } else {
-                previousColor = "#" + Integer.toHexString(getResources().getColor(R.color.noColor));
-                companyMarker.setBackgroundColor(getResources().getColor(R.color.noColor));
-                editColorBtn.setVisibility(View.GONE);
-                addColorBtn.setVisibility(View.VISIBLE);
-            }
-
-            addColorBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    chooseMarkerColor();
-                }
-            });
-            editColorBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    chooseMarkerColor();
-                }
-            });
-        }
-
-        private void chooseMarkerColor() {
-            LinearLayout colorPickerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.color_picker, null, false);
-
-            // First row
-            colorPickerLayout.findViewById(R.id.buttonColorGreen).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    markerColor = getResources().getColor(R.color.colorPickerGreen);
-                    companyMarker.setBackgroundColor(markerColor);
-                }
-            });
-            colorPickerLayout.findViewById(R.id.buttonColorLightGreen).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    markerColor = getResources().getColor(R.color.colorPickerLightGreen);
-                    companyMarker.setBackgroundColor(markerColor);
-                }
-            });
-            colorPickerLayout.findViewById(R.id.buttonColorAmber).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    markerColor = getResources().getColor(R.color.colorPickerAmber);
-                    companyMarker.setBackgroundColor(markerColor);
-                }
-            });
-            colorPickerLayout.findViewById(R.id.buttonColorDeepOrange).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
-                    companyMarker.setBackgroundColor(markerColor);
-                }
-            });
-            colorPickerLayout.findViewById(R.id.buttonColorBrown).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    markerColor = getResources().getColor(R.color.colorPickerBrown);
-                    companyMarker.setBackgroundColor(markerColor);
-                }
-            });
-
-            // Second row
-            colorPickerLayout.findViewById(R.id.buttonColorBlueGrey).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    markerColor = getResources().getColor(R.color.colorPickerBlueGrey);
-                    companyMarker.setBackgroundColor(markerColor);
-                }
-            });
-            colorPickerLayout.findViewById(R.id.buttonColorTurquoise).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    markerColor = getResources().getColor(R.color.colorPickerTurquoise);
-                    companyMarker.setBackgroundColor(markerColor);
-                }
-            });
-            colorPickerLayout.findViewById(R.id.buttonColorPink).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    markerColor = getResources().getColor(R.color.colorPickerPink);
-                    companyMarker.setBackgroundColor(markerColor);
-                }
-            });
-            colorPickerLayout.findViewById(R.id.buttonColorDeepPurple).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    markerColor = getResources().getColor(R.color.colorPickerDeepPurple);
-                    companyMarker.setBackgroundColor(markerColor);
-                }
-            });
-            colorPickerLayout.findViewById(R.id.buttonColorDarkGrey).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    markerColor = getResources().getColor(R.color.colorPickerDarkGrey);
-                    companyMarker.setBackgroundColor(markerColor);
-                }
-            });
-
-            // Third row
-            colorPickerLayout.findViewById(R.id.buttonColorRed).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    markerColor = getResources().getColor(R.color.colorPickerRed);
-                    companyMarker.setBackgroundColor(markerColor);
-                }
-            });
-            colorPickerLayout.findViewById(R.id.buttonColorPurple).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    markerColor = getResources().getColor(R.color.colorPickerPurple);
-                    companyMarker.setBackgroundColor(markerColor);
-                }
-            });
-            colorPickerLayout.findViewById(R.id.buttonColorBlue).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    markerColor = getResources().getColor(R.color.colorPickerBlue);
-                    companyMarker.setBackgroundColor(markerColor);
-                }
-            });
-            colorPickerLayout.findViewById(R.id.buttonColorDarkOrange).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    markerColor = getResources().getColor(R.color.colorPickerDarkOrange);
-                    companyMarker.setBackgroundColor(markerColor);
-                }
-            });
-            colorPickerLayout.findViewById(R.id.buttonColorBabyBlue).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    markerColor = getResources().getColor(R.color.colorPickerBabyBlue);
-                    companyMarker.setBackgroundColor(markerColor);
-                }
-            });
-
-            AlertDialog.Builder alertDialogBuilder =
-                    new AlertDialog.Builder(context).setTitle("Company color")
-                            .setMessage("Choose a color to more easily characterize companies")
-                            .setCancelable(true)
-                            .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    updateCompany();
-                                }
-                            })
-                            .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                                @Override
-                                public void onDismiss(DialogInterface dialogInterface) {
-                                    companyMarker.setBackgroundColor(Color.parseColor(previousColor));
-                                }
-                            })
-                            .setView(colorPickerLayout);
-            colorPickerDialog = alertDialogBuilder.create();
-            colorPickerDialog.show();
-        }
-
-        private void updateCompany() {
-            String color = "#" + Integer.toHexString(markerColor);
-            storageManager.getContactsRef().child(company.getTitle()).child("color").setValue(color)
-            .addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(context, "Failed to update Company color, please try again.", Toast.LENGTH_SHORT).show();
-                }
-            });
-            colorPickerDialog.cancel();
         }
     }
 

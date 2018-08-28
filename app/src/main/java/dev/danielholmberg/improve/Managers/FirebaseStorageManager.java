@@ -24,7 +24,6 @@ public class FirebaseStorageManager {
     public static final String NOTES_REF = "notes";
     public static final String ARCHIVED_NOTES_REF = "archived_notes";
     public static final String CONTACTS_REF = "contacts";
-    public static final String COMPANY_CONTACTS_KEY = "company_contacts";
 
     public FirebaseStorageManager() {}
 
@@ -116,7 +115,7 @@ public class FirebaseStorageManager {
     }
 
     public void writeContactToFirebase(Contact contact, final FirebaseStorageCallback callback) {
-        getContactsRef().child(contact.getCompany().toUpperCase()).child(COMPANY_CONTACTS_KEY)
+        getContactsRef().child(contact.getCompany().toUpperCase())
                 .child(contact.getId()).setValue(contact)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -174,7 +173,7 @@ public class FirebaseStorageManager {
     }
 
     public void deleteContact(Contact contactToDelete, final FirebaseStorageCallback callback) {
-        getContactsRef().child(contactToDelete.getCompany().toUpperCase()).child(COMPANY_CONTACTS_KEY)
+        getContactsRef().child(contactToDelete.getCompany().toUpperCase())
                 .child(contactToDelete.getId()).removeValue()
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override

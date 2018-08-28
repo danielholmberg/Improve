@@ -7,5 +7,6 @@
     <integer name="NOTES_FRAGMENT">1</integer>
     <integer name="ARCHIVED_NOTES_FRAGMENT">2</integer>
     <integer name="CONTACT_FRAGMENT">3</integer>
+    <integer name="note_title_max_length">50</integer>
 
 </resources>

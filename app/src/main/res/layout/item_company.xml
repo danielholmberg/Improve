@@ -6,63 +6,23 @@
     android:elevation="@dimen/card_elevation"
     android:layout_marginBottom="@dimen/company_cardview_margin">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentStart="true">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/company_list_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_alignParentStart="true">
+            android:layout_weight="1"
+            android:padding="@dimen/company_cardview_margin"
+            android:background="@color/colorPrimary"
+            android:textColor="@color/titleTextColor"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textStyle="bold"/>
 
-            <LinearLayout
-                android:id="@+id/item_company_marker"
-                android:orientation="vertical"
-                android:layout_width="@dimen/company_item_marker_width"
-                android:layout_height="match_parent"
-                android:layout_weight="0"
-                android:gravity="center"
-                android:elevation="@dimen/card_toolbar_elevation"
-                android:background="@color/noColor"/>
-
-            <TextView
-                android:id="@+id/company_list_tv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:padding="@dimen/company_cardview_margin"
-                android:background="@color/colorPrimary"
-                android:textColor="@color/titleTextColor"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textStyle="bold"/>
-
-        </LinearLayout>
-
-        <ImageButton
-            android:id="@+id/add_company_color_btn"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:visibility="gone"
-            android:src="@drawable/ic_add_colorpalette_white"
-            android:layout_gravity="end"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="16dp"
-            style="?android:attr/borderlessButtonStyle" />
-
-        <ImageButton
-            android:id="@+id/edit_company_color_btn"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:visibility="gone"
-            android:src="@drawable/ic_menu_colorpalette_white"
-            android:layout_gravity="end"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="16dp"
-            style="?android:attr/borderlessButtonStyle" />
-
-    </RelativeLayout>
+    </LinearLayout>
 
 </android.support.v7.widget.CardView>

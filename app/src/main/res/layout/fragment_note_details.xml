@@ -53,26 +53,18 @@
                 android:layout_below="@id/note_details_timestamp"
                 app:hintEnabled="false">
 
-                <HorizontalScrollView
-                    android:layout_width="wrap_content"
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/input_title"
                     android:layout_height="wrap_content"
-                    android:requiresFadingEdge="horizontal"
-                    android:fadingEdgeLength="32dp">
-
-                    <android.support.design.widget.TextInputEditText
-                        android:id="@+id/input_title"
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:background="@null"
-                        android:paddingTop="8dp"
-                        android:textStyle="bold"
-                        android:textColor="@color/note_title_text_color"
-                        android:inputType="textCapWords|textMultiLine"
-                        android:maxLines="2"
-                        android:hint="@string/hint_title"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
-
-                </HorizontalScrollView>
+                    android:layout_width="match_parent"
+                    android:background="@null"
+                    android:paddingTop="8dp"
+                    android:textStyle="bold"
+                    android:textColor="@color/note_title_text_color"
+                    android:maxLength="@integer/note_title_max_length"
+                    android:inputType="textCapWords|textMultiLine"
+                    android:hint="@string/hint_title"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
                 <ScrollView
                     android:layout_height="wrap_content"
