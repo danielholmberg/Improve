@@ -59,5 +59,6 @@
     <dimen name="contact_list_padding">8dp</dimen>
     <dimen name="company_cardview_margin">8dp</dimen>
     <dimen name="note_archived_padding">8dp</dimen>
+    <dimen name="note_details_layout_padding">8dp</dimen>
 
 </resources>
