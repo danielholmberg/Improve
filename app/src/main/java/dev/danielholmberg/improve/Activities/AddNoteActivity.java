@@ -1,5 +1,6 @@
 package dev.danielholmberg.improve.Activities;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -50,6 +51,8 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
 
     private AlertDialog colorPickerDialog;
 
+    private boolean resumed = false;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,6 +88,12 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        resumed = true;
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.activity_note_mode_edit, menu);
@@ -95,6 +104,9 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
             case R.id.chooseMarkerColor:
                 chooseMarkerColor();
                 return true;
@@ -252,5 +264,16 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
                 break;
         }
         colorPickerDialog.dismiss();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(resumed) {
+            Intent i = new Intent(this, MainActivity.class);
+            i.putExtra(MainActivity.SOURCE_FRAGMENT, MainActivity.TAG_NOTES_FRAGMENT);
+            startActivity(i);
+        } else {
+            showParentActivity();
+        }
     }
 }

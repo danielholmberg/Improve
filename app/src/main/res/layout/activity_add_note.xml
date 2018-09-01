@@ -14,25 +14,21 @@
         android:id="@+id/include_toolbar_add_note"
         layout="@layout/app_bar_add_note" />
 
-
     <LinearLayout
         android:id="@+id/note_form_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/note_form_padding"
+        android:paddingTop="8dp"
+        android:paddingBottom="@dimen/note_form_padding"
+        android:paddingStart="@dimen/note_form_padding"
+        android:paddingEnd="@dimen/note_form_padding"
         android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:layout_gravity="end">
-
-            <include
-                android:id="@+id/include_item_marker"
-                layout="@layout/item_marker" />
-
-        </LinearLayout>
+        <include
+            android:id="@+id/include_item_marker"
+            layout="@layout/item_marker"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"/>
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/input_layout"

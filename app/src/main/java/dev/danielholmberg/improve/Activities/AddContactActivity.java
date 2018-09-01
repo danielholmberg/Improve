@@ -1,5 +1,6 @@
 package dev.danielholmberg.improve.Activities;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
@@ -58,6 +59,8 @@ public class AddContactActivity extends AppCompatActivity {
     private boolean isEdit;
     private String oldCID, oldColor;
 
+    private boolean resumed = false;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,6 +109,12 @@ public class AddContactActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        resumed = true;
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.activity_contact_mode_edit, menu);
@@ -116,6 +125,9 @@ public class AddContactActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
             case R.id.contactDone:
                 if(validator.formIsValid()) {
                     if (!isEdit) {
@@ -206,5 +218,16 @@ public class AddContactActivity extends AppCompatActivity {
         inputEmail.getText().clear();
         inputPhone.getText().clear();
         inputComment.getText().clear();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(resumed) {
+            Intent i = new Intent(this, MainActivity.class);
+            i.putExtra(MainActivity.SOURCE_FRAGMENT, MainActivity.TAG_CONTACTS_FRAGMENT);
+            startActivity(i);
+        } else {
+            showParentActivity();
+        }
     }
 }

@@ -47,10 +47,12 @@ import dev.danielholmberg.improve.Utilities.CircleTransform;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final String TAG_NOTES_FRAGMENT = "NOTES_FRAGMENT";
-    private static final String TAG_ARCHIVED_NOTES_FRAGMENT = "ARCHIVED_NOTES_FRAGMENT";
-    private static final String TAG_CONTACTS_FRAGMENT = "CONTACTS_FRAGMENT";
+    public static final String TAG_NOTES_FRAGMENT = "NOTES_FRAGMENT";
+    public static final String TAG_ARCHIVED_NOTES_FRAGMENT = "ARCHIVED_NOTES_FRAGMENT";
+    public static final String TAG_CONTACTS_FRAGMENT = "CONTACTS_FRAGMENT";
     private static String CURRENT_TAG = TAG_NOTES_FRAGMENT;
+
+    public static final String SOURCE_FRAGMENT = "sourceFragment";
 
     private Improve app;
 
@@ -104,6 +106,9 @@ public class MainActivity extends AppCompatActivity {
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
+
+        // Source fragment when returning from Task Manager and onBackPressed().
+        CURRENT_TAG = getIntent().getStringExtra(SOURCE_FRAGMENT);
 
         // Initializing the Handler for fragment transactions.
         mHandler = new Handler();
