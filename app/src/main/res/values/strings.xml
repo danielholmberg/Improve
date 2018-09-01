@@ -60,6 +60,8 @@
     <string name="note_activity_details">Details</string>
     <string name="menu_note_delete">Delete</string>
     <string name="menu_note_unarchive">Unarchive</string>
+    <string name="nav_feedback">Feedback</string>
+    <string name="title_submit_feedback">Feedback</string>
 
     <!-- Quotes -->
     <string-array name="quotes">

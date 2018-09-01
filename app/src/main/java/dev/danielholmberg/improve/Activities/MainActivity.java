@@ -1,5 +1,6 @@
 package dev.danielholmberg.improve.Activities;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -50,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG_NOTES_FRAGMENT = "NOTES_FRAGMENT";
     public static final String TAG_ARCHIVED_NOTES_FRAGMENT = "ARCHIVED_NOTES_FRAGMENT";
     public static final String TAG_CONTACTS_FRAGMENT = "CONTACTS_FRAGMENT";
-    private static String CURRENT_TAG = TAG_NOTES_FRAGMENT;
+    public static String CURRENT_TAG = TAG_NOTES_FRAGMENT;
 
     public static final String SOURCE_FRAGMENT = "sourceFragment";
 
@@ -226,9 +227,6 @@ public class MainActivity extends AppCompatActivity {
         // selecting appropriate nav menu item
         selectNavMenu();
 
-        // set toolbar title
-        setToolbarTitle();
-
         // if currentUser select the current navigation menu again, don't do anything
         // just close the navigation drawer
         if (getSupportFragmentManager().findFragmentByTag(CURRENT_TAG) != null) {
@@ -278,15 +276,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setToolbarTitle() {
-        getSupportActionBar().setSubtitle(subTitles[navItemIndex]);
-    }
-
     private void selectNavMenu() {
         navigationView.getMenu().getItem(navItemIndex).setChecked(true);
     }
 
     private void setUpNavigationView() {
+        final Context context = this;
         //Setting Navigation View Item Selected Listener to handle the item click of the navigation menu
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
 
@@ -308,6 +303,10 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.nav_contacts:
                         navItemIndex = 2;
                         CURRENT_TAG = TAG_CONTACTS_FRAGMENT;
+                        break;
+                    case R.id.nav_feedback:
+                        Intent i = new Intent(context, SubmitFeedbackActivity.class);
+                        startActivity(i);
                         break;
                     case R.id.nav_sign_out:
                         startSignOut();

@@ -45,6 +45,13 @@
             android:parentActivityName=".Activities.MainActivity"
             android:windowSoftInputMode="adjustPan" />
 
+        <activity
+            android:name=".Activities.SubmitFeedbackActivity"
+            android:label="@string/title_submit_feedback"
+            android:launchMode="singleInstance"
+            android:parentActivityName=".Activities.MainActivity"
+            android:windowSoftInputMode="adjustPan" />
+
         <service android:name=".Services.MyFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>

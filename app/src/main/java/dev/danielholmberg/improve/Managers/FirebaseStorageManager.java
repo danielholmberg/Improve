@@ -7,9 +7,14 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.util.Deque;
 
 import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Components.Contact;
+import dev.danielholmberg.improve.Components.Feedback;
 import dev.danielholmberg.improve.Components.Note;
 import dev.danielholmberg.improve.Improve;
 
@@ -24,6 +29,7 @@ public class FirebaseStorageManager {
     public static final String NOTES_REF = "notes";
     public static final String ARCHIVED_NOTES_REF = "archived_notes";
     public static final String CONTACTS_REF = "contacts";
+    public static final String FEEDBACK_REF = "feedback";
 
     public FirebaseStorageManager() {}
 
@@ -39,17 +45,20 @@ public class FirebaseStorageManager {
     }
 
     public DatabaseReference getArchivedNotesRef() {
-        String userId = Improve.getInstance().getAuthManager().getCurrentUserId();
         DatabaseReference archivedNotesRef = getUserRef().child(ARCHIVED_NOTES_REF);
         archivedNotesRef.keepSynced(true);
         return archivedNotesRef;
     }
 
     public DatabaseReference getContactsRef() {
-        String userId = Improve.getInstance().getAuthManager().getCurrentUserId();
         DatabaseReference contactsRef = getUserRef().child(CONTACTS_REF);
         contactsRef.keepSynced(true);
         return contactsRef;
+    }
+
+    public DatabaseReference getFeedbackRef() {
+        DatabaseReference feedbackRef = FirebaseDatabase.getInstance().getReference().child(FEEDBACK_REF);
+        return feedbackRef;
     }
 
     public void writeNoteToFirebase(Note note, boolean toArchive, final FirebaseStorageCallback callback) {
@@ -187,6 +196,24 @@ public class FirebaseStorageManager {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "!!! Failed to delete the Contact in Firebase storage: " + e);
+                        callback.onFailure(e.toString());
+                    }
+                });
+    }
+
+    public void submitFeedback(Feedback feedback, final FirebaseStorageCallback callback) {
+        getFeedbackRef().child(feedback.getFeedback_id()).setValue(feedback)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "*** Successfully submitted feedback to Firebase storage ***");
+                        callback.onSuccess();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "!!! Failed to submit feedback to Firebase storage: " + e);
                         callback.onFailure(e.toString());
                     }
                 });
