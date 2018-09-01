@@ -16,16 +16,19 @@ public class Contact implements Parcelable {
     private String email = "";
     private String phone = "";
     private String comment = "";
+    private String timestampAdded;
+    private String timestampUpdated;
 
     public Contact() {}
 
-    public Contact(String id, String name, String company, String email, String phone, String comment) {
+    public Contact(String id, String name, String company, String email, String phone, String comment, String timestampAdded) {
         this.id = id;
         this.name = name;
         this.company = company;
         this.email = email;
         this.phone = phone;
         this.comment = comment;
+        this.timestampAdded = timestampAdded;
     }
 
     protected Contact(Parcel in) {
@@ -35,6 +38,8 @@ public class Contact implements Parcelable {
         email = in.readString();
         phone = in.readString();
         comment = in.readString();
+        timestampAdded = in.readString();
+        timestampUpdated = in.readString();
     }
 
     public static final Creator<Contact> CREATOR = new Creator<Contact>() {
@@ -79,6 +84,14 @@ public class Contact implements Parcelable {
         }
     }
 
+    public void setTimestampAdded(String timestampAdded) {
+        this.timestampAdded = timestampAdded;
+    }
+
+    public void setTimestampUpdated(String timestampUpdated) {
+        this.timestampUpdated = timestampUpdated;
+    }
+
     public String getId() {
         return this.id;
     }
@@ -103,6 +116,14 @@ public class Contact implements Parcelable {
         return this.comment;
     }
 
+    public String getTimestampAdded() {
+        return this.timestampAdded;
+    }
+
+    public String getTimestampUpdated() {
+        return this.timestampUpdated;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -116,5 +137,7 @@ public class Contact implements Parcelable {
         parcel.writeString(email);
         parcel.writeString(phone);
         parcel.writeString(comment);
+        parcel.writeString(timestampAdded);
+        parcel.writeString(timestampUpdated);
     }
 }

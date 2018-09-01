@@ -1,9 +1,6 @@
 package dev.danielholmberg.improve.Components;
 
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Objects;
 
 /**
@@ -15,17 +12,18 @@ public class Note implements Serializable {
     private String title;
     private String info;
     private String color;
-    private String timestamp;
+    private String timestampAdded;
+    private String timestampUpdated;
     private boolean archived;
 
     public Note() {}
 
-    public Note(String id, String title, String info, String color, String timestamp) {
+    public Note(String id, String title, String info, String color, String timestampAdded) {
         this.id = id;
         this.title = title;
         this.info = info;
         this.color = color;
-        this.timestamp = timestamp;
+        this.timestampAdded = timestampAdded;
     }
 
     public void setId(String id) {
@@ -44,8 +42,8 @@ public class Note implements Serializable {
         this.color = color;
     }
 
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
+    public void setTimestampAdded(String timestampAdded) {
+        this.timestampAdded = timestampAdded;
     }
 
     public void setArchived(boolean archived) {
@@ -68,30 +66,19 @@ public class Note implements Serializable {
         return this.color;
     }
 
-    public String getTimestamp() {
-        return this.timestamp;
+    public String getTimestampAdded() {
+        return this.timestampAdded;
     }
 
     public boolean getArchived(){
         return this.archived;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Note note = (Note) o;
-        return archived == note.archived &&
-                Objects.equals(id, note.id) &&
-                Objects.equals(title, note.title) &&
-                Objects.equals(info, note.info) &&
-                Objects.equals(color, note.color) &&
-                Objects.equals(timestamp, note.timestamp);
+    public String getTimestampUpdated() {
+        return timestampUpdated;
     }
 
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(id, title, info, color, timestamp, archived);
+    public void setTimestampUpdated(String timestampUpdated) {
+        this.timestampUpdated = timestampUpdated;
     }
 }

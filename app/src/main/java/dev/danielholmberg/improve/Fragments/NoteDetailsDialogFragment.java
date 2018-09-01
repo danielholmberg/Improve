@@ -3,7 +3,6 @@ package dev.danielholmberg.improve.Fragments;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -68,7 +67,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
     private NoteInputValidator validator;
 
     private EditText inputTitle, inputInfo;
-    private String noteId, noteTitle, noteColor, noteInfo, noteTimestamp;
+    private String noteId, noteTitle, noteColor, noteInfo, noteTimestampAdded, noteTimestampUpdated;
     private int notePosition;
     private AlertDialog colorPickerDialog;
 
@@ -109,7 +108,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        toolbar = (Toolbar) view.findViewById(R.id.toolbar_note_activity);
+        toolbar = (Toolbar) view.findViewById(R.id.toolbar_note_details_fragment);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -133,6 +132,9 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
                     }
                 } else {
                     switch (item.getItemId()) {
+                        case R.id.noteInfo:
+                            showInfoDialog();
+                            return true;
                         case R.id.noteUnarchive:
                             unarchiveNote();
                             return true;
@@ -237,7 +239,8 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
         noteTitle = note.getTitle();
         noteInfo = note.getInfo();
         noteColor = note.getColor();
-        noteTimestamp = tranformMillisToDateSring(Long.parseLong(note.getTimestamp()));
+        noteTimestampAdded = tranformMillisToDateSring(Long.parseLong(note.getTimestampAdded()));
+        noteTimestampUpdated = tranformMillisToDateSring(Long.parseLong(note.getTimestampUpdated()));
 
         inputTitle.setText(noteTitle);
         inputInfo.setText(noteInfo);
@@ -261,10 +264,35 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
         return DateFormat.getDateTimeInstance().format(calendar.getTime());
     }
 
+    private void showInfoDialog() {
+        LinearLayout noteInfoLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.dialog_note_info, null);
+        TextView noteAddedTimestamp = noteInfoLayout.findViewById(R.id.note_info_added_timestamp_tv);
+        TextView noteUpdatedTimestamp = noteInfoLayout.findViewById(R.id.note_info_updated_timestamp_tv);
+
+        String added = "Added: " + noteTimestampAdded;
+        String updated = "Last updated: " + noteTimestampUpdated;
+
+        noteAddedTimestamp.setText(added);
+        noteUpdatedTimestamp.setText(updated);
+
+        AlertDialog.Builder alertDialogBuilder =
+                new AlertDialog.Builder(context).setTitle(R.string.dialog_info_note_title)
+                        .setIcon(R.drawable.ic_menu_info_primary)
+                        .setView(noteInfoLayout)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        });
+        final AlertDialog dialog = alertDialogBuilder.create();
+        dialog.show();
+    }
+
     private void showArchiveDialog() {
         AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(context).setTitle("Archive Note")
-                        .setMessage("Do you want to archive this note?")
+                new AlertDialog.Builder(context).setTitle(R.string.dialog_archive_note_title)
+                        .setMessage(R.string.dialog_archive_note_msg)
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -282,8 +310,8 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
 
     private void showDeleteNoteDialog() {
         AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(context).setTitle("Permanently Delete Note")
-                        .setMessage("Do you want to delete this note?")
+                new AlertDialog.Builder(context).setTitle(R.string.dialog_delete_note_title)
+                        .setMessage(R.string.dialog_delete_note_msg)
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -476,14 +504,16 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
         String newTitle = inputTitle.getText().toString();
         String newInfo = inputInfo.getText().toString();
         String newColor = "#" + Integer.toHexString(markerColor);
-        String updatedTimestamp = Long.toString(System.currentTimeMillis());
+        String timestampAdded = note.getTimestampAdded();
+        String timestampUpdated = Long.toString(System.currentTimeMillis());
 
         if(TextUtils.isEmpty(newInfo.trim())) {
             newInfo = "";
         }
 
-        Note updatedNote = new Note(id, newTitle, newInfo, newColor, updatedTimestamp);
+        Note updatedNote = new Note(id, newTitle, newInfo, newColor, timestampAdded);
         updatedNote.setArchived(archived);
+        updatedNote.setTimestampUpdated(timestampUpdated);
 
         storageManager.writeNoteToFirebase(updatedNote, updatedNote.getArchived(), new FirebaseStorageCallback() {
             @Override
@@ -497,14 +527,13 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
             }
         });
 
-        dismissDialog();
-
+        editMode = false;
+        createOptionsMenu();
+        toggleMode(editMode);
     }
 
     private void dismissDialog() {
         this.dismiss();
-
-        // TODO - Finish dialog trough SharedElementTransition...
     }
 
     private void chooseMarkerColor() {
@@ -532,8 +561,8 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
         colorPickerLayout.findViewById(R.id.buttonColorBabyBlue).setOnClickListener(this);
 
         AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(context).setTitle("Marker color")
-                        .setMessage("Assign a specific color to your Note")
+                new AlertDialog.Builder(context).setTitle(R.string.choose_marker_color_note_title)
+                        .setMessage(R.string.choose_marker_color_note_msg)
                         .setCancelable(true)
                         .setView(colorPickerLayout);
         colorPickerDialog = alertDialogBuilder.create();

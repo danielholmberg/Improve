@@ -15,6 +15,7 @@
         <item name="android:windowBackground">@color/windowBackground</item>
         <!-- enable window content transitions -->
         <item name="android:windowActivityTransitions">true</item>
+        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
     </style>
 
     <!-- [Base] Toolbar title text style -->
@@ -35,6 +36,12 @@
         <item name="android:letterSpacing">0.5</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Activity WindowTransitions -->
+    <style name="WindowAnimationTransition">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
     </style>
 
 </resources>

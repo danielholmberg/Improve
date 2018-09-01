@@ -49,7 +49,7 @@ public class NotesFragment extends Fragment {
 
     private View view;
     private RecyclerView notesRecyclerView;
-    private String noteListOrderBy = "timestamp";
+    private String noteListOrderBy = "timestampUpdated";
     private TextView emptyListText;
     private FloatingActionButton fab;
 
@@ -265,7 +265,7 @@ public class NotesFragment extends Fragment {
             }
             title.setText(note.getTitle());
             info.setText(note.getInfo());
-            timestamp.setText(tranformMillisToDateSring(Long.parseLong(note.getTimestamp())));
+            timestamp.setText(tranformMillisToDateSring(Long.parseLong(note.getTimestampUpdated())));
 
             if(note.getArchived()) {
                 info.setVisibility(View.GONE);

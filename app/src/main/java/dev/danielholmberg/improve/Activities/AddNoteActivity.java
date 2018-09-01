@@ -145,8 +145,8 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         colorPickerLayout.findViewById(R.id.buttonColorBabyBlue).setOnClickListener(this);
 
         AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(this).setTitle("Note color")
-                        .setMessage("Choose a color to more easily characterize Notes")
+                new AlertDialog.Builder(this).setTitle(R.string.choose_marker_color_note_title)
+                        .setMessage(R.string.choose_marker_color_note_msg)
                         .setCancelable(true)
                         .setView(colorPickerLayout);
         colorPickerDialog = alertDialogBuilder.create();
@@ -158,13 +158,14 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         String title = inputTitle.getText().toString();
         String info = inputInfo.getText().toString();
         String color = "#" + Integer.toHexString(markerColor);
-        String timestamp = Long.toString(System.currentTimeMillis());
+        String timestampAdded = Long.toString(System.currentTimeMillis());
 
         if(TextUtils.isEmpty(info)) {
             info = "";
         }
 
-        Note newNote = new Note(id, title, info, color, timestamp);
+        Note newNote = new Note(id, title, info, color, timestampAdded);
+        newNote.setTimestampUpdated(timestampAdded);
 
         storageManager.writeNoteToFirebase(newNote, false, new FirebaseStorageCallback() {
             @Override

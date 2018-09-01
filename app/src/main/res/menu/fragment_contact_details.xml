@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/contactEdit"
+        android:title="@string/menu_contact_edit"
+        android:icon="@drawable/ic_mode_edit_primary"
+        app:showAsAction="always"
+        />
+    <item
+        android:id="@+id/contactDelete"
+        android:title="@string/menu_contact_delete"
+        android:icon="@drawable/ic_menu_delete_primary"
+        app:showAsAction="ifRoom"
+        />
+    <item
+        android:id="@+id/contactInfo"
+        android:title="@string/menu_contact_info"
+        android:icon="@drawable/ic_menu_info_primary"
+        app:showAsAction="ifRoom" />
+</menu>

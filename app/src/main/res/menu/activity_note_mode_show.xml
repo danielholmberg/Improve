@@ -24,4 +24,9 @@
         android:title="@string/menu_note_archive"
         android:icon="@drawable/ic_menu_archive_primary"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/noteInfo"
+        android:title="@string/menu_note_info"
+        android:icon="@drawable/ic_menu_info_primary"
+        app:showAsAction="ifRoom" />
 </menu>

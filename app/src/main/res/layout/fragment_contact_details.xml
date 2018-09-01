@@ -5,60 +5,12 @@
     android:layout_height="match_parent"
     android:background="@color/cardInfoBackground">
 
-    <RelativeLayout
-        android:id="@+id/toolbar_contact_details"
+    <include
+        android:id="@+id/include_toolbar_contact_details_fragment"
+        layout="@layout/app_bar_contact_details_fragment"
+        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:layout_height="?android:attr/actionBarSize"
-        android:layout_weight="0"
-        android:background="@color/cardInfoBackground">
-
-        <HorizontalScrollView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="8dp"
-            android:layout_centerVertical="true"
-            android:layout_alignParentStart="true"
-            android:layout_toStartOf="@id/edit_contact_btn"
-            android:requiresFadingEdge="horizontal"
-            android:fadingEdgeLength="32dp">
-
-            <TextView
-                android:id="@+id/toolbar_contact_details_company_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/placeholder_company"
-                style="@style/AppTheme.Base.ActivityTitle"
-                android:scrollHorizontally="true"
-                android:singleLine="true" />
-
-        </HorizontalScrollView>
-
-        <ImageButton
-            android:id="@+id/delete_contact_btn"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_menu_delete_primary"
-            android:layout_gravity="end"
-            android:layout_marginEnd="16dp"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:contentDescription="@string/deleteContactButtonContentDesc" />
-
-        <ImageButton
-            android:id="@+id/edit_contact_btn"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_mode_edit_primary"
-            android:layout_gravity="end"
-            android:layout_marginEnd="16dp"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_toStartOf="@id/delete_contact_btn"
-            android:layout_centerVertical="true"
-            android:contentDescription="@string/editContactButtonContentDesc" />
-
-    </RelativeLayout>
+        android:layout_weight="0" />
 
     <ScrollView
         android:layout_width="match_parent"

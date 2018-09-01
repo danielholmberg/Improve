@@ -1,5 +1,6 @@
 package dev.danielholmberg.improve.Fragments;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -9,9 +10,13 @@ import android.os.Bundle;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -19,6 +24,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.text.DateFormat;
+import java.util.Calendar;
 
 import dev.danielholmberg.improve.Activities.AddContactActivity;
 import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
@@ -39,6 +47,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
 
     private Improve app;
     private FirebaseStorageManager storageManager;
+    private Context context;
 
     private Bundle contactBundle;
     private Contact contact;
@@ -47,7 +56,9 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     private View view;
     private int parentFragment;
 
+    private Toolbar toolbar;
     private TextView title, name, email, mobile, comment;
+    private String timestampAdded, timestampUpdated;
 
     private View targetView;
 
@@ -61,12 +72,37 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
         app = Improve.getInstance();
         storageManager = app.getFirebaseStorageManager();
         detailsDialog = this;
+        context = getContext();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_contact_details, container, false);
+
+        toolbar = view.findViewById(R.id.toolbar_contact_details_fragment);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.contactEdit:
+                        detailsDialog.dismiss();
+                        Intent updateContact = new Intent(getContext(), AddContactActivity.class);
+                        updateContact.putExtra(AddContactActivity.CONTACT_BUNDLE_KEY, contactBundle);
+                        startActivity(updateContact);
+                        return true;
+                    case R.id.contactDelete:
+                        showDeleteContactDialog();
+                        return true;
+                    case R.id.contactInfo:
+                        showInfoDialog();
+                        return true;
+                    default:
+                        return true;
+                }
+            }
+        });
+        toolbar.inflateMenu(R.menu.fragment_contact_details);
 
         Button actionCallContact = (Button) view.findViewById(R.id.details_call_contact_btn);
         Button actionSendMailToContact = (Button) view.findViewById(R.id.details_mail_contact_btn);
@@ -77,7 +113,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
             parentFragment = contactBundle.getInt(PARENT_FRAGMENT_KEY);
             contact = (Contact) contactBundle.getParcelable(CONTACT_KEY);
         } else {
-            Toast.makeText(getContext(), "Unable to show contact details", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Unable to show contact details", Toast.LENGTH_SHORT).show();
             detailsDialog.dismiss();
         }
 
@@ -93,6 +129,9 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
             mobile.setText(contact.getPhone());
             comment.setText(contact.getComment());
             comment.setMovementMethod(new ScrollingMovementMethod());
+
+            timestampAdded = tranformMillisToDateSring(Long.parseLong(contact.getTimestampAdded()));
+            timestampUpdated = tranformMillisToDateSring(Long.parseLong(contact.getTimestampUpdated()));
 
             title.setText(contact.getCompany());
 
@@ -153,11 +192,9 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
         } else {
             // Dismiss dialog and show Toast.
             this.dismiss();
-            Toast.makeText(getContext(), "Unable to show contact details", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Unable to show contact details", Toast.LENGTH_SHORT).show();
         }
 
-        view.findViewById(R.id.edit_contact_btn).setOnClickListener(this);
-        view.findViewById(R.id.delete_contact_btn).setOnClickListener(this);
         actionCallContact.setOnClickListener(this);
         actionSendMailToContact.setOnClickListener(this);
 
@@ -233,37 +270,42 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
 
     }
 
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.edit_contact_btn:
-                this.dismiss();
-                Intent updateContact = new Intent(getContext(), AddContactActivity.class);
-                updateContact.putExtra(AddContactActivity.CONTACT_BUNDLE_KEY, contactBundle);
-                startActivity(updateContact);
-                break;
-            case R.id.details_call_contact_btn:
-                Intent callIntent = new Intent(Intent.ACTION_DIAL);
-                callIntent.setData(Uri.parse("tel:" + contact.getPhone()));
-                startActivity(callIntent);
-                break;
-            case R.id.details_mail_contact_btn:
-                Intent mailIntent = new Intent(Intent.ACTION_SENDTO);
-                mailIntent.setData(Uri.parse("mailto:" + contact.getEmail()));
-                startActivity(mailIntent);
-                break;
-            case R.id.delete_contact_btn:
-                showDeleteContactDialog();
-                break;
-            default:
-                break;
-        }
+    private String tranformMillisToDateSring(long timeInMillis) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timeInMillis);
+
+        return DateFormat.getDateTimeInstance().format(calendar.getTime());
+    }
+
+    private void showInfoDialog() {
+        LinearLayout contactInfoLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.dialog_contact_info, null);
+        TextView contactAddedTimestamp = contactInfoLayout.findViewById(R.id.contact_info_added_timestamp_tv);
+        TextView contactUpdatedTimestamp = contactInfoLayout.findViewById(R.id.contact_info_updated_timestamp_tv);
+
+        String added = "Added: " + timestampAdded;
+        String updated = "Last updated: " + timestampUpdated;
+
+        contactAddedTimestamp.setText(added);
+        contactUpdatedTimestamp.setText(updated);
+
+        AlertDialog.Builder alertDialogBuilder =
+                new AlertDialog.Builder(context).setTitle(R.string.dialog_info_contact_title)
+                        .setIcon(R.drawable.ic_menu_info_primary)
+                        .setView(contactInfoLayout)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        });
+        final AlertDialog dialog = alertDialogBuilder.create();
+        dialog.show();
     }
 
     private void showDeleteContactDialog() {
         AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(getContext()).setTitle("Permanently delete contact")
-                        .setMessage("Do you want to delete this contact?")
+                new AlertDialog.Builder(context).setTitle(R.string.dialog_delete_contact_title)
+                        .setMessage(R.string.dialog_delete_contact_msg)
                         .setIcon(R.drawable.ic_menu_delete_grey)
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
@@ -278,5 +320,23 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
                 });
         final AlertDialog dialog = alertDialogBuilder.create();
         dialog.show();
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.details_call_contact_btn:
+                Intent callIntent = new Intent(Intent.ACTION_DIAL);
+                callIntent.setData(Uri.parse("tel:" + contact.getPhone()));
+                startActivity(callIntent);
+                break;
+            case R.id.details_mail_contact_btn:
+                Intent mailIntent = new Intent(Intent.ACTION_SENDTO);
+                mailIntent.setData(Uri.parse("mailto:" + contact.getEmail()));
+                startActivity(mailIntent);
+                break;
+            default:
+                break;
+        }
     }
 }

@@ -54,10 +54,8 @@ public class AddContactActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private View inputLayout;
 
-    private AlertDialog colorPickerDialog;
-
     private boolean isEdit;
-    private String oldCID, oldColor;
+    private String oldCID;
 
     private boolean resumed = false;
 
@@ -149,12 +147,15 @@ public class AddContactActivity extends AppCompatActivity {
         String email = inputEmail.getText().toString().trim();
         String phone = inputPhone.getText().toString().trim();
         String comment = inputComment.getText().toString();
+        String timestampAdded = Long.toString(System.currentTimeMillis());
 
         if(TextUtils.isEmpty(comment)) {
             comment = "";
         }
 
-        Contact newContact = new Contact(id, name, company, email, phone, comment);
+        Contact newContact = new Contact(id, name, company, email, phone, comment, timestampAdded);
+        newContact.setTimestampUpdated(timestampAdded);
+
         storageManager.writeContactToFirebase(newContact, new FirebaseStorageCallback() {
             @Override
             public void onSuccess() {
@@ -178,8 +179,12 @@ public class AddContactActivity extends AppCompatActivity {
         String email = inputEmail.getText().toString().trim();
         String phone = inputPhone.getText().toString().trim();
         String comment = inputComment.getText().toString();
+        String timestampAdded = contact.getTimestampAdded();
+        String timestampUpdated = Long.toString(System.currentTimeMillis());
 
-        final Contact updatedContact = new Contact(id, name, company, email, phone, comment);
+        final Contact updatedContact = new Contact(id, name, company, email, phone, comment, timestampAdded);
+        updatedContact.setTimestampUpdated(timestampUpdated);
+
         storageManager.deleteContact(contact, new FirebaseStorageCallback() {
             @Override
             public void onSuccess() {

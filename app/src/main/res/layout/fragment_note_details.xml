@@ -17,7 +17,7 @@
 
         <include
             android:id="@+id/include_toolbar_note_activity"
-            layout="@layout/app_bar_note_detail_fragment"
+            layout="@layout/app_bar_note_details_fragment"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"/>
 
