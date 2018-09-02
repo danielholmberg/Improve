@@ -18,11 +18,15 @@
         android:title="@string/menu_note_unarchive"
         android:icon="@drawable/ic_menu_unarchive_primary"
         app:showAsAction="ifRoom" />
-
     <item
         android:id="@+id/noteArchive"
         android:title="@string/menu_note_archive"
         android:icon="@drawable/ic_menu_archive_primary"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/noteExport"
+        android:title="@string/menu_note_export_file"
+        android:icon="@drawable/ic_menu_export_file_primary"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/noteInfo"

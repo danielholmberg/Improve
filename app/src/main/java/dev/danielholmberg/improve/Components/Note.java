@@ -1,5 +1,9 @@
 package dev.danielholmberg.improve.Components;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -80,5 +84,22 @@ public class Note implements Serializable {
 
     public void setTimestampUpdated(String timestampUpdated) {
         this.timestampUpdated = timestampUpdated;
+    }
+
+    public String getExportJSONFormat() throws JSONException {
+        JSONObject noteObject = new JSONObject();
+        JSONObject noteData = new JSONObject();
+
+        noteData.put("archived", this.archived);
+        noteData.put("color", this.color);
+        noteData.put("id", this.id);
+        noteData.put("info", this.info);
+        noteData.put("timestampAdded", this.timestampAdded);
+        noteData.put("timestampUpdated", this.timestampUpdated);
+        noteData.put("title", this.title);
+
+        noteObject.put(this.id, noteData);
+
+        return noteObject.toString();
     }
 }

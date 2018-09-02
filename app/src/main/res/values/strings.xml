@@ -79,6 +79,8 @@
     <string name="menu_contact_edit">Edit</string>
     <string name="menu_contact_search_name">Search contact</string>
     <string name="contact_search_hint">Enter contact name</string>
+    <string name="menu_note_export_file">Export to .txt-file</string>
+    <string name="menu_note_import_file">Import Note</string>
 
     <!-- Quotes -->
     <string-array name="quotes">

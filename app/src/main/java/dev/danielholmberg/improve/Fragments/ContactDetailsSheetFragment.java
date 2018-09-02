@@ -3,8 +3,6 @@ package dev.danielholmberg.improve.Fragments;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetDialogFragment;
@@ -14,14 +12,11 @@ import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -102,7 +97,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
                 }
             }
         });
-        toolbar.inflateMenu(R.menu.fragment_contact_details);
+        toolbar.inflateMenu(R.menu.fragment_contact_details_show);
 
         Button actionCallContact = (Button) view.findViewById(R.id.details_call_contact_btn);
         Button actionSendMailToContact = (Button) view.findViewById(R.id.details_mail_contact_btn);

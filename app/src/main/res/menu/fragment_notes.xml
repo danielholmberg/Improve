@@ -9,13 +9,13 @@
         <menu>
             <item android:id="@+id/sort_notes_by_title_alphabetical"
                 android:title="@string/sort_by_title_alphabetical"
-                android:icon="@drawable/ic_menu_sort_alphabetical_accent"/>
+                android:icon="@drawable/ic_menu_sort_alphabetical_primary"/>
             <item android:id="@+id/sort_notes_by_timestamp_updated"
                 android:title="@string/sort_by_timestamp_updated"
-                android:icon="@drawable/ic_menu_sort_timestamp_accent"/>
+                android:icon="@drawable/ic_menu_sort_timestamp_primary"/>
             <item android:id="@+id/sort_notes_by_marker"
                 android:title="@string/sort_by_marker"
-                android:icon="@drawable/ic_menu_colorpalette_accent"/>
+                android:icon="@drawable/ic_menu_colorpalette_primary"/>
         </menu>
     </item>
 </menu>

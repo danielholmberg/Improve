@@ -1,9 +1,11 @@
 package dev.danielholmberg.improve.Fragments;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -25,6 +27,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Objects;
@@ -42,6 +46,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
     public static final String NOTE_PARENT_FRAGMENT_KEY = "parentFragment";
     public static final String NOTE_ADAPTER_POS_KEY = "adapterItemPos";
     public static final String NOTE_KEY = "note";
+    private static final String EXPORTED_FILES_DIRECTORY_PATH = "exported_notes";
 
     private Improve app;
     private FirebaseStorageManager storageManager;
@@ -56,6 +61,8 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
     private Bundle noteBundle;
     private Note note;
     private int parentFragment;
+
+    private ProgressDialog exportDialog;
 
     private boolean editMode = false;
 
@@ -149,6 +156,10 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
                             createOptionsMenu();
                             toggleMode(editMode);
                             return true;
+                        case R.id.noteExport:
+                            showExportProgressDialog();
+                            exportNoteToFile(note);
+                            return true;
                         default:
                             return true;
                     }
@@ -189,7 +200,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
         toolbar.getMenu().clear();
         if(editMode) {
             ((TextView) toolbar.findViewById(R.id.toolbar_note_activity_title_tv)).setText(R.string.title_edit_note);
-            toolbar.inflateMenu(R.menu.activity_note_mode_edit);
+            toolbar.inflateMenu(R.menu.fragment_note_details_edit);
             toolbar.findViewById(R.id.close_dialog_btn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -201,7 +212,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
             });
         } else {
             ((TextView) toolbar.findViewById(R.id.toolbar_note_activity_title_tv)).setText(R.string.note_activity_details);
-            toolbar.inflateMenu(R.menu.activity_note_mode_show);
+            toolbar.inflateMenu(R.menu.fragment_note_details_show);
             toolbar.findViewById(R.id.close_dialog_btn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -287,6 +298,35 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
                         });
         final AlertDialog dialog = alertDialogBuilder.create();
         dialog.show();
+    }
+
+    private void exportNoteToFile(Note note) {
+        try{
+            File root = new File(context.getFilesDir(), EXPORTED_FILES_DIRECTORY_PATH);
+            if(!root.exists()) {
+                root.mkdirs();
+            }
+
+            File noteFile = new File(root, note.getId() + ".txt");
+            FileWriter writer = new FileWriter(noteFile);
+            writer.append(note.getExportJSONFormat());
+            writer.flush();
+            writer.close();
+
+            Toast.makeText(context, "Exported Note to " + noteFile.getPath(), Toast.LENGTH_SHORT).show();
+            exportDialog.dismiss();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            Toast.makeText(context, "Export failed, please try again", Toast.LENGTH_SHORT).show();
+            exportDialog.dismiss();
+        }
+    }
+
+    private void showExportProgressDialog() {
+        exportDialog = ProgressDialog.show(context, "Exporting Note to Text-file",
+                "Working. Please wait...", true);
     }
 
     private void showArchiveDialog() {
