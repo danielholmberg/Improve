@@ -564,7 +564,13 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
                 new AlertDialog.Builder(context).setTitle(R.string.choose_marker_color_note_title)
                         .setMessage(R.string.choose_marker_color_note_msg)
                         .setCancelable(true)
-                        .setView(colorPickerLayout);
+                        .setView(colorPickerLayout)
+                        .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        });
         colorPickerDialog = alertDialogBuilder.create();
         colorPickerDialog.show();
     }

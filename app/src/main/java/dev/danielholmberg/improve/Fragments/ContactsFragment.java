@@ -157,7 +157,7 @@ public class ContactsFragment extends Fragment{
 
                                     @Override
                                     public void onCancelled(DatabaseError databaseError) {
-                                        System.err.print("Failed to read Contact values. " + databaseError.toString());
+                                        Log.e(TAG, "Failed to read Contact values. " + databaseError.toString());
                                     }
                                 });
                     }
@@ -182,12 +182,11 @@ public class ContactsFragment extends Fragment{
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                System.err.print("Failed to read Company values. " + databaseError.toString());
+                Log.e(TAG, "Failed to read Company values. " + databaseError.toString());
             }
         });
 
         contactsRecyclerView.setAdapter(adapter);
-
     }
 
     @Override
@@ -198,24 +197,13 @@ public class ContactsFragment extends Fragment{
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.sort_contacts_by_company_alphabetical:
-                sortContactsByCompany();
-                return true;
-            case R.id.sort_contacts_by_marker:
-                sortContactsByMarker();
+            case R.id.search_contact:
+                Log.d(TAG, adapter.getGroups().toString());
                 return true;
             default:
                 break;
         }
         return false;
-    }
-
-    private void sortContactsByMarker() {
-        Toast.makeText(app, "Sorted by marker color", Toast.LENGTH_SHORT).show();
-    }
-
-    private void sortContactsByCompany() {
-        Toast.makeText(app, "Sorted by company", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -239,7 +227,6 @@ public class ContactsFragment extends Fragment{
      * children in form of contacts.
      */
     public class DocExpandableRecyclerAdapter extends ExpandableRecyclerViewAdapter<CompanyGroupViewHolder, ContactViewHolder> {
-
 
         public DocExpandableRecyclerAdapter(List<Company> groups) {
             super(groups);

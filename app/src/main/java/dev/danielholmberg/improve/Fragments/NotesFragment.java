@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,7 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -135,7 +135,7 @@ public class NotesFragment extends Fragment {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Log.e(TAG, "Failed to retrieve Firebase data for NotesRef: " + databaseError);
             }
         });
 
@@ -143,8 +143,9 @@ public class NotesFragment extends Fragment {
                 new FirebaseRecyclerOptions.Builder<Note>()
                         .setQuery(query, Note.class)
                         .build();
-        
+
         recyclerAdapter = new FirebaseRecyclerAdapter<Note, NoteViewHolder>(options) {
+
             @Override
             public NoteViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(parent.getContext())
@@ -159,6 +160,7 @@ public class NotesFragment extends Fragment {
             }
         };
 
+        recyclerAdapter.startListening();
         notesRecyclerView.setAdapter(recyclerAdapter);
     }
 
@@ -173,8 +175,8 @@ public class NotesFragment extends Fragment {
             case R.id.sort_notes_by_title_alphabetical:
                 sortNotesByTitle();
                 return true;
-            case R.id.sort_notes_by_timestamp:
-                sortNotesByTimestamp();
+            case R.id.sort_notes_by_timestamp_updated:
+                sortNotesByLastUpdated();
                 return true;
             case R.id.sort_notes_by_marker:
                 sortNotesByMarker();
@@ -188,22 +190,16 @@ public class NotesFragment extends Fragment {
     private void sortNotesByMarker() {
         noteListOrderBy = "color";
         setUpAdapter();
-
-        Toast.makeText(app, "Sorted by marker color", Toast.LENGTH_SHORT).show();
     }
 
-    private void sortNotesByTimestamp() {
-        noteListOrderBy = "timestamp";
+    private void sortNotesByLastUpdated() {
+        noteListOrderBy = "timestampUpdated";
         setUpAdapter();
-
-        Toast.makeText(app, "Sorted by timestamp", Toast.LENGTH_SHORT).show();
     }
 
     private void sortNotesByTitle() {
         noteListOrderBy = "title";
         setUpAdapter();
-
-        Toast.makeText(app, "Sorted by title", Toast.LENGTH_SHORT).show();
     }
 
     @Override

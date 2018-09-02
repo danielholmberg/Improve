@@ -158,9 +158,7 @@ public class AddContactActivity extends AppCompatActivity {
 
         storageManager.writeContactToFirebase(newContact, new FirebaseStorageCallback() {
             @Override
-            public void onSuccess() {
-                Toast.makeText(app, "Added new contact" , Toast.LENGTH_SHORT).show();
-            }
+            public void onSuccess() {}
 
             @Override
             public void onFailure(String errorMessage) {
@@ -190,9 +188,7 @@ public class AddContactActivity extends AppCompatActivity {
             public void onSuccess() {
                 storageManager.writeContactToFirebase(updatedContact, new FirebaseStorageCallback() {
                     @Override
-                    public void onSuccess() {
-                        Toast.makeText(app,"Updated contact", Toast.LENGTH_SHORT).show();
-                    }
+                    public void onSuccess() {}
 
                     @Override
                     public void onFailure(String errorMessage) {

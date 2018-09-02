@@ -1,5 +1,6 @@
 package dev.danielholmberg.improve.Activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
@@ -148,7 +149,12 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
                 new AlertDialog.Builder(this).setTitle(R.string.choose_marker_color_note_title)
                         .setMessage(R.string.choose_marker_color_note_msg)
                         .setCancelable(true)
-                        .setView(colorPickerLayout);
+                        .setView(colorPickerLayout).setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        });
         colorPickerDialog = alertDialogBuilder.create();
         colorPickerDialog.show();
     }
@@ -168,10 +174,9 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         newNote.setTimestampUpdated(timestampAdded);
 
         storageManager.writeNoteToFirebase(newNote, false, new FirebaseStorageCallback() {
+
             @Override
-            public void onSuccess() {
-                Toast.makeText(app, "New note added", Toast.LENGTH_SHORT).show();
-            }
+            public void onSuccess() {}
 
             @Override
             public void onFailure(String errorMessage) {

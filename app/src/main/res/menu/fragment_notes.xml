@@ -10,8 +10,8 @@
             <item android:id="@+id/sort_notes_by_title_alphabetical"
                 android:title="@string/sort_by_title_alphabetical"
                 android:icon="@drawable/ic_menu_sort_alphabetical_accent"/>
-            <item android:id="@+id/sort_notes_by_timestamp"
-                android:title="@string/sort_by_timestamp"
+            <item android:id="@+id/sort_notes_by_timestamp_updated"
+                android:title="@string/sort_by_timestamp_updated"
                 android:icon="@drawable/ic_menu_sort_timestamp_accent"/>
             <item android:id="@+id/sort_notes_by_marker"
                 android:title="@string/sort_by_marker"

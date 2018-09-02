@@ -52,7 +52,7 @@
     <string name="sort_by_company_alphabetical">Sort by company</string>
     <string name="sort_by_marker">Sort by marker color</string>
     <string name="sort_by_title_alphabetical">Sort by title</string>
-    <string name="sort_by_timestamp">Sort by timestamp_added</string>
+    <string name="sort_by_timestamp_updated">Sort by date</string>
     <string name="empty_archived_notes_list_text">No archived notes</string>
     <string name="nav_archived_notes">Archive</string>
     <string name="menu_note_edit">Edit</string>
@@ -77,6 +77,8 @@
     <string name="menu_contact_delete">Delete</string>
     <string name="menu_contact_info">Info</string>
     <string name="menu_contact_edit">Edit</string>
+    <string name="menu_contact_search_name">Search contact</string>
+    <string name="contact_search_hint">Enter contact name</string>
 
     <!-- Quotes -->
     <string-array name="quotes">

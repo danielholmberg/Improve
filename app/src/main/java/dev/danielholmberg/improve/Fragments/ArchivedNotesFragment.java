@@ -143,7 +143,7 @@ public class ArchivedNotesFragment extends Fragment {
                 // TODO: Sort notes by title alphabetical
                 sortNotesByTitle();
                 return true;
-            case R.id.sort_notes_by_timestamp:
+            case R.id.sort_notes_by_timestamp_updated:
                 // TODO: Sort note by timestamp
                 sortNotesByTimestamp();
                 return true;
