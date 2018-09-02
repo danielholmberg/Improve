@@ -14,67 +14,52 @@
         android:id="@+id/include_toolbar_add_note"
         layout="@layout/app_bar_add_note" />
 
-    <LinearLayout
-        android:id="@+id/note_form_container"
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/input_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="8dp"
         android:paddingBottom="@dimen/note_form_padding"
         android:paddingStart="@dimen/note_form_padding"
         android:paddingEnd="@dimen/note_form_padding"
-        android:orientation="vertical">
+        app:hintEnabled="false">
 
-        <include
-            android:id="@+id/include_item_marker"
-            layout="@layout/item_marker"
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/input_title"
+            android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:layout_height="8dp"/>
+            android:background="@null"
+            android:paddingTop="8dp"
+            android:textStyle="bold"
+            android:textColor="@color/note_title_text_color"
+            android:maxLength="@integer/note_title_max_length"
+            android:inputType="textCapWords|textMultiLine"
+            android:hint="@string/hint_title"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/input_layout"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:hintEnabled="false">
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:scrollbars="vertical"
+            android:scrollbarStyle="outsideOverlay"
+            android:overScrollMode="never"
+            android:requiresFadingEdge="vertical"
+            android:fadingEdgeLength="32dp">
 
             <android.support.design.widget.TextInputEditText
-                android:id="@+id/input_title"
-                android:layout_height="wrap_content"
+                android:id="@+id/input_info"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:background="@null"
                 android:paddingTop="8dp"
-                android:textStyle="bold"
-                android:textColor="@color/note_title_text_color"
-                android:maxLength="@integer/note_title_max_length"
-                android:inputType="textCapWords|textMultiLine"
-                android:hint="@string/hint_title"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+                android:paddingBottom="8dp"
+                android:gravity="top"
+                android:inputType="textCapSentences|textMultiLine"
+                android:textColor="@color/note_info_text_color"
+                android:hint="@string/hint_info"/>
 
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:scrollbars="vertical"
-                android:scrollbarStyle="outsideOverlay"
-                android:overScrollMode="never"
-                android:requiresFadingEdge="vertical"
-                android:fadingEdgeLength="32dp">
+        </ScrollView>
 
-                <android.support.design.widget.TextInputEditText
-                    android:id="@+id/input_info"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@null"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp"
-                    android:gravity="top"
-                    android:inputType="textCapSentences|textMultiLine"
-                    android:textColor="@color/note_info_text_color"
-                    android:hint="@string/hint_info"/>
-
-            </ScrollView>
-
-        </android.support.design.widget.TextInputLayout>
-
-    </LinearLayout>
+    </android.support.design.widget.TextInputLayout>
 
 </LinearLayout>

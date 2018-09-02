@@ -15,7 +15,7 @@
                 android:icon="@drawable/ic_menu_sort_timestamp_primary"/>
             <item android:id="@+id/sort_notes_by_marker"
                 android:title="@string/sort_by_marker"
-                android:icon="@drawable/ic_menu_colorpalette_primary"/>
+                android:icon="@drawable/ic_menu_sort_colorpalette_primary"/>
         </menu>
     </item>
 </menu>

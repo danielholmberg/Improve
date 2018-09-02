@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -65,6 +66,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
     private Toolbar toolbar;
     private LinearLayout boarderMarker;
     private int markerColor;
+    private Drawable colorPaletteIcon;
 
     private Bundle noteBundle;
     private Note note;
@@ -218,6 +220,8 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
                     createOptionsMenu();
                 }
             });
+            colorPaletteIcon = toolbar.getMenu().findItem(R.id.chooseMarkerColor).getIcon();
+            colorPaletteIcon.setTint(markerColor);
         } else {
             ((TextView) toolbar.findViewById(R.id.toolbar_note_activity_title_tv)).setText(R.string.note_activity_details);
             toolbar.inflateMenu(R.menu.fragment_note_details_show);
@@ -676,10 +680,12 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
             case R.id.buttonColorGreen:
                 markerColor = getResources().getColor(R.color.colorPickerGreen);
                 boarderMarker.setBackgroundColor(markerColor);
+                colorPaletteIcon.setTint(markerColor);
                 break;
             case R.id.buttonColorLightGreen:
                 markerColor = getResources().getColor(R.color.colorPickerLightGreen);
                 boarderMarker.setBackgroundColor(markerColor);
+                colorPaletteIcon.setTint(markerColor);
                 break;
             case R.id.buttonColorAmber:
                 markerColor = getResources().getColor(R.color.colorPickerAmber);
@@ -688,54 +694,67 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
             case R.id.buttonColorDeepOrange:
                 markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
                 boarderMarker.setBackgroundColor(markerColor);
+                colorPaletteIcon.setTint(markerColor);
                 break;
             case R.id.buttonColorBrown:
                 markerColor = getResources().getColor(R.color.colorPickerBrown);
                 boarderMarker.setBackgroundColor(markerColor);
+                colorPaletteIcon.setTint(markerColor);
                 break;
             case R.id.buttonColorBlueGrey:
                 markerColor = getResources().getColor(R.color.colorPickerBlueGrey);
                 boarderMarker.setBackgroundColor(markerColor);
+                colorPaletteIcon.setTint(markerColor);
                 break;
             case R.id.buttonColorTurquoise:
                 markerColor = getResources().getColor(R.color.colorPickerTurquoise);
                 boarderMarker.setBackgroundColor(markerColor);
+                colorPaletteIcon.setTint(markerColor);
                 break;
             case R.id.buttonColorPink:
                 markerColor = getResources().getColor(R.color.colorPickerPink);
                 boarderMarker.setBackgroundColor(markerColor);
+                colorPaletteIcon.setTint(markerColor);
                 break;
             case R.id.buttonColorDeepPurple:
                 markerColor = getResources().getColor(R.color.colorPickerDeepPurple);
                 boarderMarker.setBackgroundColor(markerColor);
+                colorPaletteIcon.setTint(markerColor);
                 break;
             case R.id.buttonColorDarkGrey:
                 markerColor = getResources().getColor(R.color.colorPickerDarkGrey);
                 boarderMarker.setBackgroundColor(markerColor);
+                colorPaletteIcon.setTint(markerColor);
                 break;
             case R.id.buttonColorRed:
                 markerColor = getResources().getColor(R.color.colorPickerRed);
                 boarderMarker.setBackgroundColor(markerColor);
+                colorPaletteIcon.setTint(markerColor);
                 break;
             case R.id.buttonColorPurple:
                 markerColor = getResources().getColor(R.color.colorPickerPurple);
                 boarderMarker.setBackgroundColor(markerColor);
+                colorPaletteIcon.setTint(markerColor);
                 break;
             case R.id.buttonColorBlue:
                 markerColor = getResources().getColor(R.color.colorPickerBlue);
                 boarderMarker.setBackgroundColor(markerColor);
+                colorPaletteIcon.setTint(markerColor);
                 break;
             case R.id.buttonColorDarkOrange:
                 markerColor = getResources().getColor(R.color.colorPickerDarkOrange);
                 boarderMarker.setBackgroundColor(markerColor);
+                colorPaletteIcon.setTint(markerColor);
                 break;
             case R.id.buttonColorBabyBlue:
                 markerColor = getResources().getColor(R.color.colorPickerBabyBlue);
                 boarderMarker.setBackgroundColor(markerColor);
+                colorPaletteIcon.setTint(markerColor);
                 break;
             default:
                 markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
                 boarderMarker.setBackgroundColor(markerColor);
+                colorPaletteIcon.setTint(markerColor);
                 break;
         }
         colorPickerDialog.dismiss();
