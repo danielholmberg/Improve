@@ -17,7 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -82,13 +81,12 @@ public class ArchivedNotesFragment extends Fragment {
         archivedNotesRecyclerView.setLayoutManager(recyclerLayoutManager);
 
         // Setting RecyclerAdapter to RecyclerList.
-        initAdapter();
-        archivedNotesRecyclerView.setAdapter(recyclerAdapter);
+        setUpAdapter();
 
         return view;
     }
 
-    private void initAdapter() {
+    private void setUpAdapter() {
         Query query = storageManager.getArchivedNotesRef().orderByChild(noteListOrderBy);
 
         query.addValueEventListener(new ValueEventListener() {
@@ -129,6 +127,9 @@ public class ArchivedNotesFragment extends Fragment {
             }
         };
 
+        recyclerAdapter.startListening();
+        archivedNotesRecyclerView.setAdapter(recyclerAdapter);
+
     }
 
     @Override
@@ -140,12 +141,10 @@ public class ArchivedNotesFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sort_notes_by_title_alphabetical:
-                // TODO: Sort notes by title alphabetical
                 sortNotesByTitle();
                 return true;
             case R.id.sort_notes_by_timestamp_updated:
-                // TODO: Sort note by timestamp
-                sortNotesByTimestamp();
+                sortNotesByLastUpdated();
                 return true;
             case R.id.sort_notes_by_marker:
                 sortNotesByMarker();
@@ -157,16 +156,18 @@ public class ArchivedNotesFragment extends Fragment {
     }
 
     private void sortNotesByMarker() {
-        Toast.makeText(app, "Sorted by marker color", Toast.LENGTH_SHORT).show();
+        noteListOrderBy = "color";
+        setUpAdapter();
     }
 
-    private void sortNotesByTimestamp() {
-        Toast.makeText(app, "Sorted by timestamp", Toast.LENGTH_SHORT).show();
-
+    private void sortNotesByLastUpdated() {
+        noteListOrderBy = "timestampUpdated";
+        setUpAdapter();
     }
 
     private void sortNotesByTitle() {
-        Toast.makeText(app, "Sorted by title", Toast.LENGTH_SHORT).show();
+        noteListOrderBy = "title";
+        setUpAdapter();
     }
 
     @Override
