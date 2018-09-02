@@ -1,11 +1,18 @@
 package dev.danielholmberg.improve;
 
+import android.Manifest;
 import android.app.Application;
+import android.content.pm.PackageManager;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.File;
 import java.io.Serializable;
 
+import dev.danielholmberg.improve.Activities.MainActivity;
 import dev.danielholmberg.improve.Fragments.ArchivedNotesFragment;
 import dev.danielholmberg.improve.Fragments.ContactsFragment;
 import dev.danielholmberg.improve.Fragments.NotesFragment;
@@ -23,6 +30,8 @@ public class Improve extends Application implements Serializable {
 
     // volatile attribute makes the singleton thread safe.
     private static volatile Improve sImproveInstance;
+
+    private File rootDir;
 
     private NotesFragment notesFragmentRef;
     private ContactsFragment contactsFragmentRef;
@@ -51,6 +60,15 @@ public class Improve extends Application implements Serializable {
         // Initializing managers.
         authManager = new AuthManager();
         firebaseStorageManager = new FirebaseStorageManager();
+
+        try {
+            rootDir = new File(Environment.getExternalStorageDirectory(), "Improve");
+            if(!rootDir.exists()) {
+                rootDir.mkdirs();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     //Make singleton from serialize and deserialize operation.
@@ -88,5 +106,9 @@ public class Improve extends Application implements Serializable {
 
     public ArchivedNotesFragment getArchivedNotesFragmentRef() {
         return this.archivedNotesFragmentRef;
+    }
+
+    public File getRootDir() {
+        return this.rootDir;
     }
 }

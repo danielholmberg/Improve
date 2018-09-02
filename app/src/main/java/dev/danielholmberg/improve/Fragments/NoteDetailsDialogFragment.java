@@ -1,17 +1,23 @@
 package dev.danielholmberg.improve.Fragments;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -46,12 +52,14 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
     public static final String NOTE_PARENT_FRAGMENT_KEY = "parentFragment";
     public static final String NOTE_ADAPTER_POS_KEY = "adapterItemPos";
     public static final String NOTE_KEY = "note";
-    private static final String EXPORTED_FILES_DIRECTORY_PATH = "exported_notes";
+    private static final String EXPORTED_NOTE_DIRECTORY_PATH = "Notes";
+    private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     private Improve app;
     private FirebaseStorageManager storageManager;
 
     private Context context;
+    private AppCompatActivity activity;
     private View view;
 
     private Toolbar toolbar;
@@ -91,6 +99,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
         super.onCreate(savedInstanceState);
         app = Improve.getInstance();
         storageManager = app.getFirebaseStorageManager();
+        activity = (AppCompatActivity) getActivity();
 
         noteBundle = getArguments();
 
@@ -157,8 +166,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
                             toggleMode(editMode);
                             return true;
                         case R.id.noteExport:
-                            showExportProgressDialog();
-                            exportNoteToFile(note);
+                            checkWritePermission();
                             return true;
                         default:
                             return true;
@@ -236,9 +244,9 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
         if(editMode) {
             inputInfo.setVisibility(View.VISIBLE);
             inputTitle.requestFocus();
-            ((AppCompatActivity)context).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+            activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         } else {
-            ((AppCompatActivity)context).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+            activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
             if(TextUtils.isEmpty(noteInfo)) {
                 inputInfo.setVisibility(View.GONE);
             }
@@ -302,19 +310,26 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
 
     private void exportNoteToFile(Note note) {
         try{
-            File root = new File(context.getFilesDir(), EXPORTED_FILES_DIRECTORY_PATH);
-            if(!root.exists()) {
-                root.mkdirs();
+            File notesRoot = new File(app.getRootDir(), EXPORTED_NOTE_DIRECTORY_PATH);
+            if(!notesRoot.exists()) {
+                notesRoot.mkdirs();
             }
 
-            File noteFile = new File(root, note.getId() + ".txt");
+            final File noteFile = new File(notesRoot, note.getId() + ".txt");
             FileWriter writer = new FileWriter(noteFile);
             writer.append(note.getExportJSONFormat());
             writer.flush();
             writer.close();
 
-            Toast.makeText(context, "Exported Note to " + noteFile.getPath(), Toast.LENGTH_SHORT).show();
-            exportDialog.dismiss();
+            // Delay the export to visual show ProgressDialog for 1000ms (1 second).
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(context, "Exported Note to " + noteFile.getPath(), Toast.LENGTH_LONG).show();
+                    exportDialog.dismiss();
+                }
+            }, 1000);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -324,8 +339,48 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
         }
     }
 
+    private void checkWritePermission() {
+        if (ContextCompat.checkSelfPermission(activity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
+
+            // PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE is an
+            // app-defined int constant. The callback method gets the
+            // result of the request.
+
+        } else {
+            // Permission has already been granted
+            showExportProgressDialog();
+            exportNoteToFile(note);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    showExportProgressDialog();
+                    exportNoteToFile(note);
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+        }
+    }
+
     private void showExportProgressDialog() {
-        exportDialog = ProgressDialog.show(context, "Exporting Note to Text-file",
+        exportDialog = ProgressDialog.show(context, "Exporting Note to .txt-file",
                 "Working. Please wait...", true);
     }
 
