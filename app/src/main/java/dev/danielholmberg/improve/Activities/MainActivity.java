@@ -295,18 +295,28 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.nav_notes:
                         navItemIndex = 0;
                         CURRENT_TAG = TAG_NOTES_FRAGMENT;
+                        loadCurrentFragment();
                         break;
                     case R.id.nav_archived_notes:
                         navItemIndex = 1;
                         CURRENT_TAG = TAG_ARCHIVED_NOTES_FRAGMENT;
+                        loadCurrentFragment();
                         break;
                     case R.id.nav_contacts:
                         navItemIndex = 2;
                         CURRENT_TAG = TAG_CONTACTS_FRAGMENT;
+                        loadCurrentFragment();
                         break;
                     case R.id.nav_feedback:
-                        Intent i = new Intent(context, SubmitFeedbackActivity.class);
-                        startActivity(i);
+                        drawer.closeDrawers();
+                        drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+                            @Override
+                            public void onDrawerClosed(View drawerView) {
+                                super.onDrawerClosed(drawerView);
+                                startActivity(new Intent(context, SubmitFeedbackActivity.class));
+                                drawer.removeDrawerListener(this);
+                            }
+                        });
                         break;
                     case R.id.nav_sign_out:
                         startSignOut();
@@ -315,8 +325,6 @@ public class MainActivity extends AppCompatActivity {
                     default:
                         navItemIndex = 0;
                 }
-
-                loadCurrentFragment();
 
                 return true;
             }

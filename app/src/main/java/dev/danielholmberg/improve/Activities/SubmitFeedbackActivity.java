@@ -133,7 +133,7 @@ public class SubmitFeedbackActivity extends AppCompatActivity {
 
     private void showParentActivity() {
         restUI();
-        NavUtils.navigateUpFromSameTask(this);
+        startActivity(new Intent(this, MainActivity.class));
         finishAfterTransition();
     }
 

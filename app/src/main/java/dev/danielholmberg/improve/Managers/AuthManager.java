@@ -106,7 +106,7 @@ public class AuthManager {
         final DatabaseReference connectedRef = database.getReference(".info/connected");
         connectedRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 boolean connected = snapshot.getValue(Boolean.class);
                 if (connected) {
                     DatabaseReference con = myConnectionsRef.push();
@@ -122,16 +122,15 @@ public class AuthManager {
                     con.setValue(Boolean.TRUE, ServerValue.TIMESTAMP);
 
                     Log.d(TAG, "*** Done connecting Google account: " + userRef + " to Firebase ***");
-                    callback.onSuccess();
                 }
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error) {
                 Log.e(TAG,"Listener was cancelled at .info/connected: " + error);
-                callback.onFailure(error.toString());
             }
         });
+        callback.onSuccess();
     }
 
     public void setGoogleSignInClient(GoogleSignInClient mGoogleSignInClient) {
