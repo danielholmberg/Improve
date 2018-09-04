@@ -12,6 +12,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -56,8 +57,6 @@ public class AddContactActivity extends AppCompatActivity {
 
     private boolean isEdit;
     private String oldCID;
-
-    private boolean resumed = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -104,12 +103,6 @@ public class AddContactActivity extends AppCompatActivity {
 
         validator = new ContactInputValidator(this, inputLayout);
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        resumed = true;
     }
 
     @Override
@@ -209,7 +202,7 @@ public class AddContactActivity extends AppCompatActivity {
 
     private void showParentActivity() {
         restUI();
-        NavUtils.navigateUpFromSameTask(this);
+        startActivity(new Intent(this, MainActivity.class));
         finishAfterTransition();
     }
 
@@ -223,12 +216,6 @@ public class AddContactActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if(resumed) {
-            Intent i = new Intent(this, MainActivity.class);
-            i.putExtra(MainActivity.SOURCE_FRAGMENT, MainActivity.TAG_CONTACTS_FRAGMENT);
-            startActivity(i);
-        } else {
-            showParentActivity();
-        }
+        showParentActivity();
     }
 }

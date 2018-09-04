@@ -8,7 +8,6 @@ import android.media.AudioAttributes;
 import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -28,17 +27,17 @@ import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.squareup.picasso.Picasso;
 
+import java.util.Objects;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import dev.danielholmberg.improve.Callbacks.FirebaseAuthCallback;
 import dev.danielholmberg.improve.Fragments.ArchivedNotesFragment;
 import dev.danielholmberg.improve.Fragments.ContactsFragment;
 import dev.danielholmberg.improve.Fragments.NotesFragment;
@@ -53,26 +52,18 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG_CONTACTS_FRAGMENT = "CONTACTS_FRAGMENT";
     public static String CURRENT_TAG = TAG_NOTES_FRAGMENT;
 
-    public static final String SOURCE_FRAGMENT = "sourceFragment";
-
     private Improve app;
 
     // index to identify current nav menu item
     public static int navItemIndex = 0;
-    private static final String[] subTitles = {
-            "Notes",
-            "Archive",
-            "Contacts",
-    };
     // flag to load home fragment when currentUser presses back key
     private boolean shouldLoadHomeFragOnBackPress = true;
     private boolean doubleBackToExitPressedOnce = false;
 
     private Handler mHandler;
 
-    private FirebaseAuth fireAuth;
     private FirebaseUser currentUser;
-    private GoogleSignInClient mGoogleSignInClient;
+
     private Toolbar toolbar;
     private DrawerLayout drawer;
     private NavigationView navigationView;
@@ -99,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Getting current signed in User reference.
         currentUser = app.getAuthManager().getCurrentUser();
-        mGoogleSignInClient = app.getAuthManager().getmGoogleSignInClient();
 
         // Initalizing NavigationDrawer
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -107,9 +97,6 @@ public class MainActivity extends AppCompatActivity {
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
-
-        // Source fragment when returning from Task Manager and onBackPressed().
-        CURRENT_TAG = getIntent().getStringExtra(SOURCE_FRAGMENT);
 
         // Initializing the Handler for fragment transactions.
         mHandler = new Handler();
@@ -141,19 +128,31 @@ public class MainActivity extends AppCompatActivity {
         ImageView drawer_header_image = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.drawer_header_image_iv);
         TextView drawer_header_name = (TextView)  navigationView.getHeaderView(0).findViewById(R.id.drawer_header_name_tv);
         TextView drawer_header_email = (TextView)  navigationView.getHeaderView(0).findViewById(R.id.drawer_header_email_tv);
-        Picasso.with(this)
-                .load(currentUser.getPhotoUrl())
-                .error(R.drawable.ic_error_no_photo_white)
-                .transform(new CircleTransform())
-                .resize(200, 200)
-                .centerCrop()
-                .into(drawer_header_image);
-        drawer_header_name.setText(currentUser.getDisplayName());
-        drawer_header_email.setText(currentUser.getEmail());
+
+        if(currentUser.isAnonymous()) {
+            drawer_header_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_anonymous_outline_white));
+            drawer_header_email.setVisibility(View.GONE);
+            drawer_header_name.setVisibility(View.GONE);
+        } else {
+            Picasso.with(this)
+                    .load(currentUser.getPhotoUrl())
+                    .error(R.drawable.ic_error_no_photo_white)
+                    .transform(new CircleTransform())
+                    .resize(200, 200)
+                    .centerCrop()
+                    .into(drawer_header_image);
+            drawer_header_name.setText(currentUser.getDisplayName());
+            drawer_header_email.setText(currentUser.getEmail());
+        }
 
         // Initializing navigation menu
         setUpNavigationView();
+        setUpQuoteView();
 
+        hasloadedNavView = true;
+    }
+
+    private void setUpQuoteView() {
         quoteTextSwitcher = (TextSwitcher) navigationView.findViewById(R.id.nav_view_bottom_quote);
 
         loadAnimations();
@@ -179,8 +178,6 @@ public class MainActivity extends AppCompatActivity {
                 soundPool.play(quoteSound, 1, 1, 0, 0, 1);
             }
         });
-
-        hasloadedNavView = true;
     }
 
     private void loadQuoteSound() {
@@ -358,21 +355,50 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void signOutUser() {
-        // Disconnects the Google account.
-        mGoogleSignInClient.signOut()
-                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        app.getAuthManager().getFireAuth().signOut();
+        if(currentUser.isAnonymous()) {
+            signOutAnonymousUser();
+        } else if(currentUser.getProviders() != null && currentUser.getProviders().size() > 0) {
+            // The user has authenticated with some provider, eg. Google
+            String providerId = currentUser.getProviders().get(0);
+            switch (providerId) {
+                case GoogleAuthProvider.PROVIDER_ID:
+                    signOutGoogleUser();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 
-                        Log.d(TAG, "*** User successfully Signed Out ***");
-                        Intent i = new Intent(getApplicationContext(), LoginActivity.class);
-                        startActivity(i);
-                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                        finishAfterTransition();
-                    }
-                });
+    private void signOutAnonymousUser() {
+        app.getAuthManager().signOutAnonymousUser(new FirebaseAuthCallback() {
+            @Override
+            public void onSuccess() {
+                showSignInActivity();
+            }
 
+            @Override
+            public void onFailure(String errorMessage) {}
+        });
+    }
+
+    private void signOutGoogleUser() {
+        app.getAuthManager().signOutGoogleAccount(new FirebaseAuthCallback() {
+            @Override
+            public void onSuccess() {
+                showSignInActivity();
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {}
+        });
+    }
+
+    private void showSignInActivity() {
+        Intent i = new Intent(getApplicationContext(), SignInActivity.class);
+        startActivity(i);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        finishAfterTransition();
     }
 
     @Override
@@ -401,7 +427,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void run() {
-                        doubleBackToExitPressedOnce=false;
+                        doubleBackToExitPressedOnce = false;
                     }
                 }, 2000);
             }

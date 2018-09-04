@@ -47,10 +47,6 @@ public class SubmitFeedbackActivity extends AppCompatActivity {
     private View inputLayout;
     private FloatingActionButton fab;
 
-    private AlertDialog colorPickerDialog;
-
-    private boolean resumed = false;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,12 +79,6 @@ public class SubmitFeedbackActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        resumed = true;
     }
 
     @Override
@@ -145,12 +135,6 @@ public class SubmitFeedbackActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if(resumed) {
-            Intent i = new Intent(this, MainActivity.class);
-            i.putExtra(MainActivity.SOURCE_FRAGMENT, MainActivity.CURRENT_TAG);
-            startActivity(i);
-        } else {
-            showParentActivity();
-        }
+        showParentActivity();
     }
 }

@@ -3,10 +3,12 @@ package dev.danielholmberg.improve.Managers;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -30,7 +32,7 @@ public class AuthManager {
     private static final String TAG = AuthManager.class.getSimpleName();
 
     private static FirebaseAuth fireAuth;
-    private GoogleSignInClient mGoogleSignInClient;
+    private GoogleSignInClient googleSignInClient;
 
     public AuthManager() {
         // Firebase Instance
@@ -58,32 +60,47 @@ public class AuthManager {
     }
 
     /**
-     * Called when the user has chosen a Google-account for sign in.
-     * @param account - GoogleSignInAccount
+     * Sign
      */
-    public void authWithFirebase(GoogleSignInAccount account, final FirebaseAuthCallback callback) {
-        Log.d(TAG, "Connecting Google account: " + account.getId() + " to Firebase...");
-
-        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
-        fireAuth.signInWithCredential(credential)
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+    public void signInAnonymously(final FirebaseAuthCallback callback) {
+        fireAuth.signInAnonymously()
+                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                     @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in successful
-                            // Add user to Database before going to MainActivity.
-                            Log.d(TAG, "*** Successfully signed in to Firebase with chosen Google account ***");
-                            setUserPresence(callback);
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.e(TAG, "!!! Failed to sign in to Firebase with chosen Google account: " + task.getException());
-                        }
+                    public void onSuccess(AuthResult authResult) {
+                        Log.d(TAG, "*** Successfully signed in to Firebase with chosen Google account ***");
+                        setUserPresence(callback);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "!!! Failed to sign in to Firebase with chosen Google account:" + e);
+                        Crashlytics.log("Failed to Sign in Google-user: " + e.toString());
+                        callback.onFailure(e.toString());
+                    }
+                });
+    }
+
+    /**
+     * Called when the user has chosen a Google-account for sign in.
+     * @param account - GoogleSignInAccount
+     */
+    public void authGoogleAccountWithFirebase(GoogleSignInAccount account, final FirebaseAuthCallback callback) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+
+        fireAuth.signInWithCredential(credential)
+                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                    @Override
+                    public void onSuccess(AuthResult authResult) {
+                        Log.d(TAG, "*** Successfully signed in to Firebase with chosen Google account ***");
+                        setUserPresence(callback);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "!!! Failed to sign in to Firebase with chosen Google account:" + e.toString());
+                        Crashlytics.log("Failed to Sign in Google-user: " + e.toString());
                         callback.onFailure(e.toString());
                     }
                 });
@@ -128,16 +145,41 @@ public class AuthManager {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e(TAG,"Listener was cancelled at .info/connected: " + error);
+                Crashlytics.log("Failed to SetUserPresence: " + error.toString());
             }
         });
         callback.onSuccess();
     }
 
-    public void setGoogleSignInClient(GoogleSignInClient mGoogleSignInClient) {
-        this.mGoogleSignInClient = mGoogleSignInClient;
+    public void setGoogleSignInClient(GoogleSignInClient googleSignInClient) {
+        this.googleSignInClient = googleSignInClient;
     }
 
-    public GoogleSignInClient getmGoogleSignInClient() {
-        return this.mGoogleSignInClient;
+    public GoogleSignInClient getGoogleSignInClient() {
+        return this.googleSignInClient;
+    }
+
+    public void signOutGoogleAccount(final FirebaseAuthCallback callback) {
+        googleSignInClient.signOut()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        fireAuth.signOut();
+                        callback.onSuccess();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Crashlytics.log("Failed to Sign out Google-user: " + e.toString());
+                        callback.onFailure(e.toString());
+                    }
+                });
+
+    }
+
+    public void signOutAnonymousUser(FirebaseAuthCallback callback) {
+        fireAuth.signOut();
+        callback.onSuccess();
     }
 }

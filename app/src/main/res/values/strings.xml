@@ -81,6 +81,9 @@
     <string name="contact_search_hint">Enter contact name</string>
     <string name="menu_note_export_file">Export to .txt-file</string>
     <string name="menu_note_import_file">Import Note</string>
+    <string name="anonymous_sign_in_btn_text">Anonymous Sign in</string>
+    <string name="anonymous_sign_in_btn_content_desc">Anonymous Sign in Button</string>
+    <string name="google_sign_in_btn_text">Sign in</string>
 
     <!-- Quotes -->
     <string-array name="quotes">

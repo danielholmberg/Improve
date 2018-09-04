@@ -48,8 +48,6 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
 
     private AlertDialog colorPickerDialog;
 
-    private boolean resumed = false;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,12 +71,6 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
         validator = new NoteInputValidator(this, inputLayout);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        resumed = true;
     }
 
     @Override
@@ -179,7 +171,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
 
     private void showParentActivity() {
         restUI();
-        NavUtils.navigateUpFromSameTask(this);
+        startActivity(new Intent(this, MainActivity.class));
         finishAfterTransition();
     }
 
@@ -262,12 +254,6 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
 
     @Override
     public void onBackPressed() {
-        if(resumed) {
-            Intent i = new Intent(this, MainActivity.class);
-            i.putExtra(MainActivity.SOURCE_FRAGMENT, MainActivity.TAG_NOTES_FRAGMENT);
-            startActivity(i);
-        } else {
-            showParentActivity();
-        }
+        showParentActivity();
     }
 }
