@@ -1,13 +1,20 @@
 package dev.danielholmberg.improve.Fragments;
 
+import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -20,6 +27,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Calendar;
 
@@ -40,6 +50,9 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     public static final String PARENT_FRAGMENT_KEY = "parentFragment";
     public static final String ADAPTER_POS_KEY = "itemPos";
 
+    private static final String EXPORTED_CONTACT_DIRECTORY_PATH = "Contacts";
+    private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
+
     private Improve app;
     private FirebaseStorageManager storageManager;
     private Context context;
@@ -57,6 +70,9 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
 
     private View targetView;
 
+    private AppCompatActivity activity;
+    private ProgressDialog exportDialog;
+
     public ContactDetailsSheetFragment() {
         // Required empty public constructor
     }
@@ -68,6 +84,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
         storageManager = app.getFirebaseStorageManager();
         detailsDialog = this;
         context = getContext();
+        activity = (AppCompatActivity) getActivity();
     }
 
     @Override
@@ -91,6 +108,9 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
                         return true;
                     case R.id.contactInfo:
                         showInfoDialog();
+                        return true;
+                    case R.id.contactExport:
+                        checkWritePermission();
                         return true;
                     default:
                         return true;
@@ -195,6 +215,94 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
 
         // Inflate the layout for this fragment
         return view;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    showExportProgressDialog();
+                    exportContactToFile(contact);
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+        }
+    }
+
+    private void exportContactToFile(Contact contact) {
+        File contactsRoot = new File(app.getRootDir(), EXPORTED_CONTACT_DIRECTORY_PATH);
+        if(!contactsRoot.exists()) {
+            contactsRoot.mkdirs();
+        }
+        final File vcfFile = new File(contactsRoot, contact.getId() + ".vcf");
+
+        try {
+            FileWriter fw = new FileWriter(vcfFile);
+            fw.write("BEGIN:VCARD\r\n");
+            fw.write("VERSION:3.0\r\n");
+            fw.write("FN:" + contact.getName() + "\r\n");
+            fw.write("ORG:" + contact.getCompany() + "\r\n");
+
+            if(contact.getPhone() != null) {
+                fw.write("TEL;TYPE=HOME,VOICE:" + contact.getPhone() + "\r\n");
+            }
+            if(contact.getEmail() != null) {
+                fw.write("EMAIL;TYPE=PREF,INTERNET:" + contact.getEmail() + "\r\n");
+            }
+
+            fw.write("END:VCARD\r\n");
+            fw.flush();
+            fw.close();
+
+            // Delay the export to visual show ProgressDialog for 1000ms (1 second).
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(context, "Exported Contact to " + vcfFile.getPath(), Toast.LENGTH_LONG).show();
+                    exportDialog.dismiss();
+                }
+            }, 1000);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            Toast.makeText(context, "Export failed, please try again", Toast.LENGTH_SHORT).show();
+            exportDialog.dismiss();
+        }
+    }
+
+    private void checkWritePermission() {
+        if (ContextCompat.checkSelfPermission(activity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
+
+            // PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE is an
+            // app-defined int constant. The callback method gets the
+            // result of the request.
+
+        } else {
+            // Permission has already been granted
+            showExportProgressDialog();
+            exportContactToFile(contact);
+        }
+    }
+
+    private void showExportProgressDialog() {
+        exportDialog = ProgressDialog.show(context, "Exporting Contact to .vcf-file",
+                "Working. Please wait...", true);
     }
 
     private void deleteContact(final Contact contact) {

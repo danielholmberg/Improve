@@ -88,6 +88,7 @@
         \n \u2022 New features you would like to see in a upcoming version.
         \n \u2022 Problems you encounter during your use of the app.
         \n \u2022 Or anything else that comes to mind.</string>
+    <string name="menu_contact_export_vcf">Export to .vcf</string>
 
     <!-- Quotes -->
     <string-array name="quotes">

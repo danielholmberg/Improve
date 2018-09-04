@@ -48,7 +48,7 @@
                         android:id="@+id/input_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textCapWords"
+                        android:inputType="textPersonName"
                         android:backgroundTint="@color/editTextTint"
                         android:drawableStart="@drawable/ic_contact_person_grey"
                         android:drawablePadding="@dimen/contact_form_icons_padding"
