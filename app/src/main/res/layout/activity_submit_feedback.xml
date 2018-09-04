@@ -14,6 +14,14 @@
         android:id="@+id/include_toolbar_submit_feedback"
         layout="@layout/app_bar_submit_feedback" />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingEnd="16dp"
+        android:paddingStart="16dp"
+        android:text="@string/submit_feedback_informing_text"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
+
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/note_form_container"
         android:layout_width="match_parent"

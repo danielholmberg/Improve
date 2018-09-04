@@ -84,6 +84,10 @@
     <string name="anonymous_sign_in_btn_text">Anonymous Sign in</string>
     <string name="anonymous_sign_in_btn_content_desc">Anonymous Sign in Button</string>
     <string name="google_sign_in_btn_text">Sign in</string>
+    <string name="submit_feedback_informing_text">Thank you for reaching this page! Here you can directly provide some feedback to the developers about: \n
+        \n \u2022 New features you would like to see in a upcoming version.
+        \n \u2022 Problems you encounter during your use of the app.
+        \n \u2022 Or anything else that comes to mind.</string>
 
     <!-- Quotes -->
     <string-array name="quotes">
