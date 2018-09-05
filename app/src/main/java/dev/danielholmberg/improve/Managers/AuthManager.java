@@ -21,8 +21,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
 
 import dev.danielholmberg.improve.Callbacks.FirebaseAuthCallback;
+import dev.danielholmberg.improve.Improve;
 
 /**
  * Created by Daniel Holmberg.
@@ -111,7 +113,7 @@ public class AuthManager {
      * and to set a timestamp of the current sign in.
      */
     private void setUserPresence(final FirebaseAuthCallback callback) {
-        final String userRef = fireAuth.getCurrentUser().getUid();
+        final String userRef = getCurrentUser().getUid();
         // since I can connect from multiple devices, we store each connection instance separately
         // any time that connectionsRef's value is null (i.e. has no children) I am offline
         final FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -178,8 +180,29 @@ public class AuthManager {
 
     }
 
-    public void signOutAnonymousUser(FirebaseAuthCallback callback) {
+    public void signOutAnonymousAccount(FirebaseAuthCallback callback) {
+        // Remove UserId in Database.
+        Improve.getInstance().getFirebaseDatabaseManager().getUserRef().removeValue();
         fireAuth.signOut();
         callback.onSuccess();
+    }
+
+    public void linkAccount(GoogleSignInAccount account, final FirebaseAuthCallback callback) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+
+        getCurrentUser().linkWithCredential(credential)
+                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                    @Override
+                    public void onSuccess(AuthResult authResult) {
+                        setUserPresence(callback);
+                        callback.onSuccess();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Crashlytics.log("Failed to Link with Credential: " + e.toString());
+                        callback.onFailure(e.toString());
+                    }
+                });
     }
 }

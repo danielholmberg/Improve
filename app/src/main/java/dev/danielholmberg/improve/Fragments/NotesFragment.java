@@ -21,7 +21,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DataSnapshot;
@@ -35,7 +34,7 @@ import java.util.Calendar;
 import dev.danielholmberg.improve.Activities.AddNoteActivity;
 import dev.danielholmberg.improve.Components.Note;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
+import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 import dev.danielholmberg.improve.R;
 
 /**
@@ -46,7 +45,7 @@ public class NotesFragment extends Fragment {
     private static final String TAG = NotesFragment.class.getSimpleName();
 
     private Improve app;
-    private FirebaseStorageManager storageManager;
+    private FirebaseDatabaseManager storageManager;
 
     private View view;
     private RecyclerView notesRecyclerView;
@@ -65,7 +64,7 @@ public class NotesFragment extends Fragment {
         super.onCreate(savedInstanceState);
         app = Improve.getInstance();
         app.setNotesFragmentRef(this);
-        storageManager = app.getFirebaseStorageManager();
+        storageManager = app.getFirebaseDatabaseManager();
         setHasOptionsMenu(true);
     }
 

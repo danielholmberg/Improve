@@ -3,11 +3,13 @@ package dev.danielholmberg.improve.Activities;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -27,12 +29,20 @@ import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
+import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.squareup.picasso.Picasso;
 
-import java.util.Objects;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -53,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     public static String CURRENT_TAG = TAG_NOTES_FRAGMENT;
 
     private Improve app;
+    private Context context;
 
     // index to identify current nav menu item
     public static int navItemIndex = 0;
@@ -82,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         app = Improve.getInstance();
+        context = getApplicationContext();
 
         // Initializing the Toolbar
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -337,8 +349,8 @@ public class MainActivity extends AppCompatActivity {
      */
     private void startSignOut() {
         AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(this).setTitle("Sign out")
-                        .setMessage("Do you really want to sign out?")
+                new AlertDialog.Builder(this).setTitle(getResources().getString(R.string.dialog_sign_out_title))
+                        .setMessage(getResources().getString(R.string.dialog_sign_out_msg))
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -351,13 +363,18 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
         final AlertDialog dialog = alertDialogBuilder.create();
-        dialog.show();
+
+        // Show AnonymousDialog if current user is Anonymous
+        // else, show ordinary SignOutDialog
+        if(currentUser.isAnonymous()) {
+            showAnonymousSignOutDialog();
+        } else {
+            dialog.show();
+        }
     }
 
     private void signOutUser() {
-        if(currentUser.isAnonymous()) {
-            signOutAnonymousUser();
-        } else if(currentUser.getProviders() != null && currentUser.getProviders().size() > 0) {
+        if(currentUser.getProviders() != null && currentUser.getProviders().size() > 0) {
             // The user has authenticated with some provider, eg. Google
             String providerId = currentUser.getProviders().get(0);
             switch (providerId) {
@@ -370,8 +387,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void showAnonymousSignOutDialog() {
+        AlertDialog.Builder alertDialogBuilder =
+                new AlertDialog.Builder(this).setTitle(getResources().getString(R.string.dialog_anonymous_sign_out_title))
+                        .setMessage(getResources().getString(R.string.dialog_anonymous_sign_out_msg))
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                signOutAnonymousUser();
+                            }
+                        }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+        final AlertDialog dialog = alertDialogBuilder.create();
+        dialog.show();
+    }
+
     private void signOutAnonymousUser() {
-        app.getAuthManager().signOutAnonymousUser(new FirebaseAuthCallback() {
+        app.getAuthManager().signOutAnonymousAccount(new FirebaseAuthCallback() {
             @Override
             public void onSuccess() {
                 showSignInActivity();

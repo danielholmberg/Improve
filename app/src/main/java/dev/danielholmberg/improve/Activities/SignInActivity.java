@@ -1,6 +1,8 @@
 package dev.danielholmberg.improve.Activities;
 
+import android.app.Instrumentation;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -11,13 +13,19 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInApi;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 
 import dev.danielholmberg.improve.Callbacks.FirebaseAuthCallback;
 import dev.danielholmberg.improve.Improve;
@@ -84,33 +92,52 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         super.onActivityResult(requestCode, resultCode, data);
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
-            try {
-                Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-                // Google Sign In was successful!
-                // authenticating with Firebase
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                app.getAuthManager().authGoogleAccountWithFirebase(account, new FirebaseAuthCallback() {
-                    @Override
-                    public void onSuccess() {
-                        // Authentication with Firebase was successful.
-                        progressBar.setVisibility(View.GONE);
-                        startMainActivity();
-                    }
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
 
-                    @Override
-                    public void onFailure(String errorMessage) {
-                        // Authenication with Firebase was unsuccessful.
-                        Log.e(TAG, "!!! Failed to authenticate with Firebase: " + errorMessage);
-                    }
-                });
-            } catch (ApiException e) {
-                // Google Sign In failed, update UI appropriately
-                Log.e(TAG, "!!! Google sign in failed: " + e);
-                Crashlytics.log("Failed to Sign in Google-user: " + e.toString());
+            if(result.isSuccess()) {
+                Log.d(TAG, "Google sign in was successful!");
 
+                // Google Sign in was successful, authenticate with Firebase...
+                try {
+                    Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+                    // Google Sign In was successful!
+                    // authenticating with Firebase
+                    GoogleSignInAccount account = task.getResult(ApiException.class);
+                    app.getAuthManager().authGoogleAccountWithFirebase(account, new FirebaseAuthCallback() {
+                        @Override
+                        public void onSuccess() {
+                            // Authentication with Firebase was successful.
+                            progressBar.setVisibility(View.GONE);
+                            startMainActivity();
+                        }
+
+                        @Override
+                        public void onFailure(String errorMessage) {
+                            // Authenication with Firebase was unsuccessful.
+                            Log.e(TAG, "!!! Failed to authenticate with Firebase: " + errorMessage);
+                            progressBar.setVisibility(View.GONE);
+                            signInButtonsLayout.setVisibility(View.VISIBLE);
+                        }
+                    });
+                } catch (ApiException e) {
+                    // Google Sign In failed, update UI appropriately
+                    Log.e(TAG, "!!! Google sign in failed: " + e);
+                    Crashlytics.log("Google sign in failed: " + e.toString());
+
+                    Toast.makeText(getApplicationContext(), "Google sign in failed", Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
+                    signInButtonsLayout.setVisibility(View.VISIBLE);
+                }
+            } else if(result.getStatus().getStatusCode() == GoogleSignInStatusCodes.SIGN_IN_CANCELLED) {
+                Log.e(TAG, "Google sign in was cancelled!");
+                Toast.makeText(getApplicationContext(), "Google sign in was cancelled", Toast.LENGTH_SHORT).show();
+                progressBar.setVisibility(View.GONE);
+                signInButtonsLayout.setVisibility(View.VISIBLE);
+            } else {
+                Log.e(TAG, "Google sign in failed!");
                 Toast.makeText(getApplicationContext(), "Google sign in failed", Toast.LENGTH_SHORT).show();
                 progressBar.setVisibility(View.GONE);
-                googleSignInBtn.setVisibility(View.VISIBLE);
+                signInButtonsLayout.setVisibility(View.VISIBLE);
             }
         }
     }

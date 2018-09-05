@@ -1,23 +1,18 @@
 package dev.danielholmberg.improve;
 
-import android.Manifest;
 import android.app.Application;
-import android.content.pm.PackageManager;
 import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.File;
 import java.io.Serializable;
 
-import dev.danielholmberg.improve.Activities.MainActivity;
 import dev.danielholmberg.improve.Fragments.ArchivedNotesFragment;
 import dev.danielholmberg.improve.Fragments.ContactsFragment;
 import dev.danielholmberg.improve.Fragments.NotesFragment;
 import dev.danielholmberg.improve.Managers.AuthManager;
-import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
+import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 
 /**
  * Created by Daniel Holmberg.
@@ -26,7 +21,7 @@ import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
 public class Improve extends Application implements Serializable {
 
     private AuthManager authManager;
-    private FirebaseStorageManager firebaseStorageManager;
+    private FirebaseDatabaseManager firebaseDatabaseManager;
 
     // volatile attribute makes the singleton thread safe.
     private static volatile Improve sImproveInstance;
@@ -59,7 +54,7 @@ public class Improve extends Application implements Serializable {
 
         // Initializing managers.
         authManager = new AuthManager();
-        firebaseStorageManager = new FirebaseStorageManager();
+        firebaseDatabaseManager = new FirebaseDatabaseManager();
 
         try {
             rootDir = new File(Environment.getExternalStorageDirectory(), "Improve");
@@ -80,8 +75,8 @@ public class Improve extends Application implements Serializable {
         return this.authManager;
     }
 
-    public FirebaseStorageManager getFirebaseStorageManager() {
-        return this.firebaseStorageManager;
+    public FirebaseDatabaseManager getFirebaseDatabaseManager() {
+        return this.firebaseDatabaseManager;
     }
 
     public void setNotesFragmentRef(NotesFragment notesFragmentRef) {

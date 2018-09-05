@@ -1,7 +1,6 @@
 package dev.danielholmberg.improve.Fragments;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,14 +8,12 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -40,10 +37,10 @@ import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Objects;
 
-import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
+import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback;
 import dev.danielholmberg.improve.Components.Note;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
+import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Utilities.NoteInputValidator;
 
@@ -57,7 +54,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     private Improve app;
-    private FirebaseStorageManager storageManager;
+    private FirebaseDatabaseManager storageManager;
 
     private Context context;
     private AppCompatActivity activity;
@@ -100,7 +97,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         app = Improve.getInstance();
-        storageManager = app.getFirebaseStorageManager();
+        storageManager = app.getFirebaseDatabaseManager();
         activity = (AppCompatActivity) getActivity();
 
         noteBundle = getArguments();
@@ -427,7 +424,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
     }
 
     private void deleteNote(final Note note) {
-        storageManager.deleteNote(note, note.getArchived(), new FirebaseStorageCallback() {
+        storageManager.deleteNote(note, note.getArchived(), new FirebaseDatabaseCallback() {
             @Override
             public void onSuccess() {
                 boolean error = false;
@@ -446,7 +443,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
                             .setAction("UNDO", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    storageManager.writeNoteToFirebase(note, note.getArchived(), new FirebaseStorageCallback() {
+                                    storageManager.writeNoteToFirebase(note, note.getArchived(), new FirebaseDatabaseCallback() {
                                         @Override
                                         public void onSuccess() {
                                             Log.d(TAG, "*** Successfully undid 'Delete note' ***");
@@ -499,7 +496,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
     }
 
     private void unarchiveNote() {
-        storageManager.writeNoteToFirebase(note, false, new FirebaseStorageCallback() {
+        storageManager.writeNoteToFirebase(note, false, new FirebaseDatabaseCallback() {
             @Override
             public void onSuccess() {
                 boolean error = false;
@@ -518,7 +515,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
                             .setAction("UNDO", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    storageManager.writeNoteToFirebase(note, true, new FirebaseStorageCallback() {
+                                    storageManager.writeNoteToFirebase(note, true, new FirebaseDatabaseCallback() {
                                         @Override
                                         public void onSuccess() {
                                             Log.d(TAG, "*** Successfully undid 'Move note from archive' ***");
@@ -547,7 +544,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
     }
 
     private void archiveNote() {
-        storageManager.writeNoteToFirebase(note, true, new FirebaseStorageCallback() {
+        storageManager.writeNoteToFirebase(note, true, new FirebaseDatabaseCallback() {
             @Override
             public void onSuccess() {
                 boolean error = false;
@@ -568,7 +565,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
                                 public void onClick(View view) {
                                     note.setArchived(false);
 
-                                    storageManager.writeNoteToFirebase(note, false, new FirebaseStorageCallback() {
+                                    storageManager.writeNoteToFirebase(note, false, new FirebaseDatabaseCallback() {
                                         @Override
                                         public void onSuccess() {
                                             Log.d(TAG, "*** Successfully undid 'Move note to archive' ***");
@@ -614,7 +611,7 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
         updatedNote.setArchived(archived);
         updatedNote.setTimestampUpdated(timestampUpdated);
 
-        storageManager.writeNoteToFirebase(updatedNote, updatedNote.getArchived(), new FirebaseStorageCallback() {
+        storageManager.writeNoteToFirebase(updatedNote, updatedNote.getArchived(), new FirebaseDatabaseCallback() {
             @Override
             public void onSuccess() {
                 Toast.makeText(app, "Note successfully updated", Toast.LENGTH_SHORT).show();

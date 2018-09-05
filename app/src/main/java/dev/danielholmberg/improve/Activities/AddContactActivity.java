@@ -1,34 +1,27 @@
 package dev.danielholmberg.improve.Activities;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
-import android.support.v4.app.NavUtils;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 
-import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
+import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback;
 import dev.danielholmberg.improve.Components.Contact;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
+import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Utilities.ContactInputValidator;
 
@@ -43,7 +36,7 @@ public class AddContactActivity extends AppCompatActivity {
     private static final String CONTACT_KEY = "contact";
 
     private Improve app;
-    private FirebaseStorageManager storageManager;
+    private FirebaseDatabaseManager storageManager;
     private ContactInputValidator validator;
 
     private Contact contact;
@@ -64,7 +57,7 @@ public class AddContactActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_contact);
 
         app = Improve.getInstance();
-        storageManager = app.getFirebaseStorageManager();
+        storageManager = app.getFirebaseDatabaseManager();
 
         toolbar = (Toolbar) findViewById(R.id.toolbar_add_contact);
         setSupportActionBar(toolbar);
@@ -149,7 +142,7 @@ public class AddContactActivity extends AppCompatActivity {
         Contact newContact = new Contact(id, name, company, email, phone, comment, timestampAdded);
         newContact.setTimestampUpdated(timestampAdded);
 
-        storageManager.writeContactToFirebase(newContact, new FirebaseStorageCallback() {
+        storageManager.writeContactToFirebase(newContact, new FirebaseDatabaseCallback() {
             @Override
             public void onSuccess() {}
 
@@ -176,10 +169,10 @@ public class AddContactActivity extends AppCompatActivity {
         final Contact updatedContact = new Contact(id, name, company, email, phone, comment, timestampAdded);
         updatedContact.setTimestampUpdated(timestampUpdated);
 
-        storageManager.deleteContact(contact, new FirebaseStorageCallback() {
+        storageManager.deleteContact(contact, new FirebaseDatabaseCallback() {
             @Override
             public void onSuccess() {
-                storageManager.writeContactToFirebase(updatedContact, new FirebaseStorageCallback() {
+                storageManager.writeContactToFirebase(updatedContact, new FirebaseDatabaseCallback() {
                     @Override
                     public void onSuccess() {}
 

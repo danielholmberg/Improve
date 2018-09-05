@@ -7,12 +7,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
-import java.util.Deque;
-
-import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
+import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback;
 import dev.danielholmberg.improve.Components.Contact;
 import dev.danielholmberg.improve.Components.Feedback;
 import dev.danielholmberg.improve.Components.Note;
@@ -22,8 +18,8 @@ import dev.danielholmberg.improve.Improve;
  * Created by Daniel Holmberg.
  */
 
-public class FirebaseStorageManager {
-    private static final String TAG = FirebaseStorageManager.class.getSimpleName();
+public class FirebaseDatabaseManager {
+    private static final String TAG = FirebaseDatabaseManager.class.getSimpleName();
 
     public static final String USERS_REF = "users";
     public static final String NOTES_REF = "notes";
@@ -31,7 +27,7 @@ public class FirebaseStorageManager {
     public static final String CONTACTS_REF = "contacts";
     public static final String FEEDBACK_REF = "feedback";
 
-    public FirebaseStorageManager() {}
+    public FirebaseDatabaseManager() {}
 
     public DatabaseReference getUserRef() {
         String userId = Improve.getInstance().getAuthManager().getCurrentUserId();
@@ -61,7 +57,7 @@ public class FirebaseStorageManager {
         return feedbackRef;
     }
 
-    public void writeNoteToFirebase(Note note, boolean toArchive, final FirebaseStorageCallback callback) {
+    public void writeNoteToFirebase(Note note, boolean toArchive, final FirebaseDatabaseCallback callback) {
         if(toArchive) {
             note.setArchived(true);
             getArchivedNotesRef().child(note.getId()).setValue(note)
@@ -80,7 +76,7 @@ public class FirebaseStorageManager {
                             callback.onFailure(e.toString());
                         }
                     });
-            deleteNote(note, false, new FirebaseStorageCallback() {
+            deleteNote(note, false, new FirebaseDatabaseCallback() {
                 @Override
                 public void onSuccess() {
                     Log.d(TAG, "*** Successfully deleted note from Notes ***");
@@ -109,7 +105,7 @@ public class FirebaseStorageManager {
                             callback.onFailure(e.toString());
                         }
                     });
-            deleteNote(note, true, new FirebaseStorageCallback() {
+            deleteNote(note, true, new FirebaseDatabaseCallback() {
                 @Override
                 public void onSuccess() {
                     Log.d(TAG, "*** Successfully deleted note from Archive ***");
@@ -123,7 +119,7 @@ public class FirebaseStorageManager {
         }
     }
 
-    public void writeContactToFirebase(Contact contact, final FirebaseStorageCallback callback) {
+    public void writeContactToFirebase(Contact contact, final FirebaseDatabaseCallback callback) {
         getContactsRef().child(contact.getCompany().toUpperCase())
                 .child(contact.getId()).setValue(contact)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -143,7 +139,7 @@ public class FirebaseStorageManager {
                 });
     }
 
-    public void deleteNote(Note noteToDelete, boolean fromArchive, final FirebaseStorageCallback callback) {
+    public void deleteNote(Note noteToDelete, boolean fromArchive, final FirebaseDatabaseCallback callback) {
         if(fromArchive){
             getArchivedNotesRef().child(noteToDelete.getId()).removeValue()
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -181,7 +177,7 @@ public class FirebaseStorageManager {
         }
     }
 
-    public void deleteContact(Contact contactToDelete, final FirebaseStorageCallback callback) {
+    public void deleteContact(Contact contactToDelete, final FirebaseDatabaseCallback callback) {
         getContactsRef().child(contactToDelete.getCompany().toUpperCase())
                 .child(contactToDelete.getId()).removeValue()
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -201,7 +197,7 @@ public class FirebaseStorageManager {
                 });
     }
 
-    public void submitFeedback(Feedback feedback, final FirebaseStorageCallback callback) {
+    public void submitFeedback(Feedback feedback, final FirebaseDatabaseCallback callback) {
         getFeedbackRef().child(feedback.getFeedback_id()).setValue(feedback)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override

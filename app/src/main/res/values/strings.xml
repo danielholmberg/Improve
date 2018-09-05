@@ -63,7 +63,7 @@
     <string name="nav_feedback">Feedback</string>
     <string name="title_submit_feedback">Feedback</string>
     <string name="menu_note_info">Info</string>
-    <string name="choose_marker_color_note_msg">Choose a color to more easily characterize Notes</string>
+    <string name="choose_marker_color_note_msg">Choose a color to characterize Notes</string>
     <string name="choose_marker_color_note_title">Note color</string>
     <string name="dialog_archive_note_title">Archive note</string>
     <string name="dialog_archive_note_msg">Do you want to archive this note?</string>
@@ -84,11 +84,15 @@
     <string name="anonymous_sign_in_btn_text">Anonymous Sign in</string>
     <string name="anonymous_sign_in_btn_content_desc">Anonymous Sign in Button</string>
     <string name="google_sign_in_btn_text">Sign in</string>
-    <string name="submit_feedback_informing_text">Thank you for reaching this page! Here you can directly provide some feedback to the developers about: \n
-        \n \u2022 New features you would like to see in a upcoming version.
+    <string name="submit_feedback_informing_text">Thank you for reaching this page! From here, you may provide some feedback to the developers about: \n
+        \n \u2022 New features you would like to see in an upcoming version.
         \n \u2022 Problems you encounter during your use of the app.
         \n \u2022 Or anything else that comes to mind.</string>
     <string name="menu_contact_export_vcf">Export to .vcf</string>
+    <string name="dialog_sign_out_msg">Do you want to sign out?</string>
+    <string name="dialog_sign_out_title">Sign out</string>
+    <string name="dialog_anonymous_sign_out_msg">If you sign out from an Anonymous-session, you will loose all your data. Do you want to continue?</string>
+    <string name="dialog_anonymous_sign_out_title">Sign out Anonymous-session</string>
 
     <!-- Quotes -->
     <string-array name="quotes">

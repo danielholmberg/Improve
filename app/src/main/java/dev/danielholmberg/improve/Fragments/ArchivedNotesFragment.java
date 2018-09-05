@@ -30,7 +30,7 @@ import java.util.Calendar;
 
 import dev.danielholmberg.improve.Components.Note;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
+import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 import dev.danielholmberg.improve.R;
 
 /**
@@ -41,7 +41,7 @@ public class ArchivedNotesFragment extends Fragment {
     private static final String TAG = ArchivedNotesFragment.class.getSimpleName();
 
     private Improve app;
-    private FirebaseStorageManager storageManager;
+    private FirebaseDatabaseManager storageManager;
 
     private View view;
     private RecyclerView archivedNotesRecyclerView;
@@ -59,7 +59,7 @@ public class ArchivedNotesFragment extends Fragment {
         super.onCreate(savedInstanceState);
         app = Improve.getInstance();
         app.setArchivedNotesFragmentRef(this);
-        storageManager = app.getFirebaseStorageManager();
+        storageManager = app.getFirebaseDatabaseManager();
         setHasOptionsMenu(true);
     }
 

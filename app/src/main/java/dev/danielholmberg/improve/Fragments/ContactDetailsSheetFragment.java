@@ -34,10 +34,10 @@ import java.text.DateFormat;
 import java.util.Calendar;
 
 import dev.danielholmberg.improve.Activities.AddContactActivity;
-import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
+import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback;
 import dev.danielholmberg.improve.Components.Contact;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
+import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 import dev.danielholmberg.improve.R;
 
 /**
@@ -54,7 +54,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     private Improve app;
-    private FirebaseStorageManager storageManager;
+    private FirebaseDatabaseManager storageManager;
     private Context context;
 
     private Bundle contactBundle;
@@ -81,7 +81,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         app = Improve.getInstance();
-        storageManager = app.getFirebaseStorageManager();
+        storageManager = app.getFirebaseDatabaseManager();
         detailsDialog = this;
         context = getContext();
         activity = (AppCompatActivity) getActivity();
@@ -306,7 +306,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     }
 
     private void deleteContact(final Contact contact) {
-        storageManager.deleteContact(contact, new FirebaseStorageCallback() {
+        storageManager.deleteContact(contact, new FirebaseDatabaseCallback() {
             @Override
             public void onSuccess() {
                 boolean error = false;
@@ -322,7 +322,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
                             .setAction("UNDO", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    storageManager.writeContactToFirebase(contact, new FirebaseStorageCallback() {
+                                    storageManager.writeContactToFirebase(contact, new FirebaseDatabaseCallback() {
                                         @Override
                                         public void onSuccess() {
                                             Log.d(TAG, "*** Successfully undid 'Delete contact' ***");

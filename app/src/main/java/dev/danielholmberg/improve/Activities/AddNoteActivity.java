@@ -2,13 +2,10 @@ package dev.danielholmberg.improve.Activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -21,10 +18,10 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
+import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback;
 import dev.danielholmberg.improve.Components.Note;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
+import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Utilities.NoteInputValidator;
 
@@ -36,7 +33,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
     private static final String TAG = AddNoteActivity.class.getSimpleName();
 
     private Improve app;
-    private FirebaseStorageManager storageManager;
+    private FirebaseDatabaseManager storageManager;
     private NoteInputValidator validator;
 
     private int markerColor;
@@ -54,7 +51,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         setContentView(R.layout.activity_add_note);
 
         app = Improve.getInstance();
-        storageManager = app.getFirebaseStorageManager();
+        storageManager = app.getFirebaseDatabaseManager();
 
         toolbar = (Toolbar) findViewById(R.id.toolbar_add_note);
         setSupportActionBar(toolbar);
@@ -154,7 +151,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         Note newNote = new Note(id, title, info, color, timestampAdded);
         newNote.setTimestampUpdated(timestampAdded);
 
-        storageManager.writeNoteToFirebase(newNote, false, new FirebaseStorageCallback() {
+        storageManager.writeNoteToFirebase(newNote, false, new FirebaseDatabaseCallback() {
 
             @Override
             public void onSuccess() {}

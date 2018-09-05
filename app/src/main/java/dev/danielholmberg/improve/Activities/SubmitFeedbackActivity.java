@@ -1,32 +1,24 @@
 package dev.danielholmberg.improve.Activities;
 
 import android.content.Intent;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
-import android.support.v4.app.NavUtils;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.util.Calendar;
 
-import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
+import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback;
 import dev.danielholmberg.improve.Components.Feedback;
-import dev.danielholmberg.improve.Components.Note;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
+import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Utilities.NoteInputValidator;
 
@@ -38,7 +30,7 @@ public class SubmitFeedbackActivity extends AppCompatActivity {
     private static final String TAG = SubmitFeedbackActivity.class.getSimpleName();
 
     private Improve app;
-    private FirebaseStorageManager storageManager;
+    private FirebaseDatabaseManager storageManager;
     private NoteInputValidator validator;
 
     private TextInputEditText inputTitle, inputInfo;
@@ -53,7 +45,7 @@ public class SubmitFeedbackActivity extends AppCompatActivity {
         setContentView(R.layout.activity_submit_feedback);
 
         app = Improve.getInstance();
-        storageManager = app.getFirebaseStorageManager();
+        storageManager = app.getFirebaseDatabaseManager();
 
         toolbar = (Toolbar) findViewById(R.id.toolbar_submit_feedback);
         setSupportActionBar(toolbar);
@@ -105,7 +97,7 @@ public class SubmitFeedbackActivity extends AppCompatActivity {
 
         Feedback feedback = new Feedback(user_id, feedback_id, title, info, timestamp);
 
-        storageManager.submitFeedback(feedback, new FirebaseStorageCallback() {
+        storageManager.submitFeedback(feedback, new FirebaseDatabaseCallback() {
             @Override
             public void onSuccess() {
                 Toast.makeText(app, "Feedback submitted, you're awesome!", Toast.LENGTH_SHORT).show();
