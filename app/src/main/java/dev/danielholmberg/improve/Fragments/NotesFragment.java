@@ -70,7 +70,7 @@ public class NotesFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_notes,
                 container, false);
@@ -123,7 +123,7 @@ public class NotesFragment extends Fragment {
 
         query.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.hasChildren()) {
                     notesRecyclerView.setVisibility(View.VISIBLE);
                     emptyListText.setVisibility(View.GONE);
@@ -134,7 +134,7 @@ public class NotesFragment extends Fragment {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.e(TAG, "Failed to retrieve Firebase data for NotesRef: " + databaseError);
             }
         });
@@ -146,8 +146,9 @@ public class NotesFragment extends Fragment {
 
         recyclerAdapter = new FirebaseRecyclerAdapter<Note, NoteViewHolder>(options) {
 
+            @NonNull
             @Override
-            public NoteViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            public NoteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.item_note, parent, false);
 
