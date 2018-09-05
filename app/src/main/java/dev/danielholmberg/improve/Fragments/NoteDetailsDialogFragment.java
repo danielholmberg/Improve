@@ -123,6 +123,9 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Objects.requireNonNull(this.getDialog().getWindow())
+                .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
         toolbar = (Toolbar) view.findViewById(R.id.toolbar_note_details_fragment);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
