@@ -77,7 +77,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
         googleSignInBtn.setOnClickListener(this);
 
         // Configure Google Sign In Client
-        // TODO - Change the RequestIdToken
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()

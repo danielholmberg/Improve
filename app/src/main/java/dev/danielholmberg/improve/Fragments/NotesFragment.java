@@ -292,12 +292,7 @@ public class NotesFragment extends Fragment {
             NoteDetailsDialogFragment noteDetailsDialogFragment = NoteDetailsDialogFragment.newInstance();
             noteDetailsDialogFragment.setContext(context);
             noteDetailsDialogFragment.setArguments(createBundle(note, getAdapterPosition()));
-
-            /*
-            // SETS the target fragment for use later when sending results
-            noteDetailsDialogFragment.setTargetFragment(NotesFragment.this, 300);
-            */
-
+            
             noteDetailsDialogFragment.show(fm, NoteDetailsDialogFragment.TAG);
         }
 
