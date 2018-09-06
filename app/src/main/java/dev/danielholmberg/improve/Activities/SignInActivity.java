@@ -50,7 +50,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "Starting application...");
+        Crashlytics.log("Starting application...");
 
         // Initialize Singleton.
         app = Improve.getInstance();
@@ -94,7 +94,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
 
             if(result.isSuccess()) {
-                Log.d(TAG, "Google sign in was successful!");
+                Crashlytics.log("Google sign in was successful!");
 
                 // Google Sign in was successful, authenticate with Firebase...
                 try {
@@ -113,14 +113,13 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                         @Override
                         public void onFailure(String errorMessage) {
                             // Authenication with Firebase was unsuccessful.
-                            Log.e(TAG, "!!! Failed to authenticate with Firebase: " + errorMessage);
+                            Crashlytics.log("Failed to authenticate with Firebase: " + errorMessage);
                             progressBar.setVisibility(View.GONE);
                             signInButtonsLayout.setVisibility(View.VISIBLE);
                         }
                     });
                 } catch (ApiException e) {
                     // Google Sign In failed, update UI appropriately
-                    Log.e(TAG, "!!! Google sign in failed: " + e);
                     Crashlytics.log("Google sign in failed: " + e.toString());
 
                     Toast.makeText(getApplicationContext(), "Google sign in failed", Toast.LENGTH_SHORT).show();
@@ -128,12 +127,12 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                     signInButtonsLayout.setVisibility(View.VISIBLE);
                 }
             } else if(result.getStatus().getStatusCode() == GoogleSignInStatusCodes.SIGN_IN_CANCELLED) {
-                Log.e(TAG, "Google sign in was cancelled!");
+                Crashlytics.log("Google sign in was cancelled!");
                 Toast.makeText(getApplicationContext(), "Google sign in was cancelled", Toast.LENGTH_SHORT).show();
                 progressBar.setVisibility(View.GONE);
                 signInButtonsLayout.setVisibility(View.VISIBLE);
             } else {
-                Log.e(TAG, "Google sign in failed!");
+                Crashlytics.log("Google sign in failed!");
                 Toast.makeText(getApplicationContext(), "Google sign in failed", Toast.LENGTH_SHORT).show();
                 progressBar.setVisibility(View.GONE);
                 signInButtonsLayout.setVisibility(View.VISIBLE);
@@ -169,7 +168,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
             @Override
             public void onFailure(String errorMessage) {
-                Log.e(TAG, "!!! Failed to Sign in Anonymously: " + errorMessage);
+                Crashlytics.log("Failed to Sign in Anonymously: " + errorMessage);
             }
         });
     }

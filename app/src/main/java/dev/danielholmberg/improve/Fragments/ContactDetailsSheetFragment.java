@@ -27,6 +27,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -324,13 +326,11 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
                                 public void onClick(View view) {
                                     storageManager.writeContactToFirebase(contact, new FirebaseDatabaseCallback() {
                                         @Override
-                                        public void onSuccess() {
-                                            Log.d(TAG, "*** Successfully undid 'Delete contact' ***");
-                                        }
+                                        public void onSuccess() {}
 
                                         @Override
                                         public void onFailure(String errorMessage) {
-                                            Log.e(TAG, "Failed to undo 'Delete contact': " + errorMessage);
+                                            Crashlytics.log("Failed to undo 'Delete contact': " + errorMessage);
                                         }
                                     });
                                 }

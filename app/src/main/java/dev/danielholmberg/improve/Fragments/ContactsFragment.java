@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -146,7 +147,7 @@ public class ContactsFragment extends Fragment{
 
                                     @Override
                                     public void onCancelled(DatabaseError databaseError) {
-                                        Log.e(TAG, "Failed to read Contact values. " + databaseError.toString());
+                                        Crashlytics.log("Failed to read Contact values. " + databaseError.toString());
                                     }
                                 });
                     }
@@ -171,28 +172,11 @@ public class ContactsFragment extends Fragment{
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "Failed to read Company values. " + databaseError.toString());
+                Crashlytics.log("Failed to read Company values. " + databaseError.toString());
             }
         });
 
         contactsRecyclerView.setAdapter(adapter);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_contacts, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.search_contact:
-                Log.d(TAG, adapter.getGroups().toString());
-                return true;
-            default:
-                break;
-        }
-        return false;
     }
 
     @Override

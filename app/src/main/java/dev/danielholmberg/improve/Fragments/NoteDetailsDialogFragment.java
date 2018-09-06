@@ -31,6 +31,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.text.DateFormat;
@@ -448,13 +450,11 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
                                 public void onClick(View view) {
                                     storageManager.writeNoteToFirebase(note, note.getArchived(), new FirebaseDatabaseCallback() {
                                         @Override
-                                        public void onSuccess() {
-                                            Log.d(TAG, "*** Successfully undid 'Delete note' ***");
-                                        }
+                                        public void onSuccess() {}
 
                                         @Override
                                         public void onFailure(String errorMessage) {
-                                            Log.e(TAG, "Failed to undo 'Delete note': " + errorMessage);
+                                            Crashlytics.log("Failed to undo 'Delete note': " + errorMessage);
                                         }
                                     });
                                 }
@@ -520,14 +520,12 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
                                 public void onClick(View view) {
                                     storageManager.writeNoteToFirebase(note, true, new FirebaseDatabaseCallback() {
                                         @Override
-                                        public void onSuccess() {
-                                            Log.d(TAG, "*** Successfully undid 'Move note from archive' ***");
-                                        }
+                                        public void onSuccess() {}
 
                                         @Override
                                         public void onFailure(String errorMessage) {
                                             note.setArchived(false);
-                                            Log.e(TAG, "Failed to undo 'Move note from archive': " + errorMessage);
+                                            Crashlytics.log("Failed to undo 'Move note from archive': " + errorMessage);
                                         }
                                     });
                                 }
@@ -570,15 +568,12 @@ public class NoteDetailsDialogFragment extends DialogFragment implements View.On
 
                                     storageManager.writeNoteToFirebase(note, false, new FirebaseDatabaseCallback() {
                                         @Override
-                                        public void onSuccess() {
-                                            Log.d(TAG, "*** Successfully undid 'Move note to archive' ***");
-                                        }
+                                        public void onSuccess() {}
 
                                         @Override
                                         public void onFailure(String errorMessage) {
                                             note.setArchived(true);
-
-                                            Log.e(TAG, "Failed to undo 'Move note to archive': " + errorMessage);
+                                            Crashlytics.log("Failed to undo 'Move note to archive': " + errorMessage);
                                         }
                                     });
                                 }

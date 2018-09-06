@@ -3,6 +3,7 @@ package dev.danielholmberg.improve.Managers;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
@@ -65,26 +66,22 @@ public class FirebaseDatabaseManager {
                         @Override
                         public void onSuccess(Void aVoid) {
                             // Successfully updated Note.
-                            Log.d(TAG, "*** Successfully updated Note in Firebase storage ***");
                             callback.onSuccess();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Log.e(TAG, "!!! Failed to update Note in Firebase storage: " + e);
                             callback.onFailure(e.toString());
                         }
                     });
             deleteNote(note, false, new FirebaseDatabaseCallback() {
                 @Override
-                public void onSuccess() {
-                    Log.d(TAG, "*** Successfully deleted note from Notes ***");
-                }
+                public void onSuccess() {}
 
                 @Override
                 public void onFailure(String errorMessage) {
-                    Log.e(TAG, errorMessage);
+                    Crashlytics.log(errorMessage);
                 }
             });
         } else {
@@ -94,26 +91,23 @@ public class FirebaseDatabaseManager {
                         @Override
                         public void onSuccess(Void aVoid) {
                             // Successfully added new Note.
-                            Log.d(TAG, "*** Successfully added new Note to Firebase storage ***");
                             callback.onSuccess();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Log.e(TAG, "!!! Failed to add new Note to Firebase storage: " + e);
+                            Crashlytics.log(e.toString());
                             callback.onFailure(e.toString());
                         }
                     });
             deleteNote(note, true, new FirebaseDatabaseCallback() {
                 @Override
-                public void onSuccess() {
-                    Log.d(TAG, "*** Successfully deleted note from Archive ***");
-                }
+                public void onSuccess() {}
 
                 @Override
                 public void onFailure(String errorMessage) {
-                    Log.e(TAG, errorMessage);
+                    Crashlytics.log(errorMessage);
                 }
             });
         }
@@ -126,14 +120,13 @@ public class FirebaseDatabaseManager {
                     @Override
                     public void onSuccess(Void aVoid) {
                         // Successfully added new Contact.
-                        Log.d(TAG, "*** Successfully added new Contact to Firebase storage ***");
                         callback.onSuccess();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "!!! Failed to add new Contact to Firebase storage: " + e);
+                        Crashlytics.log(e.toString());
                         callback.onFailure(e.toString());
                     }
                 });
@@ -146,14 +139,13 @@ public class FirebaseDatabaseManager {
                         @Override
                         public void onSuccess(Void aVoid) {
                             // Successfully deleted the Note.
-                            Log.d(TAG, "*** Successfully deleted the Note in Firebase storage ***");
                             callback.onSuccess();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Log.e(TAG, "!!! Failed to delete the Note in Firebase storage: " + e);
+                            Crashlytics.log(e.toString());
                             callback.onFailure(e.toString());
                         }
                     });
@@ -163,14 +155,13 @@ public class FirebaseDatabaseManager {
                         @Override
                         public void onSuccess(Void aVoid) {
                             // Successfully deleted the Note.
-                            Log.d(TAG, "*** Successfully deleted the Note in Firebase storage ***");
                             callback.onSuccess();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Log.e(TAG, "!!! Failed to delete the Note in Firebase storage: " + e);
+                            Crashlytics.log(e.toString());
                             callback.onFailure(e.toString());
                         }
                     });
@@ -184,14 +175,13 @@ public class FirebaseDatabaseManager {
                     @Override
                     public void onSuccess(Void aVoid) {
                         // Successfully deleted the Contact.
-                        Log.d(TAG, "*** Successfully deleted the Contact in Firebase storage ***");
                         callback.onSuccess();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "!!! Failed to delete the Contact in Firebase storage: " + e);
+                        Crashlytics.log(e.toString());
                         callback.onFailure(e.toString());
                     }
                 });
@@ -202,14 +192,13 @@ public class FirebaseDatabaseManager {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "*** Successfully submitted feedback to Firebase storage ***");
                         callback.onSuccess();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "!!! Failed to submit feedback to Firebase storage: " + e);
+                        Crashlytics.log(e.toString());
                         callback.onFailure(e.toString());
                     }
                 });

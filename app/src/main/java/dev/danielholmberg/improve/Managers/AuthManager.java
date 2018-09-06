@@ -69,14 +69,12 @@ public class AuthManager {
                 .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                     @Override
                     public void onSuccess(AuthResult authResult) {
-                        Log.d(TAG, "*** Successfully signed in to Firebase with chosen Google account ***");
                         setUserPresence(callback);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "!!! Failed to sign in to Firebase with chosen Google account:" + e);
                         Crashlytics.log("Failed to Sign in Google-user: " + e.toString());
                         callback.onFailure(e.toString());
                     }
@@ -94,14 +92,12 @@ public class AuthManager {
                 .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                     @Override
                     public void onSuccess(AuthResult authResult) {
-                        Log.d(TAG, "*** Successfully signed in to Firebase with chosen Google account ***");
                         setUserPresence(callback);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "!!! Failed to sign in to Firebase with chosen Google account:" + e.toString());
                         Crashlytics.log("Failed to Sign in Google-user: " + e.toString());
                         callback.onFailure(e.toString());
                     }
@@ -140,13 +136,11 @@ public class AuthManager {
                     // this value could contain info about the device or a timestamp too
                     con.setValue(Boolean.TRUE, ServerValue.TIMESTAMP);
 
-                    Log.d(TAG, "*** Done connecting Google account: " + userRef + " to Firebase ***");
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG,"Listener was cancelled at .info/connected: " + error);
                 Crashlytics.log("Failed to SetUserPresence: " + error.toString());
             }
         });
