@@ -15,11 +15,19 @@
       },
       "oauth_client": [
         {
-          "client_id": "158013774234-iqjv00nketr9fqc75eekl6itu5q05eff.apps.googleusercontent.com",
+          "client_id": "158013774234-vdkda60t1ghob4i373uqec036qkpblvs.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "dev.danielholmberg.careercontacts",
-            "certificate_hash": "d4d33119b9e9cc9fa33bcc8b1774e263a57513da"
+            "certificate_hash": "f574052fa00f2d3b0feb8dc9c3f060eae3738566"
+          }
+        },
+        {
+          "client_id": "158013774234-faopqlst1nchc2jkmlpfic4ptcd2ek74.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dev.danielholmberg.careercontacts",
+            "certificate_hash": "e3f91b7f15fdf2927db6e6f27451b4794aaff169"
           }
         },
         {
