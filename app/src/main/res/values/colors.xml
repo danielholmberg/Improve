@@ -30,36 +30,26 @@
     <color name="cardFooterColor">#FFFFFFFF</color>             <!-- White -->
     <color name="contact_form_icon">#E0E0E0</color>             <!-- Grey 300 -->
 
-    <!-- Color picker -->
-    <color name="colorPickerGreen">#00C853</color>              <!-- Green A700 -->
-    <color name="colorPickerLightGreen">#C5E1A5</color>         <!-- LightGreen 200 -->
-    <color name="colorPickerAmber">#FFE082</color>              <!-- Amber 200 -->
-    <color name="colorPickerDeepOrange">#FFAB91</color>         <!-- DeepOrange 200 -->
-    <color name="colorPickerBrown">#8D6E63</color>              <!-- Brown 400 -->
+    <!-- [Not in use] Tag colors -->
+    <color name="tagLightGreen">#C5E1A5</color>
+    <color name="tagAmber">#FFE082</color>
+    <color name="tagDeepOrange">#FFAB91</color>
+    <color name="tagBrown">#8D6E63</color>
+    <color name="tagTurquoise">#8FE8D2</color>
+    <color name="tagPink">#F48FB1</color>
+    <color name="tagDeepPurple">#B39DDB</color>
 
-    <color name="colorPickerBlueGrey">#B0BEC5</color>           <!-- BlueGrey 200 -->
-    <color name="colorPickerTurquoise">#8FE8D2</color>          <!-- Turquoise -->
-    <color name="colorPickerPink">#F48FB1</color>               <!-- Pink 200 -->
-    <color name="colorPickerDeepPurple">#B39DDB</color>         <!-- DeepPurple 200 -->
-    <color name="colorPickerDarkGrey">#424242</color>             <!-- Grey 800 -->
+    <!-- [In use] Tag colors -->
+    <color name="tagBlueGrey">#B0BEC5</color>
+    <color name="tagDarkGrey">#424242</color>
+    <color name="tagGreen">#00C853</color>
+    <color name="tagRed">#ff1744</color>
+    <color name="tagPurple">#D500F9</color>
+    <color name="tagBlue">#2979FF</color>
+    <color name="tagDarkOrange">#f57c00</color>
+    <color name="tagBabyBlue">#89cff0</color>
 
-    <!-- Title colors -->
-    <color name="titleColorGreen">#445945</color>               <!-- Dark Green -->
-    <color name="titleColorLightGreen">#7A8C66</color>          <!-- Dark LightGreen -->
-    <color name="titleColorAmber">#A59154</color>               <!-- Dark Amber -->
-    <color name="titleColorDeepOrange">#7F5548</color>          <!-- Dark DeepOrange -->
-    <color name="titleColorBrown">#514946</color>               <!-- Dark Brown -->
-
-    <color name="titleColorBlueGrey">#4F5559</color>            <!-- Dark BlueGrey -->
-    <color name="titleColorTurquoise">#3F665C</color>           <!-- Dark Turquoise -->
-    <color name="titleColorPink">#663C4A</color>                <!-- Dark Pink -->
-    <color name="titleColorDeepPurple">#3E374C</color>          <!-- Dark DeepPurple -->
-    <color name="titleColorIndigo">#4A4E66</color>              <!-- Dark Indigo -->
-    <color name="colorPickerRed">#ff1744</color>
-    <color name="colorPickerPurple">#D500F9</color>
-    <color name="colorPickerBlue">#2979FF</color>
-    <color name="colorPickerDarkOrange">#f57c00</color>
-    <color name="colorPickerBabyBlue">#89cff0</color>
-    <color name="noColor">#E0E0E0</color>
+    <color name="noColor">#FFE0E0E0</color>
+    <color name="tagUntagged">#FFE0E0E0</color>
 
 </resources>

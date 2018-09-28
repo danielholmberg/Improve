@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/noteTag"
+        android:title="@string/note_tag"
+        android:icon="@drawable/ic_menu_tag_untagged"
+        app:showAsAction="ifRoom">
+        <menu>
+            <group
+                android:id="@+id/group_tag_list"
+                android:orderInCategory="0">
+                <!-- Group to hold all Tag-items created by the user -->
+            </group>
+            <item
+                android:id="@+id/add_new_tag"
+                android:title="@string/menu_tag_add"
+                android:icon="@drawable/ic_menu_tag_add"
+                android:orderInCategory="1"/>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/noteDone"
+        android:title="@string/noteDone"
+        android:icon="@drawable/ic_done_primary"
+        app:showAsAction="always"
+        />
+</menu>

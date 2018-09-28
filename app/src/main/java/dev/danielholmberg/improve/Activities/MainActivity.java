@@ -43,11 +43,14 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import dev.danielholmberg.improve.Callbacks.FirebaseAuthCallback;
+import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback;
+import dev.danielholmberg.improve.Components.Tag;
 import dev.danielholmberg.improve.Fragments.ArchivedNotesFragment;
 import dev.danielholmberg.improve.Fragments.ContactsFragment;
 import dev.danielholmberg.improve.Fragments.NotesFragment;
@@ -92,16 +95,23 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        app = Improve.getInstance();
         context = getApplicationContext();
+        app = Improve.getInstance();
 
+        // Add a default tag to User
+        addUntaggedTagToUser();
+
+        // Getting current signed in User reference.
+        currentUser = app.getAuthManager().getCurrentUser();
+
+        initActivity();
+    }
+
+    private void initActivity() {
         // Initializing the Toolbar
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        // Getting current signed in User reference.
-        currentUser = app.getAuthManager().getCurrentUser();
 
         // Initalizing NavigationDrawer
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -116,6 +126,25 @@ public class MainActivity extends AppCompatActivity {
         initNavDrawer();
 
         loadCurrentFragment();
+    }
+
+    private void addUntaggedTagToUser() {
+        final String id = "Untagged";
+        String label = "Untagged";
+        String colorHex = "#" + Integer.toHexString(getResources().getColor(R.color.tagUntagged));
+        int colorInt = R.color.tagUntagged;
+
+        final Tag untaggedTag = new Tag(id, label, colorHex, colorInt);
+
+        app.getFirebaseDatabaseManager().addTag(untaggedTag, new FirebaseDatabaseCallback() {
+            @Override
+            public void onSuccess() {}
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Log.e(TAG, "Failed to add default Tag to Firebase: " + errorMessage);
+            }
+        });
     }
 
     @Override
@@ -162,6 +191,60 @@ public class MainActivity extends AppCompatActivity {
         setUpQuoteView();
 
         hasloadedNavView = true;
+    }
+
+    private void setUpNavigationView() {
+        final Context context = this;
+        //Setting Navigation View Item Selected Listener to handle the item click of the navigation menu
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+
+            // This method will trigger on item Click of navigation menu
+            @Override
+            public boolean onNavigationItemSelected(MenuItem menuItem) {
+
+                // Check to see which item was being clicked and perform appropriate action
+                switch (menuItem.getItemId()) {
+                    // Replacing the main content with correct fragment.
+                    case R.id.nav_notes:
+                        navItemIndex = 0;
+                        CURRENT_TAG = TAG_NOTES_FRAGMENT;
+                        loadCurrentFragment();
+                        break;
+                    case R.id.nav_archived_notes:
+                        navItemIndex = 1;
+                        CURRENT_TAG = TAG_ARCHIVED_NOTES_FRAGMENT;
+                        loadCurrentFragment();
+                        break;
+                    case R.id.nav_contacts:
+                        navItemIndex = 2;
+                        CURRENT_TAG = TAG_CONTACTS_FRAGMENT;
+                        loadCurrentFragment();
+                        break;
+                    case R.id.nav_feedback:
+                        drawer.closeDrawers();
+                        drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+                            @Override
+                            public void onDrawerClosed(View drawerView) {
+                                super.onDrawerClosed(drawerView);
+                                startActivity(new Intent(context, SubmitFeedbackActivity.class));
+                                drawer.removeDrawerListener(this);
+                            }
+                        });
+                        break;
+                    case R.id.nav_sign_out:
+                        startSignOut();
+                        drawer.closeDrawers();
+                        return true;
+                    default:
+                        navItemIndex = 0;
+                }
+
+                return true;
+            }
+        });
+
+        // Calling sync state is necessary or else your hamburger icon wont show up
+        actionBarDrawerToggle.syncState();
     }
 
     private void setUpQuoteView() {
@@ -287,60 +370,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void selectNavMenu() {
         navigationView.getMenu().getItem(navItemIndex).setChecked(true);
-    }
-
-    private void setUpNavigationView() {
-        final Context context = this;
-        //Setting Navigation View Item Selected Listener to handle the item click of the navigation menu
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-
-            // This method will trigger on item Click of navigation menu
-            @Override
-            public boolean onNavigationItemSelected(MenuItem menuItem) {
-
-                // Check to see which item was being clicked and perform appropriate action
-                switch (menuItem.getItemId()) {
-                    // Replacing the main content with correct fragment.
-                    case R.id.nav_notes:
-                        navItemIndex = 0;
-                        CURRENT_TAG = TAG_NOTES_FRAGMENT;
-                        loadCurrentFragment();
-                        break;
-                    case R.id.nav_archived_notes:
-                        navItemIndex = 1;
-                        CURRENT_TAG = TAG_ARCHIVED_NOTES_FRAGMENT;
-                        loadCurrentFragment();
-                        break;
-                    case R.id.nav_contacts:
-                        navItemIndex = 2;
-                        CURRENT_TAG = TAG_CONTACTS_FRAGMENT;
-                        loadCurrentFragment();
-                        break;
-                    case R.id.nav_feedback:
-                        drawer.closeDrawers();
-                        drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
-                            @Override
-                            public void onDrawerClosed(View drawerView) {
-                                super.onDrawerClosed(drawerView);
-                                startActivity(new Intent(context, SubmitFeedbackActivity.class));
-                                drawer.removeDrawerListener(this);
-                            }
-                        });
-                        break;
-                    case R.id.nav_sign_out:
-                        startSignOut();
-                        drawer.closeDrawers();
-                        return true;
-                    default:
-                        navItemIndex = 0;
-                }
-
-                return true;
-            }
-        });
-
-        // Calling sync state is necessary or else your hamburger icon wont show up
-        actionBarDrawerToggle.syncState();
     }
 
     /**

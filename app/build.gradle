@@ -17,6 +17,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            manifestPlaceholders = [crashlyticsEnabled: true]
+        }
+        debug {
+            manifestPlaceholders = [crashlyticsEnabled: false]
         }
     }
 }
@@ -50,6 +54,9 @@ dependencies {
 
     // Picasso Image
     implementation 'com.squareup.picasso:picasso:2.5.2'
+
+    // Vector Drawable Path Finding
+    implementation 'com.github.devsideal:VectorChildFinder:1.0.0'
 
     // Android Testing
     testImplementation 'junit:junit:4.12'

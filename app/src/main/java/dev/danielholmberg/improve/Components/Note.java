@@ -15,19 +15,19 @@ public class Note implements Serializable {
     private String id;
     private String title;
     private String info;
-    private String color;
     private String timestampAdded;
     private String timestampUpdated;
     private boolean archived;
+    private String tagId;
 
     public Note() {}
 
-    public Note(String id, String title, String info, String color, String timestampAdded) {
+    public Note(String id, String title, String info, String timestampAdded, String tagId) {
         this.id = id;
         this.title = title;
         this.info = info;
-        this.color = color;
         this.timestampAdded = timestampAdded;
+        this.tagId = tagId;
     }
 
     public void setId(String id) {
@@ -40,10 +40,6 @@ public class Note implements Serializable {
 
     public void setInfo(String info) {
         this.info = info;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
     }
 
     public void setTimestampAdded(String timestampAdded) {
@@ -66,10 +62,6 @@ public class Note implements Serializable {
         return this.info;
     }
 
-    public String getColor() {
-        return this.color;
-    }
-
     public String getTimestampAdded() {
         return this.timestampAdded;
     }
@@ -86,17 +78,25 @@ public class Note implements Serializable {
         this.timestampUpdated = timestampUpdated;
     }
 
-    public String getExportJSONFormat() throws JSONException {
+    public String getTagId() {
+        return tagId;
+    }
+
+    public void setTagId(String tagId) {
+        this.tagId = tagId;
+    }
+
+    public String toJSON() throws JSONException {
         JSONObject noteObject = new JSONObject();
         JSONObject noteData = new JSONObject();
 
         noteData.put("archived", this.archived);
-        noteData.put("color", this.color);
         noteData.put("id", this.id);
         noteData.put("info", this.info);
         noteData.put("timestampAdded", this.timestampAdded);
         noteData.put("timestampUpdated", this.timestampUpdated);
         noteData.put("title", this.title);
+        noteData.put("tagId", this.tagId);
 
         noteObject.put(this.id, noteData);
 

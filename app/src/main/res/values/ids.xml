@@ -2,4 +2,5 @@
 <resources>
     <item name="visible" type="id"/>
     <item name="masked" type="id"/>
+    <item name="tag_1" type="id">1</item>
 </resources>

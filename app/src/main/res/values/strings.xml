@@ -8,7 +8,7 @@
     <string name="hint_phone">Phone number</string>
     <string name="hint_comment">Comment</string>
     <string name="err_msg_name">Please enter a name</string>
-    <string name="err_msg_company">Please enter related company</string>
+    <string name="err_msg_company">Please enter a companyId</string>
     <string name="err_msg_email">Please enter a valid e-mail</string>
     <string name="title_new_contact">New Contact</string>
     <string name="title_edit_contact">Edit contact</string>
@@ -33,7 +33,7 @@
     <string name="note_footer_edit_label">Edit</string>
     <string name="note_footer_delete_label">Delete</string>
     <string name="empty_notes_list_text">What\'s on your mind?</string>
-    <string name="note_background_color">Note Background Color</string>
+    <string name="note_tag">Note tag</string>
     <string name="noteDone">Done</string>
 
     <!-- Navigation strings -->
@@ -49,8 +49,8 @@
     <string name="editContactButtonContentDesc">EditContactButton</string>
     <string name="deleteContactButtonContentDesc">DeleteContactButton</string>
     <string name="sort">Sort</string>
-    <string name="sort_by_company_alphabetical">Sort by company</string>
-    <string name="sort_by_marker">Sort by marker color</string>
+    <string name="sort_by_company_alphabetical">Sort by companyId</string>
+    <string name="filter_by_tag">Filter notes by tag</string>
     <string name="sort_by_title_alphabetical">Sort by title</string>
     <string name="sort_by_timestamp_updated">Sort by date</string>
     <string name="empty_archived_notes_list_text">No archived notes</string>
@@ -93,6 +93,21 @@
     <string name="dialog_sign_out_title">Sign out</string>
     <string name="dialog_anonymous_sign_out_msg">If you sign out from an Anonymous-session, you will loose all your data. Do you want to continue?</string>
     <string name="dialog_anonymous_sign_out_title">Sign out Anonymous-session</string>
+    <string name="dialog_note_tag_title">Note tag</string>
+    <string name="hint_tag_label">New label</string>
+    <string name="err_msg_tag_label">Please enter a tag label</string>
+    <string name="menu_tag_add">Add new tag</string>
+    <string name="dialog_dicard_changes_title">Discard changes</string>
+    <string name="dialog_discard_changes_msg">Are you sure you want to discard changes?</string>
+    <string name="menu_tag_1">Red</string>
+    <string name="menu_tag_2">Purple</string>
+    <string name="menu_tag_3">Blue</string>
+    <string name="menu_tag_4">Orange</string>
+    <string name="menu_tag_5">Grey</string>
+    <string name="menu_tag_6">Baby blue</string>
+    <string name="menu_tag_7">Dark grey</string>
+    <string name="menu_tag_8">Green</string>
+    <string name="menu_tag_untagged">Untagged</string>
 
     <!-- Quotes -->
     <string-array name="quotes">

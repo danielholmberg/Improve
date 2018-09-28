@@ -1,21 +1,36 @@
 package dev.danielholmberg.improve.Managers;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.View;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
+
+import dev.danielholmberg.improve.Callbacks.FirebaseAuthCallback;
 import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback;
 import dev.danielholmberg.improve.Components.Contact;
 import dev.danielholmberg.improve.Components.Feedback;
 import dev.danielholmberg.improve.Components.Note;
+import dev.danielholmberg.improve.Components.Tag;
 import dev.danielholmberg.improve.Improve;
 
 /**
  * Created by Daniel Holmberg.
+ *
+ * Remember:
+ * Uploading data is free.
+ * Downloading data is costly.
+ *
+ * Avoid using .keepSynced(boolean) as it downloads the node even if it hasn't changed.
  */
 
 public class FirebaseDatabaseManager {
@@ -26,192 +41,294 @@ public class FirebaseDatabaseManager {
     public static final String ARCHIVED_NOTES_REF = "archived_notes";
     public static final String CONTACTS_REF = "contacts";
     public static final String FEEDBACK_REF = "feedback";
+    public static final String TAG_REF = "tags";
 
     public FirebaseDatabaseManager() {}
 
+    public FirebaseDatabase getDatabase() {
+        return FirebaseDatabase.getInstance();
+    }
+
     public DatabaseReference getUserRef() {
         String userId = Improve.getInstance().getAuthManager().getCurrentUserId();
-        return FirebaseDatabase.getInstance().getReference(USERS_REF).child(userId);
+        return getDatabase().getReference(USERS_REF).child(userId);
     }
 
+    /**
+     * Returns the database reference to the Notes-node.
+     * @return - Database reference to Notes-node
+     */
     public DatabaseReference getNotesRef() {
-        DatabaseReference notesRef = getUserRef().child(NOTES_REF);
-        notesRef.keepSynced(true);
-        return notesRef;
+        return getUserRef().child(NOTES_REF);
     }
 
+    /**
+     * Returns the database reference to the Archive-node.
+     * @return - Database reference to Archive-node
+     */
     public DatabaseReference getArchivedNotesRef() {
-        DatabaseReference archivedNotesRef = getUserRef().child(ARCHIVED_NOTES_REF);
-        archivedNotesRef.keepSynced(true);
-        return archivedNotesRef;
+        return getUserRef().child(ARCHIVED_NOTES_REF);
     }
 
+    /**
+     * Returns the database reference to the Contacts-node.
+     * @return - Database reference to Contacts-node
+     */
     public DatabaseReference getContactsRef() {
-        DatabaseReference contactsRef = getUserRef().child(CONTACTS_REF);
-        contactsRef.keepSynced(true);
-        return contactsRef;
+        return getUserRef().child(CONTACTS_REF);
     }
 
+    /**
+     * Returns the database reference to the Feedback-node.
+     * @return - Database reference to Feedback-node
+     */
     public DatabaseReference getFeedbackRef() {
-        DatabaseReference feedbackRef = FirebaseDatabase.getInstance().getReference().child(FEEDBACK_REF);
-        return feedbackRef;
+        return getDatabase().getReference().child(FEEDBACK_REF);
     }
 
-    public void writeNoteToFirebase(Note note, boolean toArchive, final FirebaseDatabaseCallback callback) {
-        if(toArchive) {
-            note.setArchived(true);
-            getArchivedNotesRef().child(note.getId()).setValue(note)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            // Successfully updated Note.
-                            Log.d(TAG, "*** Successfully updated Note in Firebase storage ***");
-                            callback.onSuccess();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e(TAG, "!!! Failed to update Note in Firebase storage: " + e);
-                            callback.onFailure(e.toString());
-                        }
-                    });
-            deleteNote(note, false, new FirebaseDatabaseCallback() {
-                @Override
-                public void onSuccess() {
-                    Log.d(TAG, "*** Successfully deleted note from Notes ***");
-                }
-
-                @Override
-                public void onFailure(String errorMessage) {
-                    Log.e(TAG, errorMessage);
-                }
-            });
-        } else {
-            note.setArchived(false);
-            getNotesRef().child(note.getId()).setValue(note)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            // Successfully added new Note.
-                            Log.d(TAG, "*** Successfully added new Note to Firebase storage ***");
-                            callback.onSuccess();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e(TAG, "!!! Failed to add new Note to Firebase storage: " + e);
-                            callback.onFailure(e.toString());
-                        }
-                    });
-            deleteNote(note, true, new FirebaseDatabaseCallback() {
-                @Override
-                public void onSuccess() {
-                    Log.d(TAG, "*** Successfully deleted note from Archive ***");
-                }
-
-                @Override
-                public void onFailure(String errorMessage) {
-                    Log.e(TAG, errorMessage);
-                }
-            });
-        }
+    /**
+     * Returns the database reference to the Tags-node.
+     * @return - Database reference to Tags-node
+     */
+    public DatabaseReference getTagRef() {
+        return getUserRef().child(TAG_REF);
     }
 
-    public void writeContactToFirebase(Contact contact, final FirebaseDatabaseCallback callback) {
+    /**
+     * Uploads a note to the Archive-node, and removes the note from the Notes-node.
+     * @param note - The note to upload
+     * @param firebaseDatabaseCallback
+     */
+    public void archiveNote(Note note, final FirebaseDatabaseCallback firebaseDatabaseCallback) {
+        note.setArchived(true);
+
+        // Add Note to ArchivedNoteRef.
+        getArchivedNotesRef().child(note.getId()).setValue(note, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                if(databaseError != null) {
+                    Log.e(TAG, "Failed to update Note in Firebase: " + databaseError);
+                    firebaseDatabaseCallback.onFailure(databaseError.toString());
+                } else {
+                    firebaseDatabaseCallback.onSuccess();
+                }
+            }
+        });
+
+        // Delete Note from NoteRef.
+        deleteNote(note, new FirebaseDatabaseCallback() {
+            @Override
+            public void onSuccess() { Log.d(TAG, "Successfully deleted note from NoteRef"); }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                Log.e(TAG, errorMessage);
+            }
+        });
+    }
+
+    /**
+     * Uploads a note to the Notes-node, and removes the note from the Archive-node.
+     * @param note - The note to upload
+     * @param firebaseDatabaseCallback
+     */
+    public void unarchiveNote(Note note, final FirebaseDatabaseCallback firebaseDatabaseCallback) {
+        note.setArchived(false);
+
+        // Add Note to NoteRef.
+        getNotesRef().child(note.getId()).setValue(note, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                if(databaseError != null) {
+                    firebaseDatabaseCallback.onFailure(databaseError.toString());
+                } else {
+                    firebaseDatabaseCallback.onSuccess();
+                }
+            }
+        });
+
+        // Delete Note from ArchivedNoteRef.
+        deleteNoteFromArchive(note, new FirebaseDatabaseCallback() {
+            @Override
+            public void onSuccess() { Log.d(TAG, "Successfully deleted note from ArchivedNoteRef"); }
+
+            @Override
+            public void onFailure(String errorMessage) { Log.e(TAG, errorMessage); }
+        });
+
+    }
+
+    /**
+     * Uploads a new note to the Notes-node.
+     * @param newNote - The note to upload
+     * @param firebaseDatabaseCallback
+     */
+    public void addNote(Note newNote, final FirebaseDatabaseCallback firebaseDatabaseCallback) {
+        getNotesRef().child(newNote.getId()).setValue(newNote, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                if(databaseError != null) {
+                    Log.e(TAG, "Failed to add new note to Firebase: " + databaseError);
+                    firebaseDatabaseCallback.onFailure(databaseError.toString());
+                } else {
+                    firebaseDatabaseCallback.onSuccess();
+                }
+            }
+        });
+    }
+
+    /**
+     * Uploads an updated note to the Notes-node.
+     * @param updatedNote - The note to upload
+     * @param firebaseDatabaseCallback
+     */
+    public void updateNote(Note updatedNote, final FirebaseDatabaseCallback firebaseDatabaseCallback) {
+        getNotesRef().child(updatedNote.getId()).setValue(updatedNote, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                if(databaseError != null) {
+                    Log.e(TAG, "Failed to update Note to Firebase: " + databaseError);
+                    firebaseDatabaseCallback.onFailure(databaseError.toString());
+                } else {
+                    firebaseDatabaseCallback.onSuccess();
+                }
+            }
+        });
+    }
+
+    /**
+     * Uploads an updated note to the Archive-node.
+     * @param updatedNote - The note to upload
+     * @param firebaseDatabaseCallback
+     */
+    public void updateArchivedNote(Note updatedNote, final FirebaseDatabaseCallback firebaseDatabaseCallback) {
+        getArchivedNotesRef().child(updatedNote.getId()).setValue(updatedNote, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                if(databaseError != null) {
+                    Log.e(TAG, "Failed to update Archived Note to Firebase: " + databaseError);
+                    firebaseDatabaseCallback.onFailure(databaseError.toString());
+                } else {
+                    firebaseDatabaseCallback.onSuccess();
+                }
+            }
+        });
+    }
+
+    /**
+     * Removes a note from the Notes-node.
+     * @param noteToDelete - The note to remove
+     * @param firebaseDatabaseCallback
+     */
+    public void deleteNote(Note noteToDelete, final FirebaseDatabaseCallback firebaseDatabaseCallback) {
+        getNotesRef().child(noteToDelete.getId()).removeValue(new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                if(databaseError != null) {
+                    Log.e(TAG, "Failed to delete Note from Firebase: " + databaseError);
+                    firebaseDatabaseCallback.onFailure(databaseError.toString());
+                } else {
+                    firebaseDatabaseCallback.onSuccess();
+                }
+            }
+        });
+    }
+
+    /**
+     * Removes a note from the Archive-node.
+     * @param noteToDelete - The note to remove
+     * @param firebaseDatabaseCallback
+     */
+    public void deleteNoteFromArchive(Note noteToDelete, final FirebaseDatabaseCallback firebaseDatabaseCallback) {
+        getArchivedNotesRef().child(noteToDelete.getId()).removeValue(new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                if(databaseError != null) {
+                    Log.e(TAG, "Failed to delete Archived Note from Firebase: " + databaseError);
+                    firebaseDatabaseCallback.onFailure(databaseError.toString());
+                } else {
+                    firebaseDatabaseCallback.onSuccess();
+                }
+            }
+        });
+    }
+
+    /**
+     * Uploads a contact to the Contacts-node.
+     * @param contact - The contact to upload
+     * @param firebaseDatabaseCallback
+     */
+    public void writeContactToFirebase(Contact contact, final FirebaseDatabaseCallback firebaseDatabaseCallback) {
         getContactsRef().child(contact.getCompany().toUpperCase())
-                .child(contact.getId()).setValue(contact)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        // Successfully added new Contact.
-                        Log.d(TAG, "*** Successfully added new Contact to Firebase storage ***");
-                        callback.onSuccess();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "!!! Failed to add new Contact to Firebase storage: " + e);
-                        callback.onFailure(e.toString());
-                    }
-                });
+                .child(contact.getId()).setValue(contact, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                if(databaseError != null) {
+                    Log.e(TAG, "Failed to add new Contact to Firebase storage: " + databaseError);
+                    firebaseDatabaseCallback.onFailure(databaseError.toString());
+                } else {
+                    firebaseDatabaseCallback.onSuccess();
+                }
+            }
+        });
     }
 
-    public void deleteNote(Note noteToDelete, boolean fromArchive, final FirebaseDatabaseCallback callback) {
-        if(fromArchive){
-            getArchivedNotesRef().child(noteToDelete.getId()).removeValue()
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            // Successfully deleted the Note.
-                            Log.d(TAG, "*** Successfully deleted the Note in Firebase storage ***");
-                            callback.onSuccess();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e(TAG, "!!! Failed to delete the Note in Firebase storage: " + e);
-                            callback.onFailure(e.toString());
-                        }
-                    });
-        } else {
-            getNotesRef().child(noteToDelete.getId()).removeValue()
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            // Successfully deleted the Note.
-                            Log.d(TAG, "*** Successfully deleted the Note in Firebase storage ***");
-                            callback.onSuccess();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e(TAG, "!!! Failed to delete the Note in Firebase storage: " + e);
-                            callback.onFailure(e.toString());
-                        }
-                    });
-        }
-    }
-
-    public void deleteContact(Contact contactToDelete, final FirebaseDatabaseCallback callback) {
+    /**
+     * Removes a contact from the Contacts-node.
+     * @param contactToDelete - The contact to remove
+     * @param firebaseDatabaseCallback
+     */
+    public void deleteContact(Contact contactToDelete, final FirebaseDatabaseCallback firebaseDatabaseCallback) {
         getContactsRef().child(contactToDelete.getCompany().toUpperCase())
-                .child(contactToDelete.getId()).removeValue()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        // Successfully deleted the Contact.
-                        Log.d(TAG, "*** Successfully deleted the Contact in Firebase storage ***");
-                        callback.onSuccess();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "!!! Failed to delete the Contact in Firebase storage: " + e);
-                        callback.onFailure(e.toString());
-                    }
-                });
+                .child(contactToDelete.getId()).removeValue(new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                if(databaseError != null) {
+                    Log.e(TAG, "Failed to delete Contact from Firebase: " + databaseError);
+                    firebaseDatabaseCallback.onFailure(databaseError.toString());
+                } else {
+                    firebaseDatabaseCallback.onSuccess();
+                }
+            }
+        });
     }
 
-    public void submitFeedback(Feedback feedback, final FirebaseDatabaseCallback callback) {
-        getFeedbackRef().child(feedback.getFeedback_id()).setValue(feedback)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "*** Successfully submitted feedback to Firebase storage ***");
-                        callback.onSuccess();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "!!! Failed to submit feedback to Firebase storage: " + e);
-                        callback.onFailure(e.toString());
-                    }
-                });
+    /**
+     * Uploads a feedback to the Feedback-node.
+     * @param feedback - The feedback to upload
+     * @param firebaseDatabaseCallback
+     */
+    public void submitFeedback(Feedback feedback, final FirebaseDatabaseCallback firebaseDatabaseCallback) {
+        getFeedbackRef().child(feedback.getFeedback_id()).setValue(feedback, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                if(databaseError != null) {
+                    Log.e(TAG, "Failed to submit feedback to Firebase: " + databaseError);
+                    firebaseDatabaseCallback.onFailure(databaseError.toString());
+                } else {
+                    firebaseDatabaseCallback.onSuccess();
+                }
+            }
+        });
     }
+
+    /**
+     * Uploads a tag to the Tags-node.
+     * @param newTag - The tag to upload
+     * @param firebaseDatabaseCallback
+     */
+    public void addTag(Tag newTag, final FirebaseDatabaseCallback firebaseDatabaseCallback) {
+        getTagRef().child(newTag.getTagId()).setValue(newTag, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                if(databaseError != null) {
+                    Log.e(TAG, "Failed to add new Tag to Firebase: " + databaseError);
+                    firebaseDatabaseCallback.onFailure(databaseError.toString());
+                } else {
+                    firebaseDatabaseCallback.onSuccess();
+                }
+            }
+        });
+    }
+
 }

@@ -21,7 +21,7 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:elevation="@dimen/card_toolbar_elevation"
-            android:background="@color/noColor"/>
+            android:background="@color/tagUntagged"/>
 
         <LinearLayout
             android:id="@+id/item_note_content"

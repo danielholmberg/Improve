@@ -18,7 +18,7 @@
         <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
     </style>
 
-    <!-- [Base] Toolbar title text style -->
+    <!-- [Base] Toolbar label text style -->
     <style name="AppTheme.Base.ActivityTitle" parent="AppTheme.Base">
         <item name="android:textColor">@color/colorPrimary</item>
         <item name="android:textSize">@dimen/title_text_size</item>

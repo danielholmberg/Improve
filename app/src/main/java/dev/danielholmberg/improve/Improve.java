@@ -1,13 +1,22 @@
 package dev.danielholmberg.improve;
 
 import android.app.Application;
+import android.content.Context;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 
+import com.crashlytics.android.Crashlytics;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 
+import dev.danielholmberg.improve.Components.Tag;
 import dev.danielholmberg.improve.Fragments.ArchivedNotesFragment;
 import dev.danielholmberg.improve.Fragments.ContactsFragment;
 import dev.danielholmberg.improve.Fragments.NotesFragment;
@@ -31,6 +40,8 @@ public class Improve extends Application implements Serializable {
     private NotesFragment notesFragmentRef;
     private ContactsFragment contactsFragmentRef;
     private ArchivedNotesFragment archivedNotesFragmentRef;
+
+    private HashMap<String, Tag> tagHashMap = new HashMap<>();
 
     public static Improve getInstance() {
         // Double checks locking to prevent unnecessary sync.
@@ -66,18 +77,66 @@ public class Improve extends Application implements Serializable {
         }
     }
 
-    //Make singleton from serialize and deserialize operation.
-    protected static Improve readResolve() {
-        return getInstance();
-    }
-
+    /**
+     * Returns the Firebase authentication manager.
+     * @return - Authentication manager of Firebase
+     */
     public AuthManager getAuthManager() {
         return this.authManager;
     }
 
+    /**
+     * Returns the application specific Firebase database manager.
+     * @return - Database manager of Firebase
+     */
     public FirebaseDatabaseManager getFirebaseDatabaseManager() {
         return this.firebaseDatabaseManager;
     }
+
+    /**
+     * Returns the application specific Root directory.
+     * @return - Root directory of application
+     */
+    public File getRootDir() {
+        return this.rootDir;
+    }
+
+    // ---- Tag-specific functions ---- //
+
+    /**
+     * Sets the HashMap containing all Tags stored in Firebase.
+     * @param tagHashMap - New HashMap to replace the old one
+     */
+    public void setTagHashMap(HashMap<String,Tag> tagHashMap) {
+        this.tagHashMap = tagHashMap;
+    }
+
+    /**
+     * Returns the HashMap containing all Tags stored in Firebase.
+     * @return
+     */
+    public HashMap<String, Tag> getTagHashMap() {
+        return tagHashMap;
+    }
+
+    /**
+     * Returns the Tag with incoming tag-id.
+     * @param tagId - The id of the Tag to return
+     * @return
+     */
+    public Tag getTag(String tagId) {
+        return tagHashMap.get(tagId);
+    }
+
+    /**
+     * Adds a Tag to the HashMap.
+     * @param tag - The Tag to add
+     */
+    public void addTagToList(Tag tag) {
+        this.tagHashMap.put(tag.getTagId(), tag);
+    }
+
+    // ---- Fragment references to use with Snackbar context ---- //
 
     public void setNotesFragmentRef(NotesFragment notesFragmentRef) {
         this.notesFragmentRef = notesFragmentRef;
@@ -86,7 +145,7 @@ public class Improve extends Application implements Serializable {
     public NotesFragment getNotesFragmentRef() {
         return this.notesFragmentRef;
     }
-    
+
     public void setContactFragmentRef(ContactsFragment contactFragmentRef) {
         this.contactsFragmentRef = contactFragmentRef;
     }
@@ -103,7 +162,4 @@ public class Improve extends Application implements Serializable {
         return this.archivedNotesFragmentRef;
     }
 
-    public File getRootDir() {
-        return this.rootDir;
-    }
 }

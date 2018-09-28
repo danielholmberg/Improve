@@ -1,24 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group
-        android:id="@+id/top"
-        android:checkableBehavior="single">
+        android:id="@+id/notes_group"
+        android:checkableBehavior="single"
+        android:orderInCategory="1">
         <item
             android:id="@+id/nav_notes"
             android:icon="@drawable/ic_menu_notes_white"
             android:checked="true"
             android:title="@string/nav_notes" />
+    </group>
+    <group
+        android:id="@+id/archived_notes_group"
+        android:checkableBehavior="single"
+        android:orderInCategory="996">
         <item
             android:id="@+id/nav_archived_notes"
             android:icon="@drawable/ic_menu_archive_white"
             android:title="@string/nav_archived_notes" />
+    </group>
+    <group
+        android:id="@+id/contacts_group"
+        android:checkableBehavior="single"
+        android:orderInCategory="997">
         <item
             android:id="@+id/nav_contacts"
             android:icon="@drawable/ic_menu_contacts_white"
             android:title="@string/nav_contacts" />
     </group>
 
-    <group>
+    <group
+        android:id="@+id/extras_group"
+        android:checkableBehavior="single"
+        android:orderInCategory="998">
         <item
             android:id="@+id/nav_feedback"
             android:icon="@drawable/ic_menu_feedback_white"
@@ -26,7 +40,9 @@
     </group>
 
     <group
-        android:id="@+id/bottom">
+        android:id="@+id/sign_out_group"
+        android:checkableBehavior="single"
+        android:orderInCategory="999">
         <item
             android:id="@+id/nav_sign_out"
             android:icon="@drawable/ic_menu_sign_out_white"

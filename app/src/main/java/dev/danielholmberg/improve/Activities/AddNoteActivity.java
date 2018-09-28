@@ -1,9 +1,11 @@
 package dev.danielholmberg.improve.Activities;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
@@ -11,15 +13,25 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
+import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.Random;
+
+import dev.danielholmberg.improve.Adapters.TagColorListAdapter;
 import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback;
 import dev.danielholmberg.improve.Components.Note;
+import dev.danielholmberg.improve.Components.Tag;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 import dev.danielholmberg.improve.R;
@@ -29,21 +41,24 @@ import dev.danielholmberg.improve.Utilities.NoteInputValidator;
  * Created by DanielHolmberg on 2018-01-27.
  */
 
-public class AddNoteActivity extends AppCompatActivity implements View.OnClickListener {
+public class AddNoteActivity extends AppCompatActivity {
     private static final String TAG = AddNoteActivity.class.getSimpleName();
 
     private Improve app;
-    private FirebaseDatabaseManager storageManager;
+    private FirebaseDatabaseManager databaseManager;
+    private Context context;
     private NoteInputValidator validator;
 
-    private int markerColor;
-    private Drawable colorPaletteIcon;
+    private ArrayList<Tag> tagList = new ArrayList<>();
+    private int tagColorInt;
+    private Tag selectedTag;
     private TextInputEditText inputTitle, inputInfo;
 
     private Toolbar toolbar;
     private View inputLayout;
+    private MenuItem noteTagMenuItem;
 
-    private AlertDialog colorPickerDialog;
+    private Tag untaggedTag;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,14 +66,15 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         setContentView(R.layout.activity_add_note);
 
         app = Improve.getInstance();
-        storageManager = app.getFirebaseDatabaseManager();
+        databaseManager = app.getFirebaseDatabaseManager();
+        context = this;
 
         toolbar = (Toolbar) findViewById(R.id.toolbar_add_note);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
+        retrieveTagList();
 
         inputLayout = (View) findViewById(R.id.input_layout);
         inputTitle = (TextInputEditText) findViewById(R.id.input_title);
@@ -72,22 +88,98 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.fragment_note_details_edit, menu);
-        colorPaletteIcon = menu.findItem(R.id.chooseMarkerColor).getIcon();
-        colorPaletteIcon.setTint(markerColor);
+        getMenuInflater().inflate(R.menu.menu_add_note, menu);
         return true;
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        invalidateOptionsMenu();
+
+        this.noteTagMenuItem = menu.findItem(R.id.noteTag);
+        Menu tagMenu = noteTagMenuItem.getSubMenu();
+
+        Random r = new Random();
+        for(final Tag tag: tagList) {
+            MenuItem tagMenuItem = tagMenu.add(
+                    R.id.group_tag_list,
+                    r.nextInt(),
+                    0,
+                    tag.getLabel()
+            );
+            tagMenuItem.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_NEVER);
+            setTagIconColor(tagMenuItem, tag.getColorInt());
+
+            tagMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem menuItem) {
+                    selectedTag = tag;
+                    setTagIconColor(noteTagMenuItem, selectedTag.getColorInt());
+                    return true;
+                }
+            });
+        }
+
+        if(selectedTag != null) {
+            setTagIconColor(noteTagMenuItem, selectedTag.getColorInt());
+        } else {
+            noteTagMenuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_untagged));
+        }
+
+        menu.findItem(R.id.tag_untagged).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                selectedTag = untaggedTag;
+                setTagIconColor(noteTagMenuItem, selectedTag.getColorInt());
+                return true;
+            }
+        });
+
+        return true;
+    }
+
+    private void setTagIconColor(MenuItem menuItem, int colorInt) {
+        switch (colorInt) {
+            case R.color.tagRed:
+                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_red));
+                break;
+            case R.color.tagPurple:
+                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_purple));
+                break;
+            case R.color.tagBlue:
+                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_blue));
+                break;
+            case R.color.tagDarkOrange:
+                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_orange));
+                break;
+            case R.color.tagBlueGrey:
+                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_blue_grey));
+                break;
+            case R.color.tagBabyBlue:
+                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_baby_blue));
+                break;
+            case R.color.tagDarkGrey:
+                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_dark_grey));
+                break;
+            case R.color.tagGreen:
+                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_green));
+                break;
+            case R.color.tagUntagged:
+                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_untagged));
+                break;
+            default:
+                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_untagged));
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
                 return true;
-            case R.id.chooseMarkerColor:
-                chooseMarkerColor();
+            case R.id.add_new_tag:
+                showAddNewTagDialog();
                 return true;
             case R.id.noteDone:
                 if(validator.formIsValid()) {
@@ -99,71 +191,135 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
-    private void chooseMarkerColor() {
-        LinearLayout colorPickerLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.color_picker, null, false);
+    public void retrieveTagList() {
+        untaggedTag = new Tag(
+                "Untagged",
+                getResources().getString(R.string.menu_tag_untagged),
+                "#" + Integer.toHexString(getResources().getColor(R.color.tagUntagged)),
+                R.color.tagUntagged
+        );
 
-        // First row
-        colorPickerLayout.findViewById(R.id.buttonColorGreen).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorLightGreen).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorAmber).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorDeepOrange).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorBrown).setOnClickListener(this);
+        // Set default tag selected to Untagged.
+        selectedTag = untaggedTag;
 
-        // Second row
-        colorPickerLayout.findViewById(R.id.buttonColorBlueGrey).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorTurquoise).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorPink).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorDeepPurple).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorDarkGrey).setOnClickListener(this);
+        databaseManager.getTagRef().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                tagList = new ArrayList<>();
 
-        // Third row
-        colorPickerLayout.findViewById(R.id.buttonColorRed).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorPurple).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorBlue).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorDarkOrange).setOnClickListener(this);
-        colorPickerLayout.findViewById(R.id.buttonColorBabyBlue).setOnClickListener(this);
+                for(DataSnapshot tagSnapshot: dataSnapshot.getChildren()) {
+                    Tag tag = tagSnapshot.getValue(Tag.class);
 
-        AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(this).setTitle(R.string.choose_marker_color_note_title)
-                        .setMessage(R.string.choose_marker_color_note_msg)
-                        .setCancelable(true)
-                        .setView(colorPickerLayout).setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.dismiss();
-                            }
-                        });
-        colorPickerDialog = alertDialogBuilder.create();
-        colorPickerDialog.show();
+                    if (tag != null) {
+                        if(!tag.getTagId().equals("Untagged")) {
+                            tagList.add(tag);
+                            invalidateOptionsMenu();
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {}
+        });
+    }
+
+    private void showAddNewTagDialog() {
+        View addDialogView = getLayoutInflater().inflate(R.layout.dialog_tag, null, false);
+
+        final EditText labelEditText = (EditText) addDialogView.findViewById(R.id.tag_label_et);
+        Spinner tagColorSpinner = (Spinner) addDialogView.findViewById(R.id.tag_color_spinner);
+
+        final TagColorListAdapter adapter = new TagColorListAdapter(this);
+        tagColorSpinner.setAdapter(adapter);
+        tagColorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                tagColorInt = getResources().getColor(adapter.tagColors[position]);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                tagColorInt = getResources().getColor(adapter.tagColors[0]);
+            }
+        });
+
+        final AlertDialog addNewTagDialog = new AlertDialog.Builder(context)
+                .setView(addDialogView)
+                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // Dummy
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                })
+                .create();
+        addNewTagDialog.show();
+        addNewTagDialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        final String tagId = databaseManager.getTagRef().push().getKey();
+                        String label = labelEditText.getText().toString().toUpperCase();
+                        String colorHex = "#" + Integer.toHexString(tagColorInt);
+                        int colorInt = tagColorInt;
+
+                        if(!label.isEmpty()) {
+                            final Tag newTag = new Tag(tagId, label, colorHex, colorInt);
+                            databaseManager.addTag(newTag, new FirebaseDatabaseCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    selectedTag = newTag;
+                                    invalidateOptionsMenu();
+                                }
+
+                                @Override
+                                public void onFailure(String errorMessage) {
+                                    if (tagId != null) {
+                                        databaseManager.getTagRef().child(tagId).removeValue();
+                                    }
+                                    Toast.makeText(context, "Failed to add new Tag, please try again", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            addNewTagDialog.dismiss();
+                        } else {
+                            labelEditText.setError("Please enter a label");
+                            labelEditText.requestFocus();
+                        }
+                    }
+                });
     }
 
     public void addNote(){
-        String id = storageManager.getNotesRef().push().getKey();
+        String id = databaseManager.getNotesRef().push().getKey();
         String title = inputTitle.getText().toString();
         String info = inputInfo.getText().toString();
-        String color = "#" + Integer.toHexString(markerColor);
         String timestampAdded = Long.toString(System.currentTimeMillis());
 
         if(TextUtils.isEmpty(info)) {
             info = "";
         }
 
-        Note newNote = new Note(id, title, info, color, timestampAdded);
+        Note newNote = new Note(id, title, info, timestampAdded, selectedTag.getTagId());
         newNote.setTimestampUpdated(timestampAdded);
 
-        storageManager.writeNoteToFirebase(newNote, false, new FirebaseDatabaseCallback() {
+        databaseManager.addNote(newNote, new FirebaseDatabaseCallback() {
 
             @Override
-            public void onSuccess() {}
+            public void onSuccess() {
+                showParentActivity();
+            }
 
             @Override
             public void onFailure(String errorMessage) {
                 Toast.makeText(app, "Failed to add new note, please try again", Toast.LENGTH_SHORT).show();
             }
         });
-
-        showParentActivity();
-
     }
 
     private void showParentActivity() {
@@ -176,77 +332,6 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         inputTitle.getText().clear();
         inputInfo.getText().clear();
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-    }
-
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.buttonColorGreen:
-                markerColor = getResources().getColor(R.color.colorPickerGreen);
-                colorPaletteIcon.setTint(markerColor);
-                break;
-            case R.id.buttonColorLightGreen:
-                markerColor = getResources().getColor(R.color.colorPickerLightGreen);
-                colorPaletteIcon.setTint(markerColor);
-                break;
-            case R.id.buttonColorAmber:
-                markerColor = getResources().getColor(R.color.colorPickerAmber);
-                colorPaletteIcon.setTint(markerColor);
-                break;
-            case R.id.buttonColorDeepOrange:
-                markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
-                colorPaletteIcon.setTint(markerColor);
-                break;
-            case R.id.buttonColorBrown:
-                markerColor = getResources().getColor(R.color.colorPickerBrown);
-                colorPaletteIcon.setTint(markerColor);
-                break;
-            case R.id.buttonColorBlueGrey:
-                markerColor = getResources().getColor(R.color.colorPickerBlueGrey);
-                colorPaletteIcon.setTint(markerColor);
-                break;
-            case R.id.buttonColorTurquoise:
-                markerColor = getResources().getColor(R.color.colorPickerTurquoise);
-                colorPaletteIcon.setTint(markerColor);
-                break;
-            case R.id.buttonColorPink:
-                markerColor = getResources().getColor(R.color.colorPickerPink);
-                colorPaletteIcon.setTint(markerColor);
-                break;
-            case R.id.buttonColorDeepPurple:
-                markerColor = getResources().getColor(R.color.colorPickerDeepPurple);
-                colorPaletteIcon.setTint(markerColor);
-                break;
-            case R.id.buttonColorDarkGrey:
-                markerColor = getResources().getColor(R.color.colorPickerDarkGrey);
-                colorPaletteIcon.setTint(markerColor);
-                break;
-            case R.id.buttonColorRed:
-                markerColor = getResources().getColor(R.color.colorPickerRed);
-                colorPaletteIcon.setTint(markerColor);
-                break;
-            case R.id.buttonColorPurple:
-                markerColor = getResources().getColor(R.color.colorPickerPurple);
-                colorPaletteIcon.setTint(markerColor);
-                break;
-            case R.id.buttonColorBlue:
-                markerColor = getResources().getColor(R.color.colorPickerBlue);
-                colorPaletteIcon.setTint(markerColor);
-                break;
-            case R.id.buttonColorDarkOrange:
-                markerColor = getResources().getColor(R.color.colorPickerDarkOrange);
-                colorPaletteIcon.setTint(markerColor);
-                break;
-            case R.id.buttonColorBabyBlue:
-                markerColor = getResources().getColor(R.color.colorPickerBabyBlue);
-                colorPaletteIcon.setTint(markerColor);
-                break;
-            default:
-                markerColor = getResources().getColor(R.color.colorPickerDeepOrange);
-                colorPaletteIcon.setTint(markerColor);
-                break;
-        }
-        colorPickerDialog.dismiss();
     }
 
     @Override

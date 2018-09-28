@@ -77,7 +77,7 @@ public class AuthManager {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "!!! Failed to sign in to Firebase with chosen Google account:" + e);
-                        Crashlytics.log("Failed to Sign in Google-user: " + e.toString());
+                        // Crashlytics.log("Failed to Sign in Google-user: " + e.toString());
                         callback.onFailure(e.toString());
                     }
                 });
@@ -102,7 +102,7 @@ public class AuthManager {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "!!! Failed to sign in to Firebase with chosen Google account:" + e.toString());
-                        Crashlytics.log("Failed to Sign in Google-user: " + e.toString());
+                        // Crashlytics.log("Failed to Sign in Google-user: " + e.toString());
                         callback.onFailure(e.toString());
                     }
                 });
@@ -147,7 +147,7 @@ public class AuthManager {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e(TAG,"Listener was cancelled at .info/connected: " + error);
-                Crashlytics.log("Failed to SetUserPresence: " + error.toString());
+                // Crashlytics.log("Failed to SetUserPresence: " + error.toString());
             }
         });
         callback.onSuccess();
@@ -173,7 +173,8 @@ public class AuthManager {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Crashlytics.log("Failed to Sign out Google-user: " + e.toString());
+                        Log.e(TAG, "Failed to Sign out Google-user: " + e);
+                        // Crashlytics.log("Failed to Sign out Google-user: " + e.toString());
                         callback.onFailure(e.toString());
                     }
                 });
@@ -200,7 +201,8 @@ public class AuthManager {
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Crashlytics.log("Failed to Link with Credential: " + e.toString());
+                        Log.e(TAG, "Failed to Link with Credential: " + e);
+                        // Crashlytics.log("Failed to Link with Credential: " + e.toString());
                         callback.onFailure(e.toString());
                     }
                 });

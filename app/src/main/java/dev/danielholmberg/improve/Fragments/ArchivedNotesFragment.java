@@ -29,6 +29,7 @@ import java.text.DateFormat;
 import java.util.Calendar;
 
 import dev.danielholmberg.improve.Components.Note;
+import dev.danielholmberg.improve.Components.Tag;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 import dev.danielholmberg.improve.R;
@@ -41,7 +42,7 @@ public class ArchivedNotesFragment extends Fragment {
     private static final String TAG = ArchivedNotesFragment.class.getSimpleName();
 
     private Improve app;
-    private FirebaseDatabaseManager storageManager;
+    private FirebaseDatabaseManager databaseManager;
 
     private View view;
     private RecyclerView archivedNotesRecyclerView;
@@ -59,7 +60,7 @@ public class ArchivedNotesFragment extends Fragment {
         super.onCreate(savedInstanceState);
         app = Improve.getInstance();
         app.setArchivedNotesFragmentRef(this);
-        storageManager = app.getFirebaseDatabaseManager();
+        databaseManager = app.getFirebaseDatabaseManager();
         setHasOptionsMenu(true);
     }
 
@@ -87,7 +88,7 @@ public class ArchivedNotesFragment extends Fragment {
     }
 
     private void setUpAdapter() {
-        Query query = storageManager.getArchivedNotesRef().orderByChild(noteListOrderBy);
+        Query query = databaseManager.getArchivedNotesRef().orderByChild(noteListOrderBy);
 
         query.addValueEventListener(new ValueEventListener() {
             @Override
@@ -146,7 +147,7 @@ public class ArchivedNotesFragment extends Fragment {
             case R.id.sort_notes_by_timestamp_updated:
                 sortNotesByLastUpdated();
                 return true;
-            case R.id.sort_notes_by_marker:
+            case R.id.filter_notes_by_tag:
                 sortNotesByMarker();
                 return true;
             default:
@@ -204,12 +205,32 @@ public class ArchivedNotesFragment extends Fragment {
             this.note = note;
 
             // [START] All views of a contact
-            LinearLayout marker = (LinearLayout) mView.findViewById(R.id.item_archived_note_marker);
+            final LinearLayout marker = (LinearLayout) mView.findViewById(R.id.item_archived_note_marker);
             TextView title = (TextView) mView.findViewById(R.id.item_archived_note_title_tv);
             // [END] All views of a note
 
             // [START] Define each view
-            marker.setBackgroundColor(Color.parseColor(note.getColor()));
+            if(note.getTagId() != null) {
+                // Retrieve tag-details
+                databaseManager.getTagRef().child(note.getTagId()).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        Tag tag = dataSnapshot.getValue(Tag.class);
+
+                        // Assert marker color with the retrieved tag-information.
+                        if(tag != null && tag.getColorHex() != null) {
+                            marker.setBackgroundColor(Color.parseColor(tag.getColorHex()));
+                        } else {
+                            marker.setBackgroundColor(getResources().getColor(R.color.tagUntagged));
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        marker.setBackgroundColor(getResources().getColor(R.color.tagUntagged));
+                    }
+                });
+            }
             title.setText(note.getTitle());
             // [END] Define each view
 
@@ -226,11 +247,6 @@ public class ArchivedNotesFragment extends Fragment {
             NoteDetailsDialogFragment noteDetailsDialogFragment = NoteDetailsDialogFragment.newInstance();
             noteDetailsDialogFragment.setContext(context);
             noteDetailsDialogFragment.setArguments(createBundle(note, getAdapterPosition()));
-
-            /*
-            // SETS the target fragment for use later when sending results
-            noteDetailsDialogFragment.setTargetFragment(NotesFragment.this, 300);
-            */
 
             noteDetailsDialogFragment.show(fm, NoteDetailsDialogFragment.TAG);
         }

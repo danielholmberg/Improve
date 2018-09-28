@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -46,7 +47,7 @@ public class ContactsFragment extends Fragment{
     private static final String TAG = ContactsFragment.class.getSimpleName();
 
     private Improve app;
-    private FirebaseDatabaseManager storageManager;
+    private FirebaseDatabaseManager databaseManager;
 
     private View view;
     private RecyclerView contactsRecyclerView;
@@ -65,7 +66,7 @@ public class ContactsFragment extends Fragment{
         super.onCreate(savedInstanceState);
         app = Improve.getInstance();
         app.setContactFragmentRef(this);
-        storageManager = app.getFirebaseDatabaseManager();
+        databaseManager = app.getFirebaseDatabaseManager();
         // Enable the OptionsMenu to show the SearchView.
         setHasOptionsMenu(true);
         COMPANIES = new ArrayList<String>();
@@ -119,9 +120,9 @@ public class ContactsFragment extends Fragment{
     }
 
     private void setUpAdapter() {
-        storageManager.getContactsRef().addValueEventListener(new ValueEventListener() {
+        databaseManager.getContactsRef().addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 final List<Company> companies = new ArrayList<>();
 
                 // For Each Company.
@@ -136,16 +137,16 @@ public class ContactsFragment extends Fragment{
                         final String contactKey = contactRef.getKey();
 
                         // Retrieve the Contact-values for corresponding ContactKey.
-                        storageManager.getContactsRef().child(company.getKey()).child(contactKey)
+                        databaseManager.getContactsRef().child(company.getKey()).child(contactKey)
                                 .addValueEventListener(new ValueEventListener() {
                                     @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                         final Contact contact = dataSnapshot.getValue(Contact.class);
                                         companyContacts.add(contact);
                                     }
 
                                     @Override
-                                    public void onCancelled(DatabaseError databaseError) {
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
                                         Log.e(TAG, "Failed to read Contact values. " + databaseError.toString());
                                     }
                                 });
@@ -252,14 +253,12 @@ public class ContactsFragment extends Fragment{
     public class CompanyGroupViewHolder extends GroupViewHolder {
 
         private View mView;
-        private Context context;
 
         private TextView companyName;
 
         public CompanyGroupViewHolder(View companyView) {
             super(companyView);
             mView = companyView;
-            context = companyView.getContext();
         }
 
         public void bindModelToView(final Company company) {

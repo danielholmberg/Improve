@@ -5,5 +5,5 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:elevation="@dimen/card_toolbar_elevation"
-    android:background="@color/colorPickerDeepOrange"
+    android:background="@color/tagUntagged"
     xmlns:android="http://schemas.android.com/apk/res/android" />
