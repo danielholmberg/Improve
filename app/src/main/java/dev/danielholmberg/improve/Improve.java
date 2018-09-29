@@ -41,8 +41,6 @@ public class Improve extends Application implements Serializable {
     private ContactsFragment contactsFragmentRef;
     private ArchivedNotesFragment archivedNotesFragmentRef;
 
-    private HashMap<String, Tag> tagHashMap = new HashMap<>();
-
     public static Improve getInstance() {
         // Double checks locking to prevent unnecessary sync.
         if (sImproveInstance == null) {
@@ -99,41 +97,6 @@ public class Improve extends Application implements Serializable {
      */
     public File getRootDir() {
         return this.rootDir;
-    }
-
-    // ---- Tag-specific functions ---- //
-
-    /**
-     * Sets the HashMap containing all Tags stored in Firebase.
-     * @param tagHashMap - New HashMap to replace the old one
-     */
-    public void setTagHashMap(HashMap<String,Tag> tagHashMap) {
-        this.tagHashMap = tagHashMap;
-    }
-
-    /**
-     * Returns the HashMap containing all Tags stored in Firebase.
-     * @return
-     */
-    public HashMap<String, Tag> getTagHashMap() {
-        return tagHashMap;
-    }
-
-    /**
-     * Returns the Tag with incoming tag-id.
-     * @param tagId - The id of the Tag to return
-     * @return
-     */
-    public Tag getTag(String tagId) {
-        return tagHashMap.get(tagId);
-    }
-
-    /**
-     * Adds a Tag to the HashMap.
-     * @param tag - The Tag to add
-     */
-    public void addTagToList(Tag tag) {
-        this.tagHashMap.put(tag.getTagId(), tag);
     }
 
     // ---- Fragment references to use with Snackbar context ---- //

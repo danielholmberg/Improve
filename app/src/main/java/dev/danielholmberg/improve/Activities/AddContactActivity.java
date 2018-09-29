@@ -36,7 +36,7 @@ public class AddContactActivity extends AppCompatActivity {
     private static final String CONTACT_KEY = "contact";
 
     private Improve app;
-    private FirebaseDatabaseManager storageManager;
+    private FirebaseDatabaseManager databaseManager;
     private ContactInputValidator validator;
 
     private Contact contact;
@@ -57,8 +57,13 @@ public class AddContactActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_contact);
 
         app = Improve.getInstance();
-        storageManager = app.getFirebaseDatabaseManager();
+        databaseManager = app.getFirebaseDatabaseManager();
 
+        initActivity();
+
+    }
+
+    private void initActivity() {
         toolbar = (Toolbar) findViewById(R.id.toolbar_add_contact);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -95,7 +100,6 @@ public class AddContactActivity extends AppCompatActivity {
         }
 
         validator = new ContactInputValidator(this, inputLayout);
-
     }
 
     @Override
@@ -127,7 +131,7 @@ public class AddContactActivity extends AppCompatActivity {
     }
 
     public void addContact(){
-        String id = storageManager.getContactsRef().push().getKey();
+        String id = databaseManager.getContactsRef().push().getKey();
         final String name = inputName.getText().toString();
         String company = inputCompany.getText().toString().toUpperCase();
         String email = inputEmail.getText().toString().trim();
@@ -142,7 +146,7 @@ public class AddContactActivity extends AppCompatActivity {
         Contact newContact = new Contact(id, name, company, email, phone, comment, timestampAdded);
         newContact.setTimestampUpdated(timestampAdded);
 
-        storageManager.writeContactToFirebase(newContact, new FirebaseDatabaseCallback() {
+        databaseManager.addContact(newContact, new FirebaseDatabaseCallback() {
             @Override
             public void onSuccess() {}
 
@@ -169,18 +173,10 @@ public class AddContactActivity extends AppCompatActivity {
         final Contact updatedContact = new Contact(id, name, company, email, phone, comment, timestampAdded);
         updatedContact.setTimestampUpdated(timestampUpdated);
 
-        storageManager.deleteContact(contact, new FirebaseDatabaseCallback() {
+        databaseManager.updateContact(contact, updatedContact, new FirebaseDatabaseCallback() {
             @Override
             public void onSuccess() {
-                storageManager.writeContactToFirebase(updatedContact, new FirebaseDatabaseCallback() {
-                    @Override
-                    public void onSuccess() {}
-
-                    @Override
-                    public void onFailure(String errorMessage) {
-                        Toast.makeText(app,"Failed to update contact", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                Toast.makeText(app,"Contact updated", Toast.LENGTH_SHORT).show();
             }
 
             @Override

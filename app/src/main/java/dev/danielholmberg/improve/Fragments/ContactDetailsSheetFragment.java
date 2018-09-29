@@ -322,7 +322,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
                             .setAction("UNDO", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    storageManager.writeContactToFirebase(contact, new FirebaseDatabaseCallback() {
+                                    storageManager.addContact(contact, new FirebaseDatabaseCallback() {
                                         @Override
                                         public void onSuccess() {
                                             Log.d(TAG, "*** Successfully undid 'Delete contact' ***");

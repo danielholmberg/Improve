@@ -119,9 +119,9 @@ public class NoteDetailsDialogFragment extends DialogFragment {
             note = (Note) noteBundle.getSerializable(NOTE_KEY);
 
             if (note != null) {
-                selectedTag = app.getTag(note.getTagId());
+                selectedTag = databaseManager.getTag(note.getTagId());
                 if(selectedTag == null) {
-                    selectedTag = app.getTag("Untagged");
+                    selectedTag = databaseManager.getTag("Untagged");
                 }
             } else {
                 Toast.makeText(context, "Failed to show Note details, please try again",
@@ -249,7 +249,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
             // Add all current Tags to the Group in Sub-menu.
             Random r = new Random();
-            for(Map.Entry<String, Tag> tagEntry: app.getTagHashMap().entrySet()) {
+            for(Map.Entry<String, Tag> tagEntry: databaseManager.getTagHashMap().entrySet()) {
                 final Tag tag = tagEntry.getValue();
 
                 // Create new MenuItem related to the specified Tag.
@@ -284,7 +284,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                         selectedTag = tag;
                     }
                 } else {
-                    selectedTag = app.getTag("Untagged");
+                    selectedTag = databaseManager.getTag("Untagged");
                 }
             }
 
@@ -446,7 +446,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                                 }
                             });
 
-                            app.addTagToList(newTag);
+                            databaseManager.addTagToList(newTag);
 
                             selectedTag = newTag;
                             note.setTagId(selectedTag.getTagId());
@@ -499,7 +499,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         inputInfo.setText(noteInfo);
 
         if(note.getTagId() != null) {
-            Tag tag = app.getTag(note.getTagId());
+            Tag tag = databaseManager.getTag(note.getTagId());
 
             if(tag != null) {
                 tagColor = tag.getColorHex();

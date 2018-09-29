@@ -121,7 +121,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
                 } catch (ApiException e) {
                     // Google Sign In failed, update UI appropriately
                     Log.e(TAG, "!!! Google sign in failed: " + e);
-                    Crashlytics.log("Google sign in failed: " + e.toString());
+                    // Crashlytics.log("Google sign in failed: " + e.toString());
 
                     Toast.makeText(getApplicationContext(), "Google sign in failed", Toast.LENGTH_SHORT).show();
                     progressBar.setVisibility(View.GONE);

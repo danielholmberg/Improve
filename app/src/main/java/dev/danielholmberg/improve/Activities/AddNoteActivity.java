@@ -69,6 +69,10 @@ public class AddNoteActivity extends AppCompatActivity {
         databaseManager = app.getFirebaseDatabaseManager();
         context = this;
 
+        initActivity();
+    }
+
+    private void initActivity() {
         toolbar = (Toolbar) findViewById(R.id.toolbar_add_note);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
