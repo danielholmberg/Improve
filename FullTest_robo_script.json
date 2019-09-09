@@ -106,7 +106,7 @@
     "canScrollTo": true,
     "elementDescriptors": [
       {
-        "className": "android.support.design.widget.TextInputEditText",
+        "className": "com.google.android.material.textfield.TextInputEditText",
         "recyclerViewChildPosition": -1,
         "adapterViewChildPosition": -1,
         "groupViewChildPosition": 0,

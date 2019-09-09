@@ -23,11 +23,14 @@
         android:title="@string/menu_note_archive"
         android:icon="@drawable/ic_menu_archive_primary"
         app:showAsAction="ifRoom" />
+    <!--
     <item
         android:id="@+id/noteExport"
-        android:title="@string/menu_note_export_file"
-        android:icon="@drawable/ic_menu_export_file_primary"
+        android:title="@string/menu_note_google_drive"
+        android:icon="@drawable/ic_menu_google_drive_primary"
+        android:enabled="false"
         app:showAsAction="ifRoom" />
+    -->
     <item
         android:id="@+id/noteInfo"
         android:title="@string/menu_note_info"

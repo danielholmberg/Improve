@@ -3,39 +3,45 @@ package dev.danielholmberg.improve.Activities;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputEditText;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.Nullable;
+
+import com.google.android.flexbox.AlignItems;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexWrap;
+import com.google.android.flexbox.FlexboxLayout;
+import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.flexbox.JustifyContent;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.Toast;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.HashMap;
 
-import dev.danielholmberg.improve.Adapters.TagColorListAdapter;
-import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback;
-import dev.danielholmberg.improve.Components.Note;
-import dev.danielholmberg.improve.Components.Tag;
+import dev.danielholmberg.improve.Adapters.TagsAdapter;
+import dev.danielholmberg.improve.Models.Note;
+import dev.danielholmberg.improve.Models.Tag;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Utilities.NoteInputValidator;
+import dev.danielholmberg.improve.ViewHolders.TagViewHolder;
 
 /**
  * Created by DanielHolmberg on 2018-01-27.
@@ -49,16 +55,16 @@ public class AddNoteActivity extends AppCompatActivity {
     private Context context;
     private NoteInputValidator validator;
 
-    private ArrayList<Tag> tagList = new ArrayList<>();
-    private int tagColorInt;
-    private Tag selectedTag;
+    private Note newNote;
+    private String newTagColor;
+    private ImageButton noTagColor, tagColor1, tagColor2, tagColor3, tagColor4, tagColor5, tagColor6, tagColor7, tagColor8;
+    private ArrayList<String> newTags;
+
     private TextInputEditText inputTitle, inputInfo;
+    private FlexboxLayout tagsList;
 
     private Toolbar toolbar;
-    private View inputLayout;
-    private MenuItem noteTagMenuItem;
-
-    private Tag untaggedTag;
+    private TagsAdapter tagsAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -78,111 +84,41 @@ public class AddNoteActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        retrieveTagList();
+        TextInputLayout inputTitleLayout = (TextInputLayout) findViewById(R.id.input_title_layout);
+        TextInputLayout inputInfoLayout = (TextInputLayout) findViewById(R.id.input_info_layout);
 
-        inputLayout = (View) findViewById(R.id.input_layout);
+        tagsList = (FlexboxLayout) findViewById(R.id.footer_note_tags_list);
+
         inputTitle = (TextInputEditText) findViewById(R.id.input_title);
         inputInfo = (TextInputEditText) findViewById(R.id.input_info);
 
         inputTitle.requestFocus();
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
-        validator = new NoteInputValidator(this, inputLayout);
+        validator = new NoteInputValidator(this, inputTitleLayout);
+
+        tagsAdapter = app.getTagsAdapter();
+        newTagColor = "#" + Integer.toHexString(app.getResources().getColor(R.color.tagColorNull));
+
+        String id = databaseManager.getNotesRef().push().getKey();
+        newNote = new Note(id);
+        newTags = new ArrayList<>();
+
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_add_note, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        invalidateOptionsMenu();
-
-        this.noteTagMenuItem = menu.findItem(R.id.noteTag);
-        Menu tagMenu = noteTagMenuItem.getSubMenu();
-
-        Random r = new Random();
-        for(final Tag tag: tagList) {
-            MenuItem tagMenuItem = tagMenu.add(
-                    R.id.group_tag_list,
-                    r.nextInt(),
-                    0,
-                    tag.getLabel()
-            );
-            tagMenuItem.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_NEVER);
-            setTagIconColor(tagMenuItem, tag.getColorInt());
-
-            tagMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem menuItem) {
-                    selectedTag = tag;
-                    setTagIconColor(noteTagMenuItem, selectedTag.getColorInt());
-                    return true;
-                }
-            });
-        }
-
-        if(selectedTag != null) {
-            setTagIconColor(noteTagMenuItem, selectedTag.getColorInt());
-        } else {
-            noteTagMenuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_untagged));
-        }
-
-        menu.findItem(R.id.tag_untagged).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                selectedTag = untaggedTag;
-                setTagIconColor(noteTagMenuItem, selectedTag.getColorInt());
-                return true;
-            }
-        });
-
-        return true;
-    }
-
-    private void setTagIconColor(MenuItem menuItem, int colorInt) {
-        switch (colorInt) {
-            case R.color.tagRed:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_red));
-                break;
-            case R.color.tagPurple:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_purple));
-                break;
-            case R.color.tagBlue:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_blue));
-                break;
-            case R.color.tagDarkOrange:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_orange));
-                break;
-            case R.color.tagBlueGrey:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_blue_grey));
-                break;
-            case R.color.tagBabyBlue:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_baby_blue));
-                break;
-            case R.color.tagDarkGrey:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_dark_grey));
-                break;
-            case R.color.tagGreen:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_green));
-                break;
-            case R.color.tagUntagged:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_untagged));
-                break;
-            default:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_untagged));
-        }
+        getMenuInflater().inflate(R.menu.menu_edit_note, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                onBackPressed();
+                showDiscardChangesDialog();
                 return true;
-            case R.id.add_new_tag:
+            case R.id.addTag:
                 showAddNewTagDialog();
                 return true;
             case R.id.noteDone:
@@ -195,135 +131,276 @@ public class AddNoteActivity extends AppCompatActivity {
         }
     }
 
-    public void retrieveTagList() {
-        untaggedTag = new Tag(
-                "Untagged",
-                getResources().getString(R.string.menu_tag_untagged),
-                "#" + Integer.toHexString(getResources().getColor(R.color.tagUntagged)),
-                R.color.tagUntagged
-        );
-
-        // Set default tag selected to Untagged.
-        selectedTag = untaggedTag;
-
-        databaseManager.getTagRef().addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                tagList = new ArrayList<>();
-
-                for(DataSnapshot tagSnapshot: dataSnapshot.getChildren()) {
-                    Tag tag = tagSnapshot.getValue(Tag.class);
-
-                    if (tag != null) {
-                        if(!tag.getTagId().equals("Untagged")) {
-                            tagList.add(tag);
-                            invalidateOptionsMenu();
-                        }
+    private void showDiscardChangesDialog() {
+        AlertDialog.Builder alertDialogBuilder =
+                new AlertDialog.Builder(context)
+                        .setMessage(R.string.dialog_discard_changes_msg)
+                        .setPositiveButton("Discard", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                                onBackPressed();
+                            }
+                        }).setNegativeButton("Keep editing", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
                     }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {}
-        });
+                });
+        final AlertDialog dialog = alertDialogBuilder.create();
+        dialog.show();
     }
 
+    /**
+     * Displays a dialog window to the user in order to choose a Tag color and enter a new Tag label.
+     * Adds the new Tag to Firebase.
+     */
     private void showAddNewTagDialog() {
-        View addDialogView = getLayoutInflater().inflate(R.layout.dialog_tag, null, false);
+        View addDialogView = getLayoutInflater().inflate(R.layout.dialog_add_tag, null, false);
 
-        final EditText labelEditText = (EditText) addDialogView.findViewById(R.id.tag_label_et);
-        Spinner tagColorSpinner = (Spinner) addDialogView.findViewById(R.id.tag_color_spinner);
+        final TextInputEditText labelEditText = (TextInputEditText) addDialogView.findViewById(R.id.tag_label_et);
+        final ImageButton createTagButton = (ImageButton) addDialogView.findViewById(R.id.create_tag_btn);
+        final RecyclerView existingTagsListView = (RecyclerView) addDialogView.findViewById(R.id.existing_tags_list);
+        final TextView labelCounterCurrent = (TextView) addDialogView.findViewById(R.id.tag_label_counter_current);
 
-        final TagColorListAdapter adapter = new TagColorListAdapter(this);
-        tagColorSpinner.setAdapter(adapter);
-        tagColorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        noTagColor = (ImageButton) addDialogView.findViewById(R.id.tag_no_color);
+        tagColor1 = (ImageButton) addDialogView.findViewById(R.id.tag_color_1);
+        tagColor2 = (ImageButton) addDialogView.findViewById(R.id.tag_color_2);
+        tagColor3 = (ImageButton) addDialogView.findViewById(R.id.tag_color_3);
+        tagColor4 = (ImageButton) addDialogView.findViewById(R.id.tag_color_4);
+        tagColor5 = (ImageButton) addDialogView.findViewById(R.id.tag_color_5);
+        tagColor6 = (ImageButton) addDialogView.findViewById(R.id.tag_color_6);
+        tagColor7 = (ImageButton) addDialogView.findViewById(R.id.tag_color_7);
+        tagColor8 = (ImageButton) addDialogView.findViewById(R.id.tag_color_8);
+
+        existingTagsListView.setHasFixedSize(false);
+        final FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(context);
+        layoutManager.setFlexDirection(FlexDirection.ROW);
+        layoutManager.setJustifyContent(JustifyContent.CENTER);
+        layoutManager.setAlignItems(AlignItems.STRETCH);
+        layoutManager.setFlexWrap(FlexWrap.WRAP);
+        existingTagsListView.setLayoutManager(layoutManager);
+        existingTagsListView.setAdapter(app.getTagsAdapter());
+
+        labelCounterCurrent.setText("0");
+        labelEditText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                tagColorInt = getResources().getColor(adapter.tagColors[position]);
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                tagColorInt = getResources().getColor(adapter.tagColors[0]);
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                labelCounterCurrent.setText(String.valueOf(charSequence.length()));
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
             }
         });
 
+        tagsAdapter.setCurrentNote(newNote);
+
         final AlertDialog addNewTagDialog = new AlertDialog.Builder(context)
+                .setTitle(R.string.menu_tag_add)
                 .setView(addDialogView)
-                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                .setCancelable(false)
+                .setNeutralButton("Edit Tags", null)
+                .setPositiveButton("Done", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        // Dummy
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.cancel();
+                        tagsAdapter.removeCurrentNote();
+                        tagsAdapter.setEditMode(false);
+                        renderTagList();
+                        dialogInterface.dismiss();
                     }
                 })
                 .create();
         addNewTagDialog.show();
-        addNewTagDialog.getButton(DialogInterface.BUTTON_POSITIVE)
-                .setOnClickListener(new View.OnClickListener() {
+
+        addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final View.OnClickListener listener = this;
+                tagsAdapter.setEditMode(true);
+                renderTagList();
+                addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setText("Stop Edit");
+                addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        final String tagId = databaseManager.getTagRef().push().getKey();
-                        String label = labelEditText.getText().toString().toUpperCase();
-                        String colorHex = "#" + Integer.toHexString(tagColorInt);
-                        int colorInt = tagColorInt;
-
-                        if(!label.isEmpty()) {
-                            final Tag newTag = new Tag(tagId, label, colorHex, colorInt);
-                            databaseManager.addTag(newTag, new FirebaseDatabaseCallback() {
-                                @Override
-                                public void onSuccess() {
-                                    selectedTag = newTag;
-                                    invalidateOptionsMenu();
-                                }
-
-                                @Override
-                                public void onFailure(String errorMessage) {
-                                    if (tagId != null) {
-                                        databaseManager.getTagRef().child(tagId).removeValue();
-                                    }
-                                    Toast.makeText(context, "Failed to add new Tag, please try again", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                            addNewTagDialog.dismiss();
-                        } else {
-                            labelEditText.setError("Please enter a label");
-                            labelEditText.requestFocus();
-                        }
+                        tagsAdapter.setEditMode(false);
+                        renderTagList();
+                        addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setText("Edit Tags");
+                        addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(listener);
                     }
                 });
+            }
+        });
+
+        createTagButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(TextUtils.isEmpty(labelEditText.getText())) {
+                    labelEditText.setError(getString(R.string.err_msg_tag_label));
+                    return;
+                }
+
+                final String newTagId = databaseManager.getTagRef().push().getKey();
+                final Tag newTag = new Tag(newTagId);
+
+                newTag.setLabel(labelEditText.getText().toString());
+                newTag.setColor(newTagColor);
+                if(newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColorNull)))) {
+                    newTag.setTextColor("#" + Integer.toHexString(getResources().getColor(R.color.tagTextColorNull)));
+                } else {
+                    newTag.setTextColor("#" + Integer.toHexString(getResources().getColor(R.color.tagTextColor)));
+                }
+
+                databaseManager.addTag(newTag);
+                tagsAdapter.addTag(newTag);
+
+                newNote.addTag(newTag.getId());
+
+                renderTagList();
+
+                // Reset
+                if(labelEditText.getText() != null) labelEditText.getText().clear();
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColorNull));
+                uncheckAllOtherTags();
+
+                layoutManager.scrollToPosition(tagsAdapter.getItemCount()-1);
+            }
+        });
+
+        noTagColor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColorNull));
+                uncheckAllOtherTags();
+            }
+        });
+        tagColor1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor1));
+                tagColor1.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_1_checked));
+                uncheckAllOtherTags();
+            }
+        });
+        tagColor2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor2));
+                tagColor2.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_2_checked));
+                uncheckAllOtherTags();
+            }
+        });
+        tagColor3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor3));
+                tagColor3.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_3_checked));
+                uncheckAllOtherTags();
+            }
+        });
+        tagColor4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor4));
+                tagColor4.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_4_checked));
+                uncheckAllOtherTags();
+            }
+        });
+        tagColor5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor5));
+                tagColor5.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_5_checked));
+                uncheckAllOtherTags();
+            }
+        });
+        tagColor6.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor6));
+                tagColor6.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_6_checked));
+                uncheckAllOtherTags();
+            }
+        });
+        tagColor7.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor7));
+                tagColor7.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_7_checked));
+                uncheckAllOtherTags();
+            }
+        });
+        tagColor8.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor8));
+                tagColor8.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_8_checked));
+                uncheckAllOtherTags();
+            }
+        });
+    }
+
+    private void uncheckAllOtherTags() {
+        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor1)))) {
+            tagColor1.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_1));
+        }
+        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor2)))) {
+            tagColor2.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_2));
+        }
+        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor3)))) {
+            tagColor3.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_3));
+        }
+        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor4)))) {
+            tagColor4.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_4));
+        }
+        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor5)))) {
+            tagColor5.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_5));
+        }
+        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor6)))) {
+            tagColor6.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_6));
+        }
+        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor7)))) {
+            tagColor7.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_7));
+        }
+        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor8)))) {
+            tagColor8.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_8));
+        }
+    }
+
+    private void renderTagList() {
+        tagsList.removeAllViews();
+        for(String tagId: newNote.getTags().keySet()) {
+            View tagView = LayoutInflater.from(context).inflate(R.layout.item_tag, tagsList, false);
+            TagViewHolder tagViewHolder = new TagViewHolder(tagView);
+            tagViewHolder.bindModelToView(Improve.getInstance().getTagsAdapter().getTag(tagId));
+            tagsList.addView(tagView);
+        }
     }
 
     public void addNote(){
-        String id = databaseManager.getNotesRef().push().getKey();
-        String title = inputTitle.getText().toString();
-        String info = inputInfo.getText().toString();
+        String title = inputTitle.getText() == null ? "" : inputTitle.getText().toString();
+        String info = inputInfo.getText() == null ? "" : inputInfo.getText().toString();
         String timestampAdded = Long.toString(System.currentTimeMillis());
 
         if(TextUtils.isEmpty(info)) {
             info = "";
         }
 
-        Note newNote = new Note(id, title, info, timestampAdded, selectedTag.getTagId());
-        newNote.setTimestampUpdated(timestampAdded);
+        newNote.setTitle(title);
+        newNote.setInfo(info);
+        newNote.setArchived(false);
+        newNote.setAdded(timestampAdded);
+        newNote.setUpdated(timestampAdded);
 
-        databaseManager.addNote(newNote, new FirebaseDatabaseCallback() {
+        databaseManager.addNote(newNote);
 
-            @Override
-            public void onSuccess() {
-                showParentActivity();
-            }
-
-            @Override
-            public void onFailure(String errorMessage) {
-                Toast.makeText(app, "Failed to add new note, please try again", Toast.LENGTH_SHORT).show();
-            }
-        });
+        showParentActivity();
     }
 
     private void showParentActivity() {
@@ -333,8 +410,8 @@ public class AddNoteActivity extends AppCompatActivity {
     }
 
     private void restUI(){
-        inputTitle.getText().clear();
-        inputInfo.getText().clear();
+        if(inputTitle.getText() != null) inputTitle.getText().clear();
+        if(inputInfo.getText() != null) inputInfo.getText().clear();
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
@@ -342,4 +419,23 @@ public class AddNoteActivity extends AppCompatActivity {
     public void onBackPressed() {
         showParentActivity();
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Re-add newly created (and therefore added) Tags from Note.
+        for (String tagId : newTags) {
+            newNote.addTag(tagId);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Remove newly created (and therefore added) Tags from Note.
+        for(String tagId: newTags) {
+            newNote.removeTag(tagId);
+        }
+    }
+
 }

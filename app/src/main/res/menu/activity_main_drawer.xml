@@ -9,11 +9,6 @@
             android:icon="@drawable/ic_menu_notes_white"
             android:checked="true"
             android:title="@string/nav_notes" />
-    </group>
-    <group
-        android:id="@+id/archived_notes_group"
-        android:checkableBehavior="single"
-        android:orderInCategory="996">
         <item
             android:id="@+id/nav_archived_notes"
             android:icon="@drawable/ic_menu_archive_white"
@@ -37,6 +32,10 @@
             android:id="@+id/nav_feedback"
             android:icon="@drawable/ic_menu_feedback_white"
             android:title="@string/nav_feedback"/>
+        <item
+            android:id="@+id/nav_privacy_policy"
+            android:icon="@drawable/ic_menu_privacy_policy_white"
+            android:title="@string/nav_privacy_policy"/>
     </group>
 
     <group

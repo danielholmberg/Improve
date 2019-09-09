@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/add_note_layout"
@@ -12,54 +12,89 @@
 
     <include
         android:id="@+id/include_toolbar_add_note"
-        layout="@layout/app_bar_add_note" />
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/input_layout"
+        layout="@layout/app_bar_add_note"
+        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingBottom="@dimen/note_form_padding"
-        android:paddingStart="@dimen/note_form_padding"
-        android:paddingEnd="@dimen/note_form_padding"
-        app:hintEnabled="false">
+        android:layout_alignParentTop="true"/>
 
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/input_title"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:background="@null"
-            android:paddingTop="8dp"
-            android:textStyle="bold"
-            android:textColor="@color/note_title_text_color"
-            android:maxLength="@integer/note_title_max_length"
-            android:inputType="textCapWords|textMultiLine"
-            android:hint="@string/hint_title"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+    <RelativeLayout
+        android:id="@+id/note_details_body_container"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_below="@id/include_toolbar_add_note"
+        android:layout_above="@id/footer_note">
 
-        <ScrollView
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/input_title_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:scrollbars="vertical"
-            android:scrollbarStyle="outsideOverlay"
-            android:overScrollMode="never"
-            android:requiresFadingEdge="vertical"
-            android:fadingEdgeLength="32dp">
+            android:paddingStart="@dimen/padding_input_note_title"
+            android:paddingEnd="@dimen/padding_input_note_title"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            app:counterEnabled="true"
+            app:counterMaxLength="@integer/note_title_max_length"
+            app:hintEnabled="false">
 
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/input_info"
-                android:layout_width="match_parent"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/input_title"
                 android:layout_height="wrap_content"
+                android:layout_width="match_parent"
                 android:background="@null"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:gravity="top"
-                android:inputType="textCapSentences|textMultiLine"
-                android:textColor="@color/note_info_text_color"
-                android:hint="@string/hint_info"/>
+                android:textStyle="bold"
+                android:textColor="@color/note_title_text_color"
+                android:maxLength="@integer/note_title_max_length"
+                android:inputType="textCapWords|textMultiLine|textNoSuggestions"
+                android:hint="@string/hint_title"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
 
-        </ScrollView>
+        </com.google.android.material.textfield.TextInputLayout>
 
-    </android.support.design.widget.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/input_info_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/input_title_layout"
+            android:paddingStart="@dimen/padding_input_note_info"
+            android:paddingEnd="@dimen/padding_input_note_info">
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:scrollbars="vertical"
+                android:scrollbarStyle="outsideOverlay"
+                android:overScrollMode="never"
+                android:requiresFadingEdge="vertical"
+                android:fadingEdgeLength="32dp">
 
-</LinearLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/input_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:gravity="top"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:textColor="@color/note_info_text_color"
+                    android:hint="@string/hint_info"/>
+
+            </ScrollView>
+        </com.google.android.material.textfield.TextInputLayout>
+    </RelativeLayout>
+
+    <include
+        android:id="@+id/footer_note"
+        layout="@layout/footer_item_note"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/footer_note_margin"
+        android:layout_marginEnd="@dimen/footer_note_margin"
+        android:layout_marginBottom="@dimen/footer_note_margin"
+        android:layout_above="@id/bottom_stone"/>
+
+    <View
+        android:id="@+id/bottom_stone"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true"/>
+
+</RelativeLayout>

@@ -5,56 +5,59 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.google.android.flexbox.AlignItems;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexWrap;
+import com.google.android.flexbox.FlexboxLayout;
+import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.flexbox.JustifyContent;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
+
+import androidx.fragment.app.DialogFragment;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
-
-import java.io.File;
-import java.io.FileWriter;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.Objects;
-import java.util.Random;
 
-import dev.danielholmberg.improve.Adapters.TagColorListAdapter;
-import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback;
-import dev.danielholmberg.improve.Components.Note;
-import dev.danielholmberg.improve.Components.Tag;
+import dev.danielholmberg.improve.Adapters.TagsAdapter;
+import dev.danielholmberg.improve.Models.Note;
+import dev.danielholmberg.improve.Models.Tag;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Utilities.NoteInputValidator;
+import dev.danielholmberg.improve.ViewHolders.TagViewHolder;
 
 public class NoteDetailsDialogFragment extends DialogFragment {
     public static final String TAG = NoteDetailsDialogFragment.class.getSimpleName();
@@ -70,11 +73,8 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
     private Context context;
     private AppCompatActivity activity;
-    private View view;
 
     private Toolbar toolbar;
-    private LinearLayout boarderMarker;
-    private int markerColor;
 
     private Bundle noteBundle;
     private Note note;
@@ -84,25 +84,20 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
     private boolean editMode = false;
 
-    private View targetView;
+    private String newTagColor;
+    private ImageButton noTagColor, tagColor1, tagColor2, tagColor3, tagColor4, tagColor5, tagColor6, tagColor7, tagColor8;
+    private ArrayList<String> newTags;
+    private HashMap<String, Boolean> oldTags;
 
-    private Tag selectedTag;
-    private int tagColorInt;
-
-    // **** [START] EditMode variables ****
-
-    private View inputLayout;
     private NoteInputValidator validator;
 
+    private TextInputLayout inputTitleLayout, inputInfoLayout;
     private EditText inputTitle, inputInfo;
-    private String noteId, noteTitle, tagColor, noteInfo, noteTimestampAdded, noteTimestampUpdated;
+    private FlexboxLayout tagsList;
+    private String noteId, noteTitle, noteInfo, noteTimestampAdded, noteTimestampUpdated;
 
     public static NoteDetailsDialogFragment newInstance() {
         return new NoteDetailsDialogFragment();
-    }
-
-    public void setContext(Context context) {
-        this.context = context;
     }
 
     @Override
@@ -111,23 +106,13 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         app = Improve.getInstance();
         databaseManager = app.getFirebaseDatabaseManager();
         activity = (AppCompatActivity) getActivity();
+        context = app.getMainActivityRef();
 
         noteBundle = getArguments();
 
         if(noteBundle != null) {
             parentFragment = noteBundle.getInt(NOTE_PARENT_FRAGMENT_KEY);
-            note = (Note) noteBundle.getSerializable(NOTE_KEY);
-
-            if (note != null) {
-                selectedTag = databaseManager.getTag(note.getTagId());
-                if(selectedTag == null) {
-                    selectedTag = databaseManager.getTag("Untagged");
-                }
-            } else {
-                Toast.makeText(context, "Failed to show Note details, please try again",
-                        Toast.LENGTH_SHORT).show();
-                dismissDialog();
-            }
+            note = (Note) noteBundle.getParcelable(NOTE_KEY);
         } else {
             Toast.makeText(context, "Failed to show Note details, please try again",
                     Toast.LENGTH_SHORT).show();
@@ -139,7 +124,18 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_note_details, container);
+        View view = inflater.inflate(R.layout.fragment_note_details, container);
+        setCancelable(false);
+
+        newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColorNull));
+
+        // Set transparent background and no title to enable corner radius.
+        if (getDialog() != null && getDialog().getWindow() != null) {
+            getDialog().getWindow().setBackgroundDrawableResource(R.drawable.background_note_details);
+            getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        }
+
+        return view;
     }
 
     @Override
@@ -150,12 +146,13 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                 .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         toolbar = (Toolbar) view.findViewById(R.id.toolbar_note_details_fragment);
+        createOptionsMenu();
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if(editMode) {
                     switch (item.getItemId()) {
-                        case R.id.add_new_tag:
+                        case R.id.addTag:
                             showAddNewTagDialog();
                             return true;
                         case R.id.noteDone:
@@ -182,11 +179,9 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                             return true;
                         case R.id.noteEdit:
                             editMode = true;
+                            newTags = new ArrayList<>();
                             createOptionsMenu();
                             toggleMode(editMode);
-                            return true;
-                        case R.id.noteExport:
-                            checkWritePermission();
                             return true;
                         default:
                             return true;
@@ -194,23 +189,22 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                 }
             }
         });
-        createOptionsMenu();
 
-        inputLayout = (TextInputLayout) view.findViewById(R.id.input_layout);
+        inputTitleLayout = (TextInputLayout) view.findViewById(R.id.input_title_layout);
+        inputInfoLayout = (TextInputLayout) view.findViewById(R.id.input_info_layout);
 
-        inputTitle = (TextInputEditText) view.findViewById(R.id.input_title);
-        inputInfo = (TextInputEditText) view.findViewById(R.id.input_info);
+        inputTitle = (EditText) inputTitleLayout.findViewById(R.id.input_title);
+        inputInfo = (EditText) inputInfoLayout.findViewById(R.id.input_info);
 
-        validator = new NoteInputValidator(context, inputLayout);
+        tagsList = (FlexboxLayout) view.findViewById(R.id.footer_note_tags_list);
+
+        validator = new NoteInputValidator(context, inputTitleLayout);
 
         toggleMode(editMode);
 
-        boarderMarker = (LinearLayout) view.findViewById(R.id.note_details_layout);
-        markerColor = getResources().getColor(R.color.tagUntagged);
-        boarderMarker.setBackgroundColor(markerColor);
-
         if(note != null) {
             populateNoteDetails();
+            oldTags = new HashMap<String, Boolean>(note.getTags());
         } else {
             Toast.makeText(context, "Unable to show Note details", Toast.LENGTH_SHORT).show();
             dismissDialog();
@@ -225,15 +219,16 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     }
 
     private void createOptionsMenu() {
-        toolbar.getMenu().clear();
+        Log.d(TAG, "Menu is redrawn");
+        TextView menuTitle = ((TextView) toolbar.findViewById(R.id.toolbar_note_dialog_title_tv));
+        Menu menu = toolbar.getMenu();
+        menu.clear();
 
         // Check (if)Edit or (else)Show.
         if(editMode) {
 
-            // Set the corresponding Menu to the Toolbar.
-            ((TextView) toolbar.findViewById(R.id.toolbar_note_activity_title_tv)).setText(R.string.title_edit_note);
+            menuTitle.setText(R.string.title_edit_note);
             toolbar.inflateMenu(R.menu.menu_edit_note);
-
             toolbar.findViewById(R.id.close_dialog_btn).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -241,65 +236,9 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                 }
             });
 
-            // Configure menu-option "Tag"
-            final MenuItem noteTagMenuItem = toolbar.getMenu().findItem(R.id.noteTag);
-
-            // Get Sub-menu which also contains the Group to show current Tags.
-            Menu tagMenu = noteTagMenuItem.getSubMenu();
-
-            // Add all current Tags to the Group in Sub-menu.
-            Random r = new Random();
-            for(Map.Entry<String, Tag> tagEntry: databaseManager.getTagHashMap().entrySet()) {
-                final Tag tag = tagEntry.getValue();
-
-                // Create new MenuItem related to the specified Tag.
-                MenuItem tagMenuItem = tagMenu.add(
-                        R.id.group_tag_list,
-                        r.nextInt(),
-                        0,
-                        tag.getLabel()
-                ).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_NEVER);
-
-                // Set the correct Tag-drawable to the color of the specified Tag.
-                setTagIconColor(tagMenuItem, tag.getColorInt());
-
-                // Add MenuItem-clickListener to detect when a user chooses this specific Tag.
-                tagMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        // Set the selected Tag to current specified Tag.
-                        selectedTag = tag;
-                        // Change the Tag-drawable related to the newly chosen Tag.
-                        setTagIconColor(noteTagMenuItem, selectedTag.getColorInt());
-                        // Change the boarder marker color to the color of selected Tag.
-                        boarderMarker.setBackgroundColor(getResources().getColor(selectedTag.getColorInt()));
-                        return true;
-                    }
-                });
-
-                // Set the default selected Tag to be the Notes' existing Tag
-                // if the Note already has an assigned Tag.
-                if(note.getTagId() != null) {
-                    if(note.getTagId().equals(tag.getTagId())){
-                        selectedTag = tag;
-                    }
-                } else {
-                    selectedTag = databaseManager.getTag("Untagged");
-                }
-            }
-
-            // If the Note already has an existing Tag
-            // --> Set the correct Tag-drawable to the color of the existing Tag.
-            if(note.getTagId() != null) {
-                setTagIconColor(noteTagMenuItem, selectedTag.getColorInt());
-            } else {
-                noteTagMenuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_untagged));
-            }
-
         } else {
 
-            // Set the corresponding Menu to the Toolbar.
-            ((TextView) toolbar.findViewById(R.id.toolbar_note_activity_title_tv)).setText(R.string.note_activity_details);
+            menuTitle.setText(R.string.note_activity_details);
             toolbar.inflateMenu(R.menu.fragment_note_details_show);
             toolbar.findViewById(R.id.close_dialog_btn).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -311,11 +250,11 @@ public class NoteDetailsDialogFragment extends DialogFragment {
             // Depending on the parent fragment.
             // Change MenuItem "Archive" and "Unarchive".
             if(parentFragment == R.integer.NOTES_FRAGMENT) {
-                toolbar.getMenu().findItem(R.id.noteArchive).setVisible(true);
-                toolbar.getMenu().findItem(R.id.noteUnarchive).setVisible(false);
+                menu.findItem(R.id.noteArchive).setVisible(true);
+                menu.findItem(R.id.noteUnarchive).setVisible(false);
             } else if(parentFragment == R.integer.ARCHIVED_NOTES_FRAGMENT){
-                toolbar.getMenu().findItem(R.id.noteUnarchive).setVisible(true);
-                toolbar.getMenu().findItem(R.id.noteArchive).setVisible(false);
+                menu.findItem(R.id.noteUnarchive).setVisible(true);
+                menu.findItem(R.id.noteArchive).setVisible(false);
             }
         }
     }
@@ -329,8 +268,11 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 editMode = false;
                                 toggleMode(editMode);
-                                populateNoteDetails();
                                 createOptionsMenu();
+
+                                note.setTags(oldTags);
+
+                                populateNoteDetails();
                                 dialogInterface.dismiss();
                             }
                         }).setNegativeButton("Keep editing", new DialogInterface.OnClickListener() {
@@ -344,123 +286,233 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     }
 
     /**
-     * Sets the drawable of the MenuItem depending on the resource color integer.
-     * @param menuItem - Tag MenuItem
-     * @param colorInt - Tag color
-     */
-    private void setTagIconColor(MenuItem menuItem, int colorInt) {
-        switch (colorInt) {
-            case R.color.tagRed:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_red));
-                break;
-            case R.color.tagPurple:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_purple));
-                break;
-            case R.color.tagBlue:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_blue));
-                break;
-            case R.color.tagDarkOrange:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_orange));
-                break;
-            case R.color.tagBlueGrey:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_blue_grey));
-                break;
-            case R.color.tagBabyBlue:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_baby_blue));
-                break;
-            case R.color.tagDarkGrey:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_dark_grey));
-                break;
-            case R.color.tagGreen:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_green));
-                break;
-            case R.color.tagUntagged:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_untagged));
-                break;
-            default:
-                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_menu_tag_untagged));
-        }
-    }
-
-    /**
      * Displays a dialog window to the user in order to choose a Tag color and enter a new Tag label.
      * Adds the new Tag to Firebase.
      */
     private void showAddNewTagDialog() {
-        View addDialogView = getLayoutInflater().inflate(R.layout.dialog_tag, null, false);
+        View addDialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_tag, null, false);
 
-        final EditText labelEditText = (EditText) addDialogView.findViewById(R.id.tag_label_et);
-        Spinner tagColorSpinner = (Spinner) addDialogView.findViewById(R.id.tag_color_spinner);
+        final TextInputEditText labelEditText = (TextInputEditText) addDialogView.findViewById(R.id.tag_label_et);
+        final ImageButton createTagButton = (ImageButton) addDialogView.findViewById(R.id.create_tag_btn);
+        final RecyclerView existingTagsListView = (RecyclerView) addDialogView.findViewById(R.id.existing_tags_list);
+        final TextView labelCounterCurrent = (TextView) addDialogView.findViewById(R.id.tag_label_counter_current);
 
-        final TagColorListAdapter adapter = new TagColorListAdapter(context);
-        tagColorSpinner.setAdapter(adapter);
-        tagColorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        noTagColor = (ImageButton) addDialogView.findViewById(R.id.tag_no_color);
+        tagColor1 = (ImageButton) addDialogView.findViewById(R.id.tag_color_1);
+        tagColor2 = (ImageButton) addDialogView.findViewById(R.id.tag_color_2);
+        tagColor3 = (ImageButton) addDialogView.findViewById(R.id.tag_color_3);
+        tagColor4 = (ImageButton) addDialogView.findViewById(R.id.tag_color_4);
+        tagColor5 = (ImageButton) addDialogView.findViewById(R.id.tag_color_5);
+        tagColor6 = (ImageButton) addDialogView.findViewById(R.id.tag_color_6);
+        tagColor7 = (ImageButton) addDialogView.findViewById(R.id.tag_color_7);
+        tagColor8 = (ImageButton) addDialogView.findViewById(R.id.tag_color_8);
+
+        existingTagsListView.setHasFixedSize(false);
+        final FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(context);
+        layoutManager.setFlexDirection(FlexDirection.ROW);
+        layoutManager.setJustifyContent(JustifyContent.CENTER);
+        layoutManager.setAlignItems(AlignItems.STRETCH);
+        layoutManager.setFlexWrap(FlexWrap.WRAP);
+        existingTagsListView.setLayoutManager(layoutManager);
+
+        final TagsAdapter tagsAdapter = app.getTagsAdapter();
+        existingTagsListView.setAdapter(tagsAdapter);
+
+        labelCounterCurrent.setText("0");
+        labelEditText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-                tagColorInt = adapter.tagColors[position];
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                tagColorInt = adapter.tagColors[0];
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                labelCounterCurrent.setText(String.valueOf(charSequence.length()));
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
             }
         });
 
+        tagsAdapter.setCurrentNote(note);
+
         final AlertDialog addNewTagDialog = new AlertDialog.Builder(context)
+                .setTitle(R.string.menu_tag_add)
                 .setView(addDialogView)
-                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                .setCancelable(false)
+                .setNeutralButton("Edit Tags", null)
+                .setPositiveButton("Done", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        // Dummy
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.cancel();
+                        tagsAdapter.removeCurrentNote();
+                        tagsAdapter.setEditMode(false);
+                        renderTagList();
+                        dialogInterface.dismiss();
                     }
                 })
                 .create();
         addNewTagDialog.show();
-        addNewTagDialog.getButton(DialogInterface.BUTTON_POSITIVE)
-                .setOnClickListener(new View.OnClickListener() {
+
+        addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final View.OnClickListener listener = this;
+                tagsAdapter.setEditMode(true);
+                renderTagList();
+                addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setText("Stop Edit");
+                addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        final String tagId = databaseManager.getTagRef().push().getKey();
-                        String label = labelEditText.getText().toString().toUpperCase();
-                        String colorHex = "#" + Integer.toHexString(getResources().getColor(tagColorInt));
-                        int colorInt = tagColorInt;
-
-                        if(!label.isEmpty()) {
-                            final Tag newTag = new Tag(tagId, label, colorHex, colorInt);
-                            databaseManager.addTag(newTag, new FirebaseDatabaseCallback() {
-                                @Override
-                                public void onSuccess() {}
-
-                                @Override
-                                public void onFailure(String errorMessage) {
-                                    if (tagId != null) {
-                                        databaseManager.getTagRef().child(tagId).removeValue();
-                                    }
-                                    Toast.makeText(context, "Failed to add new Tag, please try again", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-
-                            databaseManager.addTagToList(newTag);
-
-                            selectedTag = newTag;
-                            note.setTagId(selectedTag.getTagId());
-                            populateNoteDetails();
-                            createOptionsMenu();
-                            boarderMarker.setBackgroundColor(getResources().getColor(selectedTag.getColorInt()));
-
-                            addNewTagDialog.dismiss();
-                        } else {
-                            labelEditText.setError("Please enter a label");
-                            labelEditText.requestFocus();
-                        }
+                        tagsAdapter.setEditMode(false);
+                        renderTagList();
+                        addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setText("Edit Tags");
+                        addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(listener);
                     }
                 });
+            }
+        });
+
+        Objects.requireNonNull(addNewTagDialog.getWindow()).setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
+        createTagButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(TextUtils.isEmpty(labelEditText.getText())) {
+                    labelEditText.setError(getString(R.string.err_msg_tag_label));
+                    return;
+                }
+
+                final String newTagId = databaseManager.getTagRef().push().getKey();
+                final Tag newTag = new Tag(newTagId);
+
+                newTag.setLabel(labelEditText.getText().toString());
+                newTag.setColor(newTagColor);
+                if(newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColorNull)))) {
+                    newTag.setTextColor("#" + Integer.toHexString(getResources().getColor(R.color.tagTextColorNull)));
+                } else {
+                    newTag.setTextColor("#" + Integer.toHexString(getResources().getColor(R.color.tagTextColor)));
+                }
+
+                databaseManager.addTag(newTag);
+                tagsAdapter.addTag(newTag);
+
+                note.addTag(newTag.getId());
+                newTags.add(newTag.getId());
+
+                // Only update the List of Tags to keep all other edited information in check.
+                renderTagList();
+
+                // Reset
+                if(labelEditText.getText() != null) labelEditText.getText().clear();
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColorNull));
+                uncheckAllOtherTags();
+
+                // Display the latest added Tag
+                layoutManager.scrollToPosition(tagsAdapter.getItemCount()-1);
+            }
+        });
+
+        noTagColor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColorNull));
+                uncheckAllOtherTags();
+            }
+        });
+        tagColor1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor1));
+                tagColor1.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_1_checked));
+                uncheckAllOtherTags();
+            }
+        });
+        tagColor2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor2));
+                tagColor2.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_2_checked));
+                uncheckAllOtherTags();
+            }
+        });
+        tagColor3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor3));
+                tagColor3.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_3_checked));
+                uncheckAllOtherTags();
+            }
+        });
+        tagColor4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor4));
+                tagColor4.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_4_checked));
+                uncheckAllOtherTags();
+            }
+        });
+        tagColor5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor5));
+                tagColor5.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_5_checked));
+                uncheckAllOtherTags();
+            }
+        });
+        tagColor6.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor6));
+                tagColor6.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_6_checked));
+                uncheckAllOtherTags();
+            }
+        });
+        tagColor7.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor7));
+                tagColor7.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_7_checked));
+                uncheckAllOtherTags();
+            }
+        });
+        tagColor8.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor8));
+                tagColor8.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_8_checked));
+                uncheckAllOtherTags();
+            }
+        });
+    }
+
+    private void uncheckAllOtherTags() {
+        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor1)))) {
+            tagColor1.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_1));
+        }
+        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor2)))) {
+            tagColor2.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_2));
+        }
+        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor3)))) {
+            tagColor3.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_3));
+        }
+        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor4)))) {
+            tagColor4.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_4));
+        }
+        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor5)))) {
+            tagColor5.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_5));
+        }
+        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor6)))) {
+            tagColor6.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_6));
+        }
+        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor7)))) {
+            tagColor7.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_7));
+        }
+        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor8)))) {
+            tagColor8.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_8));
+        }
     }
 
     /**
@@ -468,6 +520,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
      * @param editMode - True; Edit, False; Show
      */
     private void toggleMode(boolean editMode) {
+        inputTitleLayout.setCounterEnabled(editMode);
         inputTitle.setEnabled(editMode);
         inputInfo.setEnabled(editMode);
 
@@ -492,35 +545,37 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         noteId = note.getId();
         noteTitle = note.getTitle();
         noteInfo = note.getInfo();
-        noteTimestampAdded = tranformMillisToDateSring(Long.parseLong(note.getTimestampAdded()));
-        noteTimestampUpdated = tranformMillisToDateSring(Long.parseLong(note.getTimestampUpdated()));
 
-        inputTitle.setText(noteTitle);
-        inputInfo.setText(noteInfo);
-
-        if(note.getTagId() != null) {
-            Tag tag = databaseManager.getTag(note.getTagId());
-
-            if(tag != null) {
-                tagColor = tag.getColorHex();
-                boarderMarker.setBackgroundColor(Color.parseColor(tagColor));
-                markerColor = getResources().getColor(tag.getColorInt());
-            } else {
-                tagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagUntagged));
-                boarderMarker.setBackgroundColor(getResources().getColor(R.color.tagUntagged));
-                markerColor = getResources().getColor(R.color.tagUntagged);
-            }
-
-        } else {
-            tagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagUntagged));
-            boarderMarker.setBackgroundColor(getResources().getColor(R.color.tagUntagged));
-            markerColor = getResources().getColor(R.color.tagUntagged);
+        if(note.getAdded() != null) {
+            noteTimestampAdded = tranformMillisToDateSring(Long.parseLong(note.getAdded()));
+        }
+        if(note.getUpdated() != null) {
+            noteTimestampUpdated = tranformMillisToDateSring(Long.parseLong(note.getUpdated()));
+        }
+        if(note.getTitle() != null) {
+            inputTitle.setText(noteTitle);
+        }
+        if(note.getInfo() != null) {
+            inputInfo.setText(noteInfo);
         }
 
         if(TextUtils.isEmpty(noteInfo)) {
             inputInfo.setVisibility(View.GONE);
         } else {
             inputInfo.setVisibility(View.VISIBLE);
+        }
+
+        renderTagList();
+
+    }
+
+    private void renderTagList() {
+        tagsList.removeAllViews();
+        for(String tagId: note.getTags().keySet()) {
+            View tagView = LayoutInflater.from(context).inflate(R.layout.item_tag, tagsList, false);
+            TagViewHolder tagViewHolder = new TagViewHolder(tagView);
+            tagViewHolder.bindModelToView(Improve.getInstance().getTagsAdapter().getTag(tagId));
+            tagsList.addView(tagView);
         }
     }
 
@@ -532,15 +587,12 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     }
 
     private void showInfoDialog() {
-        LinearLayout noteInfoLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.dialog_note_info, null);
+        RelativeLayout noteInfoLayout = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.dialog_note_info, null);
         TextView noteAddedTimestamp = noteInfoLayout.findViewById(R.id.note_info_added_timestamp_tv);
         TextView noteUpdatedTimestamp = noteInfoLayout.findViewById(R.id.note_info_updated_timestamp_tv);
 
-        String added = "Added: " + noteTimestampAdded;
-        String updated = "Last updated: " + noteTimestampUpdated;
-
-        noteAddedTimestamp.setText(added);
-        noteUpdatedTimestamp.setText(updated);
+        noteAddedTimestamp.setText(noteTimestampAdded);
+        noteUpdatedTimestamp.setText(noteTimestampUpdated);
 
         AlertDialog.Builder alertDialogBuilder =
                 new AlertDialog.Builder(context).setTitle(R.string.dialog_info_note_title)
@@ -556,35 +608,9 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         dialog.show();
     }
 
-    private void exportNoteToFile(Note note) {
-        try{
-            File notesRoot = new File(app.getRootDir(), EXPORTED_NOTE_DIRECTORY_PATH);
-            if(!notesRoot.exists()) {
-                notesRoot.mkdirs();
-            }
-
-            final File noteFile = new File(notesRoot, note.getId() + ".txt");
-            FileWriter writer = new FileWriter(noteFile);
-            writer.append(note.toJSON());
-            writer.flush();
-            writer.close();
-
-            // Delay the export to visual show ProgressDialog for 1000ms (1 second).
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(context, "Exported Note to " + noteFile.getPath(), Toast.LENGTH_LONG).show();
-                    exportDialog.dismiss();
-                }
-            }, 1000);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-
-            Toast.makeText(context, "Export failed, please try again", Toast.LENGTH_SHORT).show();
-            exportDialog.dismiss();
-        }
+    /*
+    private void shareNoteToDrive(final Note note) {
+        // TODO Integrate Drive accessibility
     }
 
     private void checkWritePermission() {
@@ -593,8 +619,10 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                 != PackageManager.PERMISSION_GRANTED) {
 
             // Permission is not granted
-            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
+            }
 
             // PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE is an
             // app-defined int constant. The callback method gets the
@@ -603,7 +631,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         } else {
             // Permission has already been granted
             showExportProgressDialog();
-            exportNoteToFile(note);
+            shareNoteToDrive(note);
         }
     }
 
@@ -617,7 +645,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
                     showExportProgressDialog();
-                    exportNoteToFile(note);
+                    shareNoteToDrive(note);
                 } else {
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
@@ -630,7 +658,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     private void showExportProgressDialog() {
         exportDialog = ProgressDialog.show(context, "Exporting Note to .txt-file",
                 "Working. Please wait...", true);
-    }
+    }*/
 
     private void showArchiveDialog() {
         AlertDialog.Builder alertDialogBuilder =
@@ -658,7 +686,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                if(note.getArchived()) {
+                                if(note.isArchived()) {
                                     deleteNoteFromArchive(note);
                                 } else {
                                     deleteNote(note);
@@ -675,283 +703,55 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     }
 
     private void deleteNoteFromArchive(final Note note) {
-        databaseManager.deleteNoteFromArchive(note, new FirebaseDatabaseCallback() {
-            @Override
-            public void onSuccess() {
-                boolean error = false;
-
-                if(parentFragment == R.integer.ARCHIVED_NOTES_FRAGMENT) {
-                    targetView = app.getArchivedNotesFragmentRef().getView().findViewById(R.id.archivednote_fragment_container);
-                } else if(parentFragment == R.integer.NOTES_FRAGMENT){
-                    targetView = app.getNotesFragmentRef().getView().findViewById(R.id.note_fragment_container);
-                } else {
-                    error = true;
-                }
-
-                if(!error) {
-                    Snackbar.make(targetView,
-                            "Deleted note: " + note.getTitle(), Snackbar.LENGTH_LONG)
-                            .setAction("UNDO", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    databaseManager.updateArchivedNote(note, new FirebaseDatabaseCallback() {
-                                        @Override
-                                        public void onSuccess() {}
-
-                                        @Override
-                                        public void onFailure(String errorMessage) {
-                                            Log.e(TAG, "Failed to undo 'Delete note': " + errorMessage);
-                                        }
-                                    });
-                                }
-                            }).show();
-                } else {
-                    Toast.makeText(context, "Failed to delete note, please try again",
-                            Toast.LENGTH_SHORT).show();
-                    dismissDialog();
-                }
-            }
-
-            @Override
-            public void onFailure(String errorMessage) {
-                boolean error = false;
-
-                if(parentFragment == R.integer.ARCHIVED_NOTES_FRAGMENT) {
-                    targetView = app.getArchivedNotesFragmentRef().getView().findViewById(R.id.archivednote_fragment_container);
-                } else if(parentFragment == R.integer.NOTES_FRAGMENT){
-                    targetView = app.getNotesFragmentRef().getView().findViewById(R.id.note_fragment_container);
-                } else {
-                    error = true;
-                }
-
-                if(!error) {
-                    Snackbar.make(targetView,
-                            "Failed to delete note", Snackbar.LENGTH_LONG)
-                            .setAction("RETRY", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    deleteNoteFromArchive(note);
-                                }
-                            }).show();
-                } else {
-                    dismissDialog();
-                }
-            }
-        });
-
+        databaseManager.deleteNoteFromArchive(note);
         dismissDialog();
-
     }
 
     private void deleteNote(final Note note) {
-        databaseManager.deleteNote(note, new FirebaseDatabaseCallback() {
-            @Override
-            public void onSuccess() {
-                boolean error = false;
-
-                if(parentFragment == R.integer.ARCHIVED_NOTES_FRAGMENT) {
-                    targetView = app.getArchivedNotesFragmentRef().getView().findViewById(R.id.archivednote_fragment_container);
-                } else if(parentFragment == R.integer.NOTES_FRAGMENT){
-                    targetView = app.getNotesFragmentRef().getView().findViewById(R.id.note_fragment_container);
-                } else {
-                    error = true;
-                }
-
-                if(!error) {
-                    Snackbar.make(targetView,
-                            "Deleted note: " + note.getTitle(), Snackbar.LENGTH_LONG)
-                            .setAction("UNDO", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    databaseManager.updateNote(note, new FirebaseDatabaseCallback() {
-                                        @Override
-                                        public void onSuccess() {}
-
-                                        @Override
-                                        public void onFailure(String errorMessage) {
-                                            Log.e(TAG, "Failed to undo 'Delete note': " + errorMessage);
-                                        }
-                                    });
-                                }
-                            }).show();
-                } else {
-                    Toast.makeText(context, "Failed to delete note, please try again",
-                            Toast.LENGTH_SHORT).show();
-                    dismissDialog();
-                }
-            }
-
-            @Override
-            public void onFailure(String errorMessage) {
-                boolean error = false;
-
-                if(parentFragment == R.integer.ARCHIVED_NOTES_FRAGMENT) {
-                    targetView = app.getArchivedNotesFragmentRef().getView().findViewById(R.id.archivednote_fragment_container);
-                } else if(parentFragment == R.integer.NOTES_FRAGMENT){
-                    targetView = app.getNotesFragmentRef().getView().findViewById(R.id.note_fragment_container);
-                } else {
-                    error = true;
-                }
-
-                if(!error) {
-                    Snackbar.make(targetView,
-                            "Failed to delete note", Snackbar.LENGTH_LONG)
-                            .setAction("RETRY", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    deleteNote(note);
-                                }
-                            }).show();
-                } else {
-                    dismissDialog();
-                }
-            }
-        });
-
+        databaseManager.deleteNote(note);
         dismissDialog();
 
     }
 
     private void unarchiveNote() {
-        databaseManager.unarchiveNote(note, new FirebaseDatabaseCallback() {
-            @Override
-            public void onSuccess() {
-                boolean error = false;
-                View targetView = null;
-
-                if (parentFragment == R.integer.ARCHIVED_NOTES_FRAGMENT) {
-                    targetView = app.getArchivedNotesFragmentRef().getView().findViewById(R.id.archivednote_fragment_container);
-                } else if (parentFragment == R.integer.NOTES_FRAGMENT) {
-                    targetView = app.getNotesFragmentRef().getView().findViewById(R.id.note_fragment_container);
-                } else {
-                    error = true;
-                }
-
-                if (!error) {
-                    Snackbar.make(targetView, "Unarchived note", Snackbar.LENGTH_SHORT)
-                            .setAction("UNDO", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    databaseManager.archiveNote(note, new FirebaseDatabaseCallback() {
-                                        @Override
-                                        public void onSuccess() {}
-
-                                        @Override
-                                        public void onFailure(String errorMessage) {
-                                            note.setArchived(false);
-                                            Log.e(TAG, "Failed to undo 'Move note from archive': " + errorMessage);
-                                        }
-                                    });
-                                }
-                            }).show();
-                }
-
-            }
-
-            @Override
-            public void onFailure(String errorMessage) {
-                Toast.makeText(context, "Failed to unarchive note", Toast.LENGTH_LONG).show();
-            }
-        });
-
+        databaseManager.unarchiveNote(note);
         dismissDialog();
-
     }
 
     private void archiveNote() {
-        databaseManager.archiveNote(note, new FirebaseDatabaseCallback() {
-            @Override
-            public void onSuccess() {
-                boolean error = false;
-                View targetView = null;
-
-                if(parentFragment == R.integer.ARCHIVED_NOTES_FRAGMENT) {
-                    targetView = app.getArchivedNotesFragmentRef().getView().findViewById(R.id.archivednote_fragment_container);
-                } else if(parentFragment == R.integer.NOTES_FRAGMENT){
-                    targetView = app.getNotesFragmentRef().getView().findViewById(R.id.note_fragment_container);
-                } else {
-                    error = true;
-                }
-
-                if(!error) {
-                    Snackbar.make(targetView, "Archived note", Snackbar.LENGTH_SHORT)
-                            .setAction("UNDO", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    note.setArchived(false);
-
-                                    databaseManager.unarchiveNote(note, new FirebaseDatabaseCallback() {
-                                        @Override
-                                        public void onSuccess() {
-                                            Log.d(TAG, "*** Successfully undid 'Move note to archive' ***");
-                                        }
-
-                                        @Override
-                                        public void onFailure(String errorMessage) {
-                                            note.setArchived(true);
-
-                                            Log.e(TAG, "Failed to undo 'Move note to archive': " + errorMessage);
-                                        }
-                                    });
-                                }
-                            }).show();
-                }
-
-            }
-
-            @Override
-            public void onFailure(String errorMessage) {
-                Toast.makeText(context, "Failed to archive note", Toast.LENGTH_LONG).show();
-            }
-        });
-
+        databaseManager.archiveNote(note);
         dismissDialog();
-
     }
 
     public void updateNote(){
         String id = noteId;
-        boolean archived = note.getArchived();
+        boolean archived = note.isArchived();
         String newTitle = inputTitle.getText().toString();
         String newInfo = inputInfo.getText().toString();
-        String timestampAdded = note.getTimestampAdded();
+        String timestampAdded = note.getAdded();
         String timestampUpdated = Long.toString(System.currentTimeMillis());
-        String tagId = selectedTag.getTagId();
+        Note updatedNote;
 
         if(TextUtils.isEmpty(newInfo.trim())) {
             newInfo = "";
         }
 
-        Note updatedNote = new Note(id, newTitle, newInfo, timestampAdded, tagId);
+        updatedNote = new Note(id);
+
+        updatedNote.setTitle(newTitle);
+        updatedNote.setInfo(newInfo);
+        updatedNote.setTags(note.getTags());
+        updatedNote.setAdded(timestampAdded);
         updatedNote.setArchived(archived);
-        updatedNote.setTimestampUpdated(timestampUpdated);
+        updatedNote.setUpdated(timestampUpdated);
 
         note = updatedNote;
+        oldTags = new HashMap<String, Boolean>(note.getTags());
 
-        if(note.getArchived()) {
-            databaseManager.updateArchivedNote(updatedNote, new FirebaseDatabaseCallback() {
-                @Override
-                public void onSuccess() {
-                    Toast.makeText(app, "Archived Note successfully updated", Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onFailure(String errorMessage) {
-                    Toast.makeText(app, "Failed to update archived note, please try again", Toast.LENGTH_SHORT).show();
-                }
-            });
+        if(note.isArchived()) {
+            databaseManager.updateArchivedNote(updatedNote);
         } else {
-            databaseManager.updateNote(updatedNote, new FirebaseDatabaseCallback() {
-                @Override
-                public void onSuccess() {
-                    Toast.makeText(app, "Note successfully updated", Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onFailure(String errorMessage) {
-                    Toast.makeText(app, "Failed to update note, please try again", Toast.LENGTH_SHORT).show();
-                }
-            });
+            databaseManager.updateNote(updatedNote);
         }
 
         editMode = false;
@@ -964,4 +764,29 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     private void dismissDialog() {
         this.dismiss();
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if(editMode) {
+            if(newTags != null) {
+                // Re-add newly created (and therefore added) Tags from Note.
+                for (String tagId : newTags) {
+                    note.addTag(tagId);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(editMode) {
+            // Remove newly created (and therefore added) Tags from Note.
+            for(String tagId: newTags) {
+                note.removeTag(tagId);
+            }
+        }
+    }
+
 }

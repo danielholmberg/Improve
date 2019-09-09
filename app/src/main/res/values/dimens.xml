@@ -3,6 +3,8 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="paddingDefault">16dp</dimen>
+    <dimen name="paddingTiny">8dp</dimen>
 
     <!-- Toolbar dimens -->
     <dimen name="toolbar_elevation">4dp</dimen>
@@ -26,7 +28,7 @@
     <dimen name="note_details_info_text_size">16sp</dimen>
     <dimen name="note_details_padding">16dp</dimen>
     <dimen name="note_form_icons_padding">16dp</dimen>
-    <dimen name="footer_note_padding">16dp</dimen>
+    <dimen name="footer_note_margin">12dp</dimen>
     <dimen name="note_title_padding">8dp</dimen>
     <dimen name="footer_note_details_timestamp_text_size">10sp</dimen>
     <dimen name="note_item_marker_width">16dp</dimen>
@@ -39,28 +41,51 @@
     <dimen name="card_elevation">4dp</dimen>
 
     <!-- Contact dimens -->
-    <dimen name="contact_details_padding">16dp</dimen>
-    <dimen name="contact_form_icons_padding">16dp</dimen>
-    <dimen name="contact_details_text_size">16sp</dimen>
-    <dimen name="contact_details_vertical_padding">8dp</dimen>
-    <dimen name="contact_details_action_margin">8dp</dimen>
-    <dimen name="contact_details_actions_text_size">12sp</dimen>
-    <dimen name="contact_item_bottom_margin">8dp</dimen>
-    <dimen name="contact_card_top_margin">8dp</dimen>
-    <dimen name="contact_card_start_margin">16dp</dimen>
-    <dimen name="contact_card_end_margin">16dp</dimen>
-    <dimen name="contact_card_margin">8dp</dimen>
-    <dimen name="contact_details_name_text_size">22sp</dimen>
-    <dimen name="contact_form_padding">16dp</dimen>
-    <dimen name="toolbar_contact_details_padding">16dp</dimen>
-    <dimen name="contact_details_extra_padding_bottom">16dp</dimen>
-    <dimen name="company_item_marker_width">16dp</dimen>
-    <dimen name="contact_toolbar_elevation">1dp</dimen>
-    <dimen name="contact_list_padding">8dp</dimen>
-    <dimen name="company_cardview_margin">8dp</dimen>
-    <dimen name="note_archived_padding">8dp</dimen>
-    <dimen name="note_details_layout_padding">8dp</dimen>
-    <dimen name="note_info_timestamp_textsize">12sp</dimen>
-    <dimen name="sign_in_button_elevation">4dp</dimen>
+    <dimen name="padding_contact_details">16dp</dimen>
+    <dimen name="padding_contact_form_icons">16dp</dimen>
+    <dimen name="textsize_contact_details">16sp</dimen>
+    <dimen name="padding_contact_details_vertical">8dp</dimen>
+    <dimen name="margin_contact_details_action">8dp</dimen>
+    <dimen name="textsize_contact_details_actions">12sp</dimen>
+    <dimen name="margin_contact_item_bottom">8dp</dimen>
+    <dimen name="margin_contact_card_top">8dp</dimen>
+    <dimen name="margin_contact_card_start">16dp</dimen>
+    <dimen name="margin_contact_card_end">16dp</dimen>
+    <dimen name="margin_contact_card">8dp</dimen>
+    <dimen name="textsize_contact_details_name">22sp</dimen>
+    <dimen name="padding_contact_form">16dp</dimen>
+    <dimen name="padding_toolbar_contact_details">16dp</dimen>
+    <dimen name="padding_bottom_contact_details_extra">16dp</dimen>
+    <dimen name="width_company_item_marker">16dp</dimen>
+    <dimen name="elevation_contact_toolbar">1dp</dimen>
+    <dimen name="padding_contact_list">8dp</dimen>
+    <dimen name="margin_company_cardview">8dp</dimen>
+    <dimen name="padding_note_archived">8dp</dimen>
+    <dimen name="padding_note_details_layout">8dp</dimen>
+    <dimen name="textsize_note_info_timestamp">12sp</dimen>
+    <dimen name="elevation_sign_in_button">4dp</dimen>
+    <dimen name="elevation_contact_item">4dp</dimen>
+    <dimen name="radius_button_corner">8dp</dimen>
+    <dimen name="radius_tag_input_corner">16dp</dimen>
+    <dimen name="radius_tag">100dp</dimen>
+    <dimen name="padding_tag">8dp</dimen>
+    <dimen name="margin_tag">2dp</dimen>
+    <dimen name="padding_input_note_title">16dp</dimen>
+    <dimen name="padding_input_note_info">16dp</dimen>
+    <dimen name="padding_detail_input_note_info">8dp</dimen>
+    <dimen name="padding_detail_input_note_title">8dp</dimen>
+    <dimen name="textsize_tag">8sp</dimen>
+    <dimen name="padding_note_item_footer">8dp</dimen>
+    <dimen name="radius_note_corner">20dp</dimen>
+    <dimen name="radius_app_bar_corner">20dp</dimen>
+    <dimen name="radius_dialog_corner">10dp</dimen>
+    <dimen name="radius_menu_corner">10dp</dimen>
+    <dimen name="margin_note_details_card">6dp</dimen>
+    <dimen name="padding_body_privacy_policy">16dp</dimen>
+    <dimen name="radius_drawer_corner">20dp</dimen>
+    <dimen name="textsize_contact_info_timestamp">12sp</dimen>
+    <dimen name="fab_menu_item_position_1">64dp</dimen>
+    <dimen name="fab_menu_item_position_2">128dp</dimen>
 
+    <item name="tag_letter_spacing" type="dimen" format="float">0.2</item>
 </resources>

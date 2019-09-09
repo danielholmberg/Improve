@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/company_details_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/cardInfoBackground">
+
+    <include
+        android:id="@+id/include_toolbar_company_details"
+        layout="@layout/app_bar_company_details_fragment"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"/>
+
+    <RelativeLayout
+        android:id="@+id/company_details_body"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:paddingStart="@dimen/margin_company_cardview"
+        android:paddingEnd="@dimen/margin_company_cardview"
+        android:paddingBottom="@dimen/margin_company_cardview">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/contacts_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:requiresFadingEdge="vertical"
+            android:fadingEdgeLength="32dp"/>
+
+    </RelativeLayout>
+
+</LinearLayout>

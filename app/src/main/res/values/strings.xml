@@ -1,14 +1,23 @@
 <resources>
     <string name="app_name" translatable="false">Improve</string>
 
+    <!-- Navigation strings -->
+    <string name="navigation_drawer_open">open drawer</string>
+    <string name="navigation_drawer_close">close drawer</string>
+    <string name="nav_notes">Notes</string>
+    <string name="nav_archived_notes">Archive</string>
+    <string name="nav_contacts">Contacts</string>
+    <string name="nav_feedback">Feedback</string>
+    <string name="sign_out">Sign Out</string>
+
     <!-- Contact strings -->
     <string name="hint_name">Name</string>
-    <string name="hint_company">Company</string>
+    <string name="hint_company">Select a company</string>
     <string name="hint_email">E-mail</string>
     <string name="hint_phone">Phone number</string>
     <string name="hint_comment">Comment</string>
     <string name="err_msg_name">Please enter a name</string>
-    <string name="err_msg_company">Please enter a companyId</string>
+    <string name="err_msg_company">Please select a company</string>
     <string name="err_msg_email">Please enter a valid e-mail</string>
     <string name="title_new_contact">New Contact</string>
     <string name="title_edit_contact">Edit contact</string>
@@ -17,11 +26,30 @@
     <string name="contact_details_action_email">Send e-mail</string>
     <string name="contact_details_name_text">Name</string>
     <string name="empty_contact_list_text">No contacts added</string>
-    <string name="contact_details_empty_email_text">Add e-mail</string>
-    <string name="contact_details_empty_mobile_text">Add phone number</string>
-    <string name="contact_details_empty_comment_text">Add comment</string>
+    <string name="contact_details_empty_email_text">No e-mail added</string>
+    <string name="contact_details_empty_mobile_text">No phone number added</string>
+    <string name="contact_details_empty_comment_text">No comment added</string>
     <string name="contactDone">Done</string>
     <string name="placeholder_company">Company</string>
+    <string name="dialog_delete_contact_title">Permanently delete contact</string>
+    <string name="dialog_delete_contact_msg">Do you want to delete this contact?</string>
+    <string name="err_msg_phone">Please enter a valid phone number</string>
+    <string name="contact_background_color">Contact Background Color</string>
+    <string name="edit_contact_btn_content_desc">EditContactButton</string>
+    <string name="delete_contact_btn_content_desc">DeleteContactButton</string>
+    <string name="info_contact_btn_desc">Info</string>
+    <string name="menu_contact_delete">Delete</string>
+    <string name="menu_contact_info">Info</string>
+    <string name="menu_contact_edit">Edit</string>
+    <string name="menu_contact_search_name">Search contact</string>
+    <string name="contact_search_hint">Enter contact name</string>
+    <string name="dialog_info_contact_title">Info</string>
+    <string name="menu_contact_export_vcf">Export to .vcf</string>
+    <string name="menu_company_delete">Delete</string>
+    <string name="menu_company_rename">Rename</string>
+    <string name="dialog_delete_company_title">Permanently delete company</string>
+    <string name="dialog_delete_company_msg">Do you really want to delete this company and all related contacts?</string>
+    <string name="sort_by_company_alphabetical">Sort by company name</string>
 
     <!-- Note strings -->
     <string name="hint_title">Title</string>
@@ -35,70 +63,54 @@
     <string name="empty_notes_list_text">What\'s on your mind?</string>
     <string name="note_tag">Note tag</string>
     <string name="noteDone">Done</string>
-
-    <!-- Navigation strings -->
-    <string name="navigation_drawer_open">open drawer</string>
-    <string name="navigation_drawer_close">close drawer</string>
-    <string name="nav_notes">Notes</string>
-    <string name="nav_contacts">Contacts</string>
-    <string name="sign_out">Sign Out</string>
-    <string name="err_msg_phone">Please enter a valid phone number</string>
-    <string name="contact_background_color">Contact Background Color</string>
-    <string name="editNoteButtonContentDesc">EditNoteButton</string>
-    <string name="doneNoteButtonContentDesc">DoneNoteButton</string>
-    <string name="editContactButtonContentDesc">EditContactButton</string>
-    <string name="deleteContactButtonContentDesc">DeleteContactButton</string>
-    <string name="sort">Sort</string>
-    <string name="sort_by_company_alphabetical">Sort by companyId</string>
-    <string name="filter_by_tag">Filter notes by tag</string>
-    <string name="sort_by_title_alphabetical">Sort by title</string>
-    <string name="sort_by_timestamp_updated">Sort by date</string>
+    <string name="edit_note_btn_content_desc">EditNoteButton</string>
+    <string name="done_note_btn_content_desc">DoneNoteButton</string>
+    <string name="search_note">Search</string>
     <string name="empty_archived_notes_list_text">No archived notes</string>
-    <string name="nav_archived_notes">Archive</string>
-    <string name="menu_note_edit">Edit</string>
-    <string name="menu_note_archive">Archive</string>
     <string name="note_activity_details">Details</string>
-    <string name="menu_note_delete">Delete</string>
-    <string name="menu_note_unarchive">Unarchive</string>
-    <string name="nav_feedback">Feedback</string>
-    <string name="title_submit_feedback">Feedback</string>
-    <string name="menu_note_info">Info</string>
-    <string name="choose_marker_color_note_msg">Choose a color to characterize Notes</string>
-    <string name="choose_marker_color_note_title">Note color</string>
+
     <string name="dialog_archive_note_title">Archive note</string>
     <string name="dialog_archive_note_msg">Do you want to archive this note?</string>
-    <string name="dialog_delete_contact_title">Permanently delete contact</string>
-    <string name="dialog_delete_contact_msg">Do you want to delete this contact?</string>
     <string name="dialog_delete_note_title">Permanently Delete Note</string>
     <string name="dialog_delete_note_msg">Do you want to delete this note?</string>
     <string name="dialog_info_note_title">Info</string>
-    <string name="dialog_info_contact_title">Info</string>
-    <string name="infoContactButtonDesc">Info</string>
-    <string name="menu_contact_delete">Delete</string>
-    <string name="menu_contact_info">Info</string>
-    <string name="menu_contact_edit">Edit</string>
-    <string name="menu_contact_search_name">Search contact</string>
-    <string name="contact_search_hint">Enter contact name</string>
-    <string name="menu_note_export_file">Export to .txt-file</string>
+
+    <string name="menu_note_delete">Delete</string>
+    <string name="menu_note_unarchive">Unarchive</string>
+    <string name="menu_note_edit">Edit</string>
+    <string name="menu_note_archive">Archive</string>
     <string name="menu_note_import_file">Import Note</string>
+    <string name="menu_note_info">Info</string>
+    <string name="menu_note_google_drive">Save on Drive</string>
+
+    <!-- Feedback strings -->
+    <string name="title_submit_feedback">Feedback</string>
+    <string name="submit_feedback_informing_text">Thank you for reaching this page! \n
+        \nFrom here you have the ability to provide some <b>feedback</b> directly to the developers about: \n
+        \n\u2022 <b>New features</b> you would like to see in an upcoming version
+        \n\u2022 <b>Bugs</b> you discover during your use of the app
+        \n\u2022 Or, just want to spread some <b>LOVE \u2764</b>
+    </string>
+    <string name="feedback_hint_subject">Subject</string>
+    <string name="feedback_hint_message">Message</string>
+
+    <!-- Login activity strings -->
     <string name="anonymous_sign_in_btn_text">Anonymous Sign in</string>
     <string name="anonymous_sign_in_btn_content_desc">Anonymous Sign in Button</string>
     <string name="google_sign_in_btn_text">Sign in</string>
-    <string name="submit_feedback_informing_text">Thank you for reaching this page! From here, you may provide some feedback to the developers about: \n
-        \n \u2022 New features you would like to see in an upcoming version.
-        \n \u2022 Problems you encounter during your use of the app.
-        \n \u2022 Or anything else that comes to mind.</string>
-    <string name="menu_contact_export_vcf">Export to .vcf</string>
     <string name="dialog_sign_out_msg">Do you want to sign out?</string>
     <string name="dialog_sign_out_title">Sign out</string>
     <string name="dialog_anonymous_sign_out_msg">If you sign out from an Anonymous-session, you will loose all your data. Do you want to continue?</string>
     <string name="dialog_anonymous_sign_out_title">Sign out Anonymous-session</string>
-    <string name="dialog_note_tag_title">Note tag</string>
-    <string name="hint_tag_label">New label</string>
-    <string name="err_msg_tag_label">Please enter a tag label</string>
-    <string name="menu_tag_add">Add new tag</string>
+
+    <!-- General strings -->
     <string name="dialog_dicard_changes_title">Discard changes</string>
     <string name="dialog_discard_changes_msg">Are you sure you want to discard changes?</string>
+    <string name="export_channel_name">Export content</string>
+    <string name="export_channel_desc">Notification related to exporting content</string>
+    <string name="export_channel_id">EXPORT</string>
+
+    <!-- Tag strings -->
     <string name="menu_tag_1">Red</string>
     <string name="menu_tag_2">Purple</string>
     <string name="menu_tag_3">Blue</string>
@@ -108,19 +120,47 @@
     <string name="menu_tag_7">Dark grey</string>
     <string name="menu_tag_8">Green</string>
     <string name="menu_tag_untagged">Untagged</string>
+    <string name="dialog_note_tag_title">Note tag</string>
+    <string name="hint_tag_label">NEW LABEL</string>
+    <string name="err_msg_tag_label">Please enter a label</string>
+    <string name="menu_tag_add"><b>Add tag</b></string>
+    <string name="menu_tag_edit"><b>Edit tags</b></string>
+    <string name="note_info_dialog_added">Created:</string>
+    <string name="note_info_dialog_updated">Latest update:</string>
+    <string name="title_edit_tags">Edit tags</string>
+
+    <!-- Unsorted strings -->
+
 
     <!-- Quotes -->
     <string-array name="quotes">
-        <item>There is always room for improvement.</item>
-        <item>If you always do what you have always done, you will always be where you have always been.</item>
-        <item>The health of your brain is much more about your actions than your age.</item>
-        <item>Change is your friend not your foe, change is a brilliant opportunity to grow.</item>
-        <item>The dreaming has to be backed up by the doing.</item>
-        <item>Be the type of person you want to meet.</item>
-        <item>Die with memories, not dreams.</item>
-        <item>Aspire to inspire before we expire.</item>
-        <item>Determine your priorities and focus on them.</item>
-        <item>The best preparation for tomorrow is doing your best today.</item>
+        <item>There is always room for improvement</item>
+        <item>If you always do what you have always done, you will always be where you have always been</item>
+        <item>The health of your brain is much more about your actions than your age</item>
+        <item>Change is your friend not your foe, change is a brilliant opportunity to grow</item>
+        <item>The dreaming has to be backed up by the doing</item>
+        <item>Be the type of person you want to meet</item>
+        <item>Die with memories, not dreams</item>
+        <item>Aspire to inspire before we expire</item>
+        <item>Determine your priorities and focus on them</item>
+        <item>The best preparation for tomorrow is doing your best today</item>
+        <item>Do more of what makes you happy</item>
     </string-array>
+    <string name="title_activity_settings">Settings</string>
+    <string name="tag_label_counter_delimiter">/</string>
+    <string name="tag_label_counter_initial">0</string>
+    <string name="nav_privacy_policy">Privacy Policy</string>
+    <string name="title_privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy_fetch_failed">Failed to retrieve Privacy Policy.</string>
+    <string name="contact_info_dialog_added">Created:</string>
+    <string name="contact_info_dialog_updated">Latest update:</string>
+    <string name="contact_no_phone_message">No phone number added</string>
+    <string name="contact_no_email_message">No email added</string>
+    <string name="search_archived_note">Search archived note</string>
+    <string name="menu_contact_add">Add Contact</string>
+    <string name="dialog_delete_tag_title">Permanently Delete Tag</string>
+    <string name="dialog_delete_tag_msg">Do you want to delete this tag?</string>
+
+    <!-- Strings related to Settings -->
 
 </resources>

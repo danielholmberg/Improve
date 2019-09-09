@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/login_main_layout"
     android:layout_width="match_parent"
@@ -38,14 +38,18 @@
             android:id="@+id/google_sign_in_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/fui_idp_button_background_google"
-            android:elevation="@dimen/sign_in_button_elevation"
-            android:padding="8dp"
+            android:background="@drawable/rounded_corner_button"
+            android:elevation="@dimen/elevation_sign_in_button"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="16dp"
             android:layout_margin="8dp"
             android:visibility="visible"
             android:text="@string/google_sign_in_btn_text"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
             android:textStyle="bold"
+            android:textColor="@color/titleTextColor"
             android:drawablePadding="8dp"
             android:drawableStart="@drawable/ic_google_icon_color" />
 
@@ -53,16 +57,20 @@
             android:id="@+id/anonymous_login_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/fui_idp_button_background_google"
-            android:elevation="@dimen/sign_in_button_elevation"
-            android:padding="8dp"
+            android:background="@drawable/rounded_corner_button"
+            android:elevation="@dimen/elevation_sign_in_button"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="16dp"
             android:layout_margin="8dp"
             android:visibility="visible"
             android:text="@string/anonymous_sign_in_btn_text"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
             android:textStyle="bold"
+            android:textColor="@color/titleTextColor"
             android:drawablePadding="8dp"
-            android:drawableStart="@drawable/ic_anonymous_outline_black"
+            android:drawableStart="@drawable/ic_anonymous_outline_white"
             android:contentDescription="@string/anonymous_sign_in_btn_content_desc" />
 
     </LinearLayout>
@@ -84,4 +92,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

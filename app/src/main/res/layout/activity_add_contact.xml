@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/add_contact_layout"
     android:layout_width="match_parent"
@@ -30,74 +29,93 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="@dimen/contact_form_padding">
+            android:padding="@dimen/padding_contact_form">
 
-            <android.support.design.widget.TextInputLayout
+            <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/input_contact_layout"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:paddingBottom="@dimen/contact_form_padding">
+                android:paddingBottom="@dimen/padding_contact_form">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <android.support.design.widget.TextInputEditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/input_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textPersonName"
+                        android:inputType="textPersonName|textCapWords"
                         android:backgroundTint="@color/editTextTint"
                         android:drawableStart="@drawable/ic_contact_person_grey"
-                        android:drawablePadding="@dimen/contact_form_icons_padding"
+                        android:drawablePadding="@dimen/padding_contact_form_icons"
                         android:textStyle="bold"
                         android:hint="@string/hint_name" />
 
-                    <AutoCompleteTextView
-                        android:id="@+id/input_company"
+                    <RelativeLayout
+                        android:orientation="horizontal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textCapCharacters"
-                        android:backgroundTint="@color/editTextTint"
-                        android:drawableStart="@drawable/ic_contact_company_grey"
-                        android:drawablePadding="@dimen/contact_form_icons_padding"
-                        android:textStyle="bold"
-                        android:hint="@string/hint_company"/>
+                        android:paddingTop="8dp"
+                        android:paddingStart="4dp"
+                        android:paddingBottom="8dp">
 
-                    <android.support.design.widget.TextInputEditText
+                        <ImageButton
+                            android:id="@+id/company_icon"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_contact_company_grey"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"/>
+
+                        <Spinner
+                            android:id="@+id/spinner_company"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:inputType="textCapCharacters"
+                            android:textStyle="bold"
+                            android:layout_marginStart="8dp"
+                            android:layout_toEndOf="@id/company_icon"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"/>
+
+                    </RelativeLayout>
+
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/input_email"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textEmailAddress"
                         android:backgroundTint="@color/editTextTint"
                         android:drawableStart="@drawable/ic_contact_email_grey"
-                        android:drawablePadding="@dimen/contact_form_icons_padding"
+                        android:drawablePadding="@dimen/padding_contact_form_icons"
                         android:hint="@string/hint_email"/>
 
-                    <android.support.design.widget.TextInputEditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/input_mobile"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="phone"
                         android:backgroundTint="@color/editTextTint"
                         android:drawableStart="@drawable/ic_contact_mobile_grey"
-                        android:drawablePadding="@dimen/contact_form_icons_padding"
+                        android:drawablePadding="@dimen/padding_contact_form_icons"
                         android:hint="@string/hint_phone"/>
 
-                    <android.support.design.widget.TextInputEditText
+                    <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/input_comment"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:inputType="textCapSentences|textMultiLine"
                         android:backgroundTint="@color/editTextTint"
                         android:drawableStart="@drawable/ic_contact_comment_grey"
-                        android:drawablePadding="@dimen/contact_form_icons_padding"
+                        android:drawablePadding="@dimen/padding_contact_form_icons"
                         android:hint="@string/hint_comment"/>
 
                 </LinearLayout>
 
-            </android.support.design.widget.TextInputLayout>
+            </com.google.android.material.textfield.TextInputLayout>
 
         </LinearLayout>
 

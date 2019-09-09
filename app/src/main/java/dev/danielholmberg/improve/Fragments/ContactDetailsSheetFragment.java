@@ -9,21 +9,21 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomSheetDialogFragment;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,8 +34,7 @@ import java.text.DateFormat;
 import java.util.Calendar;
 
 import dev.danielholmberg.improve.Activities.AddContactActivity;
-import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback;
-import dev.danielholmberg.improve.Components.Contact;
+import dev.danielholmberg.improve.Models.Contact;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 import dev.danielholmberg.improve.R;
@@ -48,13 +47,12 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     private static final String TAG = ContactDetailsSheetFragment.class.getSimpleName();
     public static final String CONTACT_KEY = "contact";
     public static final String PARENT_FRAGMENT_KEY = "parentFragment";
-    public static final String ADAPTER_POS_KEY = "itemPos";
 
     private static final String EXPORTED_CONTACT_DIRECTORY_PATH = "Contacts";
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     private Improve app;
-    private FirebaseDatabaseManager storageManager;
+    private FirebaseDatabaseManager databaseManager;
     private Context context;
 
     private Bundle contactBundle;
@@ -68,8 +66,6 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     private TextView title, name, email, mobile, comment;
     private String timestampAdded, timestampUpdated;
 
-    private View targetView;
-
     private AppCompatActivity activity;
     private ProgressDialog exportDialog;
 
@@ -81,7 +77,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         app = Improve.getInstance();
-        storageManager = app.getFirebaseDatabaseManager();
+        databaseManager = app.getFirebaseDatabaseManager();
         detailsDialog = this;
         context = getContext();
         activity = (AppCompatActivity) getActivity();
@@ -145,10 +141,19 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
             comment.setText(contact.getComment());
             comment.setMovementMethod(new ScrollingMovementMethod());
 
-            timestampAdded = tranformMillisToDateSring(Long.parseLong(contact.getTimestampAdded()));
-            timestampUpdated = tranformMillisToDateSring(Long.parseLong(contact.getTimestampUpdated()));
+            if(contact.getTimestampAdded() != null) {
+                timestampAdded = tranformMillisToDateSring(Long.parseLong(contact.getTimestampAdded()));
+            }
 
-            title.setText(contact.getCompany());
+            if(contact.getTimestampUpdated() != null) {
+                timestampUpdated = tranformMillisToDateSring(Long.parseLong(contact.getTimestampUpdated()));
+            }
+
+            if(contact.getCompanyId() != null) {
+                if (app.getCompanyRecyclerViewAdapter().getCompany(contact.getCompanyId()) != null) {
+                    title.setText(app.getCompanyRecyclerViewAdapter().getCompany(contact.getCompanyId()).getName());
+                }
+            }
 
             // Handle if the voluntary contact information fields is empty
             // Change e-mail field
@@ -249,7 +254,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
             fw.write("BEGIN:VCARD\r\n");
             fw.write("VERSION:3.0\r\n");
             fw.write("FN:" + contact.getName() + "\r\n");
-            fw.write("ORG:" + contact.getCompany() + "\r\n");
+            fw.write("ORG:" + contact.getCompanyId() + "\r\n");
 
             if(contact.getPhone() != null) {
                 fw.write("TEL;TYPE=HOME,VOICE:" + contact.getPhone() + "\r\n");
@@ -306,71 +311,8 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     }
 
     private void deleteContact(final Contact contact) {
-        storageManager.deleteContact(contact, new FirebaseDatabaseCallback() {
-            @Override
-            public void onSuccess() {
-                boolean error = false;
-
-                if(parentFragment == R.integer.CONTACT_FRAGMENT) {
-                    targetView = app.getContactsFragmentRef().getView().findViewById(R.id.contacts_fragment_container);
-                } else {
-                    error = true;
-                }
-
-                if(!error) {
-                    Snackbar.make(app.getContactsFragmentRef().getView().findViewById(R.id.contacts_fragment_container), "Deleted contact", Snackbar.LENGTH_LONG)
-                            .setAction("UNDO", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    storageManager.addContact(contact, new FirebaseDatabaseCallback() {
-                                        @Override
-                                        public void onSuccess() {
-                                            Log.d(TAG, "*** Successfully undid 'Delete contact' ***");
-                                        }
-
-                                        @Override
-                                        public void onFailure(String errorMessage) {
-                                            Log.e(TAG, "Failed to undo 'Delete contact': " + errorMessage);
-                                        }
-                                    });
-                                }
-                            }).show();
-                } else {
-                    Toast.makeText(getContext(), "Failed to delete note",
-                            Toast.LENGTH_SHORT).show();
-                    detailsDialog.dismiss();
-                }
-            }
-
-            @Override
-            public void onFailure(String errorMessage) {
-                boolean error = false;
-
-                if(parentFragment == R.integer.ARCHIVED_NOTES_FRAGMENT) {
-                    targetView = app.getArchivedNotesFragmentRef().getView().findViewById(R.id.archivednote_fragment_container);
-                } else if(parentFragment == R.integer.NOTES_FRAGMENT){
-                    targetView = app.getNotesFragmentRef().getView().findViewById(R.id.note_fragment_container);
-                } else {
-                    error = true;
-                }
-
-                if(!error) {
-                    Snackbar.make(targetView,
-                            "Failed to delete contact", Snackbar.LENGTH_LONG)
-                            .setAction("RETRY", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    deleteContact(contact);
-                                }
-                            }).show();
-                } else {
-                    detailsDialog.dismiss();
-                }
-            }
-        });
-
+        databaseManager.deleteContact(contact);
         detailsDialog.dismiss();
-
     }
 
     private String tranformMillisToDateSring(long timeInMillis) {
@@ -381,15 +323,12 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     }
 
     private void showInfoDialog() {
-        LinearLayout contactInfoLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.dialog_contact_info, null);
+        RelativeLayout contactInfoLayout = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.dialog_contact_info, null);
         TextView contactAddedTimestamp = contactInfoLayout.findViewById(R.id.contact_info_added_timestamp_tv);
         TextView contactUpdatedTimestamp = contactInfoLayout.findViewById(R.id.contact_info_updated_timestamp_tv);
 
-        String added = "Added: " + timestampAdded;
-        String updated = "Last updated: " + timestampUpdated;
-
-        contactAddedTimestamp.setText(added);
-        contactUpdatedTimestamp.setText(updated);
+        contactAddedTimestamp.setText(timestampAdded);
+        contactUpdatedTimestamp.setText(timestampUpdated);
 
         AlertDialog.Builder alertDialogBuilder =
                 new AlertDialog.Builder(context).setTitle(R.string.dialog_info_contact_title)

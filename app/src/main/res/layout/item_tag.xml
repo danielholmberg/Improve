@@ -1,14 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
-    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/margin_tag"
     android:layout_width="wrap_content"
-    android:padding="8dp">
+    android:layout_height="wrap_content"
+    android:background="@drawable/tag_background"
+    android:gravity="center_vertical">
 
     <ImageView
-        android:id="@+id/tagIcon_iv"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:src="@drawable/ic_menu_tag_untagged" />
+        android:id="@+id/tag_delete_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:padding="6dp"
+        android:background="@drawable/tag_background"
+        android:src="@drawable/ic_tag_delete"
+        android:layout_gravity="center_vertical"/>
+
+    <LinearLayout
+        android:id="@+id/tag_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/padding_tag">
+        <ImageView
+            android:id="@+id/tag_enabled_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:src="@drawable/ic_tag_enabled_indicator"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="2dp"/>
+
+        <TextView
+            android:id="@+id/tag_label_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/tagTextColor"
+            android:textSize="@dimen/textsize_tag"
+            android:maxEms="@integer/note_tag_label_max_length"
+            android:ellipsize="end"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:letterSpacing="@dimen/tag_letter_spacing"/>
+    </LinearLayout>
 
 </LinearLayout>

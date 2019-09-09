@@ -1,21 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/sort_notes"
-        android:title="@string/sort"
-        android:icon="@drawable/ic_sort_white"
-        app:showAsAction="always">
-        <!-- Submenu -->
-        <menu>
-            <item android:id="@+id/sort_notes_by_title_alphabetical"
-                android:title="@string/sort_by_title_alphabetical"
-                android:icon="@drawable/ic_menu_sort_alphabetical_primary"/>
-            <item android:id="@+id/sort_notes_by_timestamp_updated"
-                android:title="@string/sort_by_timestamp_updated"
-                android:icon="@drawable/ic_menu_sort_timestamp_primary"/>
-            <item android:id="@+id/filter_notes_by_tag"
-                android:title="@string/filter_by_tag"
-                android:icon="@drawable/ic_menu_tag_primary"/>
-        </menu>
+    <item android:id="@+id/search_note"
+        android:title="@string/search_note"
+        android:icon="@drawable/ic_menu_search_white"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always|collapseActionView">
     </item>
 </menu>

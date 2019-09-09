@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/cardInfoBackground"
+    android:fitsSystemWindows="true"
+    tools:context="dev.danielholmberg.improve.Activities.PrivacyPolicyActivity">
+
+    <include
+        android:id="@+id/include_toolbar_privacy_policy"
+        layout="@layout/app_bar_privacy_policy" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/padding_body_privacy_policy"
+        android:scrollbars="vertical"
+        android:scrollbarStyle="outsideOverlay"
+        android:overScrollMode="never"
+        android:requiresFadingEdge="vertical"
+        android:fadingEdgeLength="32dp">
+
+        <WebView
+            android:id="@+id/privacy_policy_webview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </ScrollView>
+
+</LinearLayout>

@@ -3,7 +3,7 @@
     android:shape="rectangle">
 
     <solid
-        android:color="@color/tagUntagged"
+        android:color="@color/cardBackground"
         />
 
     <corners android:radius="16dp" />

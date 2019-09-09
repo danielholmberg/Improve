@@ -1,25 +1,29 @@
 package dev.danielholmberg.improve.Activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputEditText;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
+import androidx.annotation.Nullable;
+import com.google.android.material.textfield.TextInputEditText;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback;
-import dev.danielholmberg.improve.Components.Contact;
+import dev.danielholmberg.improve.Models.Company;
+import dev.danielholmberg.improve.Models.Contact;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 import dev.danielholmberg.improve.R;
@@ -31,19 +35,20 @@ import dev.danielholmberg.improve.Utilities.ContactInputValidator;
 
 public class AddContactActivity extends AppCompatActivity {
     private static final String TAG = AddContactActivity.class.getSimpleName();
-    public static final String COMPANIES_KEY = "companies";
     public static final String CONTACT_BUNDLE_KEY = "contactBundle";
     private static final String CONTACT_KEY = "contact";
+    public static final String PRE_SELECTED_COMPANY = "preSelectedCompany";
 
     private Improve app;
     private FirebaseDatabaseManager databaseManager;
     private ContactInputValidator validator;
 
     private Contact contact;
-    private TextInputEditText inputName, inputEmail, inputPhone, inputComment;
-    private AutoCompleteTextView inputCompany;
+    private Company preSelectedCompany;
 
-    private String[] COMPANIES;
+    private TextInputEditText contactName, contactEmail, contactPhone, contactComment;
+    private Spinner contactCompany;
+    private ArrayAdapter<Company> companyAdapter;
 
     private Toolbar toolbar;
     private View inputLayout;
@@ -70,14 +75,23 @@ public class AddContactActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         inputLayout = (View) findViewById(R.id.input_contact_layout);
-        inputName = (TextInputEditText) findViewById(R.id.input_name);
-        inputCompany = (AutoCompleteTextView) findViewById(R.id.input_company);
-        inputEmail = (TextInputEditText) findViewById(R.id.input_email);
-        inputPhone = (TextInputEditText) findViewById(R.id.input_mobile);
-        inputComment = (TextInputEditText) findViewById(R.id.input_comment);
+        contactName = (TextInputEditText) findViewById(R.id.input_name);
+        contactCompany = (Spinner) findViewById(R.id.spinner_company);
+        contactEmail = (TextInputEditText) findViewById(R.id.input_email);
+        contactPhone = (TextInputEditText) findViewById(R.id.input_mobile);
+        contactComment = (TextInputEditText) findViewById(R.id.input_comment);
 
-        Bundle intentBundle = getIntent().getBundleExtra(CONTACT_BUNDLE_KEY);
-        contact =  intentBundle != null ? (Contact) intentBundle.getParcelable(CONTACT_KEY) : null;
+        List<Company> companies = app.getCompanyRecyclerViewAdapter().getCompaniesList();
+
+        companyAdapter = new ArrayAdapter<Company>(this,
+                android.R.layout.simple_dropdown_item_1line, companies);
+        contactCompany.setAdapter(companyAdapter);
+
+        Bundle contactBundle = getIntent().getBundleExtra(CONTACT_BUNDLE_KEY);
+
+        if(contactBundle != null) {
+            contact = (Contact) contactBundle.getParcelable(CONTACT_KEY);
+        }
 
         if(contact != null){
             isEdit = true;
@@ -85,18 +99,34 @@ public class AddContactActivity extends AppCompatActivity {
 
             oldCID = contact.getId();
 
-            inputName.setText(contact.getName());
-            inputCompany.setText(contact.getCompany());
-            inputEmail.setText(contact.getEmail());
-            inputPhone.setText(contact.getPhone());
-            inputComment.setText(contact.getComment());
+            if(contact.getName() != null) {
+                contactName.setText(contact.getName());
+            }
+            if(contact.getEmail() != null) {
+                contactEmail.setText(contact.getEmail());
+            }
+            if(contact.getPhone() != null) {
+                contactPhone.setText(contact.getPhone());
+            }
+            if(contact.getComment() != null) {
+                contactComment.setText(contact.getComment());
+            }
+
+            // If the company already exists, set that company as selected by default.
+            if(contact.getCompanyId() != null) {
+                Company company = app.getCompanyRecyclerViewAdapter().getCompany(contact.getCompanyId());
+                if (company != null) {
+                    int adapterPosition = companies.indexOf(company);
+                    contactCompany.setSelection(adapterPosition);
+                }
+            }
         }
 
-        ArrayList<String> companiesList = intentBundle != null ? intentBundle.getStringArrayList(COMPANIES_KEY) : null;
-        if(companiesList != null) {
-            COMPANIES = companiesList.toArray(new String[0]);
-            inputCompany.setAdapter(new ArrayAdapter<String>(this,
-                    android.R.layout.simple_dropdown_item_1line, COMPANIES));
+        preSelectedCompany = (Company) getIntent().getParcelableExtra(PRE_SELECTED_COMPANY);
+
+        if(preSelectedCompany != null) {
+            int adapterPosition = companies.indexOf(preSelectedCompany);
+            contactCompany.setSelection(adapterPosition);
         }
 
         validator = new ContactInputValidator(this, inputLayout);
@@ -114,7 +144,7 @@ public class AddContactActivity extends AppCompatActivity {
         // Handle item selection
         switch (item.getItemId()) {
             case android.R.id.home:
-                onBackPressed();
+                showDiscardChangesDialog();
                 return true;
             case R.id.contactDone:
                 if(validator.formIsValid()) {
@@ -130,60 +160,57 @@ public class AddContactActivity extends AppCompatActivity {
         }
     }
 
+    private void showDiscardChangesDialog() {
+        AlertDialog.Builder alertDialogBuilder =
+                new AlertDialog.Builder(this)
+                        .setMessage(R.string.dialog_discard_changes_msg)
+                        .setPositiveButton("Discard", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                showParentActivity();
+                                dialogInterface.dismiss();
+                            }
+                        }).setNegativeButton("Keep editing", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+        final AlertDialog dialog = alertDialogBuilder.create();
+        dialog.show();
+    }
+
     public void addContact(){
-        String id = databaseManager.getContactsRef().push().getKey();
-        final String name = inputName.getText().toString();
-        String company = inputCompany.getText().toString().toUpperCase();
-        String email = inputEmail.getText().toString().trim();
-        String phone = inputPhone.getText().toString().trim();
-        String comment = inputComment.getText().toString();
-        String timestampAdded = Long.toString(System.currentTimeMillis());
+        final Company company = (Company) contactCompany.getSelectedItem();
 
-        if(TextUtils.isEmpty(comment)) {
-            comment = "";
-        }
+        final String id = databaseManager.getCompaniesRef().child(company.getId()).child("contacts").push().getKey();
+        final String name = contactName.getText().toString();
+        final String email = contactEmail.getText().toString().trim();
+        final String phone = contactPhone.getText().toString().trim();
+        final String comment = contactComment.getText().toString();
+        final String timestampAdded = Long.toString(System.currentTimeMillis());
 
-        Contact newContact = new Contact(id, name, company, email, phone, comment, timestampAdded);
+        final Contact newContact = new Contact(id, name, company.getId(), email, phone, comment, timestampAdded);
         newContact.setTimestampUpdated(timestampAdded);
-
-        databaseManager.addContact(newContact, new FirebaseDatabaseCallback() {
-            @Override
-            public void onSuccess() {}
-
-            @Override
-            public void onFailure(String errorMessage) {
-                Toast.makeText(app, "Failed to add new contact", Toast.LENGTH_SHORT).show();
-            }
-        });
+        databaseManager.addContact(newContact);
 
         showParentActivity();
 
     }
 
     public void updateContact(){
-        String id = oldCID;
-        String name = inputName.getText().toString();
-        String company = inputCompany.getText().toString().toUpperCase();
-        String email = inputEmail.getText().toString().trim();
-        String phone = inputPhone.getText().toString().trim();
-        String comment = inputComment.getText().toString();
-        String timestampAdded = contact.getTimestampAdded();
-        String timestampUpdated = Long.toString(System.currentTimeMillis());
+        final String id = oldCID;
+        final String name = contactName.getText().toString();
+        final Company company = (Company) contactCompany.getSelectedItem();
+        final String email = contactEmail.getText().toString().trim();
+        final String phone = contactPhone.getText().toString().trim();
+        final String comment = contactComment.getText().toString();
+        final String timestampAdded = contact.getTimestampAdded();
+        final String timestampUpdated = Long.toString(System.currentTimeMillis());
 
-        final Contact updatedContact = new Contact(id, name, company, email, phone, comment, timestampAdded);
+        final Contact updatedContact = new Contact(id, name, company.getId(), email, phone, comment, timestampAdded);
         updatedContact.setTimestampUpdated(timestampUpdated);
-
-        databaseManager.updateContact(contact, updatedContact, new FirebaseDatabaseCallback() {
-            @Override
-            public void onSuccess() {
-                Toast.makeText(app,"Contact updated", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFailure(String errorMessage) {
-                Toast.makeText(app,"Failed to update contact", Toast.LENGTH_SHORT).show();
-            }
-        });
+        databaseManager.updateContact(contact, updatedContact);
 
         showParentActivity();
 
@@ -196,15 +223,14 @@ public class AddContactActivity extends AppCompatActivity {
     }
 
     private void restUI(){
-        inputName.getText().clear();
-        inputCompany.getText().clear();
-        inputEmail.getText().clear();
-        inputPhone.getText().clear();
-        inputComment.getText().clear();
+        contactName.getText().clear();
+        contactEmail.getText().clear();
+        contactPhone.getText().clear();
+        contactComment.getText().clear();
     }
 
     @Override
     public void onBackPressed() {
-        showParentActivity();
+        showDiscardChangesDialog();
     }
 }

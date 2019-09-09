@@ -3,54 +3,48 @@ package dev.danielholmberg.improve.Activities;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import com.google.android.material.navigation.NavigationView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.UserInfo;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import dev.danielholmberg.improve.Adapters.ArchivedNotesAdapter;
+import dev.danielholmberg.improve.Adapters.CompanyRecyclerViewAdapter;
+import dev.danielholmberg.improve.Adapters.NotesAdapter;
+import dev.danielholmberg.improve.Adapters.TagsAdapter;
 import dev.danielholmberg.improve.Callbacks.FirebaseAuthCallback;
-import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback;
-import dev.danielholmberg.improve.Components.Tag;
 import dev.danielholmberg.improve.Fragments.ArchivedNotesFragment;
 import dev.danielholmberg.improve.Fragments.ContactsFragment;
 import dev.danielholmberg.improve.Fragments.NotesFragment;
@@ -66,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
     public static String CURRENT_TAG = TAG_NOTES_FRAGMENT;
 
     private Improve app;
-    private Context context;
 
     // index to identify current nav menu item
     public static int navItemIndex = 0;
@@ -95,16 +88,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        context = getApplicationContext();
         app = Improve.getInstance();
-
-        // Add a default tag to User
-        addUntaggedTagToUser();
-
-        // Getting current signed in User reference.
+        app.setMainActivityRef(this);
         currentUser = app.getAuthManager().getCurrentUser();
 
         initActivity();
+        initData();
+
+        loadCurrentFragment();
     }
 
     private void initActivity() {
@@ -124,27 +115,13 @@ public class MainActivity extends AppCompatActivity {
         mHandler = new Handler();
 
         initNavDrawer();
-
-        loadCurrentFragment();
     }
 
-    private void addUntaggedTagToUser() {
-        final String id = "Untagged";
-        String label = "Untagged";
-        String colorHex = "#" + Integer.toHexString(getResources().getColor(R.color.tagUntagged));
-        int colorInt = R.color.tagUntagged;
-
-        final Tag untaggedTag = new Tag(id, label, colorHex, colorInt);
-
-        app.getFirebaseDatabaseManager().addTag(untaggedTag, new FirebaseDatabaseCallback() {
-            @Override
-            public void onSuccess() {}
-
-            @Override
-            public void onFailure(String errorMessage) {
-                Log.e(TAG, "Failed to add default Tag to Firebase: " + errorMessage);
-            }
-        });
+    private void initData() {
+        app.setTagsAdapter(new TagsAdapter());
+        app.setNotesAdapter(new NotesAdapter());
+        app.setArchivedNotesAdapter(new ArchivedNotesAdapter());
+        app.setCompanyRecyclerViewAdapter(new CompanyRecyclerViewAdapter());
     }
 
     @Override
@@ -166,17 +143,28 @@ public class MainActivity extends AppCompatActivity {
     private void initNavDrawer() {
         // Setting the Image, Name and Email in the NavigationDrawer Header.
         navigationView = (NavigationView) findViewById(R.id.nav_view);
+        RelativeLayout drawer_header_image_layout = (RelativeLayout) navigationView.getHeaderView(0).findViewById(R.id.drawer_header_image_layout);
         ImageView drawer_header_image = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.drawer_header_image_iv);
         TextView drawer_header_name = (TextView)  navigationView.getHeaderView(0).findViewById(R.id.drawer_header_name_tv);
         TextView drawer_header_email = (TextView)  navigationView.getHeaderView(0).findViewById(R.id.drawer_header_email_tv);
 
         if(currentUser.isAnonymous()) {
-            drawer_header_image.setImageDrawable(getResources().getDrawable(R.drawable.ic_anonymous_outline_white));
+            drawer_header_image_layout.setVisibility(View.GONE);
             drawer_header_email.setVisibility(View.GONE);
             drawer_header_name.setVisibility(View.GONE);
         } else {
-            Picasso.with(this)
-                    .load(currentUser.getPhotoUrl())
+            Uri photoUri = currentUser.getPhotoUrl();
+
+            List<? extends UserInfo> providerData = currentUser.getProviderData();
+            for (UserInfo ui : providerData) {
+                if(ui.getProviderId().equals(GoogleAuthProvider.PROVIDER_ID)) {
+                    photoUri = ui.getPhotoUrl();
+                    break;
+                }
+            }
+
+            Picasso.get()
+                    .load(photoUri)
                     .error(R.drawable.ic_error_no_photo_white)
                     .transform(new CircleTransform())
                     .resize(200, 200)
@@ -221,12 +209,25 @@ public class MainActivity extends AppCompatActivity {
                         loadCurrentFragment();
                         break;
                     case R.id.nav_feedback:
+                        menuItem.setChecked(true);
                         drawer.closeDrawers();
                         drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
                             @Override
                             public void onDrawerClosed(View drawerView) {
                                 super.onDrawerClosed(drawerView);
                                 startActivity(new Intent(context, SubmitFeedbackActivity.class));
+                                drawer.removeDrawerListener(this);
+                            }
+                        });
+                        break;
+                    case R.id.nav_privacy_policy:
+                        menuItem.setChecked(true);
+                        drawer.closeDrawers();
+                        drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+                            @Override
+                            public void onDrawerClosed(View drawerView) {
+                                super.onDrawerClosed(drawerView);
+                                startActivity(new Intent(context, PrivacyPolicyActivity.class));
                                 drawer.removeDrawerListener(this);
                             }
                         });
@@ -316,8 +317,8 @@ public class MainActivity extends AppCompatActivity {
      * selected from navigation menu
      */
     private void loadCurrentFragment() {
-        // selecting appropriate nav menu item
-        selectNavMenu();
+        // set selected nav item to checked.
+        setNavItemChecked();
 
         // if currentUser select the current navigation menu again, don't do anything
         // just close the navigation drawer
@@ -335,6 +336,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 // update the main content by replacing fragments
                 Fragment fragment = getCurrentFragment();
+
                 FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
                 fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
                         android.R.anim.fade_out);
@@ -356,19 +358,27 @@ public class MainActivity extends AppCompatActivity {
         switch (navItemIndex) {
             case 0:
                 // Notes
-                return new NotesFragment();
+                NotesFragment notesFragment = new NotesFragment();
+                app.setCurrentFragment(notesFragment);
+                return notesFragment;
             case 1:
                 // Archive
-                return new ArchivedNotesFragment();
+                ArchivedNotesFragment archivedNotesFragment = new ArchivedNotesFragment();
+                app.setCurrentFragment(archivedNotesFragment);
+                return archivedNotesFragment;
             case 2:
                 // Contacts
-                return new ContactsFragment();
+                ContactsFragment contactsFragment = new ContactsFragment();
+                app.setCurrentFragment(contactsFragment);
+                return contactsFragment;
             default:
-                return new NotesFragment();
+                NotesFragment defaultFragment = new NotesFragment();
+                app.setCurrentFragment(defaultFragment);
+                return defaultFragment;
         }
     }
 
-    private void selectNavMenu() {
+    private void setNavItemChecked() {
         navigationView.getMenu().getItem(navItemIndex).setChecked(true);
     }
 
@@ -403,15 +413,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void signOutUser() {
-        if(currentUser.getProviders() != null && currentUser.getProviders().size() > 0) {
-            // The user has authenticated with some provider, eg. Google
-            String providerId = currentUser.getProviders().get(0);
-            switch (providerId) {
-                case GoogleAuthProvider.PROVIDER_ID:
-                    signOutGoogleUser();
-                    break;
-                default:
-                    break;
+        List<? extends UserInfo> providerData = currentUser.getProviderData();
+        for (UserInfo ui : providerData) {
+            if(ui.getProviderId().equals(GoogleAuthProvider.PROVIDER_ID)) {
+                app.saveState();
+                signOutGoogleUser();
             }
         }
     }
@@ -443,11 +449,14 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(String errorMessage) {}
+            public void onFailure(String errorMessage) {
+                Log.e(TAG, "Failed to sign out Anonymous user: " + errorMessage);
+            }
         });
     }
 
     private void signOutGoogleUser() {
+        Log.d(TAG, "SignOutGooleUser clicked: " + currentUser.getEmail());
         app.getAuthManager().signOutGoogleAccount(new FirebaseAuthCallback() {
             @Override
             public void onSuccess() {
@@ -455,7 +464,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(String errorMessage) {}
+            public void onFailure(String errorMessage) {
+                Log.e(TAG, "Failed to sign out Google Account: " + errorMessage);
+            }
         });
     }
 
@@ -496,6 +507,22 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }, 2000);
             }
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(app.getAuthManager().getCurrentUser() != null) {
+            app.saveState();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(app.getAuthManager().getCurrentUser() != null) {
+            app.saveState();
         }
     }
 }

@@ -1,73 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/item_note_cardview"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:focusable="true"
     android:clickable="true"
+    android:background="@color/cardInfoBackground"
+    android:layout_marginBottom="@dimen/card_item_margin"
     android:elevation="@dimen/card_elevation"
-    android:layout_marginBottom="@dimen/card_item_margin">
+    app:cardCornerRadius="@dimen/radius_note_corner">
 
     <LinearLayout
-        android:id="@+id/item_note_container"
+        android:id="@+id/item_note_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <LinearLayout
-            android:id="@+id/item_note_marker"
-            android:orientation="vertical"
-            android:layout_width="@dimen/note_item_marker_width"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:elevation="@dimen/card_toolbar_elevation"
-            android:background="@color/tagUntagged"/>
-
-        <LinearLayout
-            android:id="@+id/item_note_content"
+        <RelativeLayout
+            android:id="@+id/item_note_body_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="@dimen/note_item_body_padding"
-            android:background="@color/cardInfoBackground">
+            android:padding="@dimen/note_item_body_padding">
 
-            <RelativeLayout
-                android:id="@+id/item_note_body_content"
+            <TextView
+                android:id="@+id/item_note_title_tv"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:maxLines="@integer/note_item_title_max_lines"
+                android:ellipsize="marquee"
+                android:text="@string/hint_title"
+                android:textStyle="bold"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"/>
 
-                <TextView
-                    android:id="@+id/item_note_title_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:paddingBottom="@dimen/note_title_padding"
-                    android:maxLines="@integer/note_item_title_max_lines"
-                    android:ellipsize="marquee"
-                    android:text="@string/hint_title"
-                    android:textStyle="bold"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentStart="true"/>
+            <TextView
+                android:id="@+id/item_note_info_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/note_title_padding"
+                android:ellipsize="marquee"
+                android:maxLines="@integer/note_item_info_max_lines"
+                android:text="@string/hint_info"
+                android:visibility="gone"
+                android:layout_below="@id/item_note_title_tv"
+                android:layout_alignParentStart="true"/>
 
-                <TextView
-                    android:id="@+id/item_note_info_tv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="@integer/note_item_info_max_lines"
-                    android:paddingBottom="@dimen/note_item_body_padding"
-                    android:text="@string/hint_info"
-                    android:layout_below="@id/item_note_title_tv"
-                    android:layout_alignParentStart="true"/>
+        </RelativeLayout>
 
-            </RelativeLayout>
-
-            <include
-                android:id="@+id/footer_note"
-                layout="@layout/footer_item_note" />
-        </LinearLayout>
+        <include
+            android:id="@+id/footer_note"
+            layout="@layout/footer_item_note"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/footer_note_margin"
+            android:layout_marginBottom="@dimen/footer_note_margin"
+            android:layout_marginEnd="@dimen/footer_note_margin"
+            android:visibility="gone"/>
 
     </LinearLayout>
 
-</android.support.v7.widget.CardView>
+</androidx.cardview.widget.CardView>

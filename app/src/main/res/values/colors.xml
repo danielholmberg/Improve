@@ -12,15 +12,16 @@
     <color name="windowBackground">#80DEEA</color>              <!-- Cyan 200 -->
     <color name="cardBackground">#ffffff</color>                <!-- White -->
     <color name="colorNavigationBackground">#ffffff</color>     <!-- White -->
+    <color name="dialogBackgroundColor">#ffffff</color>
+    <color name="menuBackgroundColor">@color/dialogBackgroundColor</color>
 
     <color name="emptyListTextColor">#80FFFFFF</color>          <!-- 80% White -->
     <color name="editTextTint">#00ffffff</color>                <!-- Transparent -->
     <color name="cardInfoBackground">#FAFAFA</color>            <!-- Grey 50 -->
-    <color name="iconColorWhite">#FFFFFFFF</color>              <!-- White -->
+    <color name="iconColorWhite">#FFFFFF</color>              <!-- White -->
 
     <!-- Note colors -->
     <color name="cardTitleColor">#FFFFFFFF</color>              <!-- White -->
-    <color name="doneMarkerColor">#388E3C</color>               <!-- Green 700 -->
     <color name="note_form_icon">#FFE0E0E0</color>              <!-- Grey 300 -->
     <color name="note_icon_grey">#FFE0E0E0</color>
 
@@ -30,26 +31,23 @@
     <color name="cardFooterColor">#FFFFFFFF</color>             <!-- White -->
     <color name="contact_form_icon">#E0E0E0</color>             <!-- Grey 300 -->
 
-    <!-- [Not in use] Tag colors -->
-    <color name="tagLightGreen">#C5E1A5</color>
-    <color name="tagAmber">#FFE082</color>
-    <color name="tagDeepOrange">#FFAB91</color>
-    <color name="tagBrown">#8D6E63</color>
-    <color name="tagTurquoise">#8FE8D2</color>
-    <color name="tagPink">#F48FB1</color>
-    <color name="tagDeepPurple">#B39DDB</color>
-
     <!-- [In use] Tag colors -->
-    <color name="tagBlueGrey">#B0BEC5</color>
-    <color name="tagDarkGrey">#424242</color>
-    <color name="tagGreen">#00C853</color>
-    <color name="tagRed">#ff1744</color>
-    <color name="tagPurple">#D500F9</color>
-    <color name="tagBlue">#2979FF</color>
-    <color name="tagDarkOrange">#f57c00</color>
-    <color name="tagBabyBlue">#89cff0</color>
-
-    <color name="noColor">#FFE0E0E0</color>
-    <color name="tagUntagged">#FFE0E0E0</color>
+    <color name="tagColor1">#424242</color>
+    <color name="tagColor2">#C2185B</color>
+    <color name="tagColor3">#7B1FA2</color>
+    <color name="tagColor4">#0288D1</color>
+    <color name="tagColor5">#0097A7</color>
+    <color name="tagColor6">#827717</color>
+    <color name="tagColor7">#388E3C</color>
+    <color name="tagColor8">#AFB42B</color>
+    <color name="tagTextColor">#FFFFFF</color>
+    <color name="tagInputBgColor">@color/cardBackground</color>
+    <color name="tagColorNull">#00FFFFFF</color>
+    <color name="tagTextColorNull">@color/colorAccent</color>
+    <color name="search_text_color">#FFFFFF</color>
+    <color name="search_hint_color">#50FFFFFF</color>
+    <color name="tagEnabledIndicatorColor">#81C784</color>
+    <color name="tagDeleteColor">#F30202</color>
+    <color name="tagDeleteBackground">#e0e0e0</color>
 
 </resources>

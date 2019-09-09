@@ -1,9 +1,8 @@
 package dev.danielholmberg.improve.Managers;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -21,7 +20,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
 
 import dev.danielholmberg.improve.Callbacks.FirebaseAuthCallback;
 import dev.danielholmberg.improve.Improve;
@@ -162,10 +160,11 @@ public class AuthManager {
     }
 
     public void signOutGoogleAccount(final FirebaseAuthCallback callback) {
-        googleSignInClient.signOut()
+        this.googleSignInClient.signOut()
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "*** Successfully Signed out Google Account");
                         fireAuth.signOut();
                         callback.onSuccess();
                     }

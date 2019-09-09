@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingTop="@dimen/paddingDefault"
+    android:paddingStart="@dimen/paddingDefault"
+    android:paddingEnd="@dimen/paddingDefault"
+    android:paddingBottom="@dimen/paddingTiny"
+    android:background="@color/dialogBackgroundColor"
+    android:descendantFocusability="beforeDescendants">
+
+    <RelativeLayout
+        android:id="@+id/tag_input_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/tag_input_bg"
+        android:padding="@dimen/paddingTiny">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tag_input_title_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/tag_label_counter_current"
+            android:background="@null">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/tag_label_et"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_tag_label"
+                android:inputType="textCapCharacters"
+                android:maxLength="@integer/tag_label_max_length"
+                android:layout_margin="@dimen/note_title_padding"
+                android:textAllCaps="true"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/tag_label_counter_current"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tag_label_counter_initial"
+            android:layout_toStartOf="@id/tag_label_counter_delimiter"
+            android:layout_centerVertical="true"/>
+        <TextView
+            android:id="@+id/tag_label_counter_delimiter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="2dp"
+            android:text="@string/tag_label_counter_delimiter"
+            android:paddingEnd="2dp"
+            android:layout_toStartOf="@id/tag_label_counter_limit"
+            android:layout_centerVertical="true"/>
+        <TextView
+            android:id="@+id/tag_label_counter_limit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@integer/tag_label_max_length"
+            android:layout_toStartOf="@id/create_tag_btn"
+            android:layout_centerVertical="true"/>
+
+        <ImageButton
+            android:id="@+id/create_tag_btn"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/ic_tag_add"
+            android:layout_margin="@dimen/paddingTiny"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"/>
+
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/tag_color_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_below="@id/tag_input_title_layout"
+            app:flexWrap="wrap"
+            app:alignItems="stretch"
+            app:alignContent="stretch"
+            app:justifyContent="center">
+
+            <ImageButton
+                android:id="@+id/tag_no_color"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/ic_tag_no_color"/>
+            <ImageButton
+                android:id="@+id/tag_color_1"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/ic_tag_1"/>
+            <ImageButton
+                android:id="@+id/tag_color_2"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/ic_tag_2"/>
+            <ImageButton
+                android:id="@+id/tag_color_3"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/ic_tag_3"/>
+            <ImageButton
+                android:id="@+id/tag_color_4"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/ic_tag_4"/>
+            <ImageButton
+                android:id="@+id/tag_color_5"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/ic_tag_5"/>
+            <ImageButton
+                android:id="@+id/tag_color_6"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/ic_tag_6"/>
+            <ImageButton
+                android:id="@+id/tag_color_7"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/ic_tag_7"/>
+            <ImageButton
+                android:id="@+id/tag_color_8"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="@drawable/ic_tag_8"/>
+
+        </com.google.android.flexbox.FlexboxLayout>
+
+    </RelativeLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/existing_tags_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:requiresFadingEdge="vertical"
+        android:fadingEdgeLength="32dp"
+        android:scrollbars="vertical"
+        android:layout_below="@id/tag_input_container"/>
+
+</RelativeLayout>

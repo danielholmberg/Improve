@@ -1,18 +1,21 @@
 package dev.danielholmberg.improve.Fragments;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -20,24 +23,19 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
-import java.text.DateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
+import java.util.List;
 
 import dev.danielholmberg.improve.Activities.AddNoteActivity;
-import dev.danielholmberg.improve.Components.Note;
-import dev.danielholmberg.improve.Components.Tag;
+import dev.danielholmberg.improve.Activities.MainActivity;
+import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 import dev.danielholmberg.improve.R;
@@ -46,7 +44,7 @@ import dev.danielholmberg.improve.R;
  * Created by DanielHolmberg on 2018-01-20.
  */
 
-public class NotesFragment extends Fragment {
+public class NotesFragment extends Fragment implements SearchView.OnQueryTextListener {
     private static final String TAG = NotesFragment.class.getSimpleName();
 
     private Improve app;
@@ -54,12 +52,11 @@ public class NotesFragment extends Fragment {
     private Context context;
 
     private View view;
+    private CoordinatorLayout snackbarView;
     private RecyclerView notesRecyclerView;
-    private String noteListOrderBy = "timestampUpdated";
+    private LinearLayoutManager recyclerLayoutManager;
     private TextView emptyListText;
     private FloatingActionButton fab;
-
-    private FirebaseRecyclerAdapter recyclerAdapter;
 
     public NotesFragment() {
         // Required empty public constructor
@@ -73,8 +70,6 @@ public class NotesFragment extends Fragment {
         this.context = getContext();
         databaseManager = app.getFirebaseDatabaseManager();
         setHasOptionsMenu(true);
-
-        loadTagsFromFirebase();
     }
 
     @Nullable
@@ -84,35 +79,50 @@ public class NotesFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_notes,
                 container, false);
 
-        // Initialize View components to be used.
+        snackbarView = view.findViewById(R.id.note_fragment_container);
+
         notesRecyclerView = (RecyclerView) view.findViewById(R.id.notes_list);
         emptyListText = (TextView) view.findViewById(R.id.empty_notes_list_tv);
         fab = (FloatingActionButton) view.findViewById(R.id.add_note);
 
-        // Initialize the LinearLayoutManager
-        LinearLayoutManager recyclerLayoutManager = new LinearLayoutManager(getActivity());
+        recyclerLayoutManager = new LinearLayoutManager(getActivity());
         recyclerLayoutManager.setReverseLayout(true);
         recyclerLayoutManager.setStackFromEnd(true);
         notesRecyclerView.setLayoutManager(recyclerLayoutManager);
 
-        // Setting RecyclerAdapter to RecyclerList.
-        setUpAdapter();
+        notesRecyclerView.setAdapter(app.getNotesAdapter());
 
-        // Add a OnScrollListener to change when to show the Floating Action Button for adding
-        // a new Note.
+        initListScrollListener();
+        initListDataChangeListener();
+
+        return view;
+    }
+
+    private void initListScrollListener() {
         notesRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener(){
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy){
-                if (dy>0 && fab.isShown())
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0 && fab.isShown()) {
                     // Hide the FAB when the user scrolls down.
                     fab.hide();
-                if(dy<0 && !fab.isShown())
-                    // Show the FAB when the user scrolls up.
-                    fab.show();
+                }
+
+                if(!recyclerView.canScrollVertically(-1)) {
+                    // we have reached the top of the list
+                    app.getMainActivityRef().findViewById(R.id.toolbar_dropshadow).setVisibility(View.GONE);
+                } else {
+                    // we are not at the top yet
+                    app.getMainActivityRef().findViewById(R.id.toolbar_dropshadow).setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    // Show the FAB when the user has stopped scrolling.
+                    fab.show();
+                }
+
                 super.onScrollStateChanged(recyclerView, newState);
             }
         });
@@ -123,44 +133,55 @@ public class NotesFragment extends Fragment {
                 addNote();
             }
         });
-
-        return view;
     }
 
-    /*
-    Loads Tags from Firebase and adding the retrieved list to global variable.
-     */
-    private void loadTagsFromFirebase() {
-        databaseManager.getTagRef().addValueEventListener(new ValueEventListener() {
+    private void initListDataChangeListener() {
+        databaseManager.getNotesRef().addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                HashMap<String, Tag> tagHashMap = new HashMap<>();
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                if(app.getNotesAdapter().getItemCount() > 0) {
+                    notesRecyclerView.setVisibility(View.VISIBLE);
+                    emptyListText.setVisibility(View.GONE);
 
-                for(DataSnapshot tagSnapshot: dataSnapshot.getChildren()) {
-                    Tag tagAdded = tagSnapshot.getValue(Tag.class);
+                    // Scroll to the "top" (bottom) to show changed Note.
+                    notesRecyclerView.scrollToPosition(app.getNotesAdapter().getItemCount()-1);
+                } else {
+                    notesRecyclerView.setVisibility(View.GONE);
+                    emptyListText.setVisibility(View.VISIBLE);
+                }
+            }
 
-                    if (tagAdded != null) {
-                        tagHashMap.put(tagAdded.getTagId(), tagAdded);
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                final Note removedNote = dataSnapshot.getValue(Note.class);
+
+                if(removedNote != null) {
+                    if(app.getArchivedNotes().containsKey(removedNote.getId())) {
+                        // Note is Archived and not truly deleted.
+                        Snackbar.make(snackbarView,
+                                "Note archived", Snackbar.LENGTH_LONG)
+                                .setAction("UNDO", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        databaseManager.unarchiveNote(removedNote);
+                                    }
+                                }).show();
+                    } else {
+                        Snackbar.make(snackbarView,
+                                "Note deleted", Snackbar.LENGTH_LONG)
+                                .setAction("UNDO", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        databaseManager.addNote(removedNote);
+                                    }
+                                }).show();
                     }
                 }
 
-                app.setTagHashMap(tagHashMap);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void setUpAdapter() {
-        Query query = databaseManager.getNotesRef().orderByChild(noteListOrderBy);
-
-        query.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.hasChildren()) {
+                if(app.getNotesAdapter().getItemCount() > 0) {
                     notesRecyclerView.setVisibility(View.VISIBLE);
                     emptyListText.setVisibility(View.GONE);
                 } else {
@@ -170,108 +191,11 @@ public class NotesFragment extends Fragment {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e(TAG, "Failed to retrieve Firebase data for NotesRef: " + databaseError);
-            }
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {}
         });
-
-        Query queryTags = databaseManager.getTagRef();
-
-        FirebaseRecyclerOptions<Note> options =
-                new FirebaseRecyclerOptions.Builder<Note>()
-                        .setQuery(query, Note.class)
-                        .build();
-
-        recyclerAdapter = new FirebaseRecyclerAdapter<Note, NoteViewHolder>(options) {
-
-            @NonNull
-            @Override
-            public NoteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                View view = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.item_note, parent, false);
-
-                return new NoteViewHolder(view);
-            }
-
-            @Override
-            protected void onBindViewHolder(@NonNull NoteViewHolder holder, int position, @NonNull Note model) {
-                holder.bindModelToView(model);
-            }
-        };
-
-        recyclerAdapter.startListening();
-        notesRecyclerView.setAdapter(recyclerAdapter);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_notes, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.sort_notes_by_title_alphabetical:
-                sortNotesByTitle();
-                return true;
-            case R.id.sort_notes_by_timestamp_updated:
-                sortNotesByLastUpdated();
-                return true;
-            case R.id.filter_notes_by_tag:
-                showFilterDialog();
-                return true;
-            default:
-                break;
-        }
-        return false;
-    }
-
-    private void showFilterDialog() {
-        View filterDialogView = getLayoutInflater().inflate(R.layout.dialog_filter_tag, null, false);
-
-        final AlertDialog addNewTagDialog = new AlertDialog.Builder(context)
-                .setView(filterDialogView)
-                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        // TODO - Let user choose which Tag to show.
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.cancel();
-                    }
-                })
-                .create();
-        addNewTagDialog.show();
-    }
-
-    private void filterNotesByTag() {
-        noteListOrderBy = "color";
-        setUpAdapter();
-    }
-
-    private void sortNotesByLastUpdated() {
-        noteListOrderBy = "timestampUpdated";
-        setUpAdapter();
-    }
-
-    private void sortNotesByTitle() {
-        noteListOrderBy = "title";
-        setUpAdapter();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        recyclerAdapter.startListening();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        recyclerAdapter.stopListening();
     }
 
     /**
@@ -282,114 +206,60 @@ public class NotesFragment extends Fragment {
         startActivity(addNoteIntent);
     }
 
-    /**
-     * ViewHolder class for each RecyclerList item.
-     */
-    public class NoteViewHolder extends RecyclerView.ViewHolder {
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.fragment_notes, menu);
+    }
 
-        private View mView;
-        private Context context;
-        private Note note;
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.search_note:
+                SearchView searchView = (SearchView) item.getActionView();
+                searchView.setQueryHint("Search Note");
+                searchView.setOnQueryTextListener(this);
 
-        public NoteViewHolder(View itemView) {
-            super(itemView);
-            mView = itemView;
-            context = itemView.getContext();
-        }
+                EditText searchEditText = (EditText) searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+                searchEditText.setTextColor(getResources().getColor(R.color.search_text_color));
+                searchEditText.setHintTextColor(getResources().getColor(R.color.search_hint_color));
+                searchEditText.setCursorVisible(false);
 
-        // OBS! Due to RecyclerView:
-        // We need to define all views of each note!
-        // Otherwise each note view won't be unique.
-        public void bindModelToView(final Note note) {
-            this.note = note;
-
-            // [START] All views of a contact
-            final LinearLayout marker = (LinearLayout) mView.findViewById(R.id.item_note_marker);
-            TextView title = (TextView) mView.findViewById(R.id.item_note_title_tv);
-            TextView info = (TextView) mView.findViewById(R.id.item_note_info_tv);
-
-            View footer = (View) mView.findViewById(R.id.footer_note);
-            TextView timestamp = (TextView) mView.findViewById(R.id.footer_note_timestamp_tv);
-            // [END] All views of a note
-
-            // [START] Define each view
-            title.setText(note.getTitle());
-            info.setText(note.getInfo());
-            timestamp.setText(tranformMillisToDateSring(Long.parseLong(note.getTimestampUpdated())));
-
-            // Retrieve the Tag related to this Note.
-            // Then set the marker color based on that Tag.
-            if(note.getTagId() != null) {
-                // Retrieve tag-details
-                databaseManager.getTagRef().child(note.getTagId()).addValueEventListener(new ValueEventListener() {
+                item.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        Tag tag = dataSnapshot.getValue(Tag.class);
-
-                        // Assert marker color with the retrieved tag-information.
-                        if(tag != null && tag.getColorHex() != null) {
-                            marker.setBackgroundColor(Color.parseColor(tag.getColorHex()));
-                        } else {
-                            marker.setBackgroundColor(getResources().getColor(R.color.tagUntagged));
-                        }
+                    public boolean onMenuItemActionExpand(MenuItem menuItem) {
+                        Log.d(TAG, "Search opened!");
+                        app.getNotesAdapter().initSearch();
+                        return true;
                     }
 
                     @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        marker.setBackgroundColor(getResources().getColor(R.color.tagUntagged));
+                    public boolean onMenuItemActionCollapse(MenuItem menuItem) {
+                        Log.d(TAG, "Search closed!");
+                        app.getNotesAdapter().clearFilter();
+                        return true;
                     }
                 });
-            } else {
-                marker.setBackgroundColor(getResources().getColor(R.color.tagUntagged));
-            }
 
-            // Change the Note layout to match current fragment.
-            // If the Note is Archived or not.
-            if(note.getArchived()) {
-                info.setVisibility(View.GONE);
-                footer.setVisibility(View.GONE);
-                marker.setLayoutParams(new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            } else {
-                if(info.getText().toString().trim().isEmpty()){
-                    info.setVisibility(View.GONE);
-                } else {
-                    info.setVisibility(View.VISIBLE);
-                }
-                footer.setVisibility(View.VISIBLE);
-            }
-            // [END] Define each view
-
-            mView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    showNoteDetailDialog();
-                }
-            });
+                return true;
+            default:
+                break;
         }
+        return false;
+    }
 
-        private void showNoteDetailDialog() {
-            FragmentManager fm = getFragmentManager();
-            NoteDetailsDialogFragment noteDetailsDialogFragment = NoteDetailsDialogFragment.newInstance();
-            noteDetailsDialogFragment.setContext(context);
-            noteDetailsDialogFragment.setArguments(createBundle(note, getAdapterPosition()));
-            
-            noteDetailsDialogFragment.show(fm, NoteDetailsDialogFragment.TAG);
-        }
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        Log.d(TAG, "Query Submitted: " + query);
+        return true;
+    }
 
-        private String tranformMillisToDateSring(long timeInMillis) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(timeInMillis);
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        Log.d(TAG, "Query Inserted: " + newText);
 
-            return DateFormat.getDateTimeInstance().format(calendar.getTime());
-        }
+        app.getNotesAdapter().filter(newText);
+        notesRecyclerView.scrollToPosition(app.getNotesAdapter().getItemCount()-1);
 
-        private Bundle createBundle(Note note, int itemPos) {
-            Bundle bundle = new Bundle();
-            bundle.putSerializable(NoteDetailsDialogFragment.NOTE_KEY, note);
-            bundle.putInt(NoteDetailsDialogFragment.NOTE_PARENT_FRAGMENT_KEY, R.integer.NOTES_FRAGMENT);
-            bundle.putInt(NoteDetailsDialogFragment.NOTE_ADAPTER_POS_KEY, itemPos);
-            return bundle;
-        }
+        return true;
     }
 }

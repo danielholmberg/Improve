@@ -1,11 +1,9 @@
 package dev.danielholmberg.improve.Utilities;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import com.google.android.material.textfield.TextInputEditText;
+
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.WindowManager;
@@ -23,11 +21,11 @@ public class NoteInputValidator {
     private Context context;
     private EditText inputTitle;
 
-    public NoteInputValidator(Context context, View inputLayoutConatiner) {
+    public NoteInputValidator(Context context, View inputTitleLayout) {
         this.context = context;
 
         // Input Components
-        inputTitle = (TextInputEditText) inputLayoutConatiner.findViewById(R.id.input_title);
+        inputTitle = (EditText) inputTitleLayout.findViewById(R.id.input_title);
     }
 
     /**

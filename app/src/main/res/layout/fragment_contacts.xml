@@ -8,7 +8,7 @@
     android:orientation="vertical"
     android:fitsSystemWindows="true">
 
-    <android.support.design.widget.CoordinatorLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/contacts_fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -18,25 +18,38 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/empty_contact_list_text"
+            android:layout_marginTop="?attr/actionBarSize"
             android:paddingTop="64dp"
             android:textSize="28sp"
             android:textColor="@color/emptyListTextColor"
             android:gravity="center_horizontal"/>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/contacts_list"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/company_recycler_view"
             android:scrollbars="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingStart="@dimen/contact_list_padding"
-            android:paddingTop="@dimen/contact_list_padding"
-            android:paddingEnd="@dimen/contact_list_padding"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:paddingTop="@dimen/note_list_padding"
+            android:paddingStart="@dimen/note_list_padding"
+            android:paddingEnd="@dimen/note_list_padding"
             android:clipToPadding="false"
             android:scrollbarStyle="outsideOverlay"
+            android:overScrollMode="always"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"/>
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/add_company"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/ic_fab_add_company_white" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/add_contact"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -47,7 +60,18 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_fab_add_contact_white" />
 
-    </android.support.design.widget.CoordinatorLayout>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/ic_fab_add_white" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <!-- Bottom sheet for contact details -->
     <include layout="@layout/fragment_contact_details"/>

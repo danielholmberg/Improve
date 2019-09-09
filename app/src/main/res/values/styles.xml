@@ -6,7 +6,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <!-- a darker variant of the primary color, used for
            the status bar (on Android 5.0+) and contextual app bars -->
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimaryDark">@android:color/transparent</item>
         <!-- a secondary color for controls like checkboxes and text fields -->
         <item name="colorAccent">@color/colorAccent</item>
         <!-- color for the back-button and other controls -->
@@ -16,6 +16,23 @@
         <!-- enable window content transitions -->
         <item name="android:windowActivityTransitions">true</item>
         <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
+        <!-- custom font family -->
+        <item name="android:fontFamily">@font/m_plus_rounded_1c_medium</item>
+        <item name="fontFamily">@font/m_plus_rounded_1c_medium</item>
+        <item name="dialogCornerRadius">@dimen/radius_dialog_corner</item>
+
+        <item name="android:actionOverflowMenuStyle">@style/CustomActionOverflowMenuStyle</item>
+        <item name="actionOverflowMenuStyle">@style/CustomActionOverflowMenuStyle</item>
+        <item name="popupMenuStyle">@style/CustomPopupMenuStyle</item>
+        <item name="android:popupMenuStyle">@style/CustomPopupMenuStyle</item>
+    </style>
+
+    <style name="CustomActionOverflowMenuStyle" parent="@style/Widget.AppCompat.PopupMenu.Overflow">
+        <item name="android:popupBackground">@drawable/menu_background</item>
+    </style>
+
+    <style name="CustomPopupMenuStyle" parent="@style/Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@drawable/menu_background</item>
     </style>
 
     <!-- [Base] Toolbar label text style -->
@@ -36,6 +53,7 @@
         <item name="android:letterSpacing">0.5</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/m_plus_rounded_1c_extra_bold</item>
     </style>
 
     <!-- Activity WindowTransitions -->

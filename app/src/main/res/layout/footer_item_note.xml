@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:id="@+id/footer_note"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/footer_note"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-    <TextView
-        android:id="@+id/footer_note_timestamp_tv"
-        android:layout_width="wrap_content"
+    android:gravity="center_vertical">
+    <com.google.android.flexbox.FlexboxLayout
+        android:id="@+id/footer_note_tags_list"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textStyle="italic"
-        android:textSize="@dimen/footer_note_details_timestamp_text_size" />
+        android:orientation="horizontal"
+        app:flexWrap="wrap"
+        app:alignItems="stretch"
+        app:alignContent="stretch">
+
+    </com.google.android.flexbox.FlexboxLayout>
 </RelativeLayout>

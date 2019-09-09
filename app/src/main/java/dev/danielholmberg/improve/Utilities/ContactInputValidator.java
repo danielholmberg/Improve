@@ -1,16 +1,16 @@
 package dev.danielholmberg.improve.Utilities;
 
 import android.content.Context;
-import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Patterns;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 
+import dev.danielholmberg.improve.Models.Company;
 import dev.danielholmberg.improve.R;
 
 /**
@@ -23,21 +23,23 @@ public class ContactInputValidator {
     private View inputLayoutContainer;
     private Context context;
 
-    private EditText inputName, inputCompany, inputEmail, inputPhone;
+    private EditText inputName, inputEmail, inputPhone;
+    private Spinner spinnerCompany;
+    private Button addCompanyBtn;
 
     public ContactInputValidator(Context context, View inputLayoutContainer) {
         this.context = context;
         this.inputLayoutContainer = (View) inputLayoutContainer;
 
         inputName = (EditText) inputLayoutContainer.findViewById(R.id.input_name);
-        inputCompany = (EditText) inputLayoutContainer.findViewById(R.id.input_company);
+        spinnerCompany = (Spinner) inputLayoutContainer.findViewById(R.id.spinner_company);
         inputEmail = (EditText) inputLayoutContainer.findViewById(R.id.input_email);
         inputPhone = (EditText) inputLayoutContainer.findViewById(R.id.input_mobile);
     }
 
     /**
-     * Validating new contact form (should at least contain Name and Company)
-     * return true if both Name- and Company-field is not empty.
+     * Validating new contact form.
+     * return true if both Name is not empty and each additional input is correct format.
      */
     public boolean formIsValid() {
         return validateName() && validateCompany() && validateEmail() && validatePhone();
@@ -60,20 +62,16 @@ public class ContactInputValidator {
         return true;
     }
 
-    /**
-     * REQUIRED FIELD
-     * Validate if the user has entered a company.
-     * @return false company field is empty.
-     */
     private boolean validateCompany() {
-        String company = inputCompany.getText().toString().trim();
+        Company selectedCompany = (Company) spinnerCompany.getSelectedItem();
+        if(selectedCompany == null) {
+            requestFocus(spinnerCompany);
 
-        if (TextUtils.isEmpty(company)) {
-            inputCompany.setError(context.getString(R.string.err_msg_company));
-            requestFocus(inputCompany);
+            if (spinnerCompany.getChildCount() > 0) {
+                spinnerCompany.performClick();
+            }
             return false;
         }
-
         return true;
     }
 
