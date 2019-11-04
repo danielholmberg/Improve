@@ -302,6 +302,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     private void showAddNewTagDialog() {
         View addDialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_tag, null, false);
 
+        final RelativeLayout tagInputContainer = (RelativeLayout) addDialogView.findViewById(R.id.tag_input_container);
         final TextInputEditText labelEditText = (TextInputEditText) addDialogView.findViewById(R.id.tag_label_et);
         final ImageButton createTagButton = (ImageButton) addDialogView.findViewById(R.id.create_tag_btn);
         final RecyclerView existingTagsListView = (RecyclerView) addDialogView.findViewById(R.id.existing_tags_list);
@@ -358,6 +359,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         tagsAdapter.removeCurrentNote();
                         tagsAdapter.setEditMode(false);
+                        tagInputContainer.setVisibility(View.VISIBLE);
                         renderTagList();
                         dialogInterface.dismiss();
                     }
@@ -370,12 +372,14 @@ public class NoteDetailsDialogFragment extends DialogFragment {
             public void onClick(View view) {
                 final View.OnClickListener listener = this;
                 tagsAdapter.setEditMode(true);
+                tagInputContainer.setVisibility(View.GONE);
                 renderTagList();
                 addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setText("Stop Edit");
                 addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         tagsAdapter.setEditMode(false);
+                        tagInputContainer.setVisibility(View.VISIBLE);
                         renderTagList();
                         addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setText("Edit Tags");
                         addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(listener);
