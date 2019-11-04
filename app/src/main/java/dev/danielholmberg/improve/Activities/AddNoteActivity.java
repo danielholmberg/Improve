@@ -126,6 +126,15 @@ public class AddNoteActivity extends AppCompatActivity {
                     addNote();
                 }
                 return true;
+            case R.id.starNote:
+                newNote.setStared(!newNote.isStared());
+                if(newNote.isStared()) {
+                    item.setIcon(R.drawable.ic_star_enabled_accent);
+                    item.setTitle(R.string.menu_note_star_disable);
+                } else {
+                    item.setIcon(R.drawable.ic_star_disabled_accent);
+                    item.setTitle(R.string.menu_note_star_enable);
+                }
             default:
                 return super.onOptionsItemSelected(item);
         }

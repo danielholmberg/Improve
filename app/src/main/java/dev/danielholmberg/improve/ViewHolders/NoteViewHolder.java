@@ -89,6 +89,13 @@ public class NoteViewHolder extends RecyclerView.ViewHolder {
 
         }
 
+        // Stared
+        if(note.isStared()) {
+            itemView.setBackground(Improve.getInstance().getDrawable(R.drawable.background_note_stared));
+        } else {
+            itemView.setBackground(Improve.getInstance().getDrawable(R.drawable.background_note));
+        }
+
         // Set OnClickListener to display a DialogFragment to show all the details.
         itemView.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -177,6 +177,14 @@ public class ArchivedNotesFragment extends Fragment implements SearchView.OnQuer
                 SearchView searchView = (SearchView) item.getActionView();
                 searchView.setQueryHint("Search Archived Note");
                 searchView.setOnQueryTextListener(this);
+                searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+                    @Override
+                    public boolean onClose() {
+                        Log.d(TAG, "Search closed!");
+                        app.getArchivedNotesAdapter().clearFilter();
+                        return true;
+                    }
+                });
 
                 EditText searchEditText = (EditText) searchView.findViewById(androidx.appcompat.R.id.search_src_text);
                 searchEditText.setTextColor(getResources().getColor(R.color.search_text_color));

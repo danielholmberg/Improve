@@ -1,11 +1,8 @@
 package dev.danielholmberg.improve.Fragments;
 
-import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -21,7 +18,6 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import androidx.fragment.app.DialogFragment;
-import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -64,7 +60,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
     public static final String NOTE_PARENT_FRAGMENT_KEY = "parentFragment";
     public static final String NOTE_ADAPTER_POS_KEY = "adapterItemPos";
-    public static final String NOTE_KEY = "note";
+    public static final String NOTE_KEY = "originalNote";
     private static final String EXPORTED_NOTE_DIRECTORY_PATH = "Notes";
     private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
@@ -77,7 +73,8 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     private Toolbar toolbar;
 
     private Bundle noteBundle;
-    private Note note;
+    private Note originalNote;
+    private boolean isOriginallyStared;
     private int parentFragment;
 
     private ProgressDialog exportDialog;
@@ -112,7 +109,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
         if(noteBundle != null) {
             parentFragment = noteBundle.getInt(NOTE_PARENT_FRAGMENT_KEY);
-            note = (Note) noteBundle.getParcelable(NOTE_KEY);
+            originalNote = (Note) noteBundle.getParcelable(NOTE_KEY);
         } else {
             Toast.makeText(context, "Failed to show Note details, please try again",
                     Toast.LENGTH_SHORT).show();
@@ -154,6 +151,10 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                     switch (item.getItemId()) {
                         case R.id.addTag:
                             showAddNewTagDialog();
+                            return true;
+                        case R.id.starNote:
+                            originalNote.setStared(!originalNote.isStared());
+                            createOptionsMenu();
                             return true;
                         case R.id.noteDone:
                             if (validator.formIsValid()) {
@@ -202,9 +203,9 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
         toggleMode(editMode);
 
-        if(note != null) {
+        if(originalNote != null) {
             populateNoteDetails();
-            oldTags = new HashMap<String, Boolean>(note.getTags());
+            oldTags = new HashMap<String, Boolean>(originalNote.getTags());
         } else {
             Toast.makeText(context, "Unable to show Note details", Toast.LENGTH_SHORT).show();
             dismissDialog();
@@ -235,6 +236,14 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                     showDiscardChangesDialog();
                 }
             });
+
+            if(originalNote.isStared()) {
+                menu.findItem(R.id.starNote).setIcon(R.drawable.ic_star_enabled_accent);
+                menu.findItem(R.id.starNote).setTitle(R.string.menu_note_star_disable);
+            } else {
+                menu.findItem(R.id.starNote).setIcon(R.drawable.ic_star_disabled_accent);
+                menu.findItem(R.id.starNote).setTitle(R.string.menu_note_star_enable);
+            }
 
         } else {
 
@@ -268,10 +277,11 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 editMode = false;
                                 toggleMode(editMode);
+                                originalNote.setStared(isOriginallyStared);
+
+                                originalNote.setTags(oldTags);
+
                                 createOptionsMenu();
-
-                                note.setTags(oldTags);
-
                                 populateNoteDetails();
                                 dialogInterface.dismiss();
                             }
@@ -336,7 +346,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
             }
         });
 
-        tagsAdapter.setCurrentNote(note);
+        tagsAdapter.setCurrentNote(originalNote);
 
         final AlertDialog addNewTagDialog = new AlertDialog.Builder(context)
                 .setTitle(R.string.menu_tag_add)
@@ -399,7 +409,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                 databaseManager.addTag(newTag);
                 tagsAdapter.addTag(newTag);
 
-                note.addTag(newTag.getId());
+                originalNote.addTag(newTag.getId());
                 newTags.add(newTag.getId());
 
                 // Only update the List of Tags to keep all other edited information in check.
@@ -525,6 +535,8 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         inputInfo.setEnabled(editMode);
 
         if(editMode) {
+            isOriginallyStared = originalNote.isStared();
+
             inputInfo.setVisibility(View.VISIBLE);
             inputTitle.requestFocus();
             getDialog().setCancelable(false);
@@ -542,20 +554,20 @@ public class NoteDetailsDialogFragment extends DialogFragment {
      * Sets all the necessary detailed information about the Note.
      */
     private void populateNoteDetails() {
-        noteId = note.getId();
-        noteTitle = note.getTitle();
-        noteInfo = note.getInfo();
+        noteId = originalNote.getId();
+        noteTitle = originalNote.getTitle();
+        noteInfo = originalNote.getInfo();
 
-        if(note.getAdded() != null) {
-            noteTimestampAdded = tranformMillisToDateSring(Long.parseLong(note.getAdded()));
+        if(originalNote.getAdded() != null) {
+            noteTimestampAdded = tranformMillisToDateSring(Long.parseLong(originalNote.getAdded()));
         }
-        if(note.getUpdated() != null) {
-            noteTimestampUpdated = tranformMillisToDateSring(Long.parseLong(note.getUpdated()));
+        if(originalNote.getUpdated() != null) {
+            noteTimestampUpdated = tranformMillisToDateSring(Long.parseLong(originalNote.getUpdated()));
         }
-        if(note.getTitle() != null) {
+        if(originalNote.getTitle() != null) {
             inputTitle.setText(noteTitle);
         }
-        if(note.getInfo() != null) {
+        if(originalNote.getInfo() != null) {
             inputInfo.setText(noteInfo);
         }
 
@@ -571,7 +583,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
     private void renderTagList() {
         tagsList.removeAllViews();
-        for(String tagId: note.getTags().keySet()) {
+        for(String tagId: originalNote.getTags().keySet()) {
             View tagView = LayoutInflater.from(context).inflate(R.layout.item_tag, tagsList, false);
             TagViewHolder tagViewHolder = new TagViewHolder(tagView);
             tagViewHolder.bindModelToView(Improve.getInstance().getTagsAdapter().getTag(tagId));
@@ -609,7 +621,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     }
 
     /*
-    private void shareNoteToDrive(final Note note) {
+    private void shareNoteToDrive(final Note originalNote) {
         // TODO Integrate Drive accessibility
     }
 
@@ -631,7 +643,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         } else {
             // Permission has already been granted
             showExportProgressDialog();
-            shareNoteToDrive(note);
+            shareNoteToDrive(originalNote);
         }
     }
 
@@ -645,7 +657,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
                     showExportProgressDialog();
-                    shareNoteToDrive(note);
+                    shareNoteToDrive(originalNote);
                 } else {
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
@@ -686,10 +698,10 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                if(note.isArchived()) {
-                                    deleteNoteFromArchive(note);
+                                if(originalNote.isArchived()) {
+                                    deleteNoteFromArchive(originalNote);
                                 } else {
-                                    deleteNote(note);
+                                    deleteNote(originalNote);
                                 }
                             }
                         }).setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -714,21 +726,22 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     }
 
     private void unarchiveNote() {
-        databaseManager.unarchiveNote(note);
+        databaseManager.unarchiveNote(originalNote);
         dismissDialog();
     }
 
     private void archiveNote() {
-        databaseManager.archiveNote(note);
+        databaseManager.archiveNote(originalNote);
         dismissDialog();
     }
 
     public void updateNote(){
-        String id = noteId;
-        boolean archived = note.isArchived();
+        String oldId = originalNote.getId();
+        boolean archived = originalNote.isArchived();
         String newTitle = inputTitle.getText().toString();
         String newInfo = inputInfo.getText().toString();
-        String timestampAdded = note.getAdded();
+        boolean stared = originalNote.isStared();
+        String timestampAdded = originalNote.getAdded();
         String timestampUpdated = Long.toString(System.currentTimeMillis());
         Note updatedNote;
 
@@ -736,19 +749,20 @@ public class NoteDetailsDialogFragment extends DialogFragment {
             newInfo = "";
         }
 
-        updatedNote = new Note(id);
+        updatedNote = new Note(oldId);
 
         updatedNote.setTitle(newTitle);
         updatedNote.setInfo(newInfo);
-        updatedNote.setTags(note.getTags());
+        updatedNote.setStared(stared);
+        updatedNote.setTags(originalNote.getTags());
         updatedNote.setAdded(timestampAdded);
         updatedNote.setArchived(archived);
         updatedNote.setUpdated(timestampUpdated);
 
-        note = updatedNote;
-        oldTags = new HashMap<String, Boolean>(note.getTags());
+        originalNote = updatedNote;
+        oldTags = new HashMap<String, Boolean>(originalNote.getTags());
 
-        if(note.isArchived()) {
+        if(originalNote.isArchived()) {
             databaseManager.updateArchivedNote(updatedNote);
         } else {
             databaseManager.updateNote(updatedNote);
@@ -772,7 +786,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
             if(newTags != null) {
                 // Re-add newly created (and therefore added) Tags from Note.
                 for (String tagId : newTags) {
-                    note.addTag(tagId);
+                    originalNote.addTag(tagId);
                 }
             }
         }
@@ -784,7 +798,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         if(editMode) {
             // Remove newly created (and therefore added) Tags from Note.
             for(String tagId: newTags) {
-                note.removeTag(tagId);
+                originalNote.removeTag(tagId);
             }
         }
     }

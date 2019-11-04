@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:focusable="true"
     android:clickable="true"
-    android:background="@color/cardInfoBackground"
+    android:background="@drawable/background_note"
     android:layout_marginBottom="@dimen/card_item_margin"
     android:elevation="@dimen/card_elevation"
     app:cardCornerRadius="@dimen/radius_note_corner">

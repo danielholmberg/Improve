@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,29 +40,31 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
         notes = new SortedList<>(Note.class, new SortedList.Callback<Note>() {
             @Override
             public int compare(@NonNull Note o1, @NonNull Note o2) {
-                return o1.getId().compareTo(o2.getId());
+                // Makes sure that the objects has a value for parameter "updated".
+                // Those with a value are greater than those without.
+                // This issue is only related to Notes created with v1.
+                if(o1.getUpdated() == null && o2.getUpdated() == null) {
+                    return 0;
+                } else if(o1.getUpdated() != null && o2.getUpdated() == null) {
+                    return 1;
+                } else if(o1.getUpdated() == null && o2.getUpdated() != null) {
+                    return -1;
+                } else {
+                    return o1.getUpdated().compareTo(o2.getUpdated());
+                }
             }
 
             @Override
             public void onChanged(int position, int count) {
-                notifyItemRangeChanged(position, count);
+                notifyItemChanged(position);
             }
 
             @Override
             public boolean areContentsTheSame(@NonNull Note oldItem, @NonNull Note newItem) {
-                boolean tagsNotSame = false;
-                for(String oldTagId: oldItem.getTags().keySet()) {
-                    for(String newTagId: newItem.getTags().keySet()) {
-                        if(!oldTagId.equals(newTagId)) {
-                            tagsNotSame = true;
-                            break;
-                        }
-                    }
-                }
-
-                return oldItem.getTitle().equals(newItem.getTitle())
-                        && oldItem.getInfo().equals(newItem.getInfo())
-                        && tagsNotSame;
+                return oldItem.getTitle().trim().equals(newItem.getTitle().trim())
+                        && oldItem.getInfo().trim().equals(newItem.getInfo().trim())
+                        && (oldItem.isStared() == newItem.isStared())
+                        && oldItem.getTags().equals(newItem.getTags());
             }
 
             @Override
@@ -71,12 +74,12 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
 
             @Override
             public void onInserted(int position, int count) {
-                notifyItemRangeInserted(position, count);
+                notifyItemInserted(position);
             }
 
             @Override
             public void onRemoved(int position, int count) {
-                notifyItemRangeRemoved(position, count);
+                notifyItemRemoved(position);
             }
 
             @Override
@@ -111,7 +114,21 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
                 Note updatedNote = dataSnapshot.getValue(Note.class);
 
                 if(updatedNote != null) {
-                    notes.add(updatedNote);
+                    Note existingNote = (Note) getHashMap().get(updatedNote.getId());
+                    if(existingNote == null) {
+                        notes.add(updatedNote);
+                    } else {
+                        notes.updateItemAt(getNotesList().indexOf(existingNote), updatedNote);
+                    }
+
+                    Toast.makeText(app, "Note updated", Toast.LENGTH_SHORT).show();
+
+                    app.getMainActivityRef().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                             notifyDataSetChanged();
+                        }
+                    });
                 }
             }
 

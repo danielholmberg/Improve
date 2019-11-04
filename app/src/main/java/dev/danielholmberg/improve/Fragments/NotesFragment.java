@@ -1,8 +1,6 @@
 package dev.danielholmberg.improve.Fragments;
 
-import android.app.SearchManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -12,7 +10,6 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,16 +22,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 
-import java.util.List;
-
 import dev.danielholmberg.improve.Activities.AddNoteActivity;
-import dev.danielholmberg.improve.Activities.MainActivity;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
@@ -218,6 +211,14 @@ public class NotesFragment extends Fragment implements SearchView.OnQueryTextLis
                 SearchView searchView = (SearchView) item.getActionView();
                 searchView.setQueryHint("Search Note");
                 searchView.setOnQueryTextListener(this);
+                searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+                    @Override
+                    public boolean onClose() {
+                        Log.d(TAG, "Search closed!");
+                        app.getNotesAdapter().clearFilter();
+                        return true;
+                    }
+                });
 
                 EditText searchEditText = (EditText) searchView.findViewById(androidx.appcompat.R.id.search_src_text);
                 searchEditText.setTextColor(getResources().getColor(R.color.search_text_color));

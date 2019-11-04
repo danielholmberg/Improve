@@ -3,12 +3,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:orderInCategory="0"
+        android:id="@+id/starNote"
+        android:title="@string/menu_note_star_enable"
+        android:icon="@drawable/ic_star_disabled_accent"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:orderInCategory="1"
         android:id="@+id/addTag"
         android:title="@string/menu_tag_add"
         android:icon="@drawable/ic_tag_add"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"/>
     <item
-        android:orderInCategory="1"
+        android:orderInCategory="2"
         android:id="@+id/noteDone"
         android:title="@string/noteDone"
         android:icon="@drawable/ic_done_primary"

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:focusable="true"
     android:clickable="true"
-    android:background="@color/cardInfoBackground"
+    android:background="@drawable/background_note_details"
     app:cardCornerRadius="@dimen/radius_note_corner">
 
     <RelativeLayout

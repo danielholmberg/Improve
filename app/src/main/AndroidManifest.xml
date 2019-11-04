@@ -20,7 +20,7 @@
         tools:ignore="GoogleAppIndexingWarning">
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_notifications_active_accent" />
+            android:resource="@drawable/ic_notification" />
         <meta-data
             android:name="firebase_crash_collection_enabled"
             android:value="${crashlyticsEnabled}" />

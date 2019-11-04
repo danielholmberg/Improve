@@ -40,7 +40,18 @@ public class ArchivedNotesAdapter extends RecyclerView.Adapter<ArchivedNoteViewH
         archivedNotes = new SortedList<Note>(Note.class, new SortedList.Callback<Note>() {
             @Override
             public int compare(@NonNull Note o1, @NonNull Note o2) {
-                return o1.getId().compareTo(o2.getId());
+                // Makes sure that the objects has a value for parameter "updated".
+                // Those with a value are greater than those without.
+                // This issue is only related to Notes created with v1.
+                if(o1.getUpdated() == null && o2.getUpdated() == null) {
+                    return 0;
+                } else if(o1.getUpdated() != null && o2.getUpdated() == null) {
+                    return 1;
+                } else if(o1.getUpdated() == null && o2.getUpdated() != null) {
+                    return -1;
+                } else {
+                    return o1.getUpdated().compareTo(o2.getUpdated());
+                }
             }
 
             @Override
@@ -50,8 +61,8 @@ public class ArchivedNotesAdapter extends RecyclerView.Adapter<ArchivedNoteViewH
 
             @Override
             public boolean areContentsTheSame(@NonNull Note oldItem, @NonNull Note newItem) {
-                return oldItem.getTitle().equals(newItem.getTitle())
-                        && oldItem.getInfo().equals(newItem.getInfo())
+                return oldItem.getTitle().trim().equals(newItem.getTitle().trim())
+                        && oldItem.getInfo().trim().equals(newItem.getInfo().trim())
                         && oldItem.getTags().size() != newItem.getTags().size();
             }
 
@@ -102,7 +113,15 @@ public class ArchivedNotesAdapter extends RecyclerView.Adapter<ArchivedNoteViewH
                 Note updatedNote = dataSnapshot.getValue(Note.class);
 
                 if(updatedNote != null) {
-                    archivedNotes.add(updatedNote);
+                    Note existingNote = (Note) getHashMap().get(updatedNote.getId());
+                    if(existingNote == null) {
+                        archivedNotes.add(updatedNote);
+                    } else {
+                        archivedNotes.updateItemAt(getArchivedNotesList().indexOf(existingNote), updatedNote);
+                    }
+
+                    Toast.makeText(app, "Archived note updated", Toast.LENGTH_SHORT).show();
+
                 }
             }
 

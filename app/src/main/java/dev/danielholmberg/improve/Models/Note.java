@@ -37,6 +37,7 @@ public class Note implements Parcelable {
     private String id;
     private String title;
     private String info;
+    private boolean stared = false;
     private String added;
     private String updated;
     private boolean archived = false;
@@ -96,6 +97,16 @@ public class Note implements Parcelable {
         this.archived = archived;
     }
 
+    public boolean getStared() {
+        return stared;
+    }
+
+    public void setStared(boolean stared) {
+        this.stared = stared;
+    }
+
+    // Utility functions
+
     public HashMap<String, Boolean> getTags() {
         return this.tags;
     }
@@ -109,6 +120,9 @@ public class Note implements Parcelable {
         }
         this.tags = tags;
     }
+
+    @Exclude
+    public boolean isStared() { return getStared(); }
 
     @Exclude
     public boolean isArchived() {
@@ -158,6 +172,7 @@ public class Note implements Parcelable {
         parcel.writeString(id);
         parcel.writeString(title);
         parcel.writeString(info);
+        parcel.writeInt((stared ? 1 : 0));
         parcel.writeInt((archived ? 1 : 0));
         parcel.writeString(added);
         parcel.writeString(updated);
@@ -168,6 +183,7 @@ public class Note implements Parcelable {
         id = in.readString();
         title = in.readString();
         info = in.readString();
+        stared = in.readInt() != 0;
         archived = in.readInt() != 0;
         added = in.readString();
         updated = in.readString();
@@ -192,6 +208,7 @@ public class Note implements Parcelable {
         if (o == null || getClass() != o.getClass()) return false;
         Note note = (Note) o;
         return archived == note.archived &&
+                stared == note.stared &&
                 id.equals(note.id) &&
                 Objects.equals(title, note.title) &&
                 Objects.equals(info, note.info) &&
@@ -202,6 +219,6 @@ public class Note implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, info, added, updated, archived, tags);
+        return Objects.hash(id, title, info, stared, added, updated, archived, tags);
     }
 }
