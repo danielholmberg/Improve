@@ -32,14 +32,15 @@
     <color name="contact_form_icon">#E0E0E0</color>             <!-- Grey 300 -->
 
     <!-- [In use] Tag colors -->
-    <color name="tagColor1">#424242</color>
-    <color name="tagColor2">#C2185B</color>
-    <color name="tagColor3">#7B1FA2</color>
-    <color name="tagColor4">#0288D1</color>
-    <color name="tagColor5">#0097A7</color>
-    <color name="tagColor6">#827717</color>
-    <color name="tagColor7">#388E3C</color>
-    <color name="tagColor8">#AFB42B</color>
+    <color name="tagColor1">#2F4550</color>
+    <color name="tagColor2">#DA2C38</color>
+    <color name="tagColor3">#2F1847</color>
+    <color name="tagColor4">#0E79B2</color>
+    <color name="tagColor5">#60463B</color>
+    <color name="tagColor6">#EF709D</color>
+    <color name="tagColor7">#63C132</color>
+    <color name="tagColor8">#FF7B00</color>
+
     <color name="tagTextColor">#FFFFFF</color>
     <color name="tagInputBgColor">@color/cardBackground</color>
     <color name="tagColorNull">#00FFFFFF</color>
