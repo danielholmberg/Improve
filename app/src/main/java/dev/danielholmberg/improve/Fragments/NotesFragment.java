@@ -1,14 +1,25 @@
 package dev.danielholmberg.improve.Fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+
+import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,16 +33,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.api.services.drive.DriveScopes;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import dev.danielholmberg.improve.Activities.AddNoteActivity;
-import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.R;
+import dev.danielholmberg.improve.Services.DriveServiceHelper;
 
 /**
  * Created by DanielHolmberg on 2018-01-20.
@@ -40,9 +57,13 @@ import dev.danielholmberg.improve.R;
 public class NotesFragment extends Fragment implements SearchView.OnQueryTextListener {
     private static final String TAG = NotesFragment.class.getSimpleName();
 
+    private static final int REQUEST_CODE_OPEN_FILE = 1;
+    public static final int REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION = 999;
+
     private Improve app;
     private FirebaseDatabaseManager databaseManager;
     private Context context;
+    private DriveServiceHelper mDriveServiceHelper;
 
     private View view;
     private CoordinatorLayout snackbarView;
@@ -62,6 +83,7 @@ public class NotesFragment extends Fragment implements SearchView.OnQueryTextLis
         app.setNotesFragmentRef(this);
         this.context = getContext();
         databaseManager = app.getFirebaseDatabaseManager();
+        mDriveServiceHelper = app.getDriveServiceHelper();
         setHasOptionsMenu(true);
     }
 
@@ -207,7 +229,10 @@ public class NotesFragment extends Fragment implements SearchView.OnQueryTextLis
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.search_note:
+            case R.id.noteImport:
+                openFilePicker();
+                return true;
+            case R.id.noteSearch:
                 SearchView searchView = (SearchView) item.getActionView();
                 searchView.setQueryHint("Search Note");
                 searchView.setOnQueryTextListener(this);
@@ -246,6 +271,114 @@ public class NotesFragment extends Fragment implements SearchView.OnQueryTextLis
                 break;
         }
         return false;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
+                case REQUEST_CODE_OPEN_FILE:
+                    if (resultData != null) {
+                        Uri uri = resultData.getData();
+                        if (uri != null) {
+                            openFileFromFilePicker(uri);
+                        }
+                    }
+                    break;
+                case REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION:
+                    if(app.getCurrentNoteDetailsDialogRef() != null) {
+                        app.getCurrentNoteDetailsDialogRef().exportNoteToDrive();
+                    } else {
+                        Toast.makeText(app, "Failed to export Note", Toast.LENGTH_LONG).show();
+                    }
+                    break;
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, resultData);
+    }
+
+    /**
+     * Opens the Storage Access Framework file picker.
+     */
+    public void openFilePicker() {
+
+        GoogleSignInOptions signInOptions =
+                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestEmail()
+                        .requestScopes(new Scope(DriveScopes.DRIVE_FILE))
+                        .build();
+        GoogleSignInClient client = GoogleSignIn.getClient(app, signInOptions);
+
+
+        if (mDriveServiceHelper != null) {
+            Log.d(TAG, "Opening file picker.");
+
+            Intent pickerIntent = mDriveServiceHelper.createFilePickerIntent(DriveServiceHelper.TYPE_NOTE);
+
+            // The result of the SAF Intent is handled in onActivityResult.
+            startActivityForResult(pickerIntent, REQUEST_CODE_OPEN_FILE);
+        }
+    }
+
+    /**
+     * Opens a file from its {@code uri} returned from the Storage Access Framework file picker
+     * initiated by {@link #openFilePicker()}.
+     */
+    public void openFileFromFilePicker(Uri uri) {
+        if (mDriveServiceHelper != null) {
+            Log.d(TAG, "Opening " + uri.getPath());
+
+            mDriveServiceHelper.openFileUsingStorageAccessFramework(app.getContentResolver(), uri)
+                    .addOnSuccessListener(new OnSuccessListener<Pair<String, String>>() {
+                        @Override
+                        public void onSuccess(Pair<String, String> nameAndContent) {
+                            String name = nameAndContent.first;
+                            String content = nameAndContent.second;
+
+                            Log.d(TAG, "Note picked: " + name + " with content: " + content);
+
+                            try {
+                                if(name != null && content != null) {
+                                    JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
+
+                                    Log.d(TAG, "Parsed jsonObject: " + jsonObject);
+
+                                    Note importedNote = new Gson().fromJson(jsonObject, Note.class);
+
+                                    Log.d(TAG, "Imported Note: " + importedNote.getTitle() + "(" + importedNote.getId() + ")");
+
+                                    boolean noteIdExists = app.getNotes().containsKey(importedNote.getId())
+                                            || app.getArchivedNotes().containsKey(importedNote.getId());
+
+                                    if(noteIdExists) {
+                                        // Change id of imported Note to avoid duplicates.
+                                        String newId = databaseManager.getNotesRef().push().getKey();
+                                        importedNote.setId(newId);
+                                        Log.d(TAG, "New id: " + importedNote.getId());
+                                    }
+
+                                    databaseManager.addNote(importedNote);
+                                    Toast.makeText(app, "Note imported: " + importedNote.getTitle(), Toast.LENGTH_LONG).show();
+
+                                } else {
+                                    Toast.makeText(app, "Note was empty!", Toast.LENGTH_LONG).show();
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                Toast.makeText(app, "Failed to import Note", Toast.LENGTH_LONG).show();
+                            }
+
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(TAG, "Unable to open file from picker.", e);
+                            Toast.makeText(app, "Failed to import Note", Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+        }
     }
 
     @Override

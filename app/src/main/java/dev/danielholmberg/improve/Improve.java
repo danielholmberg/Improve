@@ -23,9 +23,11 @@ import dev.danielholmberg.improve.Adapters.NotesAdapter;
 import dev.danielholmberg.improve.Adapters.TagsAdapter;
 import dev.danielholmberg.improve.Fragments.ArchivedNotesFragment;
 import dev.danielholmberg.improve.Fragments.ContactsFragment;
+import dev.danielholmberg.improve.Fragments.NoteDetailsDialogFragment;
 import dev.danielholmberg.improve.Fragments.NotesFragment;
 import dev.danielholmberg.improve.Managers.AuthManager;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Services.DriveServiceHelper;
 
 /**
  * Created by Daniel Holmberg.
@@ -36,6 +38,7 @@ public class Improve extends Application implements Serializable {
     private AuthManager authManager;
     private FirebaseDatabaseManager firebaseDatabaseManager;
     private FirebaseRemoteConfig firebaseRemoteConfig;
+    private DriveServiceHelper mDriveServiceHelper;
 
     // volatile attribute makes the singleton thread safe.
     private static volatile Improve sImproveInstance;
@@ -47,6 +50,7 @@ public class Improve extends Application implements Serializable {
     private NotesFragment notesFragmentRef;
     private ContactsFragment contactsFragmentRef;
     private ArchivedNotesFragment archivedNotesFragmentRef;
+    private NoteDetailsDialogFragment currentNoteDetailsDialogRef;
     
     private NotesAdapter notesAdapter;
     private ArchivedNotesAdapter archivedNotesAdapter;
@@ -268,5 +272,21 @@ public class Improve extends Application implements Serializable {
 
     public ContactRecyclerViewAdapter getCompanyContactsAdapter(String companyId) {
         return contactAdapters.get(companyId);
+    }
+
+    public void setDriveServiceHelper(DriveServiceHelper mDriveServiceHelper) {
+        this.mDriveServiceHelper = mDriveServiceHelper;
+    }
+
+    public DriveServiceHelper getDriveServiceHelper() {
+        return mDriveServiceHelper;
+    }
+
+    public void setCurrentNoteDetailsDialogRef(NoteDetailsDialogFragment noteDetailsDialogRef) {
+        this.currentNoteDetailsDialogRef = noteDetailsDialogRef;
+    }
+
+    public NoteDetailsDialogFragment getCurrentNoteDetailsDialogRef() {
+        return currentNoteDetailsDialogRef;
     }
 }

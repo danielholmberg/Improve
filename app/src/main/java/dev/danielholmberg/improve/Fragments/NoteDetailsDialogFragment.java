@@ -14,8 +14,13 @@ import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.api.services.drive.DriveScopes;
 
 import androidx.fragment.app.DialogFragment;
 import androidx.appcompat.app.AlertDialog;
@@ -52,8 +57,11 @@ import dev.danielholmberg.improve.Models.Tag;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 import dev.danielholmberg.improve.R;
+import dev.danielholmberg.improve.Services.DriveServiceHelper;
 import dev.danielholmberg.improve.Utilities.NoteInputValidator;
 import dev.danielholmberg.improve.ViewHolders.TagViewHolder;
+
+import static dev.danielholmberg.improve.Fragments.NotesFragment.REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION;
 
 public class NoteDetailsDialogFragment extends DialogFragment {
     public static final String TAG = NoteDetailsDialogFragment.class.getSimpleName();
@@ -61,11 +69,10 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     public static final String NOTE_PARENT_FRAGMENT_KEY = "parentFragment";
     public static final String NOTE_ADAPTER_POS_KEY = "adapterItemPos";
     public static final String NOTE_KEY = "originalNote";
-    private static final String EXPORTED_NOTE_DIRECTORY_PATH = "Notes";
-    private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     private Improve app;
     private FirebaseDatabaseManager databaseManager;
+    private DriveServiceHelper mDriveServiceHelper;
 
     private Context context;
     private AppCompatActivity activity;
@@ -104,6 +111,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         databaseManager = app.getFirebaseDatabaseManager();
         activity = (AppCompatActivity) getActivity();
         context = app.getMainActivityRef();
+        mDriveServiceHelper = app.getDriveServiceHelper();
 
         noteBundle = getArguments();
 
@@ -178,6 +186,9 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                         case R.id.noteDelete:
                             showDeleteNoteDialog();
                             return true;
+                        case R.id.noteExport:
+                            checkDrivePermission();
+                            return true;
                         case R.id.noteEdit:
                             editMode = true;
                             newTags = new ArrayList<>();
@@ -209,6 +220,19 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         } else {
             Toast.makeText(context, "Unable to show Note details", Toast.LENGTH_SHORT).show();
             dismissDialog();
+        }
+    }
+
+    private void checkDrivePermission() {
+        if (!GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(app), new Scope(DriveScopes.DRIVE_FILE))) {
+            app.setCurrentNoteDetailsDialogRef(this);
+
+            GoogleSignIn.requestPermissions(
+                    app.getNotesFragmentRef(),
+                    REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION,
+                    GoogleSignIn.getLastSignedInAccount(app), new Scope(DriveScopes.DRIVE_FILE));
+        } else {
+            exportNoteToDrive();
         }
     }
 
@@ -624,57 +648,41 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         dialog.show();
     }
 
-    /*
-    private void shareNoteToDrive(final Note originalNote) {
-        // TODO Integrate Drive accessibility
-    }
+    /**
+     * Creates a new file via the Drive REST API.
+     */
+    public void exportNoteToDrive() {
+        if (mDriveServiceHelper != null) {
+            Log.d(TAG, "Creating a file.");
 
-    private void checkWritePermission() {
-        if (ContextCompat.checkSelfPermission(activity,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
+            exportDialog = ProgressDialog.show(context, "Exporting Note to Google Drive",
+                    "In progress...", true);
 
-            // Permission is not granted
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
-            }
+            exportDialog.show();
 
-            // PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE is an
-            // app-defined int constant. The callback method gets the
-            // result of the request.
-
+            mDriveServiceHelper.createFile(DriveServiceHelper.TYPE_NOTE, originalNote.getTitle(), originalNote.toString())
+                    .addOnSuccessListener(new OnSuccessListener<String>() {
+                        @Override
+                        public void onSuccess(String id) {
+                            Log.e(TAG, "Created file");
+                            exportDialog.cancel();
+                            dismissDialog();
+                            Toast.makeText(app, "Note exported", Toast.LENGTH_LONG).show();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(TAG, "Couldn't create file.", e);
+                            exportDialog.cancel();
+                            Toast.makeText(app, "Failed to export Note", Toast.LENGTH_LONG).show();
+                        }
+                    });
         } else {
-            // Permission has already been granted
-            showExportProgressDialog();
-            shareNoteToDrive(originalNote);
+            Log.e(TAG, "DriveServiceHelper wasn't initialized.");
+            Toast.makeText(app, "Failed to export Note", Toast.LENGTH_LONG).show();
         }
     }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                    showExportProgressDialog();
-                    shareNoteToDrive(originalNote);
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return;
-            }
-        }
-    }
-
-    private void showExportProgressDialog() {
-        exportDialog = ProgressDialog.show(context, "Exporting Note to .txt-file",
-                "Working. Please wait...", true);
-    }*/
 
     private void showArchiveDialog() {
         AlertDialog.Builder alertDialogBuilder =

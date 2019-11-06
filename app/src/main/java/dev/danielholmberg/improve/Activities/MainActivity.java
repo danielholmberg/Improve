@@ -9,6 +9,9 @@ import android.media.SoundPool;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.navigation.NavigationView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -30,11 +33,16 @@ import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.drive.DriveScopes;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.UserInfo;
 import com.squareup.picasso.Picasso;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
@@ -50,6 +58,7 @@ import dev.danielholmberg.improve.Fragments.ContactsFragment;
 import dev.danielholmberg.improve.Fragments.NotesFragment;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.R;
+import dev.danielholmberg.improve.Services.DriveServiceHelper;
 import dev.danielholmberg.improve.Utilities.CircleTransform;
 
 public class MainActivity extends AppCompatActivity {
@@ -60,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     public static String CURRENT_TAG = TAG_NOTES_FRAGMENT;
 
     private Improve app;
+    private DriveServiceHelper mDriveServiceHelper;
 
     // index to identify current nav menu item
     public static int navItemIndex = 0;
@@ -115,6 +125,29 @@ public class MainActivity extends AppCompatActivity {
         mHandler = new Handler();
 
         initNavDrawer();
+        initDriveService();
+    }
+
+    private void initDriveService() {
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+
+        if(account != null) {
+            GoogleAccountCredential credential =
+                    GoogleAccountCredential.usingOAuth2(
+                            this, Collections.singleton(DriveScopes.DRIVE_FILE));
+            credential.setSelectedAccount(account.getAccount());
+            com.google.api.services.drive.Drive googleDriveService =
+                    new com.google.api.services.drive.Drive.Builder(
+                            AndroidHttp.newCompatibleTransport(),
+                            new GsonFactory(),
+                            credential)
+                            .setApplicationName(getResources().getString(R.string.app_name))
+                            .build();
+            mDriveServiceHelper = new DriveServiceHelper(googleDriveService);
+            app.setDriveServiceHelper(mDriveServiceHelper);
+        } else {
+            Log.e(TAG, "Failed to initialize DriveServiceHelper.");
+        }
     }
 
     private void initData() {

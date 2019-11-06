@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -130,21 +131,25 @@ public class Note implements Parcelable {
     }
 
     @Exclude
-    public String toJSON() throws JSONException {
-        JSONObject noteObject = new JSONObject();
+    public String toString() {
         JSONObject noteData = new JSONObject();
 
-        noteData.put("archived", this.archived);
-        noteData.put("info", this.info);
-        noteData.put("added", this.added);
-        noteData.put("updated", this.updated);
-        noteData.put("title", this.title);
+        try {
+            noteData.put("id", this.id);
+            noteData.put("archived", this.archived);
+            noteData.put("info", this.info);
+            noteData.put("added", this.added);
+            noteData.put("updated", this.updated);
+            noteData.put("title", this.title);
+            noteData.put("stared", this.stared);
 
-        if(!this.tags.isEmpty()) noteData.put("tags", tags);
+            Log.d("Note", "Tags: " + new JSONObject(this.tags));
+            if(!this.tags.isEmpty()) noteData.put("tags", new JSONObject(this.tags));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-        noteObject.put(this.id, noteData);
-
-        return noteObject.toString();
+        return noteData.toString();
     }
 
     @Exclude
