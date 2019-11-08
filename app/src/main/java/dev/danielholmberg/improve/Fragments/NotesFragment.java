@@ -11,7 +11,6 @@ import androidx.appcompat.widget.SearchView;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -307,7 +306,7 @@ public class NotesFragment extends Fragment implements SearchView.OnQueryTextLis
                         .requestEmail()
                         .requestScopes(new Scope(DriveScopes.DRIVE_FILE))
                         .build();
-        GoogleSignInClient client = GoogleSignIn.getClient(app, signInOptions);
+        GoogleSignIn.getClient(app, signInOptions);
 
 
         if (mDriveServiceHelper != null) {
@@ -364,7 +363,7 @@ public class NotesFragment extends Fragment implements SearchView.OnQueryTextLis
                                     Toast.makeText(app, "Note was empty!", Toast.LENGTH_LONG).show();
                                 }
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                Log.e(TAG, "Failed to import Note.", e);
                                 Toast.makeText(app, "Failed to import Note", Toast.LENGTH_LONG).show();
                             }
 

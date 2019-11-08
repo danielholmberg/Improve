@@ -664,7 +664,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                     .addOnSuccessListener(new OnSuccessListener<String>() {
                         @Override
                         public void onSuccess(String id) {
-                            Log.e(TAG, "Created file");
+                            Log.d(TAG, "Created file");
                             exportDialog.cancel();
                             dismissDialog();
                             Toast.makeText(app, "Note exported", Toast.LENGTH_LONG).show();
