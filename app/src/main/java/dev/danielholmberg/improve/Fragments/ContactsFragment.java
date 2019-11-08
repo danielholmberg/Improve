@@ -230,12 +230,14 @@ public class ContactsFragment extends Fragment{
             @Override
             public void onClick(View view) {
                 addContact();
+                closeFABMenu();
             }
         });
         addCompanyFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 addCompany();
+                closeFABMenu();
             }
         });
     }
@@ -295,14 +297,27 @@ public class ContactsFragment extends Fragment{
     private void showFABMenu(){
         isFABOpen = true;
         fab.animate().rotation(45).setDuration(300).start();
-        addContactFAB.animate().translationY(-getResources().getDimension(R.dimen.fab_menu_item_position_1)).setDuration(300);
-        addCompanyFAB.animate().translationY(-getResources().getDimension(R.dimen.fab_menu_item_position_2)).setDuration(300);
+
+        if (app.getCompanyRecyclerViewAdapter().getItemCount() > 0) {
+            addContactFAB.show();
+            addContactFAB.animate().translationY(-getResources().getDimension(R.dimen.fab_menu_item_position_1)).setDuration(300);
+            addCompanyFAB.show();
+            addCompanyFAB.animate().translationY(-getResources().getDimension(R.dimen.fab_menu_item_position_2)).setDuration(300);
+        } else {
+            addContactFAB.hide();
+            addCompanyFAB.show();
+            addCompanyFAB.animate().translationY(-getResources().getDimension(R.dimen.fab_menu_item_position_1)).setDuration(300);
+        }
+
     }
 
     private void closeFABMenu(){
         isFABOpen = false;
         fab.animate().rotation(0).setDuration(300).start();
+
+        addContactFAB.hide();
         addContactFAB.animate().translationY(0).setDuration(300);
+        addCompanyFAB.hide();
         addCompanyFAB.animate().translationY(0).setDuration(300);
     }
 
