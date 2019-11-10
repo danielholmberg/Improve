@@ -8,18 +8,17 @@ import com.google.android.material.textfield.TextInputEditText;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import android.util.Log;
+
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import dev.danielholmberg.improve.Models.Company;
@@ -45,10 +44,12 @@ public class AddContactActivity extends AppCompatActivity {
 
     private Contact contact;
     private Company preSelectedCompany;
+    private List<Company> companies;
 
     private TextInputEditText contactName, contactEmail, contactPhone, contactComment;
     private Spinner contactCompany;
     private ArrayAdapter<Company> companyAdapter;
+    private ImageView addCompanyButton;
 
     private Toolbar toolbar;
     private View inputLayout;
@@ -81,7 +82,15 @@ public class AddContactActivity extends AppCompatActivity {
         contactPhone = (TextInputEditText) findViewById(R.id.input_mobile);
         contactComment = (TextInputEditText) findViewById(R.id.input_comment);
 
-        List<Company> companies = app.getCompanyRecyclerViewAdapter().getCompaniesList();
+        addCompanyButton = (ImageView) findViewById(R.id.add_company);
+        addCompanyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addCompany();
+            }
+        });
+
+        companies = app.getCompanyRecyclerViewAdapter().getCompaniesList();
 
         companyAdapter = new ArrayAdapter<Company>(this,
                 android.R.layout.simple_dropdown_item_1line, companies);
@@ -158,6 +167,64 @@ public class AddContactActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void addCompany() {
+        View addCompanyDialogView = getLayoutInflater().inflate(R.layout.dialog_new_company, null, false);
+
+        final EditText companyNameEditText = (EditText) addCompanyDialogView.findViewById(R.id.new_company_name_et);
+
+        final AlertDialog addNewCompanyDialog = new AlertDialog.Builder(this)
+                .setTitle("Add new company")
+                .setView(addCompanyDialogView)
+                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // Dummy
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                })
+                .create();
+        addNewCompanyDialog.show();
+
+        companyNameEditText.requestFocus();
+
+        addNewCompanyDialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String newCompanyName = companyNameEditText.getText().toString().toUpperCase();
+
+                        if(!newCompanyName.isEmpty()) {
+                            Company company;
+
+                            if(app.getCompanyRecyclerViewAdapter().getCompaniesName().contains(newCompanyName)) {
+                                companyNameEditText.setError("Company already exists!");
+                                companyNameEditText.requestFocus();
+                            } else {
+                                String newCompanyId = databaseManager.getCompaniesRef().push().getKey();
+                                company = new Company(newCompanyId, newCompanyName);
+                                databaseManager.addCompany(company);
+
+                                // Add and select created Company to Company Spinner.
+                                companyAdapter.add(company);
+                                companyAdapter.notifyDataSetChanged();
+                                int adapterPosition = companies.indexOf(company);
+                                contactCompany.setSelection(adapterPosition);
+                            }
+                            addNewCompanyDialog.dismiss();
+
+                        } else {
+                            companyNameEditText.setError("Please enter a company name");
+                            companyNameEditText.requestFocus();
+                        }
+                    }
+                });
     }
 
     private void showDiscardChangesDialog() {

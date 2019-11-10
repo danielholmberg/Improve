@@ -26,7 +26,7 @@
     <item
         android:id="@+id/noteExport"
         android:title="@string/menu_note_google_drive"
-        android:icon="@drawable/ic_menu_google_drive_primary"
+        android:icon="@drawable/ic_menu_google_drive_export_primary"
         android:enabled="true"
         app:showAsAction="ifRoom" />
     <item

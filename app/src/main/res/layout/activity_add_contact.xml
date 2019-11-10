@@ -58,9 +58,7 @@
                         android:orientation="horizontal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingTop="8dp"
-                        android:paddingStart="4dp"
-                        android:paddingBottom="8dp">
+                        android:paddingStart="4dp">
 
                         <ImageButton
                             android:id="@+id/company_icon"
@@ -78,8 +76,17 @@
                             android:textStyle="bold"
                             android:layout_marginStart="8dp"
                             android:layout_toEndOf="@id/company_icon"
+                            android:layout_centerVertical="true"
+                            android:layout_toStartOf="@id/add_company"/>
+
+                        <ImageView
+                            android:id="@+id/add_company"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_add_company_primary"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"/>
+
 
                     </RelativeLayout>
 
