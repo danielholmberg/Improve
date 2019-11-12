@@ -15,10 +15,15 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import dev.danielholmberg.improve.Models.Company;
 import dev.danielholmberg.improve.Models.Contact;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.ViewHolders.ContactViewHolder;
 
@@ -103,7 +108,21 @@ public class ContactRecyclerViewAdapter extends RecyclerView.Adapter<ContactView
                 Contact updatedContact = dataSnapshot.getValue(Contact.class);
 
                 if(updatedContact != null) {
-                    add(updatedContact);
+                    Contact existingContact = (Contact) getHashMap().get(updatedContact.getId());
+                    if(existingContact == null) {
+                        contacts.add(updatedContact);
+                    } else {
+                        contacts.updateItemAt(getContactsList().indexOf(existingContact), updatedContact);
+                    }
+
+                    Toast.makeText(app, "Contact updated", Toast.LENGTH_SHORT).show();
+
+                    app.getMainActivityRef().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            notifyDataSetChanged();
+                        }
+                    });
                 } else {
                     Toast.makeText(app, "Failed to update contact, please try again later",
                             Toast.LENGTH_SHORT).show();
@@ -162,5 +181,22 @@ public class ContactRecyclerViewAdapter extends RecyclerView.Adapter<ContactView
 
     private void remove(Contact contact) {
         contacts.remove(contact);
+    }
+
+    public List<Contact> getContactsList() {
+        List<Contact> contactsCopy = new ArrayList<>();
+        for(int i = 0; i < contacts.size(); i++) {
+            contactsCopy.add(contacts.get(i));
+        }
+        return contactsCopy;
+    }
+
+    public HashMap<String, Object> getHashMap() {
+        HashMap<String, Object> hashMap = new HashMap<>();
+        for(int i = 0; i < contacts.size(); i++) {
+            Contact contact = contacts.get(i);
+            hashMap.put(contact.getId(), contact);
+        }
+        return hashMap;
     }
 }

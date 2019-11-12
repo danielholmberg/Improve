@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -23,6 +24,7 @@ import java.util.Map;
 import dev.danielholmberg.improve.Models.Company;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Models.Contact;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.ViewHolders.CompanyViewHolder;
 
@@ -102,11 +104,25 @@ public class CompanyRecyclerViewAdapter extends RecyclerView.Adapter<CompanyView
             @Override
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
                 // This method is triggered when the data at a child location has changed.
-
                 Company updatedCompany = dataSnapshot.getValue(Company.class);
 
                 if(updatedCompany != null) {
-                    companies.add(updatedCompany);
+                    Company existingCompany = (Company) getCompany(updatedCompany.getId());
+                    if(existingCompany == null) {
+                        companies.add(updatedCompany);
+                    } else {
+                        companies.updateItemAt(getCompaniesList().indexOf(existingCompany), updatedCompany);
+                    }
+
+                    app.getMainActivityRef().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            notifyDataSetChanged();
+                        }
+                    });
+                } else {
+                    Toast.makeText(app, "Failed to update contact, please try again later",
+                            Toast.LENGTH_SHORT).show();
                 }
             }
 

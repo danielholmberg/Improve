@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -91,6 +92,9 @@ public class CompanyDetailsDialogFragment extends DialogFragment {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
+                    case R.id.edit_company:
+                        showEditCompanyDialog();
+                        break;
                     case R.id.delete_company:
                         showDeleteCompanyDialog();
                         break;
@@ -107,7 +111,7 @@ public class CompanyDetailsDialogFragment extends DialogFragment {
         if(company != null) {
             populateCompanyDetails();
         } else {
-            Toast.makeText(activity, "Unable to show Note details", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, "Unable to show Company details", Toast.LENGTH_SHORT).show();
             dismissDialog();
         }
     }
@@ -151,6 +155,61 @@ public class CompanyDetailsDialogFragment extends DialogFragment {
             contactsRecyclerView.setLayoutManager(linearLayoutManager);
             contactsRecyclerView.setAdapter(app.getCompanyContactsAdapter(companyId));
         }
+    }
+
+
+    private void showEditCompanyDialog() {
+        View editCompanyDialogView = getLayoutInflater().inflate(R.layout.dialog_new_company, null, false);
+
+        final EditText companyNameEditText = (EditText) editCompanyDialogView.findViewById(R.id.new_company_name_et);
+        companyNameEditText.setText(companyNameId);
+
+        final AlertDialog editCompanyDialog = new AlertDialog.Builder(getContext())
+                .setTitle("Edit company")
+                .setView(editCompanyDialogView)
+                .setPositiveButton("Done", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // Dummy
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.cancel();
+                    }
+                })
+                .create();
+        editCompanyDialog.show();
+
+        companyNameEditText.requestFocus();
+
+        editCompanyDialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String newCompanyName = companyNameEditText.getText().toString().toUpperCase();
+
+                        if(!newCompanyName.isEmpty()) {
+
+                            if(app.getCompanyRecyclerViewAdapter().getCompaniesName().contains(newCompanyName)) {
+                                companyNameEditText.setError("Company already exists!");
+                                companyNameEditText.requestFocus();
+                            } else {
+                                company.setName(newCompanyName);
+                                companyNameId = newCompanyName;
+                                dialogTitle.setText(newCompanyName);
+                                databaseManager.addCompany(company);
+
+                                editCompanyDialog.dismiss();
+                            }
+
+                        } else {
+                            companyNameEditText.setError("Please enter a company name");
+                            companyNameEditText.requestFocus();
+                        }
+                    }
+                });
     }
 
     private void showDeleteCompanyDialog() {

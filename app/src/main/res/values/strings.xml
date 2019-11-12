@@ -163,6 +163,7 @@
     <string name="menu_note_star_disable">Remove from Stared</string>
     <string name="menu_note_star_enable">Add to Stared</string>
     <string name="menu_note_import">Import Note</string>
+    <string name="menu_company_edit">Edit Name</string>
 
     <!-- Strings related to Settings -->
 

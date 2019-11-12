@@ -216,8 +216,9 @@ public class AddContactActivity extends AppCompatActivity {
                                 companyAdapter.notifyDataSetChanged();
                                 int adapterPosition = companies.indexOf(company);
                                 contactCompany.setSelection(adapterPosition);
+
+                                addNewCompanyDialog.dismiss();
                             }
-                            addNewCompanyDialog.dismiss();
 
                         } else {
                             companyNameEditText.setError("Please enter a company name");

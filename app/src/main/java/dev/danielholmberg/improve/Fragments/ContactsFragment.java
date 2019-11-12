@@ -236,8 +236,8 @@ public class ContactsFragment extends Fragment{
                                 String newCompanyId = databaseManager.getCompaniesRef().push().getKey();
                                 company = new Company(newCompanyId, newCompanyName);
                                 databaseManager.addCompany(company);
+                                addNewCompanyDialog.dismiss();
                             }
-                            addNewCompanyDialog.dismiss();
 
                         } else {
                             companyNameEditText.setError("Please enter a company name");
