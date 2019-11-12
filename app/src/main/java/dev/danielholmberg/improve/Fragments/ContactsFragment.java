@@ -133,48 +133,6 @@ public class ContactsFragment extends Fragment{
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {}
         });
-
-        for(String companyId: app.getCompanies().keySet()) {
-            // Contacts listener
-            databaseManager.getCompaniesRef().child(companyId).child("contacts").addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-                }
-
-                @Override
-                public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-                }
-
-                @Override
-                public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                    final Contact removedContact = dataSnapshot.getValue(Contact.class);
-
-                    if(removedContact != null) {
-                        Log.d(TAG, "Removed contact: " + removedContact.getId());
-                        Snackbar.make(snackbarView,
-                                "Contact deleted", Snackbar.LENGTH_LONG)
-                                .setAction("UNDO", new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        databaseManager.addContact(removedContact);
-                                    }
-                                }).show();
-                    }
-                }
-
-                @Override
-                public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-        }
     }
 
     private void initListScrollListener() {
