@@ -64,6 +64,8 @@ public class ArchivedNotesFragment extends Fragment implements SearchView.OnQuer
         view = inflater.inflate(R.layout.fragment_archived_notes,
                 container, false);
 
+        app.getMainActivityRef().findViewById(R.id.toolbar_dropshadow).setVisibility(View.GONE);
+
         snackbarView = view.findViewById(R.id.archivednote_fragment_container);
 
         archivedNotesRecyclerView = (RecyclerView) view.findViewById(R.id.archived_notes_list);

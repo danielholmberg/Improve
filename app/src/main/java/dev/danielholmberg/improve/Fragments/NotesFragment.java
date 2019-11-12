@@ -93,6 +93,8 @@ public class NotesFragment extends Fragment implements SearchView.OnQueryTextLis
         view = inflater.inflate(R.layout.fragment_notes,
                 container, false);
 
+        app.getMainActivityRef().findViewById(R.id.toolbar_dropshadow).setVisibility(View.GONE);
+
         snackbarView = view.findViewById(R.id.note_fragment_container);
 
         notesRecyclerView = (RecyclerView) view.findViewById(R.id.notes_list);

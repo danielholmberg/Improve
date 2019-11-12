@@ -66,6 +66,8 @@ public class ContactsFragment extends Fragment{
         view = inflater.inflate(R.layout.fragment_contacts,
                 container, false);
 
+        app.getMainActivityRef().findViewById(R.id.toolbar_dropshadow).setVisibility(View.GONE);
+
         snackbarView = view.findViewById(R.id.contacts_fragment_container);
 
         companyRecyclerView = view.findViewById(R.id.company_recycler_view);
