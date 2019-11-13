@@ -50,6 +50,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth:18.1.0'
     implementation 'com.google.firebase:firebase-messaging:19.0.1'
     implementation 'com.google.firebase:firebase-inappmessaging-display:18.0.2'
+    implementation 'com.google.firebase:firebase-storage:19.1.0'
 
     implementation 'com.firebaseui:firebase-ui:3.3.0'
 

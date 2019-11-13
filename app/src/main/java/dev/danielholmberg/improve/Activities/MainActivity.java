@@ -12,7 +12,11 @@ import android.os.Handler;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.core.view.GravityCompat;
@@ -102,6 +106,32 @@ public class MainActivity extends AppCompatActivity {
         app.setMainActivityRef(this);
         currentUser = app.getAuthManager().getCurrentUser();
 
+        // Retrieve VIP_USERS from Firebase RemoteConfig
+        app.getFirebaseRemoteConfig().fetchAndActivate()
+                .addOnCompleteListener(new OnCompleteListener<Boolean>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Boolean> task) {
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            boolean updated = task.getResult();
+                            Log.d(TAG, "Config params updated: " + updated);
+                        }
+
+                        String retrievedVIPUsers = app.getFirebaseRemoteConfig().getString("vip_users");
+                        Log.d(TAG, "Retrieved VIP_USERS: " + retrievedVIPUsers);
+
+                        if (currentUser.getEmail() != null && !currentUser.getEmail().isEmpty()) {
+                            Log.d(TAG, "Current user: " + currentUser.getEmail());
+
+                            app.setIsVIPUser(retrievedVIPUsers.contains(currentUser.getEmail()));
+                        } else {
+                            app.setIsVIPUser(false);
+                        }
+
+                        initNavDrawer();
+                    }
+                });
+
+
         initActivity();
         initData();
 
@@ -177,15 +207,23 @@ public class MainActivity extends AppCompatActivity {
         // Setting the Image, Name and Email in the NavigationDrawer Header.
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         RelativeLayout drawer_header_image_layout = (RelativeLayout) navigationView.getHeaderView(0).findViewById(R.id.drawer_header_image_layout);
+        ImageView vip_user_symbol = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.vip_user_symbol);
         ImageView drawer_header_image = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.drawer_header_image_iv);
         TextView drawer_header_name = (TextView)  navigationView.getHeaderView(0).findViewById(R.id.drawer_header_name_tv);
         TextView drawer_header_email = (TextView)  navigationView.getHeaderView(0).findViewById(R.id.drawer_header_email_tv);
+
+        if(app.isVIPUser()) {
+            vip_user_symbol.setVisibility(View.VISIBLE);
+        } else {
+            vip_user_symbol.setVisibility(View.GONE);
+        }
 
         if(currentUser.isAnonymous()) {
             drawer_header_image_layout.setVisibility(View.GONE);
             drawer_header_email.setVisibility(View.GONE);
             drawer_header_name.setVisibility(View.GONE);
         } else {
+
             Uri photoUri = currentUser.getPhotoUrl();
 
             List<? extends UserInfo> providerData = currentUser.getProviderData();

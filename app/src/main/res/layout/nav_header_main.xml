@@ -14,17 +14,33 @@
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <RelativeLayout
-        android:id="@+id/drawer_header_image_layout"
-        android:layout_width="110dp"
-        android:layout_height="110dp"
-        android:background="@drawable/user_photo_background"
-        android:layout_marginTop="@dimen/nav_header_iv_top_spacing">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
         <ImageView
-            android:id="@+id/drawer_header_image_iv"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@drawable/ic_error_no_photo_white"
-            android:layout_centerInParent="true"/>
+            android:id="@+id/vip_user_symbol"
+            android:visibility="gone"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="@dimen/nav_header_iv_top_spacing"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/ic_vip_user_white"/>
+
+        <RelativeLayout
+            android:id="@+id/drawer_header_image_layout"
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            android:background="@drawable/user_photo_background"
+            android:layout_marginTop="@dimen/nav_header_iv_top_spacing">
+            <ImageView
+                android:id="@+id/drawer_header_image_iv"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/ic_error_no_photo_white"
+                android:layout_centerInParent="true"/>
+        </RelativeLayout>
+
     </RelativeLayout>
 
     <TextView

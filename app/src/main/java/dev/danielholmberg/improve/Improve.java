@@ -11,9 +11,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 import dev.danielholmberg.improve.Activities.MainActivity;
 import dev.danielholmberg.improve.Adapters.ArchivedNotesAdapter;
@@ -27,6 +33,7 @@ import dev.danielholmberg.improve.Fragments.NoteDetailsDialogFragment;
 import dev.danielholmberg.improve.Fragments.NotesFragment;
 import dev.danielholmberg.improve.Managers.AuthManager;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
 import dev.danielholmberg.improve.Services.DriveServiceHelper;
 
 /**
@@ -37,6 +44,7 @@ public class Improve extends Application implements Serializable {
 
     private AuthManager authManager;
     private FirebaseDatabaseManager firebaseDatabaseManager;
+    private FirebaseStorageManager firebaseStorageManager;
     private FirebaseRemoteConfig firebaseRemoteConfig;
     private DriveServiceHelper mDriveServiceHelper;
 
@@ -58,6 +66,12 @@ public class Improve extends Application implements Serializable {
     private Fragment currentFragment;
     private CompanyRecyclerViewAdapter companyRecyclerViewAdapter;
     private final HashMap<String, ContactRecyclerViewAdapter> contactAdapters = new HashMap<>();
+
+    private boolean isVIPUser = false;
+    public final Map VIP_USERS = new HashMap<String, Object>() {{
+        put("1", "danielholmberg.dev@gmail.com");
+        put("2", "danielkurtholmberg@gmail.com");
+    }};
 
     public static Improve getInstance() {
         // Double checks locking to prevent unnecessary sync.
@@ -82,6 +96,7 @@ public class Improve extends Application implements Serializable {
         // Initializing managers.
         authManager = new AuthManager();
         firebaseDatabaseManager = new FirebaseDatabaseManager();
+        firebaseStorageManager = new FirebaseStorageManager();
 
         firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
         FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
@@ -89,6 +104,7 @@ public class Improve extends Application implements Serializable {
                 .build();
         firebaseRemoteConfig.setConfigSettingsAsync(configSettings);
         firebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
+        firebaseRemoteConfig.setDefaults(VIP_USERS);
 
         try {
             rootDir = new File(Environment.getExternalStorageDirectory(), "Improve");
@@ -100,6 +116,14 @@ public class Improve extends Application implements Serializable {
         }
 
         createNotificationChannelExport();
+    }
+
+    public void setIsVIPUser(boolean isVIPUser) {
+        this.isVIPUser = isVIPUser;
+    }
+
+    public boolean isVIPUser() {
+        return this.isVIPUser;
     }
 
     private void createNotificationChannelExport() {
@@ -135,6 +159,14 @@ public class Improve extends Application implements Serializable {
      */
     public FirebaseDatabaseManager getFirebaseDatabaseManager() {
         return this.firebaseDatabaseManager;
+    }
+
+    /**
+     * Returns the application specific Firebase Cloud Storage manager.
+     * @return - Cloud Storage manager of Firebase
+     */
+    public FirebaseStorageManager getFirebaseStorageManager() {
+        return this.firebaseStorageManager;
     }
 
     /**
