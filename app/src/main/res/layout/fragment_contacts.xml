@@ -39,34 +39,69 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"/>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/add_company"
+        <TextView
+            android:id="@+id/add_company_fab_text"
+            android:visibility="gone"
+            android:alpha="0"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
+            android:paddingBottom="@dimen/fab_text_padding_horizontal"
+            android:paddingTop="@dimen/fab_text_padding_horizontal"
+            android:paddingStart="@dimen/fab_text_padding_vertical"
+            android:paddingEnd="@dimen/fab_text_padding_vertical"
+            android:text="@string/fab_company_text"
+            android:textColor="@color/fabTextColor"
+            android:background="@drawable/background_fab_text"
+            android:layout_marginEnd="80dp"
+            app:layout_anchor="@id/add_company"
+            app:layout_anchorGravity="center_vertical"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/add_company"
             android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/fab_margin"
+            android:layout_gravity="bottom|end"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_fab_add_company_white" />
+
+        <TextView
+            android:id="@+id/add_contact_fab_text"
+            android:visibility="gone"
+            android:alpha="0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/fab_text_padding_horizontal"
+            android:paddingTop="@dimen/fab_text_padding_horizontal"
+            android:paddingStart="@dimen/fab_text_padding_vertical"
+            android:paddingEnd="@dimen/fab_text_padding_vertical"
+            android:text="@string/fab_contact_text"
+            android:textColor="@color/fabTextColor"
+            android:background="@drawable/background_fab_text"
+            android:layout_marginEnd="80dp"
+            app:layout_anchor="@id/add_contact"
+            app:layout_anchorGravity="center_vertical"/>
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/add_contact"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
-            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_fab_add_contact_white" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_menu"
+            android:visibility="visible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
-            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_fab_add_white" />

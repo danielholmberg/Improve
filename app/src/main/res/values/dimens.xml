@@ -87,6 +87,9 @@
     <dimen name="fab_menu_item_position_1">64dp</dimen>
     <dimen name="fab_menu_item_position_2">128dp</dimen>
     <dimen name="note_item_stared_width">4dp</dimen>
+    <dimen name="radius_fab_text_corner">4dp</dimen>
+    <dimen name="fab_text_padding_horizontal">4dp</dimen>
+    <dimen name="fab_text_padding_vertical">8dp</dimen>
 
     <item name="tag_letter_spacing" type="dimen" format="float">0.2</item>
 </resources>

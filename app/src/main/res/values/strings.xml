@@ -164,6 +164,8 @@
     <string name="menu_note_star_enable">Add to Stared</string>
     <string name="menu_note_import">Import Note</string>
     <string name="menu_company_edit">Edit Name</string>
+    <string name="fab_company_text">Add new company</string>
+    <string name="fab_contact_text">Add new contact</string>
 
     <!-- Strings related to Settings -->
 

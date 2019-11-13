@@ -50,5 +50,7 @@
     <color name="tagEnabledIndicatorColor">#81C784</color>
     <color name="tagDeleteColor">#F30202</color>
     <color name="tagDeleteBackground">#e0e0e0</color>
+    <color name="fabTextColor">#FFFFFF</color>
+    <color name="fabTextBackgroundColor">#70242424</color>
 
 </resources>

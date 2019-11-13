@@ -13,11 +13,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -27,7 +27,6 @@ import dev.danielholmberg.improve.Activities.AddContactActivity;
 import dev.danielholmberg.improve.Models.Company;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
-import dev.danielholmberg.improve.Models.Contact;
 import dev.danielholmberg.improve.R;
 
 /**
@@ -41,6 +40,7 @@ public class ContactsFragment extends Fragment{
     private View view;
     private RecyclerView companyRecyclerView;
     private FloatingActionButton fab, addContactFAB, addCompanyFAB;
+    private TextView addCompanyFABTextView, addContactFABTextView;
     private View snackbarView;
     private FirebaseDatabaseManager databaseManager;
     private View emptyListView;
@@ -74,6 +74,8 @@ public class ContactsFragment extends Fragment{
         emptyListView = view.findViewById(R.id.empty_contact_list_tv);
 
         fab = view.findViewById(R.id.fab_menu);
+        addCompanyFABTextView = view.findViewById(R.id.add_company_fab_text);
+        addContactFABTextView = view.findViewById(R.id.add_contact_fab_text);
         addContactFAB = view.findViewById(R.id.add_contact);
         addCompanyFAB = view.findViewById(R.id.add_company);
 
@@ -144,8 +146,7 @@ public class ContactsFragment extends Fragment{
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 if (dy > 0 && fab.isShown()) {
                     // Hide FABs when the user scrolls down.
-                    addContactFAB.hide();
-                    addCompanyFAB.hide();
+                    closeFABMenu();
                     fab.hide();
                 }
 
@@ -162,8 +163,7 @@ public class ContactsFragment extends Fragment{
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     // Show FABs when the user has stopped scrolling.
-                    addContactFAB.show();
-                    addCompanyFAB.show();
+                    showFABMenu();
                     fab.show();
                 }
                 super.onScrollStateChanged(recyclerView, newState);
@@ -252,14 +252,39 @@ public class ContactsFragment extends Fragment{
         fab.animate().rotation(45).setDuration(300).start();
 
         if (app.getCompanyRecyclerViewAdapter().getItemCount() > 0) {
+            // If a Company has already been added, make the FAB for adding a Contact visible.
+
             addContactFAB.show();
-            addContactFAB.animate().translationY(-getResources().getDimension(R.dimen.fab_menu_item_position_1)).setDuration(300);
+            addContactFAB.animate().translationY(-getResources().getDimension(R.dimen.fab_menu_item_position_1)).setDuration(300).withEndAction(new Runnable() {
+                @Override
+                public void run() {
+                    addContactFABTextView.setVisibility(View.VISIBLE);
+                    addContactFABTextView.animate().alpha(1f).setDuration(300);
+                }
+            });
+
             addCompanyFAB.show();
-            addCompanyFAB.animate().translationY(-getResources().getDimension(R.dimen.fab_menu_item_position_2)).setDuration(300);
+            addCompanyFAB.animate().translationY(-getResources().getDimension(R.dimen.fab_menu_item_position_2)).setDuration(300).withEndAction(new Runnable() {
+                @Override
+                public void run() {
+                    addCompanyFABTextView.setVisibility(View.VISIBLE);
+                    addCompanyFABTextView.animate().alpha(1f).setDuration(300);
+                }
+            });
         } else {
+            // No Company has been added, hide the FAB for adding a Contact and switch position of Company FAB.
             addContactFAB.hide();
+            addContactFABTextView.setVisibility(View.GONE);
+            addContactFABTextView.setAlpha(0f);
+
             addCompanyFAB.show();
-            addCompanyFAB.animate().translationY(-getResources().getDimension(R.dimen.fab_menu_item_position_1)).setDuration(300);
+            addCompanyFAB.animate().translationY(-getResources().getDimension(R.dimen.fab_menu_item_position_1)).setDuration(300).withEndAction(new Runnable() {
+                @Override
+                public void run() {
+                    addCompanyFABTextView.setVisibility(View.VISIBLE);
+                    addCompanyFABTextView.animate().alpha(1f).setDuration(300);
+                }
+            });
         }
 
     }
@@ -269,9 +294,30 @@ public class ContactsFragment extends Fragment{
         fab.animate().rotation(0).setDuration(300).start();
 
         addContactFAB.hide();
-        addContactFAB.animate().translationY(0).setDuration(300);
+        addContactFABTextView.animate().alpha(0f).setDuration(300).withEndAction(new Runnable() {
+            @Override
+            public void run() {
+                addContactFAB.animate().translationY(0).setDuration(300).withStartAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        addContactFABTextView.setVisibility(View.GONE);
+                    }
+                });
+            }
+        });
+
         addCompanyFAB.hide();
-        addCompanyFAB.animate().translationY(0).setDuration(300);
+        addCompanyFABTextView.animate().alpha(0f).setDuration(300).withEndAction(new Runnable() {
+            @Override
+            public void run() {
+                addCompanyFAB.animate().translationY(0).setDuration(300).withStartAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        addCompanyFABTextView.setVisibility(View.GONE);
+                    }
+                });
+            }
+        });
     }
 
     public void initAdapter() {
