@@ -93,7 +93,7 @@ public class AddContactActivity extends AppCompatActivity {
         companies = app.getCompanyRecyclerViewAdapter().getCompaniesList();
 
         companyAdapter = new ArrayAdapter<Company>(this,
-                android.R.layout.simple_dropdown_item_1line, companies);
+                android.R.layout.simple_spinner_dropdown_item, companies);
         contactCompany.setAdapter(companyAdapter);
 
         Bundle contactBundle = getIntent().getBundleExtra(CONTACT_BUNDLE_KEY);
