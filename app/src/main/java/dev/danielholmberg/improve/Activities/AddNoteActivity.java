@@ -1,8 +1,10 @@
 package dev.danielholmberg.improve.Activities;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 
@@ -14,6 +16,7 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.squareup.picasso.Picasso;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,18 +26,28 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import dev.danielholmberg.improve.Adapters.TagsAdapter;
+import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Models.Tag;
 import dev.danielholmberg.improve.Improve;
@@ -49,6 +62,8 @@ import dev.danielholmberg.improve.ViewHolders.TagViewHolder;
 
 public class AddNoteActivity extends AppCompatActivity {
     private static final String TAG = AddNoteActivity.class.getSimpleName();
+
+    private static final int PICK_IMAGE_REQUEST = 1;
 
     private Improve app;
     private FirebaseDatabaseManager databaseManager;
@@ -65,6 +80,13 @@ public class AddNoteActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private TagsAdapter tagsAdapter;
+
+    // VIP
+    private RelativeLayout vipImageViewContainer;
+    private ImageView vipImageView;
+    private ImageButton vipImageClearBtn;
+    private Uri filePath;
+    private String currentImageId = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -100,6 +122,12 @@ public class AddNoteActivity extends AppCompatActivity {
         tagsAdapter = app.getTagsAdapter();
         newTagColor = "#" + Integer.toHexString(app.getResources().getColor(R.color.tagColorNull));
 
+        if(app.isVIPUser()) {
+            vipImageViewContainer = (RelativeLayout) findViewById(R.id.vip_image_view_container);
+            vipImageView = (ImageView) findViewById(R.id.vip_image_view);
+            vipImageClearBtn = (ImageButton) findViewById(R.id.vip_image_clear_btn);
+        }
+
         String id = databaseManager.getNotesRef().push().getKey();
         newNote = new Note(id);
         newTags = new ArrayList<>();
@@ -109,6 +137,11 @@ public class AddNoteActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_edit_note, menu);
+
+        // Show Menu-group with VIP features.
+        menu.setGroupEnabled(R.id.vipMenuGroup, app.isVIPUser());
+        menu.setGroupVisible(R.id.vipMenuGroup, app.isVIPUser());
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -135,9 +168,21 @@ public class AddNoteActivity extends AppCompatActivity {
                     item.setIcon(R.drawable.ic_star_disabled_accent);
                     item.setTitle(R.string.menu_note_star_enable);
                 }
+                return true;
+            case R.id.vipAddImage:
+                // *** VIP feature *** //
+                chooseImage();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void chooseImage() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGE_REQUEST);
     }
 
     private void showDiscardChangesDialog() {
@@ -407,9 +452,83 @@ public class AddNoteActivity extends AppCompatActivity {
         newNote.setAdded(timestampAdded);
         newNote.setUpdated(timestampAdded);
 
-        databaseManager.addNote(newNote);
+        if (app.isVIPUser() && filePath != null) {
+            // Wait on adding new note and returning to parent activity
+            // until the upload has been successfully completed.
+            uploadImage();
+        } else {
+            databaseManager.addNote(newNote);
+            showParentActivity();
+        }
+    }
 
-        showParentActivity();
+    private void uploadImage() {
+        if(filePath != null) {
+            final ProgressDialog progressDialog = new ProgressDialog(this);
+            progressDialog.setTitle("Uploading image...");
+            progressDialog.show();
+
+            File cachedImage = new File(app.getImageDir().getPath() +
+                    File.separator + currentImageId);
+
+            if(!cachedImage.exists()) {
+                try {
+                    Log.d(TAG, "Copying image to Local Filesystem for Note: " + newNote.getId() +
+                            " with image id: " + currentImageId + " from Uri: " + filePath);
+                    boolean cachedImageCreated = cachedImage.createNewFile();
+
+                    if(cachedImageCreated) {
+                        copyFileFromUri(filePath, cachedImage);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            app.getFirebaseStorageManager().uploadImage(currentImageId, filePath, new FirebaseStorageCallback() {
+                @Override
+                public void onSuccess(File file) {
+                    progressDialog.dismiss();
+
+                    newNote.setImageId(currentImageId);
+                    databaseManager.addNote(newNote);
+                    showParentActivity();
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    progressDialog.dismiss();
+                    Toast.makeText(app, "Failed to upload image!", Toast.LENGTH_LONG).show();
+                }
+
+                @Override
+                public void onProgress(int progress) {
+                    progressDialog.setMessage("Uploaded " + progress + "%");
+                }
+            });
+        }
+    }
+
+    private void copyFileFromUri(Uri sourceUri, File destFile) throws IOException {
+        if (!destFile.exists()) {
+            destFile.createNewFile();
+        }
+
+        Log.d(TAG, "Copying File from: " + sourceUri + " to File: " + destFile.getPath());
+
+        InputStream in = app.getContentResolver().openInputStream(filePath);
+        OutputStream out = new FileOutputStream(destFile);
+
+        // Copy the bits from instream to outstream
+        byte[] buf = new byte[1024];
+        int len;
+        if (in != null) {
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            in.close();
+        }
+        out.close();
     }
 
     private void showParentActivity() {
@@ -422,6 +541,44 @@ public class AddNoteActivity extends AppCompatActivity {
         if(inputTitle.getText() != null) inputTitle.getText().clear();
         if(inputInfo.getText() != null) inputInfo.getText().clear();
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
+                && data != null && data.getData() != null ) {
+
+            filePath = data.getData();
+
+            currentImageId = Long.toString(System.currentTimeMillis());
+
+            int targetSize = (int) Improve.getInstance().getResources().getDimension(R.dimen.vip_image_view_size);
+
+            Picasso.get()
+                    .load(filePath)
+                    .centerCrop()
+                    .resize(targetSize, targetSize)
+                    .into(vipImageView);
+
+            vipImageViewContainer.setVisibility(View.VISIBLE);
+            vipImageView.setVisibility(View.VISIBLE);
+            vipImageClearBtn.setVisibility(View.VISIBLE);
+
+            vipImageClearBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    filePath = null;
+                    vipImageView.setImageDrawable(null);
+
+                    vipImageView.setVisibility(View.GONE);
+                    vipImageClearBtn.setVisibility(View.GONE);
+                    vipImageViewContainer.setVisibility(View.GONE);
+                }
+            });
+
+        }
     }
 
     @Override

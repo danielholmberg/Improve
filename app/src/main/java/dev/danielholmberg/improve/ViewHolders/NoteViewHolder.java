@@ -1,27 +1,39 @@
 package dev.danielholmberg.improve.ViewHolders;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.flexbox.FlexboxLayout;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.IOException;
+
+import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Fragments.NoteDetailsDialogFragment;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Models.Tag;
 import dev.danielholmberg.improve.R;
+import dev.danielholmberg.improve.Utilities.CircleTransform;
 
 public class NoteViewHolder extends RecyclerView.ViewHolder {
+    private static final String TAG = NoteViewHolder.class.getSimpleName();
 
     private Context context;
     private View itemView;
@@ -54,6 +66,9 @@ public class NoteViewHolder extends RecyclerView.ViewHolder {
         title = (TextView) itemView.findViewById(R.id.item_note_title_tv);
         info = (TextView) itemView.findViewById(R.id.item_note_info_tv);
         footer = (RelativeLayout) itemView.findViewById(R.id.footer_note);
+        RelativeLayout vipImageViewContainer = (RelativeLayout) itemView.findViewById(R.id.vip_image_view_container);
+        ProgressBar vipImagePlaceholder = (ProgressBar) itemView.findViewById(R.id.vip_image_progressBar);
+        ImageView vipImageView = itemView.findViewById(R.id.vip_image_view_thumbnail);
         FlexboxLayout tagsList = (FlexboxLayout) itemView.findViewById(R.id.footer_note_tags_list);
 
         // Title
@@ -94,6 +109,64 @@ public class NoteViewHolder extends RecyclerView.ViewHolder {
             itemView.setBackground(Improve.getInstance().getDrawable(R.drawable.background_note_stared));
         } else {
             itemView.setBackground(Improve.getInstance().getDrawable(R.drawable.background_note));
+        }
+
+        // Note has VIP image or not
+        if(note.hasImage()) {
+            vipImagePlaceholder.setVisibility(View.VISIBLE);
+            vipImageViewContainer.setVisibility(View.VISIBLE);
+
+            // Retrieve image from local storage
+            File cachedImage = new File(Improve.getInstance().getImageDir().getPath() +
+                    File.separator + note.getImageId());
+
+            int thumbnailSize = (int) Improve.getInstance().getResources().getDimension(R.dimen.vip_image_view_thumbnail_size);
+
+            // If an image has previously been downloaded to local storage
+            if(cachedImage.exists()) {
+                Log.d(TAG, "Loading image from Local Filesystem with file at path: " + cachedImage.getPath());
+
+                Picasso.get()
+                        .load(cachedImage)
+                        .centerCrop()
+                        .transform(new CircleTransform())
+                        .resize(thumbnailSize, thumbnailSize)
+                        .into(vipImageView);
+
+                vipImagePlaceholder.setVisibility(View.GONE);
+                vipImageView.setVisibility(View.VISIBLE);
+
+            } else {
+                // Download image from Firebase to a local file
+                Log.d(TAG, "Loading image from Firebase with image id: " + note.getImageId());
+
+                Improve.getInstance().getFirebaseStorageManager().downloadImageToLocalFile(note.getImageId(), new FirebaseStorageCallback() {
+                    @Override
+                    public void onSuccess(File file) {
+                        Picasso.get()
+                                .load(file)
+                                .centerCrop()
+                                .transform(new CircleTransform())
+                                .resize(thumbnailSize, thumbnailSize)
+                                .into(vipImageView);
+
+                        vipImagePlaceholder.setVisibility(View.GONE);
+                        vipImageView.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {}
+
+                    @Override
+                    public void onProgress(int progress) {}
+                });
+            }
+
+        } else {
+            // Remove VIP ImageView from layout
+            vipImagePlaceholder.setVisibility(View.GONE);
+            vipImageView.setVisibility(View.GONE);
+            vipImageViewContainer.setVisibility(View.GONE);
         }
 
         // Set OnClickListener to display a DialogFragment to show all the details.

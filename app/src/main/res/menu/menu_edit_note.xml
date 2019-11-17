@@ -1,23 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:orderInCategory="0"
-        android:id="@+id/starNote"
-        android:title="@string/menu_note_star_enable"
-        android:icon="@drawable/ic_star_disabled_accent"
-        app:showAsAction="ifRoom"/>
-    <item
+    <group android:orderInCategory="0"
+        android:visible="true">
+        <item
+            android:orderInCategory="0"
+            android:id="@+id/starNote"
+            android:title="@string/menu_note_star_enable"
+            android:icon="@drawable/ic_star_disabled_accent"
+            app:showAsAction="ifRoom"/>
+        <item
+            android:orderInCategory="1"
+            android:id="@+id/addTag"
+            android:title="@string/menu_tag_add"
+            android:icon="@drawable/ic_tag_add"
+            app:showAsAction="ifRoom"/>
+        <item
+            android:orderInCategory="2"
+            android:id="@+id/noteDone"
+            android:title="@string/noteDone"
+            android:icon="@drawable/ic_done_primary"
+            app:showAsAction="always"
+            />
+    </group>
+    <group
+        android:id="@+id/vipMenuGroup"
         android:orderInCategory="1"
-        android:id="@+id/addTag"
-        android:title="@string/menu_tag_add"
-        android:icon="@drawable/ic_tag_add"
-        app:showAsAction="ifRoom"/>
-    <item
-        android:orderInCategory="2"
-        android:id="@+id/noteDone"
-        android:title="@string/noteDone"
-        android:icon="@drawable/ic_done_primary"
-        app:showAsAction="always"
-        />
+        android:enabled="false"
+        android:visible="false">
+        <item
+            android:orderInCategory="0"
+            android:id="@+id/vipAddImage"
+            android:title="@string/vip_add_image"
+            android:icon="@drawable/ic_menu_vip_add_image_primary"
+            app:showAsAction="always"
+            />
+    </group>
 </menu>

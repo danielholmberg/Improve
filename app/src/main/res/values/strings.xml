@@ -166,6 +166,7 @@
     <string name="menu_company_edit">Edit Name</string>
     <string name="fab_company_text">Add new company</string>
     <string name="fab_contact_text">Add new contact</string>
+    <string name="vip_add_image">Add Image</string>
 
     <!-- Strings related to Settings -->
 

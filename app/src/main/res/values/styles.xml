@@ -35,6 +35,15 @@
         <item name="android:popupBackground">@drawable/menu_background</item>
     </style>
 
+    <style name="CustomFullscreenDialogStyle" parent="Theme.AppCompat.Dialog.Alert">
+        <!-- Fill the screen -->
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+
+        <!-- No backgrounds, titles or window float -->
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
     <!-- [Base] Toolbar label text style -->
     <style name="AppTheme.Base.ActivityTitle" parent="AppTheme.Base">
         <item name="android:textColor">@color/colorPrimary</item>

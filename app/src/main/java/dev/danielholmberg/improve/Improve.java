@@ -51,7 +51,7 @@ public class Improve extends Application implements Serializable {
     // volatile attribute makes the singleton thread safe.
     private static volatile Improve sImproveInstance;
 
-    private File rootDir;
+    private File rootDir, imageDir;
 
     public MainActivity mainActivityRef;
 
@@ -110,6 +110,10 @@ public class Improve extends Application implements Serializable {
             rootDir = new File(Environment.getExternalStorageDirectory(), "Improve");
             if(!rootDir.exists()) {
                 rootDir.mkdirs();
+            }
+            imageDir = new File(rootDir.getPath() + File.separator + FirebaseStorageManager.IMAGES_REF);
+            if(!imageDir.exists()) {
+                imageDir.mkdirs();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -198,6 +202,10 @@ public class Improve extends Application implements Serializable {
      */
     public File getRootDir() {
         return this.rootDir;
+    }
+
+    public File getImageDir() {
+        return this.imageDir;
     }
 
     public MainActivity getMainActivityRef() {

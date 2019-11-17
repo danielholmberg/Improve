@@ -1,19 +1,9 @@
 package dev.danielholmberg.improve.Models;
 
-import android.content.Context;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
-import androidx.fragment.app.FragmentManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.flexbox.FlexboxLayout;
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
@@ -23,10 +13,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Objects;
 
-import dev.danielholmberg.improve.Fragments.NoteDetailsDialogFragment;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.R;
-import dev.danielholmberg.improve.ViewHolders.TagViewHolder;
 
 /**
  * Created by DanielHolmberg on 2018-01-21.
@@ -43,6 +30,9 @@ public class Note implements Parcelable {
     private String updated;
     private boolean archived = false;
     private HashMap<String, Boolean> tags = new HashMap<>();
+
+    // VIP values
+    private String imageId;
 
     public Note() {}
 
@@ -122,6 +112,19 @@ public class Note implements Parcelable {
         this.tags = tags;
     }
 
+    public String getImageId() {
+        return this.imageId;
+    }
+
+    public void setImageId(String imageId) {
+        this.imageId = imageId;
+    }
+
+    @Exclude
+    public boolean hasImage() {
+        return this.imageId != null;
+    }
+
     @Exclude
     public boolean isStared() { return getStared(); }
 
@@ -142,6 +145,7 @@ public class Note implements Parcelable {
             noteData.put("updated", this.updated);
             noteData.put("title", this.title);
             noteData.put("stared", this.stared);
+            noteData.put("imageId", this.imageId);
 
             Log.d("Note", "Tags: " + new JSONObject(this.tags));
             if(!this.tags.isEmpty()) noteData.put("tags", new JSONObject(this.tags));
@@ -181,6 +185,7 @@ public class Note implements Parcelable {
         parcel.writeInt((archived ? 1 : 0));
         parcel.writeString(added);
         parcel.writeString(updated);
+        parcel.writeString(imageId);
         parcel.writeMap(tags);
     }
 
@@ -192,6 +197,7 @@ public class Note implements Parcelable {
         archived = in.readInt() != 0;
         added = in.readString();
         updated = in.readString();
+        imageId = in.readString();
         in.readMap(tags, HashMap.class.getClassLoader());
     }
 
@@ -219,11 +225,12 @@ public class Note implements Parcelable {
                 Objects.equals(info, note.info) &&
                 Objects.equals(added, note.added) &&
                 Objects.equals(updated, note.updated) &&
+                Objects.equals(imageId, note.imageId) &&
                 Objects.equals(tags, note.tags);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, info, stared, added, updated, archived, tags);
+        return Objects.hash(id, title, info, stared, added, updated, archived, imageId, tags);
     }
 }

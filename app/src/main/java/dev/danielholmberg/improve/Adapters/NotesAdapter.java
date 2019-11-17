@@ -15,10 +15,12 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
@@ -64,6 +66,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
                 return oldItem.getTitle().trim().equals(newItem.getTitle().trim())
                         && oldItem.getInfo().trim().equals(newItem.getInfo().trim())
                         && (oldItem.isStared() == newItem.isStared())
+                        && (oldItem.hasImage() && oldItem.getImageId().equals(newItem.getImageId()))
                         && oldItem.getTags().equals(newItem.getTags());
             }
 
@@ -105,6 +108,30 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
 
                 if(addedNote != null) {
                     notes.add(addedNote);
+
+                    if(addedNote.hasImage()) {
+                        File cachedImage = new File(app.getImageDir().getPath() +
+                                File.separator + addedNote.getImageId());
+
+                        if(cachedImage.exists()) {
+                            Log.d(TAG, "Image for Note: " + addedNote.getId() +
+                                    " exists in Local Filesystem with image id: " + addedNote.getImageId());
+                        } else {
+                            Log.d(TAG, "Downloading image from Firebase for Note: " + addedNote.getId()
+                                    + " with image id: " + addedNote.getImageId());
+
+                            app.getFirebaseStorageManager().downloadImageToLocalFile(addedNote.getImageId(), new FirebaseStorageCallback() {
+                                @Override
+                                public void onSuccess(File file) {}
+
+                                @Override
+                                public void onFailure(String errorMessage) {}
+
+                                @Override
+                                public void onProgress(int progress) {}
+                            });
+                        }
+                    }
                 }
             }
 
