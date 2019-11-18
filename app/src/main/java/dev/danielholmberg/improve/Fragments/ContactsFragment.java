@@ -163,7 +163,6 @@ public class ContactsFragment extends Fragment{
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     // Show FABs when the user has stopped scrolling.
-                    showFABMenu();
                     fab.show();
                 }
                 super.onScrollStateChanged(recyclerView, newState);
