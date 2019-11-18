@@ -93,6 +93,8 @@
     <dimen name="vip_image_view_thumbnail_size">@dimen/abc_text_size_large_material</dimen>
     <dimen name="vip_image_view_size">100dp</dimen>
     <dimen name="vip_image_view_corner_radius">20dp</dimen>
+    <dimen name="vip_image_border_width">2dp</dimen>
+    <dimen name="radius_vip_image_thumbnail">20dp</dimen>
 
     <item name="tag_letter_spacing" type="dimen" format="float">0.2</item>
 </resources>

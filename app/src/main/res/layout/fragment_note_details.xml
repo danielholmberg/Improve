@@ -94,6 +94,8 @@
             android:layout_centerHorizontal="true"
             android:layout_above="@id/footer_note"
             android:layout_margin="@dimen/footer_note_margin"
+            android:background="@drawable/background_vip_image_preview"
+            android:padding="@dimen/vip_image_border_width"
             android:gravity="center">
 
             <ProgressBar
