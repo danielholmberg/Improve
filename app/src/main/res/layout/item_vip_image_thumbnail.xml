@@ -15,12 +15,8 @@
         android:id="@+id/vip_image_progressBar"
         android:visibility="gone"
         android:padding="@dimen/vip_image_border_width"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minWidth="4dp"
-        android:minHeight="4dp"
-        android:maxWidth="@dimen/vip_image_view_thumbnail_size"
-        android:maxHeight="@dimen/vip_image_view_thumbnail_size"/>
+        android:layout_width="@dimen/vip_image_view_thumbnail_size"
+        android:layout_height="@dimen/vip_image_view_thumbnail_size"/>
 
     <ImageView
         android:id="@+id/vip_image_view_thumbnail"

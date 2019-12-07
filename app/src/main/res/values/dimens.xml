@@ -90,7 +90,7 @@
     <dimen name="radius_fab_text_corner">4dp</dimen>
     <dimen name="fab_text_padding_horizontal">4dp</dimen>
     <dimen name="fab_text_padding_vertical">8dp</dimen>
-    <dimen name="vip_image_view_thumbnail_size">@dimen/abc_text_size_large_material</dimen>
+    <dimen name="vip_image_view_thumbnail_size">24dp</dimen>
     <dimen name="vip_image_view_size">100dp</dimen>
     <dimen name="vip_image_view_corner_radius">20dp</dimen>
     <dimen name="vip_image_border_width">2dp</dimen>

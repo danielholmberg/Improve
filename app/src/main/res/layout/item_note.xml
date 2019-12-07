@@ -64,7 +64,7 @@
                     <TextView
                         android:id="@+id/vip_images_additionals_indicator"
                         android:layout_width="@dimen/vip_image_view_thumbnail_size"
-                        android:layout_height="@dimen/vip_image_view_thumbnail_size"
+                        android:layout_height="24dp"
                         android:visibility="gone"
                         android:textSize="@dimen/vip_images_additionals_indicator_text_size"
                         android:padding="4dp"
