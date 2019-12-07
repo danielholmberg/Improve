@@ -2,28 +2,36 @@ package dev.danielholmberg.improve.ViewHolders;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.flexbox.FlexboxLayout;
 
+import java.util.Map;
+
+import dev.danielholmberg.improve.Adapters.VipImagesAdapter;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Fragments.NoteDetailsDialogFragment;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Models.Tag;
+import dev.danielholmberg.improve.Models.VipImage;
 import dev.danielholmberg.improve.R;
 
 public class ArchivedNoteViewHolder extends RecyclerView.ViewHolder {
+    private static final String TAG = ArchivedNoteViewHolder.class.getSimpleName();
 
     private View itemView;
     private Context context;
     private ViewGroup parent;
     private Note note;
+    private TextView title;
 
     public ArchivedNoteViewHolder(Context context, View itemView, ViewGroup parent) {
         super(itemView);
@@ -42,9 +50,13 @@ public class ArchivedNoteViewHolder extends RecyclerView.ViewHolder {
      * @param note - Target Note (Model)
      */
     public void bindModelToView(final Note note) {
+        if(note == null) return;
+
         this.note = note;
 
-        TextView title = (TextView) itemView.findViewById(R.id.item_archived_note_title_tv);
+        title = (TextView) itemView.findViewById(R.id.item_archived_note_title_tv);
+        RecyclerView vipImagesRecyclerView = (RecyclerView) itemView.findViewById(R.id.vip_images_thumbnail_list);
+        TextView additionalImagesIndicator = itemView.findViewById(R.id.vip_images_additionals_indicator);
         FlexboxLayout tagsList = (FlexboxLayout) itemView.findViewById(R.id.footer_note_tags_list);
 
         if(note.getTitle() != null) title.setText(note.getTitle());
@@ -62,6 +74,52 @@ public class ArchivedNoteViewHolder extends RecyclerView.ViewHolder {
             tagViewHolder.bindModelToView(tag);
             tagsList.addView(tagView);
 
+        }
+
+        // Note has VIP image or not
+        if(note.hasImage()) {
+            VipImagesAdapter vipImagesAdapter = new VipImagesAdapter(note.getId(), true);
+
+            vipImagesRecyclerView.setAdapter(vipImagesAdapter);
+            LinearLayoutManager layoutManager
+                    = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
+            vipImagesRecyclerView.setLayoutManager(layoutManager);
+            vipImagesRecyclerView.setVisibility(View.VISIBLE);
+
+            additionalImagesIndicator.setVisibility(View.GONE);
+
+            int thumbnails = 0;
+            int maxThumbnails = 2;
+
+            Log.d(TAG, "Total number of images attached to Note: " + note.getVipImages().size());
+
+            for(Map.Entry<String, String> vipImageEntry: note.getVipImages().entrySet()) {
+                thumbnails++;
+
+                Log.d(TAG, "Thumbnail nr " + thumbnails + " with id: " + vipImageEntry.getKey());
+
+                if(thumbnails <= maxThumbnails) {
+                    String imageId = vipImageEntry.getKey();
+                    String filePath = vipImageEntry.getValue();
+
+                    VipImage vipImage = new VipImage(imageId, filePath);
+
+                    vipImagesAdapter.add(vipImage);
+                } else {
+                    // Show number indicator on total amount of attached images
+                    int numberOfAdditionalImages = (note.getVipImages().size()-maxThumbnails);
+                    additionalImagesIndicator.setText(Improve.getInstance().getResources()
+                            .getString(R.string.vip_images_additionals_indicator, numberOfAdditionalImages));
+                    additionalImagesIndicator.setVisibility(View.VISIBLE);
+
+                    break;
+                }
+            }
+
+        } else {
+            // Remove VIP Views from layout
+            vipImagesRecyclerView.setVisibility(View.GONE);
+            additionalImagesIndicator.setVisibility(View.GONE);
         }
 
         // Set OnClickListener to display a DialogFragment to show all the details.

@@ -34,7 +34,7 @@
                     android:id="@+id/item_note_title_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:ellipsize="marquee"
+                    android:ellipsize="end"
                     android:maxLines="@integer/note_item_title_max_lines"
                     android:text="@string/hint_title"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large"
