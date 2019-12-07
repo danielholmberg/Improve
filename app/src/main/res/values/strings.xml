@@ -83,6 +83,8 @@
     <string name="menu_note_info">Info</string>
     <string name="menu_note_google_drive">Export to Google Drive</string>
 
+    <string name="vip_images_additionals_indicator">+%d</string>
+
     <!-- Feedback strings -->
     <string name="title_submit_feedback">Feedback</string>
     <string name="submit_feedback_informing_text">Thank you for reaching this page! \n

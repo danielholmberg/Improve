@@ -39,38 +39,41 @@
                     android:text="@string/hint_title"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large"
                     android:textStyle="bold"
-                    android:layout_toStartOf="@id/vip_image_view_container"
+                    android:layout_toStartOf="@id/vip_images_thumbnail_list"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"/>
 
-                <RelativeLayout
-                    android:id="@+id/vip_image_view_container"
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/vip_images_thumbnail_list"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
+                    android:visibility="gone"
+                    android:orientation="horizontal"
+                    android:gravity="end"
                     android:layout_centerVertical="true"
-                    android:background="@drawable/background_vip_image_thumbnail"
-                    android:padding="@dimen/vip_image_border_width"
-                    android:gravity="center">
+                    android:layout_toStartOf="@id/vip_images_thumbnails_container"/>
 
-                    <ProgressBar
-                        android:id="@+id/vip_image_progressBar"
+                <LinearLayout
+                    android:id="@+id/vip_images_thumbnails_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true">
+
+                    <TextView
+                        android:id="@+id/vip_images_additionals_indicator"
+                        android:layout_width="@dimen/vip_image_view_thumbnail_size"
+                        android:layout_height="@dimen/vip_image_view_thumbnail_size"
                         android:visibility="gone"
-                        android:padding="@dimen/vip_image_border_width"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:minWidth="4dp"
-                        android:minHeight="4dp"
-                        android:maxWidth="@dimen/vip_image_view_thumbnail_size"
-                        android:maxHeight="@dimen/vip_image_view_thumbnail_size"/>
+                        android:textSize="@dimen/vip_images_additionals_indicator_text_size"
+                        android:padding="4dp"
+                        android:layout_marginStart="@dimen/vip_image_margin"
+                        android:layout_marginEnd="@dimen/vip_image_margin"
+                        android:gravity="center"
+                        android:background="@drawable/background_vip_image_thumbnail"/>
 
-                    <ImageView
-                        android:id="@+id/vip_image_view_thumbnail"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"/>
-
-                </RelativeLayout>
+                </LinearLayout>
 
             </RelativeLayout>
 

@@ -4,8 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -24,15 +22,14 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.api.services.drive.DriveScopes;
-import com.squareup.picasso.Picasso;
 
 import androidx.fragment.app.DialogFragment;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -46,32 +43,25 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.channels.FileChannel;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import dev.danielholmberg.improve.Adapters.TagsAdapter;
+import dev.danielholmberg.improve.Adapters.VipImagesAdapter;
 import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Models.Tag;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Models.VipImage;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Services.DriveServiceHelper;
 import dev.danielholmberg.improve.Utilities.NoteInputValidator;
@@ -122,13 +112,10 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     private String noteId, noteTitle, noteInfo, noteTimestampAdded, noteTimestampUpdated;
 
     // VIP
-    private RelativeLayout vipImageViewContainer;
-    private ProgressBar vipImagePlaceholder;
-    private ImageView vipImageView;
-    private ImageButton vipImageClearBtn;
-    private Uri filePath;
-    private String currentImageId = null;
-    private String originalImageId = null;
+    private RecyclerView vipImagesRecyclerView;
+    private VipImagesAdapter vipImagesAdapter;
+    private HashMap<String, String> currentImages;
+    private HashMap<String, String> originalImages;
 
     public static NoteDetailsDialogFragment newInstance() {
         return new NoteDetailsDialogFragment();
@@ -243,10 +230,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         inputInfo = (EditText) inputInfoLayout.findViewById(R.id.input_info);
 
         // VIP Views
-        vipImageViewContainer = (RelativeLayout) view.findViewById(R.id.vip_image_view_container);
-        vipImagePlaceholder = (ProgressBar) view.findViewById(R.id.vip_image_progressBar);
-        vipImageView = (ImageView) view.findViewById(R.id.vip_image_view);
-        vipImageClearBtn = (ImageButton) view.findViewById(R.id.vip_image_clear_btn);
+        vipImagesRecyclerView = (RecyclerView) view.findViewById(R.id.vip_images_list);
 
         tagsList = (FlexboxLayout) view.findViewById(R.id.footer_note_tags_list);
 
@@ -256,9 +240,21 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
         if(originalNote != null) {
 
-            if(originalNote.hasImage()) {
-                originalImageId = originalNote.getImageId();
-                currentImageId = originalImageId;
+            if(app.isVIPUser()) {
+                vipImagesAdapter = new VipImagesAdapter(originalNote.getId(), false);
+
+                if(originalNote.hasImage()) {
+                    originalImages = originalNote.getVipImages();
+                    currentImages = originalImages;
+
+                    vipImagesAdapter.addImages(originalImages);
+                    Log.d(TAG, "Initial image count: " + originalImages.size());
+                }
+
+                vipImagesRecyclerView.setAdapter(vipImagesAdapter);
+                LinearLayoutManager layoutManager
+                        = new LinearLayoutManager(app, LinearLayoutManager.HORIZONTAL, false);
+                vipImagesRecyclerView.setLayoutManager(layoutManager);
             }
 
             populateNoteDetails();
@@ -345,6 +341,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     private void chooseImage() {
         Intent intent = new Intent();
         intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGE_REQUEST);
     }
@@ -361,7 +358,10 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                                 originalNote.setStared(isOriginallyStared);
 
                                 if(originalNote.hasImage()) {
-                                    currentImageId = originalImageId;
+                                    currentImages = originalImages;
+                                    vipImagesAdapter = new VipImagesAdapter(originalNote.getId(), false);
+                                    vipImagesAdapter.addImages(currentImages);
+                                    vipImagesRecyclerView.setAdapter(vipImagesAdapter);
                                 }
 
                                 originalNote.setTags(oldTags);
@@ -626,35 +626,24 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         if(editMode) {
             isOriginallyStared = originalNote.isStared();
 
+            if(vipImagesAdapter != null) {
+                vipImagesAdapter.setEditMode(true);
+            }
+
             inputInfo.setVisibility(View.VISIBLE);
             inputTitle.requestFocus();
             getDialog().setCancelable(false);
             activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
-            if(vipImageView != null && vipImageView.getDrawable() != null) {
-                vipImageClearBtn.setVisibility(View.VISIBLE);
-                vipImageClearBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        filePath = null;
-                        currentImageId = null;
-                        vipImageView.setImageDrawable(null);
-
-                        vipImageView.setVisibility(View.GONE);
-                        vipImageClearBtn.setVisibility(View.GONE);
-                        vipImageViewContainer.setVisibility(View.GONE);
-                    }
-                });
-            }
         } else {
+
+            if(vipImagesAdapter != null) {
+                vipImagesAdapter.setEditMode(false);
+            }
+
             getDialog().setCancelable(true);
             activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
             if(TextUtils.isEmpty(noteInfo)) {
                 inputInfo.setVisibility(View.GONE);
-            }
-
-            if(currentImageId != null && vipImageClearBtn != null) {
-                vipImageClearBtn.setVisibility(View.GONE);
             }
         }
     }
@@ -687,104 +676,14 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         }
 
         if(originalNote.hasImage()) {
-            vipImageViewContainer.setVisibility(View.VISIBLE);
-            vipImagePlaceholder.setVisibility(View.VISIBLE);
-
-            File image = new File(app.getImageDir().getPath() + File.separator + currentImageId);
-
-            int targetSize = (int) Improve.getInstance().getResources().getDimension(R.dimen.vip_image_view_size);
-
-            if(image.exists()) {
-                Log.d(TAG, "Loading Preview image from Local Filesystem at path: " + image.getPath());
-
-                Picasso.get()
-                        .load(image)
-                        .centerCrop()
-                        .resize(targetSize, targetSize)
-                        .into(vipImageView);
-
-                vipImagePlaceholder.setVisibility(View.GONE);
-                vipImageView.setVisibility(View.VISIBLE);
-
-            } else {
-                Log.d(TAG, "Downloading Preview image from Firebase for Note: " + noteId + "with image id: " + currentImageId);
-
-                app.getFirebaseStorageManager().downloadImageToLocalFile(currentImageId, new FirebaseStorageCallback() {
-                    @Override
-                    public void onSuccess(File file) {
-                        Picasso.get()
-                                .load(file)
-                                .centerCrop()
-                                .resize(targetSize, targetSize)
-                                .into(vipImageView);
-
-                        vipImagePlaceholder.setVisibility(View.GONE);
-                        vipImageView.setVisibility(View.VISIBLE);
-                    }
-
-                    @Override
-                    public void onFailure(String errorMessage) {}
-
-                    @Override
-                    public void onProgress(int progress) {}
-                });
-            }
-
-            vipImageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    showImageFullscreen();
-                }
-            });
-
+            vipImagesRecyclerView.setVisibility(View.VISIBLE);
         } else {
-            // Hide VIP Image Views
-            vipImagePlaceholder.setVisibility(View.GONE);
-            vipImageClearBtn.setVisibility(View.GONE);
-            vipImageView.setVisibility(View.GONE);
-            vipImageViewContainer.setVisibility(View.GONE);
+            // Hide VIP Images List
+            vipImagesRecyclerView.setVisibility(View.GONE);
         }
 
         renderTagList();
 
-    }
-
-    private void showImageFullscreen() {
-        LinearLayout vipImageViewFullscreenLayout = (LinearLayout) LayoutInflater.from(context)
-                .inflate(R.layout.dialog_vip_image_fullscreen, null);
-        ImageView vipImageViewFull = (ImageView) vipImageViewFullscreenLayout.findViewById(R.id.vip_image_view_full);
-
-        File image = new File(app.getImageDir() + File.separator + currentImageId);
-
-        if(image.exists()) {
-            Log.d(TAG, "Loading Fullscreen image from Local Filesystem at path: " + image.getPath());
-            Picasso.get()
-                    .load(image)
-                    .into(vipImageViewFull);
-        } else {
-            Log.d(TAG, "Loading Fullscreen image from Firebase for Note: " + noteId);
-            app.getFirebaseStorageManager().downloadImageToLocalFile(noteId, new FirebaseStorageCallback() {
-                @Override
-                public void onSuccess(File file) {
-                    Picasso.get()
-                            .load(file)
-                            .into(vipImageViewFull);
-                }
-
-                @Override
-                public void onFailure(String errorMessage) {}
-
-                @Override
-                public void onProgress(int progress) {}
-            });
-        }
-
-        AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(context, R.style.CustomFullscreenDialogStyle)
-                        .setView(vipImageViewFullscreenLayout)
-                        .setCancelable(true);
-        final AlertDialog dialog = alertDialogBuilder.create();
-        dialog.show();
     }
 
     private void renderTagList() {
@@ -893,10 +792,6 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                                 } else {
                                     deleteNote(originalNote);
                                 }
-
-                                if(originalNote.hasImage()) {
-                                    app.getFirebaseStorageManager().deleteImage(originalNote.getImageId());
-                                }
                             }
                         }).setNegativeButton("No", new DialogInterface.OnClickListener() {
                     @Override
@@ -952,9 +847,31 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         updatedNote.setArchived(archived);
         updatedNote.setUpdated(timestampUpdated);
 
-        if(currentImageId != null) {
-            if(originalImageId != null && originalImageId.equals(currentImageId)) {
-                updatedNote.setImageId(originalImageId);
+        currentImages = vipImagesAdapter.getHashMap();
+
+        if(currentImages.size() > 0) {
+            Log.d(TAG, "Updated image count: " + currentImages.size());
+
+            boolean vipImageDiff = false;
+            for (Map.Entry<String, String> vipImage: currentImages.entrySet()) {
+                if(originalImages == null) {
+                    vipImageDiff = true;
+                    break;
+                } else {
+                    if(!originalImages.containsKey(vipImage.getKey())) {
+                        vipImageDiff = true;
+                        break;
+                    }
+                }
+            }
+
+
+            Log.d(TAG, "vipImageDiff: " + vipImageDiff);
+
+            if(vipImageDiff) {
+                uploadImages();
+            } else {
+                updatedNote.setVipImages(currentImages);
 
                 originalNote = updatedNote;
                 oldTags = new HashMap<String, Boolean>(originalNote.getTags());
@@ -969,8 +886,6 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                 populateNoteDetails();
                 createOptionsMenu();
                 toggleMode(editMode);
-            } else {
-                uploadImage();
             }
         } else {
             originalNote = updatedNote;
@@ -990,87 +905,69 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
     }
 
-    private void uploadImage() {
-        if(currentImageId != null && filePath != null) {
-            final ProgressDialog progressDialog = new ProgressDialog(app.getMainActivityRef());
-            progressDialog.setTitle("Uploading image...");
-            progressDialog.show();
+    private void uploadImages() {
+        Log.d(TAG, "Uploading " + vipImagesAdapter.getItemCount() + " image(s)");
 
-            File cachedImage = new File(app.getImageDir().getPath() +
-                    File.separator + currentImageId);
+        ArrayList<VipImage> imagesToUpload = new ArrayList<>();
 
-            if(!cachedImage.exists()) {
-                try {
-                    Log.d(TAG, "Copying image to Local Filesystem for Note: " + noteId +
-                            " with image id: " + currentImageId + " from Uri: " + filePath);
-                    boolean cachedImageCreated = cachedImage.createNewFile();
-
-                    if(cachedImageCreated) {
-                        copyFileFromUri(filePath, cachedImage);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+        if(originalImages != null) {
+            for(VipImage vipImage: vipImagesAdapter.getList()) {
+                if(originalImages.containsKey(vipImage.getId())) {
+                    updatedNote.addVipImage(vipImage);
+                } else {
+                    imagesToUpload.add(vipImage);
                 }
             }
-
-            app.getFirebaseStorageManager().uploadImage(currentImageId, filePath, new FirebaseStorageCallback() {
-                @Override
-                public void onSuccess(File file) {
-                    progressDialog.dismiss();
-
-                    updatedNote.setImageId(currentImageId);
-
-                    originalImageId = currentImageId;
-
-                    originalNote = updatedNote;
-                    oldTags = new HashMap<String, Boolean>(originalNote.getTags());
-
-                    if(originalNote.isArchived()) {
-                        databaseManager.updateArchivedNote(updatedNote);
-                    } else {
-                        databaseManager.updateNote(updatedNote);
-                    }
-
-                    editMode = false;
-                    populateNoteDetails();
-                    createOptionsMenu();
-                    toggleMode(editMode);
-                }
-
-                @Override
-                public void onFailure(String errorMessage) {
-                    progressDialog.dismiss();
-                    Toast.makeText(app, "Failed to upload image!", Toast.LENGTH_LONG).show();
-                }
-
-                @Override
-                public void onProgress(int progress) {
-                    progressDialog.setMessage("Uploaded " + progress + "%");
-                }
-            });
-        }
-    }
-
-    private void copyFileFromUri(Uri sourceUri, File destFile) throws IOException {
-        if (!destFile.exists()) {
-            destFile.createNewFile();
+        } else {
+            imagesToUpload = vipImagesAdapter.getList();
         }
 
-        Log.d(TAG, "Copying File from: " + sourceUri + " to File: " + destFile.getPath());
 
-        InputStream in = app.getContentResolver().openInputStream(filePath);
-        OutputStream out = new FileOutputStream(destFile);
+        String progressDialogText = "Saving attached image(s)";
 
-        // Copy the bits from instream to outstream
-        byte[] buf = new byte[1024];
-        int len;
-        if (in != null) {
-            while ((len = in.read(buf)) > 0) {
-                out.write(buf, 0, len);
+        final ProgressDialog progressDialog = new ProgressDialog(app.getMainActivityRef());
+        progressDialog.setTitle(progressDialogText);
+        progressDialog.show();
+
+        progressDialog.setMessage("Uploading " + imagesToUpload.size() + " image(s)...");
+
+        app.getFirebaseStorageManager().uploadMultipleImages(noteId, imagesToUpload, new FirebaseStorageCallback() {
+            @Override
+            public void onSuccess(Object object) {
+                Log.d(TAG, "Last image uploaded successfully!");
+
+                ArrayList<VipImage> uploadedImages = (ArrayList<VipImage>) object;
+
+                for(VipImage vipImage: uploadedImages) {
+                    updatedNote.addVipImage(vipImage);
+                }
+
+                originalImages = currentImages;
+
+                originalNote = updatedNote;
+                oldTags = new HashMap<String, Boolean>(originalNote.getTags());
+
+                if(originalNote.isArchived()) {
+                    databaseManager.updateArchivedNote(updatedNote);
+                } else {
+                    databaseManager.updateNote(updatedNote);
+                }
+
+                progressDialog.dismiss();
+                editMode = false;
+                populateNoteDetails();
+                createOptionsMenu();
+                toggleMode(editMode);            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                progressDialog.dismiss();
+                Toast.makeText(app, "Failed to upload images!", Toast.LENGTH_LONG).show();
             }
-            in.close();
-        }
-        out.close();
+
+            @Override
+            public void onProgress(int progress) {}
+        });
     }
 
     private void dismissDialog() {
@@ -1081,38 +978,40 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
-                && data != null && data.getData() != null ) {
+        if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK) {
 
-            filePath = data.getData();
+            if(data.getClipData() != null) {
+                // User selected multiple images.
 
-            currentImageId = Long.toString(System.currentTimeMillis());
+                int numberOfImagesSelected = data.getClipData().getItemCount();
 
-            int targetSize = (int) Improve.getInstance().getResources().getDimension(R.dimen.vip_image_view_size);
+                Log.d(TAG, "Multiple (" + numberOfImagesSelected + ") images selected.");
 
-            Picasso.get()
-                    .load(filePath)
-                    .centerCrop()
-                    .resize(targetSize, targetSize)
-                    .into(vipImageView);
+                for (int i = 0; i < numberOfImagesSelected; i++) {
+                    String filePath = data.getClipData().getItemAt(i).getUri().toString();
+                    String imageId = Long.toString(System.currentTimeMillis());
 
-            vipImageViewContainer.setVisibility(View.VISIBLE);
-            vipImageView.setVisibility(View.VISIBLE);
-            vipImageClearBtn.setVisibility(View.VISIBLE);
+                    VipImage vipImage = new VipImage(imageId, filePath);
+                    vipImage.setOriginalFilePath(filePath);
 
-            vipImageClearBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    filePath = null;
-                    currentImageId = null;
-                    vipImageView.setImageDrawable(null);
-
-                    vipImageView.setVisibility(View.GONE);
-                    vipImageClearBtn.setVisibility(View.GONE);
-                    vipImageViewContainer.setVisibility(View.GONE);
+                    vipImagesAdapter.add(vipImage);
+                    vipImagesRecyclerView.setVisibility(View.VISIBLE);
                 }
-            });
 
+            } else if (data.getData() != null) {
+                // User selected a single image.
+
+                Log.d(TAG, "1 image selected.");
+
+                String filePath = data.getData().toString();
+                String imageId = Long.toString(System.currentTimeMillis());
+
+                VipImage vipImage = new VipImage(imageId, filePath);
+                vipImage.setOriginalFilePath(filePath);
+
+                vipImagesAdapter.add(vipImage);
+                vipImagesRecyclerView.setVisibility(View.VISIBLE);
+            }
         }
     }
 

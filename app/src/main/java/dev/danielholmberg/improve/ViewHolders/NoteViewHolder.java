@@ -1,34 +1,38 @@
 package dev.danielholmberg.improve.ViewHolders;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.DimenRes;
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.flexbox.FlexboxLayout;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
+import dev.danielholmberg.improve.Adapters.VipImagesAdapter;
 import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Fragments.NoteDetailsDialogFragment;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Models.Tag;
+import dev.danielholmberg.improve.Models.VipImage;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Utilities.CircleTransform;
 
@@ -66,9 +70,8 @@ public class NoteViewHolder extends RecyclerView.ViewHolder {
         title = (TextView) itemView.findViewById(R.id.item_note_title_tv);
         info = (TextView) itemView.findViewById(R.id.item_note_info_tv);
         footer = (RelativeLayout) itemView.findViewById(R.id.footer_note);
-        RelativeLayout vipImageViewContainer = (RelativeLayout) itemView.findViewById(R.id.vip_image_view_container);
-        ProgressBar vipImagePlaceholder = (ProgressBar) itemView.findViewById(R.id.vip_image_progressBar);
-        ImageView vipImageView = itemView.findViewById(R.id.vip_image_view_thumbnail);
+        RecyclerView vipImagesRecyclerView = (RecyclerView) itemView.findViewById(R.id.vip_images_thumbnail_list);
+        TextView additionalImagesIndicator = itemView.findViewById(R.id.vip_images_additionals_indicator);
         FlexboxLayout tagsList = (FlexboxLayout) itemView.findViewById(R.id.footer_note_tags_list);
 
         // Title
@@ -113,60 +116,48 @@ public class NoteViewHolder extends RecyclerView.ViewHolder {
 
         // Note has VIP image or not
         if(note.hasImage()) {
-            vipImagePlaceholder.setVisibility(View.VISIBLE);
-            vipImageViewContainer.setVisibility(View.VISIBLE);
+            VipImagesAdapter vipImagesAdapter = new VipImagesAdapter(note.getId(), true);
 
-            // Retrieve image from local storage
-            File cachedImage = new File(Improve.getInstance().getImageDir().getPath() +
-                    File.separator + note.getImageId());
+            vipImagesRecyclerView.setAdapter(vipImagesAdapter);
+            LinearLayoutManager layoutManager
+                    = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
+            vipImagesRecyclerView.setLayoutManager(layoutManager);
+            vipImagesRecyclerView.setVisibility(View.VISIBLE);
 
-            int thumbnailSize = (int) Improve.getInstance().getResources().getDimension(R.dimen.vip_image_view_thumbnail_size);
+            additionalImagesIndicator.setVisibility(View.GONE);
 
-            // If an image has previously been downloaded to local storage
-            if(cachedImage.exists()) {
-                Log.d(TAG, "Loading image from Local Filesystem with file at path: " + cachedImage.getPath());
+            int thumbnails = 0;
+            int maxThumbnails = 2;
 
-                Picasso.get()
-                        .load(cachedImage)
-                        .centerCrop()
-                        .transform(new CircleTransform())
-                        .resize(thumbnailSize, thumbnailSize)
-                        .into(vipImageView);
+            Log.d(TAG, "Total number of images attached to Note: " + note.getVipImages().size());
 
-                vipImagePlaceholder.setVisibility(View.GONE);
-                vipImageView.setVisibility(View.VISIBLE);
+            for(Map.Entry<String, String> vipImageEntry: note.getVipImages().entrySet()) {
+                thumbnails++;
 
-            } else {
-                // Download image from Firebase to a local file
-                Log.d(TAG, "Loading image from Firebase with image id: " + note.getImageId());
+                Log.d(TAG, "Thumbnail nr " + thumbnails + " with id: " + vipImageEntry.getKey());
 
-                Improve.getInstance().getFirebaseStorageManager().downloadImageToLocalFile(note.getImageId(), new FirebaseStorageCallback() {
-                    @Override
-                    public void onSuccess(File file) {
-                        Picasso.get()
-                                .load(file)
-                                .centerCrop()
-                                .transform(new CircleTransform())
-                                .resize(thumbnailSize, thumbnailSize)
-                                .into(vipImageView);
+                if(thumbnails <= maxThumbnails) {
+                    String imageId = vipImageEntry.getKey();
+                    String filePath = vipImageEntry.getValue();
 
-                        vipImagePlaceholder.setVisibility(View.GONE);
-                        vipImageView.setVisibility(View.VISIBLE);
-                    }
+                    VipImage vipImage = new VipImage(imageId, filePath);
 
-                    @Override
-                    public void onFailure(String errorMessage) {}
+                    vipImagesAdapter.add(vipImage);
+                } else {
+                    // Show number indicator on total amount of attached images
+                    int numberOfAdditionalImages = (note.getVipImages().size()-maxThumbnails);
+                    additionalImagesIndicator.setText(Improve.getInstance().getResources()
+                            .getString(R.string.vip_images_additionals_indicator, numberOfAdditionalImages));
+                    additionalImagesIndicator.setVisibility(View.VISIBLE);
 
-                    @Override
-                    public void onProgress(int progress) {}
-                });
+                    break;
+                }
             }
 
         } else {
-            // Remove VIP ImageView from layout
-            vipImagePlaceholder.setVisibility(View.GONE);
-            vipImageView.setVisibility(View.GONE);
-            vipImageViewContainer.setVisibility(View.GONE);
+            // Remove VIP Views from layout
+            vipImagesRecyclerView.setVisibility(View.GONE);
+            additionalImagesIndicator.setVisibility(View.GONE);
         }
 
         // Set OnClickListener to display a DialogFragment to show all the details.

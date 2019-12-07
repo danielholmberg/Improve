@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:layout_below="@id/include_toolbar_add_note"
-        android:layout_above="@id/vip_image_view_container">
+        android:layout_above="@id/vip_images_list">
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/input_title_layout"
@@ -81,34 +81,17 @@
         </com.google.android.material.textfield.TextInputLayout>
     </RelativeLayout>
 
-    <RelativeLayout
-        android:id="@+id/vip_image_view_container"
-        android:layout_width="wrap_content"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/vip_images_list"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:layout_margin="@dimen/footer_note_margin"
+        android:orientation="horizontal"
         android:layout_centerHorizontal="true"
         android:layout_above="@id/footer_note"
-        android:background="@drawable/background_vip_image_preview"
-        android:padding="@dimen/vip_image_border_width">
-
-        <ImageView
-            android:id="@+id/vip_image_view"
-            android:layout_width="@dimen/vip_image_view_size"
-            android:layout_height="@dimen/vip_image_view_size"
-            android:background="@drawable/background_fab_text" />
-
-        <ImageButton
-            android:id="@+id/vip_image_clear_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="2dp"
-            android:src="@drawable/ic_vip_image_clear"
-            android:background="@null"
-            android:layout_alignTop="@id/vip_image_view"
-            android:layout_alignEnd="@id/vip_image_view"/>
-
-    </RelativeLayout>
+        android:requiresFadingEdge="horizontal"
+        android:fadingEdgeLength="32dp"
+        android:layout_margin="@dimen/footer_note_margin" />
 
     <include
         android:id="@+id/footer_note"

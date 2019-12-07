@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 
@@ -16,11 +15,11 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.squareup.picasso.Picasso;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
@@ -33,25 +32,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import dev.danielholmberg.improve.Adapters.TagsAdapter;
+import dev.danielholmberg.improve.Adapters.VipImagesAdapter;
 import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Models.Tag;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Models.VipImage;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Utilities.NoteInputValidator;
 import dev.danielholmberg.improve.ViewHolders.TagViewHolder;
@@ -82,11 +75,8 @@ public class AddNoteActivity extends AppCompatActivity {
     private TagsAdapter tagsAdapter;
 
     // VIP
-    private RelativeLayout vipImageViewContainer;
-    private ImageView vipImageView;
-    private ImageButton vipImageClearBtn;
-    private Uri filePath;
-    private String currentImageId = null;
+    private RecyclerView vipImagesRecyclerView;
+    private VipImagesAdapter vipImagesAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -122,15 +112,19 @@ public class AddNoteActivity extends AppCompatActivity {
         tagsAdapter = app.getTagsAdapter();
         newTagColor = "#" + Integer.toHexString(app.getResources().getColor(R.color.tagColorNull));
 
-        if(app.isVIPUser()) {
-            vipImageViewContainer = (RelativeLayout) findViewById(R.id.vip_image_view_container);
-            vipImageView = (ImageView) findViewById(R.id.vip_image_view);
-            vipImageClearBtn = (ImageButton) findViewById(R.id.vip_image_clear_btn);
-        }
-
         String id = databaseManager.getNotesRef().push().getKey();
         newNote = new Note(id);
         newTags = new ArrayList<>();
+
+        if(app.isVIPUser()) {
+            vipImagesRecyclerView = (RecyclerView) findViewById(R.id.vip_images_list);
+            vipImagesAdapter = new VipImagesAdapter(newNote.getId(), false);
+
+            vipImagesRecyclerView.setAdapter(vipImagesAdapter);
+            LinearLayoutManager layoutManager
+                    = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+            vipImagesRecyclerView.setLayoutManager(layoutManager);
+        }
 
     }
 
@@ -181,6 +175,7 @@ public class AddNoteActivity extends AppCompatActivity {
     private void chooseImage() {
         Intent intent = new Intent();
         intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGE_REQUEST);
     }
@@ -452,83 +447,52 @@ public class AddNoteActivity extends AppCompatActivity {
         newNote.setAdded(timestampAdded);
         newNote.setUpdated(timestampAdded);
 
-        if (app.isVIPUser() && filePath != null) {
+        if (app.isVIPUser() && vipImagesAdapter.getItemCount() > 0) {
             // Wait on adding new note and returning to parent activity
-            // until the upload has been successfully completed.
-            uploadImage();
+            // until all image uploads has been successfully completed.
+            uploadImages();
         } else {
             databaseManager.addNote(newNote);
             showParentActivity();
         }
     }
 
-    private void uploadImage() {
-        if(filePath != null) {
-            final ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setTitle("Uploading image...");
-            progressDialog.show();
+    private void uploadImages() {
+        Log.d(TAG, "Uploading " + vipImagesAdapter.getItemCount() + " image(s)");
 
-            File cachedImage = new File(app.getImageDir().getPath() +
-                    File.separator + currentImageId);
+        String progressDialogText = "Saving attached image(s)";
 
-            if(!cachedImage.exists()) {
-                try {
-                    Log.d(TAG, "Copying image to Local Filesystem for Note: " + newNote.getId() +
-                            " with image id: " + currentImageId + " from Uri: " + filePath);
-                    boolean cachedImageCreated = cachedImage.createNewFile();
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle(progressDialogText);
+        progressDialog.show();
 
-                    if(cachedImageCreated) {
-                        copyFileFromUri(filePath, cachedImage);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+        progressDialog.setMessage("Uploading " + vipImagesAdapter.getItemCount() + " image(s)...");
+
+        app.getFirebaseStorageManager().uploadMultipleImages(newNote.getId(), vipImagesAdapter.getList(), new FirebaseStorageCallback() {
+            @Override
+            public void onSuccess(Object object) {
+                Log.d(TAG, "Last image uploaded successfully!");
+
+                ArrayList<VipImage> uploadedImages = (ArrayList<VipImage>) object;
+
+                for(VipImage vipImage: uploadedImages) {
+                    newNote.addVipImage(vipImage);
                 }
+
+                progressDialog.dismiss();
+                databaseManager.addNote(newNote);
+                showParentActivity();
             }
 
-            app.getFirebaseStorageManager().uploadImage(currentImageId, filePath, new FirebaseStorageCallback() {
-                @Override
-                public void onSuccess(File file) {
-                    progressDialog.dismiss();
-
-                    newNote.setImageId(currentImageId);
-                    databaseManager.addNote(newNote);
-                    showParentActivity();
-                }
-
-                @Override
-                public void onFailure(String errorMessage) {
-                    progressDialog.dismiss();
-                    Toast.makeText(app, "Failed to upload image!", Toast.LENGTH_LONG).show();
-                }
-
-                @Override
-                public void onProgress(int progress) {
-                    progressDialog.setMessage("Uploaded " + progress + "%");
-                }
-            });
-        }
-    }
-
-    private void copyFileFromUri(Uri sourceUri, File destFile) throws IOException {
-        if (!destFile.exists()) {
-            destFile.createNewFile();
-        }
-
-        Log.d(TAG, "Copying File from: " + sourceUri + " to File: " + destFile.getPath());
-
-        InputStream in = app.getContentResolver().openInputStream(filePath);
-        OutputStream out = new FileOutputStream(destFile);
-
-        // Copy the bits from instream to outstream
-        byte[] buf = new byte[1024];
-        int len;
-        if (in != null) {
-            while ((len = in.read(buf)) > 0) {
-                out.write(buf, 0, len);
+            @Override
+            public void onFailure(String errorMessage) {
+                progressDialog.dismiss();
+                Toast.makeText(app, "Failed to upload images!", Toast.LENGTH_LONG).show();
             }
-            in.close();
-        }
-        out.close();
+
+            @Override
+            public void onProgress(int progress) {}
+        });
     }
 
     private void showParentActivity() {
@@ -547,37 +511,42 @@ public class AddNoteActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
-                && data != null && data.getData() != null ) {
+        if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK) {
 
-            filePath = data.getData();
+            if(data.getClipData() != null) {
+                // User selected multiple images.
 
-            currentImageId = Long.toString(System.currentTimeMillis());
+                int numberOfImagesSelected = data.getClipData().getItemCount();
 
-            int targetSize = (int) Improve.getInstance().getResources().getDimension(R.dimen.vip_image_view_size);
+                Log.d(TAG, "Multiple (" + numberOfImagesSelected + ") images selected.");
 
-            Picasso.get()
-                    .load(filePath)
-                    .centerCrop()
-                    .resize(targetSize, targetSize)
-                    .into(vipImageView);
+                for (int i = 0; i < numberOfImagesSelected; i++) {
+                    String filePath = data.getClipData().getItemAt(i).getUri().toString();
+                    String imageId = Long.toString(System.currentTimeMillis());
 
-            vipImageViewContainer.setVisibility(View.VISIBLE);
-            vipImageView.setVisibility(View.VISIBLE);
-            vipImageClearBtn.setVisibility(View.VISIBLE);
+                    VipImage vipImage = new VipImage(imageId, filePath);
+                    vipImage.setOriginalFilePath(filePath);
 
-            vipImageClearBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    filePath = null;
-                    vipImageView.setImageDrawable(null);
-
-                    vipImageView.setVisibility(View.GONE);
-                    vipImageClearBtn.setVisibility(View.GONE);
-                    vipImageViewContainer.setVisibility(View.GONE);
+                    vipImagesAdapter.add(vipImage);
+                    vipImagesAdapter.setEditMode(true);
+                    vipImagesRecyclerView.setVisibility(View.VISIBLE);
                 }
-            });
 
+            } else if (data.getData() != null) {
+                // User selected a single image.
+
+                Log.d(TAG, "1 image selected.");
+
+                String filePath = data.getData().toString();
+                String imageId = Long.toString(System.currentTimeMillis());
+
+                VipImage vipImage = new VipImage(imageId, filePath);
+                vipImage.setOriginalFilePath(filePath);
+
+                vipImagesAdapter.add(vipImage);
+                vipImagesAdapter.setEditMode(true);
+                vipImagesRecyclerView.setVisibility(View.VISIBLE);
+            }
         }
     }
 

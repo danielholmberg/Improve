@@ -56,6 +56,7 @@ import dev.danielholmberg.improve.Adapters.ArchivedNotesAdapter;
 import dev.danielholmberg.improve.Adapters.CompanyRecyclerViewAdapter;
 import dev.danielholmberg.improve.Adapters.NotesAdapter;
 import dev.danielholmberg.improve.Adapters.TagsAdapter;
+import dev.danielholmberg.improve.Adapters.VipImagesAdapter;
 import dev.danielholmberg.improve.Callbacks.FirebaseAuthCallback;
 import dev.danielholmberg.improve.Fragments.ArchivedNotesFragment;
 import dev.danielholmberg.improve.Fragments.ContactsFragment;

@@ -152,6 +152,13 @@ public class FirebaseDatabaseManager {
                 if(databaseError != null) {
                     Log.e(TAG, "Failed to delete Note: " + noteToDelete.getId() + " from Firebase: " + databaseError);
                 }
+
+                // Delete all related images from Firebase Storage
+                if(noteToDelete.hasImage()) {
+                    for(String imageId: noteToDelete.getVipImages().keySet()) {
+                        Improve.getInstance().getFirebaseStorageManager().deleteImage(noteToDelete.getId(), imageId);
+                    }
+                }
             }
         });
     }
@@ -216,6 +223,13 @@ public class FirebaseDatabaseManager {
             public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
                 if(databaseError != null) {
                     Log.e(TAG, "Failed to delete Archived Note: " + noteToDelete.getId() + "from Firebase: " + databaseError);
+                }
+
+                // Delete all related images from Firebase Storage
+                if(noteToDelete.hasImage()) {
+                    for(String imageId: noteToDelete.getVipImages().keySet()) {
+                        Improve.getInstance().getFirebaseStorageManager().deleteImage(noteToDelete.getId(), imageId);
+                    }
                 }
             }
         });

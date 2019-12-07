@@ -1,15 +1,18 @@
 package dev.danielholmberg.improve.Models;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.google.gson.JsonObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -32,7 +35,7 @@ public class Note implements Parcelable {
     private HashMap<String, Boolean> tags = new HashMap<>();
 
     // VIP values
-    private String imageId;
+    private HashMap<String, String> vipImages = new HashMap<>();
 
     public Note() {}
 
@@ -96,7 +99,13 @@ public class Note implements Parcelable {
         this.stared = stared;
     }
 
-    // Utility functions
+    public HashMap<String, String> getVipImages() {
+        return this.vipImages;
+    }
+
+    public void setVipImages(HashMap<String, String> vipImages) {
+        this.vipImages = vipImages;
+    }
 
     public HashMap<String, Boolean> getTags() {
         return this.tags;
@@ -112,17 +121,10 @@ public class Note implements Parcelable {
         this.tags = tags;
     }
 
-    public String getImageId() {
-        return this.imageId;
-    }
-
-    public void setImageId(String imageId) {
-        this.imageId = imageId;
-    }
-
+    // Utility functions
     @Exclude
     public boolean hasImage() {
-        return this.imageId != null;
+        return this.vipImages.size() > 0;
     }
 
     @Exclude
@@ -145,15 +147,25 @@ public class Note implements Parcelable {
             noteData.put("updated", this.updated);
             noteData.put("title", this.title);
             noteData.put("stared", this.stared);
-            noteData.put("imageId", this.imageId);
 
-            Log.d("Note", "Tags: " + new JSONObject(this.tags));
+            if(this.vipImages.size() > 0) noteData.put("vipImages", new JSONObject(this.vipImages));
             if(!this.tags.isEmpty()) noteData.put("tags", new JSONObject(this.tags));
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
         return noteData.toString();
+    }
+
+    @Exclude
+    public void addVipImage(VipImage vipImage) {
+        this.vipImages.put(vipImage.getId(), vipImage.getPath());
+    }
+
+    @Exclude
+    public void removeVipImage(String imageId) {
+        this.vipImages.remove(imageId);
     }
 
     @Exclude
@@ -185,7 +197,7 @@ public class Note implements Parcelable {
         parcel.writeInt((archived ? 1 : 0));
         parcel.writeString(added);
         parcel.writeString(updated);
-        parcel.writeString(imageId);
+        parcel.writeMap(vipImages);
         parcel.writeMap(tags);
     }
 
@@ -197,7 +209,7 @@ public class Note implements Parcelable {
         archived = in.readInt() != 0;
         added = in.readString();
         updated = in.readString();
-        imageId = in.readString();
+        in.readMap(vipImages, HashMap.class.getClassLoader());
         in.readMap(tags, HashMap.class.getClassLoader());
     }
 
@@ -225,12 +237,12 @@ public class Note implements Parcelable {
                 Objects.equals(info, note.info) &&
                 Objects.equals(added, note.added) &&
                 Objects.equals(updated, note.updated) &&
-                Objects.equals(imageId, note.imageId) &&
+                Objects.equals(vipImages, note.vipImages) &&
                 Objects.equals(tags, note.tags);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, info, stared, added, updated, archived, imageId, tags);
+        return Objects.hash(id, title, info, stared, added, updated, archived, vipImages, tags);
     }
 }

@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.SortedList;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,11 +21,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Models.VipImage;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.ViewHolders.NoteViewHolder;
 
@@ -66,7 +71,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
                 return oldItem.getTitle().trim().equals(newItem.getTitle().trim())
                         && oldItem.getInfo().trim().equals(newItem.getInfo().trim())
                         && (oldItem.isStared() == newItem.isStared())
-                        && (oldItem.hasImage() && oldItem.getImageId().equals(newItem.getImageId()))
+                        && (oldItem.hasImage() && oldItem.getVipImages().equals(newItem.getVipImages()))
                         && oldItem.getTags().equals(newItem.getTags());
             }
 
@@ -110,26 +115,29 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
                     notes.add(addedNote);
 
                     if(addedNote.hasImage()) {
-                        File cachedImage = new File(app.getImageDir().getPath() +
-                                File.separator + addedNote.getImageId());
+                        for(String imageId : addedNote.getVipImages().keySet()) {
 
-                        if(cachedImage.exists()) {
-                            Log.d(TAG, "Image for Note: " + addedNote.getId() +
-                                    " exists in Local Filesystem with image id: " + addedNote.getImageId());
-                        } else {
-                            Log.d(TAG, "Downloading image from Firebase for Note: " + addedNote.getId()
-                                    + " with image id: " + addedNote.getImageId());
+                            File cachedImage = new File(app.getImageDir().getPath() +
+                                    File.separator + addedNote.getId() + File.separator + imageId);
 
-                            app.getFirebaseStorageManager().downloadImageToLocalFile(addedNote.getImageId(), new FirebaseStorageCallback() {
-                                @Override
-                                public void onSuccess(File file) {}
+                            if(cachedImage.exists()) {
+                                Log.d(TAG, "Image for Note: " + addedNote.getId() +
+                                        " exists in Local Filesystem with image id: " + imageId);
+                            } else {
+                                Log.d(TAG, "Downloading image from Firebase for Note: " + addedNote.getId()
+                                        + " with image id: " + imageId);
 
-                                @Override
-                                public void onFailure(String errorMessage) {}
+                                app.getFirebaseStorageManager().downloadImageToLocalFile(addedNote.getId(), imageId, new FirebaseStorageCallback() {
+                                    @Override
+                                    public void onSuccess(Object file) {}
 
-                                @Override
-                                public void onProgress(int progress) {}
-                            });
+                                    @Override
+                                    public void onFailure(String errorMessage) {}
+
+                                    @Override
+                                    public void onProgress(int progress) {}
+                                });
+                            }
                         }
                     }
                 }
