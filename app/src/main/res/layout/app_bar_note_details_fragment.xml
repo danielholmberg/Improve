@@ -14,17 +14,6 @@
         app:layout_scrollFlags="scroll|enterAlways"
         app:popupTheme="@style/AppTheme.Base.FlatToolbar">
 
-        <ImageButton
-            android:id="@+id/close_dialog_btn"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_menu_close_primary"
-            android:layout_gravity="start"
-            android:layout_marginEnd="16dp"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_toStartOf="@id/toolbar_note_dialog_title_tv"
-            android:layout_centerVertical="true" />
-
         <TextView
             android:id="@+id/toolbar_note_dialog_title_tv"
             style="@style/AppTheme.Base.ActivityTitle"

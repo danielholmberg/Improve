@@ -23,6 +23,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.api.services.drive.DriveScopes;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.DialogFragment;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -152,6 +153,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
         newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColorNull));
 
+
         // Set transparent background and no title to enable corner radius.
         if (getDialog() != null && getDialog().getWindow() != null) {
             getDialog().getWindow().setBackgroundDrawableResource(R.drawable.background_note_details);
@@ -170,6 +172,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
         toolbar = (Toolbar) view.findViewById(R.id.toolbar_note_details_fragment);
         createOptionsMenu();
+        toolbar.setNavigationIcon(R.drawable.ic_menu_close_primary);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -296,7 +299,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
             menuTitle.setText(R.string.title_edit_note);
             toolbar.inflateMenu(R.menu.menu_edit_note);
-            toolbar.findViewById(R.id.close_dialog_btn).setOnClickListener(new View.OnClickListener() {
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     showDiscardChangesDialog();
@@ -319,7 +322,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
             menuTitle.setText(R.string.note_activity_details);
             toolbar.inflateMenu(R.menu.fragment_note_details_show);
-            toolbar.findViewById(R.id.close_dialog_btn).setOnClickListener(new View.OnClickListener() {
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     dismissDialog();
