@@ -30,7 +30,8 @@
     <string name="contact_details_empty_mobile_text">No phone number added</string>
     <string name="contact_details_empty_comment_text">No comment added</string>
     <string name="contactDone">Done</string>
-    <string name="placeholder_company">Company</string>
+    <string name="placeholder_company_details_nr_of_contacts">0</string>
+    <string name="placeholder_company_details_name">Company Name</string>
     <string name="dialog_delete_contact_title">Permanently delete contact</string>
     <string name="dialog_delete_contact_msg">Do you want to delete this contact?</string>
     <string name="err_msg_phone">Please enter a valid phone number</string>

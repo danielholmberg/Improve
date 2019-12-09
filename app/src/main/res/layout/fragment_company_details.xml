@@ -13,18 +13,38 @@
         android:layout_width="match_parent"/>
 
     <RelativeLayout
-        android:id="@+id/company_details_body"
+        android:id="@+id/company_details_container"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:paddingStart="@dimen/margin_company_cardview"
         android:paddingEnd="@dimen/margin_company_cardview"
         android:paddingBottom="@dimen/margin_company_cardview">
 
+        <RelativeLayout
+            android:id="@+id/company_details_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:paddingBottom="@dimen/margin_company_cardview"
+            android:paddingEnd="@dimen/margin_company_cardview">
+
+            <TextView
+                android:id="@+id/company_details_nr_of_contacts"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/placeholder_company_details_nr_of_contacts"
+                android:drawableStart="@drawable/ic_contact_person_grey"
+                android:textColor="@color/note_icon_grey"
+                android:layout_centerHorizontal="true"/>
+
+        </RelativeLayout>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/contacts_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:requiresFadingEdge="vertical"
+            android:layout_below="@id/company_details_content"
             android:fadingEdgeLength="32dp"/>
 
     </RelativeLayout>

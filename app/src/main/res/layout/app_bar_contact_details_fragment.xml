@@ -29,7 +29,7 @@
                 android:id="@+id/toolbar_contact_details_company_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/placeholder_company"
+                android:text="@string/placeholder_company_details_name"
                 style="@style/AppTheme.Base.ActivityTitle"
                 android:scrollHorizontally="true"
                 android:singleLine="true" />

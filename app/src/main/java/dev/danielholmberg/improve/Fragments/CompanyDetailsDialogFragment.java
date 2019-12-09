@@ -1,7 +1,6 @@
 package dev.danielholmberg.improve.Fragments;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,7 +25,6 @@ import android.widget.Toast;
 import java.util.HashMap;
 import java.util.Objects;
 
-import dev.danielholmberg.improve.Activities.AddContactActivity;
 import dev.danielholmberg.improve.Models.Company;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
@@ -50,7 +48,7 @@ public class CompanyDetailsDialogFragment extends DialogFragment {
     private String companyId;
     private String companyNameId;
     private HashMap<String, Object> companyContacts;
-    private TextView dialogTitle;
+    private TextView companyName, companyNrOfContacts;
     private RecyclerView contactsRecyclerView;
 
     public static CompanyDetailsDialogFragment newInstance() {
@@ -88,6 +86,7 @@ public class CompanyDetailsDialogFragment extends DialogFragment {
 
         toolbar = (Toolbar) view.findViewById(R.id.toolbar_company_details_fragment);
         createOptionsMenu();
+        toolbar.setNavigationIcon(R.drawable.ic_menu_close_primary);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -105,7 +104,8 @@ public class CompanyDetailsDialogFragment extends DialogFragment {
             }
         });
 
-        dialogTitle = (TextView) view.findViewById(R.id.toolbar_company_title_tv);
+        companyName = (TextView) view.findViewById(R.id.toolbar_company_title_tv);
+        companyNrOfContacts = (TextView) view.findViewById(R.id.company_details_nr_of_contacts);
         contactsRecyclerView = (RecyclerView) view.findViewById(R.id.contacts_recyclerview);
 
         if(company != null) {
@@ -128,7 +128,7 @@ public class CompanyDetailsDialogFragment extends DialogFragment {
         menu.clear();
 
         toolbar.inflateMenu(R.menu.fragment_company_details);
-        toolbar.findViewById(R.id.close_dialog_btn).setOnClickListener(new View.OnClickListener() {
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dismissDialog();
@@ -147,13 +147,14 @@ public class CompanyDetailsDialogFragment extends DialogFragment {
         Log.d(TAG, "Company.contacts: "+companyContacts);
 
         if(companyNameId != null) {
-            dialogTitle.setText(companyNameId);
+            companyName.setText(companyNameId);
         }
 
         if(companyContacts != null) {
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(app, RecyclerView.VERTICAL, false);
             contactsRecyclerView.setLayoutManager(linearLayoutManager);
             contactsRecyclerView.setAdapter(app.getCompanyContactsAdapter(companyId));
+            companyNrOfContacts.setText(String.valueOf(companyContacts.size()));
         }
     }
 
@@ -198,7 +199,7 @@ public class CompanyDetailsDialogFragment extends DialogFragment {
                             } else {
                                 company.setName(newCompanyName);
                                 companyNameId = newCompanyName;
-                                dialogTitle.setText(newCompanyName);
+                                companyName.setText(newCompanyName);
                                 databaseManager.addCompany(company);
 
                                 editCompanyDialog.dismiss();

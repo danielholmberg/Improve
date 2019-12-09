@@ -15,24 +15,15 @@
         app:layout_scrollFlags="scroll|enterAlways"
         app:popupTheme="@style/AppTheme.Base.FlatToolbar">
 
-        <ImageButton
-            android:id="@+id/close_dialog_btn"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_menu_close_primary"
-            android:layout_gravity="start"
-            android:layout_marginEnd="16dp"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_toStartOf="@id/toolbar_company_title_tv"
-            android:layout_centerVertical="true" />
-
         <TextView
             android:id="@+id/toolbar_company_title_tv"
             style="@style/AppTheme.Base.ActivityTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:text="@string/placeholder_company" />
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/placeholder_company_details_name" />
 
     </androidx.appcompat.widget.Toolbar>
 
