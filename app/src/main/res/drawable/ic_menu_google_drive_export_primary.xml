@@ -1,9 +1,21 @@
-<!-- drawable/google_drive.xml -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:height="24dp"
     android:width="24dp"
+    android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <path android:fillColor="@color/colorPrimary"
-        android:pathData="M7.71,3.5L1.15,15L4.58,21L11.13,9.5M9.73,15L6.3,21H19.42L22.85,15M22.28,14L15.42,2H8.58L8.57,2L15.43,14H22.28Z" />
+  <path
+      android:pathData="M7.8,3.7c-0.1,-0.1 -0.2,-0.1 -0.2,0L1.3,14.8c-0.1,0.1 -0.1,0.3 0,0.4l3.2,5.6c0.1,0.1 0.2,0.1 0.2,0L11,9.7C11,9.6 11,9.4 11,9.3L7.8,3.7z"
+      android:fillColor="@color/colorPrimary"/>
+  <path
+      android:pathData="M17.6,10.6c2.2,0 3.1,0.9 3.1,0.9c0.1,0.1 0.1,0.1 0.1,0l-5.3,-9.3C15.5,2.1 15.3,2 15.1,2H8.9C8.7,2 8.7,2.1 8.7,2.2l5.4,9.4c0.1,0.1 0.2,0.1 0.3,0.1C14.4,11.6 15.6,10.6 17.6,10.6z"
+      android:fillColor="@color/colorPrimary"/>
+  <path
+      android:pathData="M12.2,16c0,-0.3 0.1,-0.8 0.1,-0.8c0,-0.1 -0.1,-0.2 -0.2,-0.2H9.9c-0.1,0 -0.3,0.1 -0.4,0.2l-3.2,5.6c-0.1,0.1 0,0.2 0.1,0.2h8.8c0.1,0 0.1,0 0,-0.1C15.4,20.9 12.2,19.8 12.2,16z"
+      android:fillColor="@color/colorPrimary"/>
+  <path
+      android:fillColor="@color/colorPrimary"
+      android:pathData="M14.8,15.6l2.6,-3.3c0.1,-0.1 0.3,-0.1 0.4,0l2.6,3.3c0.1,0.2 0,0.4 -0.2,0.4H15C14.8,16 14.7,15.8 14.8,15.6z"/>
+  <path
+      android:fillColor="@color/colorPrimary"
+      android:pathData="M18.5,19.7h-1.9c-0.1,0 -0.3,-0.1 -0.3,-0.3v-4.3c0,-0.1 0.1,-0.3 0.3,-0.3h1.9c0.1,0 0.3,0.1 0.3,0.3v4.3C18.8,19.6 18.7,19.7 18.5,19.7z"/>
 </vector>
