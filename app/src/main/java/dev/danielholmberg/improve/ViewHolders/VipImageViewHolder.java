@@ -2,6 +2,7 @@ package dev.danielholmberg.improve.ViewHolders;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +10,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,7 +21,7 @@ import java.io.File;
 import dev.danielholmberg.improve.Adapters.VipImagesAdapter;
 import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Models.Note;
+import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
 import dev.danielholmberg.improve.Models.VipImage;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Utilities.CircleTransform;
@@ -43,8 +43,7 @@ public class VipImageViewHolder extends RecyclerView.ViewHolder{
         this.noteId = noteId;
         this.vipImagesAdapter = vipImagesAdapter;
 
-        noteImagesDir = new File(Improve.getInstance().getImageDir().getPath() +
-                File.separator + noteId);
+        noteImagesDir = new File(Improve.getInstance().getImageDir(), noteId);
         if(!noteImagesDir.exists()) noteImagesDir.mkdirs();
     }
 
@@ -62,7 +61,7 @@ public class VipImageViewHolder extends RecyclerView.ViewHolder{
 
         this.vipImage = vipImage;
 
-        File image = new File(noteImagesDir + File.separator + vipImage.getId());
+        File image = new File(noteImagesDir, vipImage.getId() + FirebaseStorageManager.VIP_IMAGE_SUFFIX);
 
         int targetSize = (int) Improve.getInstance().getResources().getDimension(R.dimen.vip_image_view_size);
 
@@ -98,15 +97,16 @@ public class VipImageViewHolder extends RecyclerView.ViewHolder{
             Improve.getInstance().getFirebaseStorageManager()
                     .downloadImageToLocalFile(noteId, vipImage.getId(), new FirebaseStorageCallback() {
                 @Override
-                public void onSuccess(Object uri) {
+                public void onSuccess(Object file) {
                     Picasso.get()
-                            .load((Uri) uri)
+                            .load((File) file)
                             .centerCrop()
                             .resize(targetSize, targetSize)
                             .into(vipImageView);
 
                     //vipImagePlaceholder.setVisibility(View.GONE);
                     vipImageView.setVisibility(View.VISIBLE);
+                    vipImagesAdapter.notifyDataSetChanged();
                 }
 
                 @Override
@@ -130,7 +130,7 @@ public class VipImageViewHolder extends RecyclerView.ViewHolder{
                 .inflate(R.layout.dialog_vip_image_fullscreen, null);
         ImageView vipImageViewFull = (ImageView) vipImageViewFullscreenLayout.findViewById(R.id.vip_image_view_full);
 
-        File image = new File(noteImagesDir + File.separator + vipImage.getId());
+        File image = new File(noteImagesDir, vipImage.getId() + FirebaseStorageManager.VIP_IMAGE_SUFFIX);
 
         if(image.exists()) {
             Log.d(TAG, "Loading Fullscreen image from Local Filesystem at path: " + image.getPath());
@@ -180,11 +180,7 @@ public class VipImageViewHolder extends RecyclerView.ViewHolder{
         vipImagePlaceholder.setVisibility(View.VISIBLE);
         vipImageView.setVisibility(View.GONE);
 
-        File noteImagesDir = new File(Improve.getInstance().getImageDir() +
-                File.separator + noteId);
-        if(!noteImagesDir.exists()) noteImagesDir.mkdirs();
-
-        File image = new File(noteImagesDir + File.separator + vipImage.getId());
+        File image = new File(noteImagesDir, vipImage.getId() + FirebaseStorageManager.VIP_IMAGE_SUFFIX);
 
         int thumbnailSize = (int) Improve.getInstance().getResources().getDimension(R.dimen.vip_image_view_thumbnail_size);
 
@@ -206,11 +202,12 @@ public class VipImageViewHolder extends RecyclerView.ViewHolder{
             // Download image from Firebase to a local file
             Log.d(TAG, "Loading image from Firebase with image id: " + vipImage.getId());
 
-            Improve.getInstance().getFirebaseStorageManager().downloadImageToLocalFile(noteId, vipImage.getId(), new FirebaseStorageCallback() {
+            Improve.getInstance().getFirebaseStorageManager()
+                    .downloadImageToLocalFile(noteId, vipImage.getId(), new FirebaseStorageCallback() {
                 @Override
                 public void onSuccess(Object file) {
                     Picasso.get()
-                            .load((Uri) file)
+                            .load((File) file)
                             .centerCrop()
                             .transform(new CircleTransform())
                             .resize(thumbnailSize, thumbnailSize)
@@ -218,6 +215,7 @@ public class VipImageViewHolder extends RecyclerView.ViewHolder{
 
                     vipImagePlaceholder.setVisibility(View.GONE);
                     vipImageView.setVisibility(View.VISIBLE);
+                    vipImagesAdapter.notifyDataSetChanged();
                 }
 
                 @Override

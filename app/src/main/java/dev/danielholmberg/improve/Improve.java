@@ -5,6 +5,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
 import android.os.Environment;
+import android.util.Log;
+
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.database.FirebaseDatabase;
@@ -92,7 +94,13 @@ public class Improve extends Application implements Serializable {
         super.onCreate();
         sImproveInstance = this;
         // Enabling offline capabilities for Firebase Storage.
+        // OBS!!! Can create Local Firebase cache issue where data changed in console won't take effect.
+        // Reset cache by setting this to FASLE if there is an issue with data out of sync,
+        // or a crash due to changed Model parameters.
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+
+        // Create Root-Dir if not already existing.
+        getRootDir();
 
         // Initializing managers.
         authManager = new AuthManager();
@@ -106,19 +114,6 @@ public class Improve extends Application implements Serializable {
         firebaseRemoteConfig.setConfigSettingsAsync(configSettings);
         firebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
         firebaseRemoteConfig.setDefaults(VIP_USERS);
-
-        try {
-            rootDir = new File(Environment.getExternalStorageDirectory(), "Improve");
-            if(!rootDir.exists()) {
-                rootDir.mkdirs();
-            }
-            imageDir = new File(rootDir.getPath() + File.separator + FirebaseStorageManager.IMAGES_REF);
-            if(!imageDir.exists()) {
-                imageDir.mkdirs();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         createNotificationChannelExport();
     }
@@ -202,10 +197,20 @@ public class Improve extends Application implements Serializable {
      * @return - Root directory of application
      */
     public File getRootDir() {
+        rootDir = getApplicationContext().getFilesDir();
+        if(!rootDir.exists()) {
+            rootDir.mkdirs();
+        }
+        Log.d("Improve", "RootDir: " + this.rootDir.getPath());
         return this.rootDir;
     }
 
     public File getImageDir() {
+        imageDir = new File(rootDir, FirebaseStorageManager.IMAGES_REF);
+        if(!imageDir.exists()) {
+            imageDir.mkdirs();
+        }
+        Log.d("Improve", "ImageDir: " + this.imageDir.getPath());
         return this.imageDir;
     }
 

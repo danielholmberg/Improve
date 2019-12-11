@@ -23,7 +23,6 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.api.services.drive.DriveScopes;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.DialogFragment;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -115,8 +114,8 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     // VIP
     private RecyclerView vipImagesRecyclerView;
     private VipImagesAdapter vipImagesAdapter;
-    private HashMap<String, String> currentImages;
-    private HashMap<String, String> originalImages;
+    private ArrayList<VipImage> currentImages;
+    private ArrayList<VipImage> originalImages;
 
     public static NoteDetailsDialogFragment newInstance() {
         return new NoteDetailsDialogFragment();
@@ -247,7 +246,10 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                 vipImagesAdapter = new VipImagesAdapter(originalNote.getId(), false);
 
                 if(originalNote.hasImage()) {
-                    originalImages = originalNote.getVipImages();
+                    originalImages = new ArrayList<>();
+                    for(String vipImageId: originalNote.getVipImages()) {
+                        originalImages.add(new VipImage(vipImageId));
+                    }
                     currentImages = originalImages;
 
                     vipImagesAdapter.addImages(originalImages);
@@ -850,18 +852,18 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         updatedNote.setArchived(archived);
         updatedNote.setUpdated(timestampUpdated);
 
-        currentImages = vipImagesAdapter.getHashMap();
+        currentImages = vipImagesAdapter.getImageList();
 
         if(currentImages.size() > 0) {
             Log.d(TAG, "Updated image count: " + currentImages.size());
 
             boolean vipImageDiff = false;
-            for (Map.Entry<String, String> vipImage: currentImages.entrySet()) {
+            for (VipImage vipImage: currentImages) {
                 if(originalImages == null) {
                     vipImageDiff = true;
                     break;
                 } else {
-                    if(!originalImages.containsKey(vipImage.getKey())) {
+                    if(!originalImages.contains(vipImage)) {
                         vipImageDiff = true;
                         break;
                     }
@@ -874,7 +876,11 @@ public class NoteDetailsDialogFragment extends DialogFragment {
             if(vipImageDiff) {
                 uploadImages();
             } else {
-                updatedNote.setVipImages(currentImages);
+                ArrayList<String> images = new ArrayList<>();
+                for(VipImage vipImage: currentImages) {
+                    images.add(vipImage.getId());
+                }
+                updatedNote.setVipImages(images);
 
                 originalNote = updatedNote;
                 oldTags = new HashMap<String, Boolean>(originalNote.getTags());
@@ -914,15 +920,15 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         ArrayList<VipImage> imagesToUpload = new ArrayList<>();
 
         if(originalImages != null) {
-            for(VipImage vipImage: vipImagesAdapter.getList()) {
-                if(originalImages.containsKey(vipImage.getId())) {
-                    updatedNote.addVipImage(vipImage);
+            for(VipImage vipImage: vipImagesAdapter.getImageList()) {
+                if(originalImages.contains(vipImage)) {
+                    updatedNote.addVipImage(vipImage.getId());
                 } else {
                     imagesToUpload.add(vipImage);
                 }
             }
         } else {
-            imagesToUpload = vipImagesAdapter.getList();
+            imagesToUpload = vipImagesAdapter.getImageList();
         }
 
 
@@ -942,7 +948,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                 ArrayList<VipImage> uploadedImages = (ArrayList<VipImage>) object;
 
                 for(VipImage vipImage: uploadedImages) {
-                    updatedNote.addVipImage(vipImage);
+                    updatedNote.addVipImage(vipImage.getId());
                 }
 
                 originalImages = currentImages;
@@ -991,11 +997,11 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                 Log.d(TAG, "Multiple (" + numberOfImagesSelected + ") images selected.");
 
                 for (int i = 0; i < numberOfImagesSelected; i++) {
-                    String filePath = data.getClipData().getItemAt(i).getUri().toString();
+                    String originalFilePath = data.getClipData().getItemAt(i).getUri().toString();
                     String imageId = Long.toString(System.currentTimeMillis());
 
-                    VipImage vipImage = new VipImage(imageId, filePath);
-                    vipImage.setOriginalFilePath(filePath);
+                    VipImage vipImage = new VipImage(imageId);
+                    vipImage.setOriginalFilePath(originalFilePath);
 
                     vipImagesAdapter.add(vipImage);
                     vipImagesRecyclerView.setVisibility(View.VISIBLE);
@@ -1006,11 +1012,11 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
                 Log.d(TAG, "1 image selected.");
 
-                String filePath = data.getData().toString();
+                String originalFilePath = data.getData().toString();
                 String imageId = Long.toString(System.currentTimeMillis());
 
-                VipImage vipImage = new VipImage(imageId, filePath);
-                vipImage.setOriginalFilePath(filePath);
+                VipImage vipImage = new VipImage(imageId);
+                vipImage.setOriginalFilePath(originalFilePath);
 
                 vipImagesAdapter.add(vipImage);
                 vipImagesRecyclerView.setVisibility(View.VISIBLE);

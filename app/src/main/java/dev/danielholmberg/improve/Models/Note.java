@@ -1,20 +1,19 @@
 package dev.danielholmberg.improve.Models;
 
-import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
-import com.google.gson.JsonObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import dev.danielholmberg.improve.Improve;
 
@@ -32,10 +31,10 @@ public class Note implements Parcelable {
     private String added;
     private String updated;
     private boolean archived = false;
-    private HashMap<String, Boolean> tags = new HashMap<>();
+    private Map<String, Boolean> tags = new HashMap<>();
 
     // VIP values
-    private HashMap<String, String> vipImages = new HashMap<>();
+    private ArrayList<String> vipImages = new ArrayList<>();
 
     public Note() {}
 
@@ -99,26 +98,28 @@ public class Note implements Parcelable {
         this.stared = stared;
     }
 
-    public HashMap<String, String> getVipImages() {
+    public ArrayList<String> getVipImages() {
         return this.vipImages;
     }
 
-    public void setVipImages(HashMap<String, String> vipImages) {
+    public void setVipImages(ArrayList<String> vipImages) {
         this.vipImages = vipImages;
     }
 
-    public HashMap<String, Boolean> getTags() {
+    public Map<String, Boolean> getTags() {
         return this.tags;
     }
 
-    public void setTags(HashMap<String, Boolean> tags) {
+    public void setTags(Map<String, Boolean> tags) {
+        Map<String, Boolean> concurrentMap = new ConcurrentHashMap<String, Boolean>(tags);
+
         // Do not add if Tag has been removed.
-        for(String tagId: tags.keySet()) {
+        for(String tagId: concurrentMap.keySet()) {
             if(Improve.getInstance().getTagsAdapter().getTag(tagId) == null) {
-                tags.remove(tagId);
+                concurrentMap.remove(tagId);
             }
         }
-        this.tags = tags;
+        this.tags = concurrentMap;
     }
 
     // Utility functions
@@ -148,7 +149,7 @@ public class Note implements Parcelable {
             noteData.put("title", this.title);
             noteData.put("stared", this.stared);
 
-            if(this.vipImages.size() > 0) noteData.put("vipImages", new JSONObject(this.vipImages));
+            if(this.vipImages.size() > 0) noteData.put("vipImages", this.vipImages);
             if(!this.tags.isEmpty()) noteData.put("tags", new JSONObject(this.tags));
 
         } catch (JSONException e) {
@@ -159,8 +160,8 @@ public class Note implements Parcelable {
     }
 
     @Exclude
-    public void addVipImage(VipImage vipImage) {
-        this.vipImages.put(vipImage.getId(), vipImage.getPath());
+    public void addVipImage(String vipImageId) {
+        this.vipImages.add(vipImageId);
     }
 
     @Exclude
@@ -197,7 +198,7 @@ public class Note implements Parcelable {
         parcel.writeInt((archived ? 1 : 0));
         parcel.writeString(added);
         parcel.writeString(updated);
-        parcel.writeMap(vipImages);
+        parcel.writeList(vipImages);
         parcel.writeMap(tags);
     }
 
@@ -209,7 +210,7 @@ public class Note implements Parcelable {
         archived = in.readInt() != 0;
         added = in.readString();
         updated = in.readString();
-        in.readMap(vipImages, HashMap.class.getClassLoader());
+        in.readList(vipImages, ArrayList.class.getClassLoader());
         in.readMap(tags, HashMap.class.getClassLoader());
     }
 

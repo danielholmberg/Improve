@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
+import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
@@ -115,10 +116,12 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
                     notes.add(addedNote);
 
                     if(addedNote.hasImage()) {
-                        for(String imageId : addedNote.getVipImages().keySet()) {
+                        File noteImagesDir = new File(Improve.getInstance().getImageDir(), addedNote.getId());
+                        if(!noteImagesDir.exists()) noteImagesDir.mkdirs();
 
-                            File cachedImage = new File(app.getImageDir().getPath() +
-                                    File.separator + addedNote.getId() + File.separator + imageId);
+                        for(String imageId : addedNote.getVipImages()) {
+
+                            File cachedImage = new File(noteImagesDir, imageId + FirebaseStorageManager.VIP_IMAGE_SUFFIX);
 
                             if(cachedImage.exists()) {
                                 Log.d(TAG, "Image for Note: " + addedNote.getId() +

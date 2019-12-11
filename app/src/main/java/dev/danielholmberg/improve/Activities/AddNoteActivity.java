@@ -468,7 +468,8 @@ public class AddNoteActivity extends AppCompatActivity {
 
         progressDialog.setMessage("Uploading " + vipImagesAdapter.getItemCount() + " image(s)...");
 
-        app.getFirebaseStorageManager().uploadMultipleImages(newNote.getId(), vipImagesAdapter.getList(), new FirebaseStorageCallback() {
+        app.getFirebaseStorageManager()
+                .uploadMultipleImages(newNote.getId(), vipImagesAdapter.getImageList(), new FirebaseStorageCallback() {
             @Override
             public void onSuccess(Object object) {
                 Log.d(TAG, "Last image uploaded successfully!");
@@ -476,7 +477,7 @@ public class AddNoteActivity extends AppCompatActivity {
                 ArrayList<VipImage> uploadedImages = (ArrayList<VipImage>) object;
 
                 for(VipImage vipImage: uploadedImages) {
-                    newNote.addVipImage(vipImage);
+                    newNote.addVipImage(vipImage.getId());
                 }
 
                 progressDialog.dismiss();
@@ -521,11 +522,11 @@ public class AddNoteActivity extends AppCompatActivity {
                 Log.d(TAG, "Multiple (" + numberOfImagesSelected + ") images selected.");
 
                 for (int i = 0; i < numberOfImagesSelected; i++) {
-                    String filePath = data.getClipData().getItemAt(i).getUri().toString();
+                    String originalFilePath = data.getClipData().getItemAt(i).getUri().toString();
                     String imageId = Long.toString(System.currentTimeMillis());
 
-                    VipImage vipImage = new VipImage(imageId, filePath);
-                    vipImage.setOriginalFilePath(filePath);
+                    VipImage vipImage = new VipImage(imageId);
+                    vipImage.setOriginalFilePath(originalFilePath);
 
                     vipImagesAdapter.add(vipImage);
                     vipImagesAdapter.setEditMode(true);
@@ -537,11 +538,11 @@ public class AddNoteActivity extends AppCompatActivity {
 
                 Log.d(TAG, "1 image selected.");
 
-                String filePath = data.getData().toString();
+                String originalFilePath = data.getData().toString();
                 String imageId = Long.toString(System.currentTimeMillis());
 
-                VipImage vipImage = new VipImage(imageId, filePath);
-                vipImage.setOriginalFilePath(filePath);
+                VipImage vipImage = new VipImage(imageId);
+                vipImage.setOriginalFilePath(originalFilePath);
 
                 vipImagesAdapter.add(vipImage);
                 vipImagesAdapter.setEditMode(true);

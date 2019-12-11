@@ -7,34 +7,22 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.annotation.DimenRes;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.flexbox.FlexboxLayout;
-import com.squareup.picasso.Picasso;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import dev.danielholmberg.improve.Adapters.VipImagesAdapter;
-import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Fragments.NoteDetailsDialogFragment;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Models.Tag;
 import dev.danielholmberg.improve.Models.VipImage;
 import dev.danielholmberg.improve.R;
-import dev.danielholmberg.improve.Utilities.CircleTransform;
 
 public class NoteViewHolder extends RecyclerView.ViewHolder {
     private static final String TAG = NoteViewHolder.class.getSimpleName();
@@ -131,18 +119,13 @@ public class NoteViewHolder extends RecyclerView.ViewHolder {
 
             Log.d(TAG, "Total number of images attached to Note: " + note.getVipImages().size());
 
-            for(Map.Entry<String, String> vipImageEntry: note.getVipImages().entrySet()) {
+            for(String vipImageId: note.getVipImages()) {
                 thumbnails++;
 
-                Log.d(TAG, "Thumbnail nr " + thumbnails + " with id: " + vipImageEntry.getKey());
+                Log.d(TAG, "Thumbnail nr " + thumbnails + " with id: " + vipImageId);
 
                 if(thumbnails <= maxThumbnails) {
-                    String imageId = vipImageEntry.getKey();
-                    String filePath = vipImageEntry.getValue();
-
-                    VipImage vipImage = new VipImage(imageId, filePath);
-
-                    vipImagesAdapter.add(vipImage);
+                    vipImagesAdapter.add(new VipImage(vipImageId));
                 } else {
                     // Show number indicator on total amount of attached images
                     int numberOfAdditionalImages = (note.getVipImages().size()-maxThumbnails);

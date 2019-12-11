@@ -1,7 +1,5 @@
 package dev.danielholmberg.improve.Models;
 
-import android.net.Uri;
-
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
@@ -9,14 +7,12 @@ import com.google.firebase.database.IgnoreExtraProperties;
 public class VipImage {
 
     private String id;
-    private String path;
     private String originalFilePath;
 
     public VipImage() {}
 
-    public VipImage(String id, String path) {
+    public VipImage(String id) {
         this.id = id;
-        this.path = path;
     }
 
     public String getId() {
@@ -25,14 +21,6 @@ public class VipImage {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
     }
 
     @Exclude

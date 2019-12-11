@@ -10,8 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import dev.danielholmberg.improve.Models.VipImage;
 import dev.danielholmberg.improve.R;
@@ -43,7 +41,7 @@ public class VipImagesAdapter extends RecyclerView.Adapter<VipImageViewHolder>{
 
             @Override
             public boolean areContentsTheSame(@NonNull VipImage oldItem, @NonNull VipImage newItem) {
-                return oldItem.getPath().equals(newItem.getPath());
+                return oldItem.getId().equals(newItem.getId());
             }
 
             @Override
@@ -100,38 +98,29 @@ public class VipImagesAdapter extends RecyclerView.Adapter<VipImageViewHolder>{
     }
 
     public void add(VipImage vipImage) {
-        Log.d(TAG, "Adding vipImage: " + vipImage.getId() + " with Uri: " + vipImage.getPath());
+        Log.d(TAG, "Adding vipImage: " + vipImage.getId());
         this.vipImages.add(vipImage);
     }
 
     public void remove(VipImage vipImage) {
-        Log.d(TAG, "Removing vipImage: " + vipImage.getId() + " with Uri: " + vipImage.getPath());
+        Log.d(TAG, "Removing vipImage: " + vipImage.getId());
         this.vipImages.remove(vipImage);
     }
 
-    public void addImages(HashMap<String, String> images) {
+    public void addImages(ArrayList<VipImage> images) {
         vipImages.beginBatchedUpdates();
-        for(String imageId: images.keySet()) {
-            vipImages.add(new VipImage(imageId, images.get(imageId)));
+        for(VipImage vipImage: images) {
+            vipImages.add(vipImage);
         }
         vipImages.endBatchedUpdates();
     }
 
-    public ArrayList<VipImage> getList() {
+    public ArrayList<VipImage> getImageList() {
         ArrayList<VipImage> vipImageCopy = new ArrayList<>();
         for(int i = 0; i < vipImages.size(); i++) {
             vipImageCopy.add(vipImages.get(i));
         }
         return vipImageCopy;
-    }
-
-    public HashMap<String, String> getHashMap() {
-        HashMap<String, String> hashMap = new HashMap<>();
-        for(int i = 0; i < vipImages.size(); i++) {
-            VipImage vipImage = vipImages.get(i);
-            hashMap.put(vipImage.getId(), vipImage.getPath());
-        }
-        return hashMap;
     }
 
     public void setEditMode(boolean editMode) {

@@ -28,8 +28,9 @@ import dev.danielholmberg.improve.Models.VipImage;
 public class FirebaseStorageManager {
     private static final String TAG = FirebaseStorageManager.class.getSimpleName();
 
-    private static final String USERS_REF = "Users";
+    public static final String USERS_REF = "Users";
     public static final String IMAGES_REF = "Images";
+    public static final String VIP_IMAGE_SUFFIX = ".jpg";
 
     public FirebaseStorageManager() {}
 
@@ -84,14 +85,13 @@ public class FirebaseStorageManager {
         });
     }
 
-    public File downloadImageToLocalFile(String noteId, String imageId, FirebaseStorageCallback callback) {
+    public void downloadImageToLocalFile(String noteId, String imageId, FirebaseStorageCallback callback) {
         Log.d(TAG, "Downloading image to Local Filesystem...");
 
-        File noteImagesDir = new File(Improve.getInstance().getImageDir().getPath() +
-                File.separator + noteId);
+        File noteImagesDir = new File(Improve.getInstance().getImageDir(), noteId);
         if(!noteImagesDir.exists()) noteImagesDir.mkdirs();
 
-        File targetFile = new File(noteImagesDir + File.separator + imageId);
+        File targetFile = new File(noteImagesDir, imageId + VIP_IMAGE_SUFFIX);
 
         Log.d(TAG, "targetFile path: " + targetFile.getPath());
 
@@ -107,8 +107,6 @@ public class FirebaseStorageManager {
                 Log.e(TAG, "FAILURE: To download image with id: " + imageId + " to filePath: " + targetFile.getPath());
             }
         });
-
-        return targetFile;
     }
 
     public void uploadMultipleImages(String noteId, List<VipImage> vipImagesList, FirebaseStorageCallback callback) {
@@ -116,7 +114,7 @@ public class FirebaseStorageManager {
 
         ArrayList<VipImage> vipImagesUploaded = new ArrayList<>();
 
-        File noteImagesDir = new File(Improve.getInstance().getImageDir().getPath() + File.separator + noteId);
+        File noteImagesDir = new File(Improve.getInstance().getImageDir(), noteId);
         if(!noteImagesDir.exists()) noteImagesDir.mkdirs();
 
         for(int i=0; i<vipImagesList.size(); i++) {
@@ -125,19 +123,16 @@ public class FirebaseStorageManager {
             String imageId = vipImage.getId();
             Uri originalFilePath = Uri.parse(vipImage.getOriginalFilePath());
 
-            File cachedImage = new File(noteImagesDir + File.separator + imageId);
+            File cachedImage = new File(noteImagesDir, imageId + VIP_IMAGE_SUFFIX);
 
             if(!cachedImage.exists()) {
                 try {
                     Log.d(TAG, "Copying image to Local Filesystem for Note: " + noteId +
                             " with image id: " + imageId);
-                    boolean cachedImageCreated = cachedImage.createNewFile();
-
-                    if(cachedImageCreated) {
-                        copyFileFromUri(originalFilePath, cachedImage);
-                    }
+                    copyFileFromUri(originalFilePath, cachedImage);
                 } catch (IOException e) {
                     e.printStackTrace();
+                    callback.onFailure(e.getMessage());
                 }
             }
 
@@ -152,7 +147,9 @@ public class FirebaseStorageManager {
                 }
 
                 @Override
-                public void onFailure(String errorMessage) {}
+                public void onFailure(String errorMessage) {
+                    callback.onFailure(errorMessage);
+                }
 
                 @Override
                 public void onProgress(int progress) {}
@@ -161,11 +158,11 @@ public class FirebaseStorageManager {
     }
 
     private void copyFileFromUri(Uri sourceUri, File destFile) throws IOException {
+        Log.d(TAG, "Copying File from: " + sourceUri + " to File: " + destFile.getAbsolutePath());
+
         if (!destFile.exists()) {
             destFile.createNewFile();
         }
-
-        Log.d(TAG, "Copying File from: " + sourceUri + " to File: " + destFile.getPath());
 
         InputStream in = Improve.getInstance().getContentResolver().openInputStream(sourceUri);
         OutputStream out = new FileOutputStream(destFile);

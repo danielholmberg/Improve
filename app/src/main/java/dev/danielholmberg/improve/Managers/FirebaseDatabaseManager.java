@@ -155,7 +155,7 @@ public class FirebaseDatabaseManager {
 
                 // Delete all related images from Firebase Storage
                 if(noteToDelete.hasImage()) {
-                    for(String imageId: noteToDelete.getVipImages().keySet()) {
+                    for(String imageId: noteToDelete.getVipImages()) {
                         Improve.getInstance().getFirebaseStorageManager().deleteImage(noteToDelete.getId(), imageId);
                     }
                 }
@@ -227,7 +227,7 @@ public class FirebaseDatabaseManager {
 
                 // Delete all related images from Firebase Storage
                 if(noteToDelete.hasImage()) {
-                    for(String imageId: noteToDelete.getVipImages().keySet()) {
+                    for(String imageId: noteToDelete.getVipImages()) {
                         Improve.getInstance().getFirebaseStorageManager().deleteImage(noteToDelete.getId(), imageId);
                     }
                 }

@@ -93,18 +93,13 @@ public class ArchivedNoteViewHolder extends RecyclerView.ViewHolder {
 
             Log.d(TAG, "Total number of images attached to Note: " + note.getVipImages().size());
 
-            for(Map.Entry<String, String> vipImageEntry: note.getVipImages().entrySet()) {
+            for(String vipImageId: note.getVipImages()) {
                 thumbnails++;
 
-                Log.d(TAG, "Thumbnail nr " + thumbnails + " with id: " + vipImageEntry.getKey());
+                Log.d(TAG, "Thumbnail nr " + thumbnails + " with id: " + vipImageId);
 
                 if(thumbnails <= maxThumbnails) {
-                    String imageId = vipImageEntry.getKey();
-                    String filePath = vipImageEntry.getValue();
-
-                    VipImage vipImage = new VipImage(imageId, filePath);
-
-                    vipImagesAdapter.add(vipImage);
+                    vipImagesAdapter.add(new VipImage(vipImageId));
                 } else {
                     // Show number indicator on total amount of attached images
                     int numberOfAdditionalImages = (note.getVipImages().size()-maxThumbnails);
