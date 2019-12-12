@@ -128,7 +128,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
                                 Log.d(TAG, "Downloading image from Firebase for Note: " + addedNote.getId()
                                         + " with image id: " + imageId);
 
-                                app.getFirebaseStorageManager().downloadImageToLocalFile(addedNote.getId(), imageId, new FirebaseStorageCallback() {
+                                app.getFirebaseStorageManager().downloadImageToLocalFile(imageId, new FirebaseStorageCallback() {
                                     @Override
                                     public void onSuccess(Object file) {}
 

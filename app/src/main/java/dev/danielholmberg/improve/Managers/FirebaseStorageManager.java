@@ -85,14 +85,14 @@ public class FirebaseStorageManager {
         });
     }
 
-    public void downloadImageToLocalFile(String noteId, String imageId, FirebaseStorageCallback callback) {
+    public void downloadImageToLocalFile(String imageId, FirebaseStorageCallback callback) {
         Log.d(TAG, "Downloading image to Local Filesystem...");
 
         File targetFile = new File(Improve.getInstance().getImageDir(), imageId + VIP_IMAGE_SUFFIX);
 
         Log.d(TAG, "targetFile path: " + targetFile.getPath());
 
-        getImagesRef().child(noteId).child(imageId).getFile(targetFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+        getImagesRef().child(imageId).getFile(targetFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                 Log.d(TAG, "SUCCESS: Downloaded image with id: " + imageId + " to filePath: " + targetFile.getPath());

@@ -92,7 +92,7 @@ public class VipImageViewHolder extends RecyclerView.ViewHolder{
             Log.d(TAG, "Downloading Preview image from Firebase for Note: " + noteId + " with image id: " + vipImage.getId());
 
             Improve.getInstance().getFirebaseStorageManager()
-                    .downloadImageToLocalFile(noteId, vipImage.getId(), new FirebaseStorageCallback() {
+                    .downloadImageToLocalFile(vipImage.getId(), new FirebaseStorageCallback() {
                 @Override
                 public void onSuccess(Object file) {
                     Picasso.get()
@@ -143,7 +143,7 @@ public class VipImageViewHolder extends RecyclerView.ViewHolder{
         } else {
             Log.d(TAG, "Loading Fullscreen image from Firebase with id: " + vipImage.getId());
             Improve.getInstance().getFirebaseStorageManager()
-                    .downloadImageToLocalFile(noteId, vipImage.getId(), new FirebaseStorageCallback() {
+                    .downloadImageToLocalFile(vipImage.getId(), new FirebaseStorageCallback() {
                 @Override
                 public void onSuccess(Object file) {
                     Picasso.get()
@@ -202,7 +202,7 @@ public class VipImageViewHolder extends RecyclerView.ViewHolder{
             Log.d(TAG, "Loading image from Firebase with image id: " + vipImage.getId());
 
             Improve.getInstance().getFirebaseStorageManager()
-                    .downloadImageToLocalFile(noteId, vipImage.getId(), new FirebaseStorageCallback() {
+                    .downloadImageToLocalFile(vipImage.getId(), new FirebaseStorageCallback() {
                 @Override
                 public void onSuccess(Object file) {
                     Picasso.get()
