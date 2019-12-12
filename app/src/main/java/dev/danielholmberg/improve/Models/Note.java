@@ -5,7 +5,10 @@ import android.os.Parcelable;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -149,7 +152,7 @@ public class Note implements Parcelable {
             noteData.put("title", this.title);
             noteData.put("stared", this.stared);
 
-            if(this.vipImages.size() > 0) noteData.put("vipImages", this.vipImages);
+            if(this.vipImages.size() > 0) noteData.put("vipImages", new JSONArray(this.vipImages));
             if(!this.tags.isEmpty()) noteData.put("tags", new JSONObject(this.tags));
 
         } catch (JSONException e) {

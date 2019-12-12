@@ -116,12 +116,10 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
                     notes.add(addedNote);
 
                     if(addedNote.hasImage()) {
-                        File noteImagesDir = new File(Improve.getInstance().getImageDir(), addedNote.getId());
-                        if(!noteImagesDir.exists()) noteImagesDir.mkdirs();
-
                         for(String imageId : addedNote.getVipImages()) {
 
-                            File cachedImage = new File(noteImagesDir, imageId + FirebaseStorageManager.VIP_IMAGE_SUFFIX);
+                            File cachedImage = new File(Improve.getInstance().getImageDir(),
+                                    imageId + FirebaseStorageManager.VIP_IMAGE_SUFFIX);
 
                             if(cachedImage.exists()) {
                                 Log.d(TAG, "Image for Note: " + addedNote.getId() +

@@ -34,7 +34,6 @@ public class VipImageViewHolder extends RecyclerView.ViewHolder{
     private View itemView;
     private VipImage vipImage;
     private VipImagesAdapter vipImagesAdapter;
-    private File noteImagesDir;
 
     public VipImageViewHolder(Context context, View itemView, String noteId, VipImagesAdapter vipImagesAdapter) {
         super(itemView);
@@ -42,9 +41,6 @@ public class VipImageViewHolder extends RecyclerView.ViewHolder{
         this.itemView = itemView;
         this.noteId = noteId;
         this.vipImagesAdapter = vipImagesAdapter;
-
-        noteImagesDir = new File(Improve.getInstance().getImageDir(), noteId);
-        if(!noteImagesDir.exists()) noteImagesDir.mkdirs();
     }
 
     /**
@@ -61,7 +57,8 @@ public class VipImageViewHolder extends RecyclerView.ViewHolder{
 
         this.vipImage = vipImage;
 
-        File image = new File(noteImagesDir, vipImage.getId() + FirebaseStorageManager.VIP_IMAGE_SUFFIX);
+        File image = new File(Improve.getInstance().getImageDir(),
+                vipImage.getId() + FirebaseStorageManager.VIP_IMAGE_SUFFIX);
 
         int targetSize = (int) Improve.getInstance().getResources().getDimension(R.dimen.vip_image_view_size);
 
@@ -130,7 +127,8 @@ public class VipImageViewHolder extends RecyclerView.ViewHolder{
                 .inflate(R.layout.dialog_vip_image_fullscreen, null);
         ImageView vipImageViewFull = (ImageView) vipImageViewFullscreenLayout.findViewById(R.id.vip_image_view_full);
 
-        File image = new File(noteImagesDir, vipImage.getId() + FirebaseStorageManager.VIP_IMAGE_SUFFIX);
+        File image = new File(Improve.getInstance().getImageDir(),
+                vipImage.getId() + FirebaseStorageManager.VIP_IMAGE_SUFFIX);
 
         if(image.exists()) {
             Log.d(TAG, "Loading Fullscreen image from Local Filesystem at path: " + image.getPath());
@@ -180,7 +178,8 @@ public class VipImageViewHolder extends RecyclerView.ViewHolder{
         vipImagePlaceholder.setVisibility(View.VISIBLE);
         vipImageView.setVisibility(View.GONE);
 
-        File image = new File(noteImagesDir, vipImage.getId() + FirebaseStorageManager.VIP_IMAGE_SUFFIX);
+        File image = new File(Improve.getInstance().getImageDir(),
+                vipImage.getId() + FirebaseStorageManager.VIP_IMAGE_SUFFIX);
 
         int thumbnailSize = (int) Improve.getInstance().getResources().getDimension(R.dimen.vip_image_view_thumbnail_size);
 

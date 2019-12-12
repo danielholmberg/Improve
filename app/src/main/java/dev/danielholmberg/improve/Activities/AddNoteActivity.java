@@ -469,7 +469,7 @@ public class AddNoteActivity extends AppCompatActivity {
         progressDialog.setMessage("Uploading " + vipImagesAdapter.getItemCount() + " image(s)...");
 
         app.getFirebaseStorageManager()
-                .uploadMultipleImages(newNote.getId(), vipImagesAdapter.getImageList(), new FirebaseStorageCallback() {
+                .uploadMultipleImages(vipImagesAdapter.getImageList(), new FirebaseStorageCallback() {
             @Override
             public void onSuccess(Object object) {
                 Log.d(TAG, "Last image uploaded successfully!");

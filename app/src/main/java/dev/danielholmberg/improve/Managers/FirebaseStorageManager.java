@@ -47,18 +47,18 @@ public class FirebaseStorageManager {
         return getUserRef().child(IMAGES_REF);
     }
 
-    public void uploadImage(final String noteId, final String imageId, final Uri imageUri, FirebaseStorageCallback callback) {
-        getImagesRef().child(noteId).child(imageId).putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+    public void uploadImage(final String imageId, final Uri imageUri, FirebaseStorageCallback callback) {
+        getImagesRef().child(imageId).putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 String fileName = taskSnapshot.getMetadata().getName();
-                Log.d(TAG, "SUCCESS: Image (" + imageId + ") uploaded to Firebase Cloud Storage for Note (" + noteId + ")");
+                Log.d(TAG, "SUCCESS: Image (" + imageId + ") uploaded to Firebase Cloud Storage");
                 callback.onSuccess(null);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Log.e(TAG, "FAILURE: To upload image (" + imageId + ") to Firebase Cloud Storage for Note (" + noteId + "): " + e);
+                Log.e(TAG, "FAILURE: To upload image (" + imageId + ") to Firebase Cloud Storage: " + e);
                 callback.onFailure(e.getMessage());
             }
         }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
@@ -88,10 +88,7 @@ public class FirebaseStorageManager {
     public void downloadImageToLocalFile(String noteId, String imageId, FirebaseStorageCallback callback) {
         Log.d(TAG, "Downloading image to Local Filesystem...");
 
-        File noteImagesDir = new File(Improve.getInstance().getImageDir(), noteId);
-        if(!noteImagesDir.exists()) noteImagesDir.mkdirs();
-
-        File targetFile = new File(noteImagesDir, imageId + VIP_IMAGE_SUFFIX);
+        File targetFile = new File(Improve.getInstance().getImageDir(), imageId + VIP_IMAGE_SUFFIX);
 
         Log.d(TAG, "targetFile path: " + targetFile.getPath());
 
@@ -109,13 +106,10 @@ public class FirebaseStorageManager {
         });
     }
 
-    public void uploadMultipleImages(String noteId, List<VipImage> vipImagesList, FirebaseStorageCallback callback) {
+    public void uploadMultipleImages(List<VipImage> vipImagesList, FirebaseStorageCallback callback) {
         Log.d(TAG, "Uploading multiple ("+ vipImagesList.size() +") images to Firebase");
 
         ArrayList<VipImage> vipImagesUploaded = new ArrayList<>();
-
-        File noteImagesDir = new File(Improve.getInstance().getImageDir(), noteId);
-        if(!noteImagesDir.exists()) noteImagesDir.mkdirs();
 
         for(int i=0; i<vipImagesList.size(); i++) {
             VipImage vipImage = vipImagesList.get(i);
@@ -123,12 +117,11 @@ public class FirebaseStorageManager {
             String imageId = vipImage.getId();
             Uri originalFilePath = Uri.parse(vipImage.getOriginalFilePath());
 
-            File cachedImage = new File(noteImagesDir, imageId + VIP_IMAGE_SUFFIX);
+            File cachedImage = new File(Improve.getInstance().getImageDir(), imageId + VIP_IMAGE_SUFFIX);
 
             if(!cachedImage.exists()) {
                 try {
-                    Log.d(TAG, "Copying image to Local Filesystem for Note: " + noteId +
-                            " with image id: " + imageId);
+                    Log.d(TAG, "Copying image to Local Filesystem with image id: " + imageId);
                     copyFileFromUri(originalFilePath, cachedImage);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -136,7 +129,7 @@ public class FirebaseStorageManager {
                 }
             }
 
-            uploadImage(noteId, imageId, Uri.fromFile(cachedImage), new FirebaseStorageCallback() {
+            uploadImage(imageId, Uri.fromFile(cachedImage), new FirebaseStorageCallback() {
                 @Override
                 public void onSuccess(Object object) {
                     vipImagesUploaded.add(vipImage);

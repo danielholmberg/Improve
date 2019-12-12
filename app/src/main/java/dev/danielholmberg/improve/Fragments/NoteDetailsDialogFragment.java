@@ -741,6 +741,8 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
             exportDialog.show();
 
+            Log.d(TAG, "Note exported info: " + originalNote.toString());
+
             mDriveServiceHelper.createFile(DriveServiceHelper.TYPE_NOTE, originalNote.getTitle(), originalNote.toString())
                     .addOnSuccessListener(new OnSuccessListener<String>() {
                         @Override
@@ -939,7 +941,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
         progressDialog.setMessage("Uploading " + imagesToUpload.size() + " image(s)...");
 
-        app.getFirebaseStorageManager().uploadMultipleImages(noteId, imagesToUpload, new FirebaseStorageCallback() {
+        app.getFirebaseStorageManager().uploadMultipleImages(imagesToUpload, new FirebaseStorageCallback() {
             @Override
             public void onSuccess(Object object) {
                 Log.d(TAG, "Last image uploaded successfully!");
