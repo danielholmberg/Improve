@@ -45,7 +45,7 @@
     <string name="menu_contact_search_name">Search contact</string>
     <string name="contact_search_hint">Enter contact name</string>
     <string name="dialog_info_contact_title">Info</string>
-    <string name="menu_contact_export_vcf">Export to .vcf</string>
+    <string name="menu_contact_export_vcf">Export to Google Drive</string>
     <string name="menu_company_delete">Delete</string>
     <string name="menu_company_rename">Rename</string>
     <string name="dialog_delete_company_title">Permanently delete company</string>

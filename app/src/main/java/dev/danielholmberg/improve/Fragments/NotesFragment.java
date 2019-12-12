@@ -49,6 +49,8 @@ import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Services.DriveServiceHelper;
 
+import static android.app.Activity.RESULT_OK;
+
 /**
  * Created by DanielHolmberg on 2018-01-20.
  */
@@ -57,7 +59,6 @@ public class NotesFragment extends Fragment implements SearchView.OnQueryTextLis
     private static final String TAG = NotesFragment.class.getSimpleName();
 
     private static final int REQUEST_CODE_OPEN_FILE = 1;
-    public static final int REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION = 999;
 
     private Improve app;
     private FirebaseDatabaseManager databaseManager;
@@ -276,23 +277,12 @@ public class NotesFragment extends Fragment implements SearchView.OnQueryTextLis
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
-        if (resultCode == Activity.RESULT_OK) {
-            switch (requestCode) {
-                case REQUEST_CODE_OPEN_FILE:
-                    if (resultData != null) {
-                        Uri uri = resultData.getData();
-                        if (uri != null) {
-                            openFileFromFilePicker(uri);
-                        }
-                    }
-                    break;
-                case REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION:
-                    if(app.getCurrentNoteDetailsDialogRef() != null) {
-                        app.getCurrentNoteDetailsDialogRef().exportNoteToDrive();
-                    } else {
-                        Toast.makeText(app, "Failed to export Note", Toast.LENGTH_LONG).show();
-                    }
-                    break;
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_CODE_OPEN_FILE && resultData != null) {
+                Uri uri = resultData.getData();
+                if (uri != null) {
+                    openFileFromFilePicker(uri);
+                }
             }
         }
         super.onActivityResult(requestCode, resultCode, resultData);

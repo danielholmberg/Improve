@@ -61,8 +61,7 @@ public class Improve extends Application implements Serializable {
     private NotesFragment notesFragmentRef;
     private ContactsFragment contactsFragmentRef;
     private ArchivedNotesFragment archivedNotesFragmentRef;
-    private NoteDetailsDialogFragment currentNoteDetailsDialogRef;
-    
+
     private NotesAdapter notesAdapter;
     private ArchivedNotesAdapter archivedNotesAdapter;
     private TagsAdapter tagsAdapter;
@@ -326,13 +325,5 @@ public class Improve extends Application implements Serializable {
 
     public DriveServiceHelper getDriveServiceHelper() {
         return mDriveServiceHelper;
-    }
-
-    public void setCurrentNoteDetailsDialogRef(NoteDetailsDialogFragment noteDetailsDialogRef) {
-        this.currentNoteDetailsDialogRef = noteDetailsDialogRef;
-    }
-
-    public NoteDetailsDialogFragment getCurrentNoteDetailsDialogRef() {
-        return currentNoteDetailsDialogRef;
     }
 }

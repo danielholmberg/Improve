@@ -1,35 +1,34 @@
 package dev.danielholmberg.improve.Fragments;
 
-import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import androidx.annotation.NonNull;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.core.content.ContextCompat;
+import com.google.api.services.drive.DriveScopes;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Calendar;
 
@@ -38,6 +37,7 @@ import dev.danielholmberg.improve.Models.Contact;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
 import dev.danielholmberg.improve.R;
+import dev.danielholmberg.improve.Services.DriveServiceHelper;
 
 /**
  * Created by DanielHolmberg on 2018-02-21.
@@ -48,12 +48,12 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     public static final String CONTACT_KEY = "contact";
     public static final String PARENT_FRAGMENT_KEY = "parentFragment";
 
-    private static final String EXPORTED_CONTACT_DIRECTORY_PATH = "Contacts";
-    private static final int PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
+    private static final int REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION = 999;
 
     private Improve app;
     private FirebaseDatabaseManager databaseManager;
     private Context context;
+    private DriveServiceHelper mDriveServiceHelper;
 
     private Bundle contactBundle;
     private Contact contact;
@@ -81,6 +81,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
         detailsDialog = this;
         context = getContext();
         activity = (AppCompatActivity) getActivity();
+        mDriveServiceHelper = app.getDriveServiceHelper();
     }
 
     @Override
@@ -106,7 +107,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
                         showInfoDialog();
                         return true;
                     case R.id.contactExport:
-                        checkWritePermission();
+                        checkDrivePermission();
                         return true;
                     default:
                         return true;
@@ -222,92 +223,53 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
         return view;
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                    showExportProgressDialog();
-                    exportContactToFile(contact);
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return;
-            }
-        }
-    }
+    private void exportContactToDrive(Contact contact) {
+        Log.d(TAG, "Exporting contact (" + contact.getId() + " to Google Drive...");
 
-    private void exportContactToFile(Contact contact) {
-        File contactsRoot = new File(app.getRootDir(), EXPORTED_CONTACT_DIRECTORY_PATH);
-        if(!contactsRoot.exists()) {
-            contactsRoot.mkdirs();
-        }
-        final File vcfFile = new File(contactsRoot, contact.getId() + ".vcf");
+        if (mDriveServiceHelper != null) {
+            Log.d(TAG, "Creating a file.");
 
-        try {
-            FileWriter fw = new FileWriter(vcfFile);
-            fw.write("BEGIN:VCARD\r\n");
-            fw.write("VERSION:3.0\r\n");
-            fw.write("FN:" + contact.getName() + "\r\n");
-            fw.write("ORG:" + contact.getCompanyId() + "\r\n");
+            exportDialog = ProgressDialog.show(context, "Exporting Contact to Google Drive",
+                    "In progress...", true);
 
-            if(contact.getPhone() != null) {
-                fw.write("TEL;TYPE=HOME,VOICE:" + contact.getPhone() + "\r\n");
-            }
-            if(contact.getEmail() != null) {
-                fw.write("EMAIL;TYPE=PREF,INTERNET:" + contact.getEmail() + "\r\n");
-            }
+            exportDialog.show();
 
-            fw.write("END:VCARD\r\n");
-            fw.flush();
-            fw.close();
+            Log.d(TAG, "Contact exported info: " + contact.toString());
 
-            // Delay the export to visual show ProgressDialog for 1000ms (1 second).
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(context, "Exported Contact to " + vcfFile.getPath(), Toast.LENGTH_LONG).show();
-                    exportDialog.dismiss();
-                }
-            }, 1000);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-
-            Toast.makeText(context, "Export failed, please try again", Toast.LENGTH_SHORT).show();
-            exportDialog.dismiss();
-        }
-    }
-
-    private void checkWritePermission() {
-        if (ContextCompat.checkSelfPermission(activity,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Permission is not granted
-            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE);
-
-            // PERMISSION_REQUEST_WRITE_EXTERNAL_STORAGE is an
-            // app-defined int constant. The callback method gets the
-            // result of the request.
-
+            mDriveServiceHelper.createFile(DriveServiceHelper.TYPE_CONTACT, contact.getName(), contact.toString())
+                    .addOnSuccessListener(new OnSuccessListener<String>() {
+                        @Override
+                        public void onSuccess(String id) {
+                            Log.d(TAG, "Created file");
+                            exportDialog.cancel();
+                            dismiss();
+                            Toast.makeText(app, "Contact exported", Toast.LENGTH_LONG).show();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e(TAG, "Couldn't create file.", e);
+                            exportDialog.cancel();
+                            Toast.makeText(app, "Failed to export Contact", Toast.LENGTH_LONG).show();
+                        }
+                    });
         } else {
-            // Permission has already been granted
-            showExportProgressDialog();
-            exportContactToFile(contact);
+            Log.e(TAG, "DriveServiceHelper wasn't initialized.");
+            Toast.makeText(app, "Failed to export Contact", Toast.LENGTH_LONG).show();
         }
     }
 
-    private void showExportProgressDialog() {
-        exportDialog = ProgressDialog.show(context, "Exporting Contact to .vcf-file",
-                "Working. Please wait...", true);
+    private void checkDrivePermission() {
+        if (!GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(app), new Scope(DriveScopes.DRIVE_FILE))) {
+
+            GoogleSignIn.requestPermissions(
+                    app.getContactsFragmentRef(),
+                    REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION,
+                    GoogleSignIn.getLastSignedInAccount(app), new Scope(DriveScopes.DRIVE_FILE));
+        } else {
+            exportContactToDrive(contact);
+        }
     }
 
     private void deleteContact(final Contact contact) {

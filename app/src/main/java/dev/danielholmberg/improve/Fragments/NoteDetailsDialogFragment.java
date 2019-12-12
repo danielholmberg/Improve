@@ -68,7 +68,6 @@ import dev.danielholmberg.improve.Utilities.NoteInputValidator;
 import dev.danielholmberg.improve.ViewHolders.TagViewHolder;
 
 import static android.app.Activity.RESULT_OK;
-import static dev.danielholmberg.improve.Fragments.NotesFragment.REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION;
 
 public class NoteDetailsDialogFragment extends DialogFragment {
     public static final String TAG = NoteDetailsDialogFragment.class.getSimpleName();
@@ -78,6 +77,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     public static final String NOTE_KEY = "originalNote";
 
     private static final int PICK_IMAGE_REQUEST = 1;
+    private static final int REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION = 999;
 
     private Improve app;
     private FirebaseDatabaseManager databaseManager;
@@ -272,7 +272,6 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
     private void checkDrivePermission() {
         if (!GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(app), new Scope(DriveScopes.DRIVE_FILE))) {
-            app.setCurrentNoteDetailsDialogRef(this);
 
             GoogleSignIn.requestPermissions(
                     app.getNotesFragmentRef(),
@@ -987,17 +986,37 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK) {
+            if(requestCode == REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION) {
+                exportNoteToDrive();
+            }
 
-            if(data.getClipData() != null) {
-                // User selected multiple images.
+            if(requestCode == PICK_IMAGE_REQUEST) {
 
-                int numberOfImagesSelected = data.getClipData().getItemCount();
+                if(data.getClipData() != null) {
+                    // User selected multiple images.
 
-                Log.d(TAG, "Multiple (" + numberOfImagesSelected + ") images selected.");
+                    int numberOfImagesSelected = data.getClipData().getItemCount();
 
-                for (int i = 0; i < numberOfImagesSelected; i++) {
-                    String originalFilePath = data.getClipData().getItemAt(i).getUri().toString();
+                    Log.d(TAG, "Multiple (" + numberOfImagesSelected + ") images selected.");
+
+                    for (int i = 0; i < numberOfImagesSelected; i++) {
+                        String originalFilePath = data.getClipData().getItemAt(i).getUri().toString();
+                        String imageId = Long.toString(System.currentTimeMillis());
+
+                        VipImage vipImage = new VipImage(imageId);
+                        vipImage.setOriginalFilePath(originalFilePath);
+
+                        vipImagesAdapter.add(vipImage);
+                        vipImagesRecyclerView.setVisibility(View.VISIBLE);
+                    }
+
+                } else if (data.getData() != null) {
+                    // User selected a single image.
+
+                    Log.d(TAG, "1 image selected.");
+
+                    String originalFilePath = data.getData().toString();
                     String imageId = Long.toString(System.currentTimeMillis());
 
                     VipImage vipImage = new VipImage(imageId);
@@ -1006,22 +1025,10 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                     vipImagesAdapter.add(vipImage);
                     vipImagesRecyclerView.setVisibility(View.VISIBLE);
                 }
-
-            } else if (data.getData() != null) {
-                // User selected a single image.
-
-                Log.d(TAG, "1 image selected.");
-
-                String originalFilePath = data.getData().toString();
-                String imageId = Long.toString(System.currentTimeMillis());
-
-                VipImage vipImage = new VipImage(imageId);
-                vipImage.setOriginalFilePath(originalFilePath);
-
-                vipImagesAdapter.add(vipImage);
-                vipImagesRecyclerView.setVisibility(View.VISIBLE);
             }
         }
+
+
     }
 
     @Override

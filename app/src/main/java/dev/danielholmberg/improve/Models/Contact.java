@@ -2,8 +2,13 @@ package dev.danielholmberg.improve.Models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
+
+import androidx.annotation.NonNull;
 
 import java.util.Objects;
+
+import dev.danielholmberg.improve.Improve;
 
 /**
  * Created by DanielHolmberg on 2018-01-17.
@@ -94,6 +99,32 @@ public class Contact implements Parcelable {
 
     public void setTimestampUpdated(String timestampUpdated) {
         this.timestampUpdated = timestampUpdated;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        String contactAsString = "BEGIN:VCARD\r\n" + "VERSION:3.0\r\n" +
+                "FN:" + this.name + "\r\n";
+
+        Company company = (Company) Improve.getInstance().getCompanies().get(this.companyId);
+
+        if(company != null) {
+            contactAsString += "ORG:" + company.getName() + "\r\n";
+        }
+        if(this.phone != null) {
+            contactAsString += "TEL;TYPE=HOME,VOICE:" + this.phone + "\r\n";
+        }
+        if(this.email != null) {
+            contactAsString += "EMAIL;TYPE=PREF,INTERNET:" + this.email + "\r\n";
+        }
+        if(this.comment != null) {
+            contactAsString += "NOTE:" + this.comment + "\r\n";
+        }
+
+        contactAsString += "END:VCARD\r\n";
+
+        return contactAsString;
     }
 
     @Override
