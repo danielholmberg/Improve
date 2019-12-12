@@ -36,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 import dev.danielholmberg.improve.Adapters.TagsAdapter;
 import dev.danielholmberg.improve.Adapters.VipImagesAdapter;
@@ -523,7 +524,7 @@ public class AddNoteActivity extends AppCompatActivity {
 
                 for (int i = 0; i < numberOfImagesSelected; i++) {
                     String originalFilePath = data.getClipData().getItemAt(i).getUri().toString();
-                    String imageId = Long.toString(System.currentTimeMillis());
+                    String imageId = UUID.randomUUID().toString();
 
                     VipImage vipImage = new VipImage(imageId);
                     vipImage.setOriginalFilePath(originalFilePath);
@@ -539,7 +540,7 @@ public class AddNoteActivity extends AppCompatActivity {
                 Log.d(TAG, "1 image selected.");
 
                 String originalFilePath = data.getData().toString();
-                String imageId = Long.toString(System.currentTimeMillis());
+                String imageId = UUID.randomUUID().toString();
 
                 VipImage vipImage = new VipImage(imageId);
                 vipImage.setOriginalFilePath(originalFilePath);

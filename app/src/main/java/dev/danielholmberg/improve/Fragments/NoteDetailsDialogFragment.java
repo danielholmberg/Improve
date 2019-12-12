@@ -53,6 +53,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import dev.danielholmberg.improve.Adapters.TagsAdapter;
 import dev.danielholmberg.improve.Adapters.VipImagesAdapter;
@@ -1004,7 +1005,10 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
                     for (int i = 0; i < numberOfImagesSelected; i++) {
                         String originalFilePath = data.getClipData().getItemAt(i).getUri().toString();
-                        String imageId = Long.toString(System.currentTimeMillis());
+                        String imageId = UUID.randomUUID().toString();
+
+                        Log.d(TAG, "ImageId: " + imageId);
+                        Log.d(TAG, "ImagePath: " + originalFilePath);
 
                         VipImage vipImage = new VipImage(imageId);
                         vipImage.setOriginalFilePath(originalFilePath);
@@ -1019,7 +1023,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
                     Log.d(TAG, "1 image selected.");
 
                     String originalFilePath = data.getData().toString();
-                    String imageId = Long.toString(System.currentTimeMillis());
+                    String imageId = UUID.randomUUID().toString();
 
                     VipImage vipImage = new VipImage(imageId);
                     vipImage.setOriginalFilePath(originalFilePath);
