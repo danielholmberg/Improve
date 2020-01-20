@@ -1,5 +1,6 @@
 package dev.danielholmberg.improve.Fragments;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -34,6 +35,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -158,6 +160,19 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         if (getDialog() != null && getDialog().getWindow() != null) {
             getDialog().getWindow().setBackgroundDrawableResource(R.drawable.background_note_details);
             getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+
+            getDialog().setOnKeyListener(new DialogInterface.OnKeyListener() {
+                @Override
+                public boolean onKey(DialogInterface dialogInterface, int keyCode, KeyEvent keyEvent) {
+                    if (keyCode == KeyEvent.KEYCODE_BACK
+                            && getDialog() != null
+                            && getFragmentManager() != null) {
+                        getDialog().dismiss();
+                        getFragmentManager().popBackStackImmediate();
+                    }
+                    return true;
+                }
+            });
         }
 
         return view;
@@ -854,40 +869,58 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         updatedNote.setArchived(archived);
         updatedNote.setUpdated(timestampUpdated);
 
-        currentImages = vipImagesAdapter.getImageList();
+        if(app.isVIPUser() && vipImagesAdapter != null) {
+            // User is a VIP user and the VIP image adapter has been initialized.
+            currentImages = vipImagesAdapter.getImageList();
 
-        if(currentImages.size() > 0) {
-            Log.d(TAG, "Updated image count: " + currentImages.size());
+            if (currentImages.size() > 0) {
+                // The VIP user has added a image to the current Note.
+                Log.d(TAG, "Updated image count: " + currentImages.size());
 
-            boolean vipImageDiff = false;
-            for (VipImage vipImage: currentImages) {
-                if(originalImages == null) {
-                    vipImageDiff = true;
-                    break;
-                } else {
-                    if(!originalImages.contains(vipImage)) {
+                boolean vipImageDiff = false;
+                for (VipImage vipImage : currentImages) {
+                    if (originalImages == null) {
                         vipImageDiff = true;
                         break;
+                    } else {
+                        if (!originalImages.contains(vipImage)) {
+                            vipImageDiff = true;
+                            break;
+                        }
                     }
                 }
-            }
 
 
-            Log.d(TAG, "vipImageDiff: " + vipImageDiff);
+                Log.d(TAG, "vipImageDiff: " + vipImageDiff);
 
-            if(vipImageDiff) {
-                uploadImages();
-            } else {
-                ArrayList<String> images = new ArrayList<>();
-                for(VipImage vipImage: currentImages) {
-                    images.add(vipImage.getId());
+                if (vipImageDiff) {
+                    uploadImages();
+                } else {
+                    ArrayList<String> images = new ArrayList<>();
+                    for (VipImage vipImage : currentImages) {
+                        images.add(vipImage.getId());
+                    }
+                    updatedNote.setVipImages(images);
+
+                    originalNote = updatedNote;
+                    oldTags = new HashMap<String, Boolean>(originalNote.getTags());
+
+                    if (originalNote.isArchived()) {
+                        databaseManager.updateArchivedNote(updatedNote);
+                    } else {
+                        databaseManager.updateNote(updatedNote);
+                    }
+
+                    editMode = false;
+                    populateNoteDetails();
+                    createOptionsMenu();
+                    toggleMode(editMode);
                 }
-                updatedNote.setVipImages(images);
-
+            } else {
                 originalNote = updatedNote;
                 oldTags = new HashMap<String, Boolean>(originalNote.getTags());
 
-                if(originalNote.isArchived()) {
+                if (originalNote.isArchived()) {
                     databaseManager.updateArchivedNote(updatedNote);
                 } else {
                     databaseManager.updateNote(updatedNote);
@@ -902,7 +935,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
             originalNote = updatedNote;
             oldTags = new HashMap<String, Boolean>(originalNote.getTags());
 
-            if(originalNote.isArchived()) {
+            if (originalNote.isArchived()) {
                 databaseManager.updateArchivedNote(updatedNote);
             } else {
                 databaseManager.updateNote(updatedNote);
