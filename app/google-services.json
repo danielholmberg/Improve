@@ -15,11 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "158013774234-vdkda60t1ghob4i373uqec036qkpblvs.apps.googleusercontent.com",
+          "client_id": "158013774234-ntivu87ho9lqa3is52t91o3mfg4b8ui8.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "dev.danielholmberg.careercontacts",
-            "certificate_hash": "f574052fa00f2d3b0feb8dc9c3f060eae3738566"
+            "certificate_hash": "63a16815af66f9ae0a865c246ab6b9900ad385bd"
           }
         },
         {
@@ -28,6 +28,14 @@
           "android_info": {
             "package_name": "dev.danielholmberg.careercontacts",
             "certificate_hash": "e3f91b7f15fdf2927db6e6f27451b4794aaff169"
+          }
+        },
+        {
+          "client_id": "158013774234-vdkda60t1ghob4i373uqec036qkpblvs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dev.danielholmberg.careercontacts",
+            "certificate_hash": "f574052fa00f2d3b0feb8dc9c3f060eae3738566"
           }
         },
         {
@@ -41,20 +49,13 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 2,
           "other_platform_oauth_client": [
             {
               "client_id": "158013774234-r2834206s6k7i59o5pvuffrlmhq1al62.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
-        },
-        "ads_service": {
-          "status": 2
         }
       }
     }
