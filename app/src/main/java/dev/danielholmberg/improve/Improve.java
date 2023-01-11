@@ -111,8 +111,8 @@ public class Improve extends Application implements Serializable {
                 .setMinimumFetchIntervalInSeconds(BuildConfig.DEBUG ? 0 : 3600)
                 .build();
         firebaseRemoteConfig.setConfigSettingsAsync(configSettings);
-        firebaseRemoteConfig.setDefaults(R.xml.remote_config_defaults);
-        firebaseRemoteConfig.setDefaults(VIP_USERS);
+        firebaseRemoteConfig.setDefaultsAsync(R.xml.remote_config_defaults);
+        firebaseRemoteConfig.setDefaultsAsync(VIP_USERS);
 
         createNotificationChannelExport();
     }

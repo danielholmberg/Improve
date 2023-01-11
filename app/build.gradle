@@ -1,7 +1,9 @@
-apply plugin: 'com.android.application'
-apply plugin: 'com.google.firebase.firebase-perf'
-apply plugin: 'com.google.gms.google-services'
-//apply plugin: 'io.fabric'
+plugins {
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
+    id 'com.google.firebase.firebase-perf'
+}
 
 android {
     compileSdkVersion 28
@@ -45,22 +47,26 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.google.firebase:firebase-analytics:17.2.1'
-    implementation 'com.google.firebase:firebase-database:19.2.0'
-    implementation 'com.google.firebase:firebase-core:17.2.1'
-    implementation 'com.google.firebase:firebase-perf:19.0.3'
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
-    implementation 'com.google.firebase:firebase-auth:19.2.0'
-    implementation 'com.google.firebase:firebase-messaging:20.1.0'
-    implementation 'com.google.firebase:firebase-inappmessaging-display:19.0.2'
-    implementation 'com.google.firebase:firebase-storage:19.1.0'
-    implementation 'com.firebaseui:firebase-ui-storage:4.3.1'
 
-    implementation 'com.firebaseui:firebase-ui:3.3.0'
+    // Import the Firebase BoM
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation platform('com.google.firebase:firebase-bom:31.1.1')
+
+    // Dependencies for Firebase products
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-database'
+    implementation 'com.google.firebase:firebase-perf'
+    implementation 'com.google.firebase:firebase-crashlytics'
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.firebase:firebase-inappmessaging-display'
+    implementation 'com.google.firebase:firebase-storage'
+    implementation 'com.google.firebase:firebase-config'
 
     implementation 'com.google.android.gms:play-services-auth:17.0.0'
     implementation 'com.google.android.gms:play-services-location:17.0.0'
     implementation 'com.google.android.gms:play-services-places:17.0.0'
+
     implementation 'com.google.http-client:google-http-client-gson:1.26.0'
     implementation('com.google.api-client:google-api-client-android:1.26.0') {
         exclude group: 'org.apache.httpcomponents'
@@ -70,8 +76,9 @@ dependencies {
     }
 
     implementation 'com.google.android.material:material:1.0.0'
-    implementation 'com.google.android:flexbox:1.1.0'
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
 
+    // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
@@ -83,7 +90,6 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
 
     // Android Testing
-    implementation 'com.google.firebase:firebase-config:19.0.4'
     testImplementation 'junit:junit:4.12'
 
     // Android runner and rules support
