@@ -1,35 +1,13 @@
-package dev.danielholmberg.improve.Models;
+package dev.danielholmberg.improve.Models
 
-import com.google.firebase.database.Exclude;
-import com.google.firebase.database.IgnoreExtraProperties;
+import com.google.firebase.database.IgnoreExtraProperties
+import com.google.firebase.database.Exclude
 
 @IgnoreExtraProperties
-public class VipImage {
+class VipImage(var id: String?) {
 
-    private String id;
-    private String originalFilePath;
+    @get:Exclude
+    @set:Exclude
+    var originalFilePath: String? = null
 
-    public VipImage() {}
-
-    public VipImage(String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    @Exclude
-    public void setOriginalFilePath(String originalFilePath) {
-        this.originalFilePath = originalFilePath;
-    }
-
-    @Exclude
-    public String getOriginalFilePath() {
-        return this.originalFilePath;
-    }
 }
