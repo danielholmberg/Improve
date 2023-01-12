@@ -87,9 +87,9 @@ class VipImageViewHolder(
             instance!!.storageManager
                 ?.downloadImageToLocalFile(vipImage.id!!, object :
                     StorageCallback {
-                    override fun onSuccess(file: Any) {
+                    override fun onSuccess(`object`: Any) {
                         Picasso.get()
-                            .load((file as File))
+                            .load((`object` as File))
                             .centerCrop()
                             .resize(targetSize, targetSize)
                             .into(vipImageView)
@@ -99,7 +99,7 @@ class VipImageViewHolder(
                         vipImagesAdapter.notifyDataSetChanged()
                     }
 
-                    override fun onFailure(errorMessage: String) {}
+                    override fun onFailure(errorMessage: String?) {}
                     override fun onProgress(progress: Int) {}
                 })
         }
@@ -133,13 +133,13 @@ class VipImageViewHolder(
             instance!!.storageManager
                 ?.downloadImageToLocalFile(vipImage!!.id!!, object :
                     StorageCallback {
-                    override fun onSuccess(file: Any) {
+                    override fun onSuccess(`object`: Any) {
                         Picasso.get()
-                            .load(file as Uri)
+                            .load(`object` as Uri)
                             .into(vipImageViewFull)
                     }
 
-                    override fun onFailure(errorMessage: String) {}
+                    override fun onFailure(errorMessage: String?) {}
                     override fun onProgress(progress: Int) {}
                 })
         }
@@ -183,9 +183,9 @@ class VipImageViewHolder(
             instance!!.storageManager
                 ?.downloadImageToLocalFile(vipImage.id!!, object :
                     StorageCallback {
-                    override fun onSuccess(file: Any) {
+                    override fun onSuccess(`object`: Any) {
                         Picasso.get()
-                            .load((file as File))
+                            .load((`object` as File))
                             .centerCrop()
                             .transform(CircleTransform())
                             .resize(thumbnailSize, thumbnailSize)
@@ -195,7 +195,7 @@ class VipImageViewHolder(
                         vipImagesAdapter.notifyDataSetChanged()
                     }
 
-                    override fun onFailure(errorMessage: String) {}
+                    override fun onFailure(errorMessage: String?) {}
                     override fun onProgress(progress: Int) {}
                 })
         }

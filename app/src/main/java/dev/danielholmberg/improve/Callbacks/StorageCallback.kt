@@ -1,9 +1,7 @@
-package dev.danielholmberg.improve.Callbacks;
+package dev.danielholmberg.improve.Callbacks
 
-public interface StorageCallback {
-
-    void onSuccess(Object object);
-    void onFailure(String errorMessage);
-    void onProgress(int progress);
-
+interface StorageCallback {
+    fun onSuccess(`object`: Any)
+    fun onFailure(errorMessage: String?)
+    fun onProgress(progress: Int)
 }

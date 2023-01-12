@@ -98,7 +98,7 @@ class StorageManager {
                     }
                 }
 
-                override fun onFailure(errorMessage: String) {
+                override fun onFailure(errorMessage: String?) {
                     callback.onFailure(errorMessage)
                 }
 
