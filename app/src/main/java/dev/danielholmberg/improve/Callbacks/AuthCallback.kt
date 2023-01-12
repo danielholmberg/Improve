@@ -1,12 +1,9 @@
-package dev.danielholmberg.improve.Callbacks;
+package dev.danielholmberg.improve.Callbacks
 
 /**
  * Created by Daniel Holmberg.
  */
-
-public interface AuthCallback {
-
-    void onSuccess();
-    void onFailure(String errorMessage);
-
+interface AuthCallback {
+    fun onSuccess()
+    fun onFailure(errorMessage: String?)
 }
