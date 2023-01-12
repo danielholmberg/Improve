@@ -1,80 +1,51 @@
-package dev.danielholmberg.improve.Models;
+package dev.danielholmberg.improve.Models
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.os.Parcelable
+import android.os.Parcel
+import java.util.*
 
-public class Tag implements Parcelable {
+class Tag : Parcelable {
+    var id: String? = null
+    var label: String? = null
+        private set
+    var color: String? = null
+    var textColor: String? = null
 
-    private String id;
-    private String label;
-    private String color;
-    private String textColor;
-
-    public Tag() {}
-
-    public Tag(String id) {
-        this.id = id;
+    constructor()
+    constructor(id: String?) {
+        this.id = id
     }
 
-    public String getId() {
-        return id;
+    fun setLabel(label: String) {
+        this.label = label.uppercase(Locale.getDefault())
     }
 
-    public void setId(String id) {
-        this.id = id;
+    override fun describeContents(): Int {
+        return 0
     }
 
-    public String getLabel() {
-        return label;
+    override fun writeToParcel(parcel: Parcel, i: Int) {
+        parcel.writeString(id)
+        parcel.writeString(label)
+        parcel.writeString(color)
     }
 
-    public void setLabel(String label) {
-        this.label = label.toUpperCase();
+    constructor(`in`: Parcel) {
+        id = `in`.readString()
+        label = `in`.readString()
+        color = `in`.readString()
     }
 
-    public String getColor(){
-        return this.color;
-    }
+    companion object {
+        @JvmField
+        val CREATOR: Parcelable.Creator<Tag> = object : Parcelable.Creator<Tag> {
+            override fun createFromParcel(`in`: Parcel): Tag {
+                return Tag(`in`)
+            }
 
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public String getTextColor() {
-        return this.textColor;
-    }
-
-    public void setTextColor(String textColor) {
-        this.textColor = textColor;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(id);
-        parcel.writeString(label);
-        parcel.writeString(color);
-    }
-
-    protected Tag(Parcel in) {
-        this.id = in.readString();
-        this.label = in.readString();
-        this.color = in.readString();
-    }
-
-    public static final Creator<Tag> CREATOR = new Creator<Tag>() {
-        @Override
-        public Tag createFromParcel(Parcel in) {
-            return new Tag(in);
+            override fun newArray(size: Int): Array<Tag?> {
+                return arrayOfNulls(size)
+            }
         }
-
-        @Override
-        public Tag[] newArray(int size) {
-            return new Tag[size];
-        }
-    };
+    }
 }
