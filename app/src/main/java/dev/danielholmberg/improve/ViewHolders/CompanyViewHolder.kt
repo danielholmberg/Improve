@@ -1,63 +1,50 @@
-package dev.danielholmberg.improve.ViewHolders;
+package dev.danielholmberg.improve.ViewHolders
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import dev.danielholmberg.improve.Improve.Companion.instance
+import androidx.recyclerview.widget.RecyclerView
+import android.widget.TextView
+import dev.danielholmberg.improve.Models.Company
+import dev.danielholmberg.improve.R
+import android.content.Intent
+import dev.danielholmberg.improve.Activities.AddContactActivity
+import android.os.Bundle
+import android.view.View
+import android.widget.Button
+import dev.danielholmberg.improve.Fragments.CompanyDetailsDialogFragment
 
-import androidx.recyclerview.widget.RecyclerView;
+class CompanyViewHolder(private val mView: View) : RecyclerView.ViewHolder(
+    mView
+) {
+    private var companyName: TextView? = null
+    private var quickAddNewContact: Button? = null
+    @JvmField
+    var contactRecyclerView: RecyclerView? = null
 
-import dev.danielholmberg.improve.Activities.AddContactActivity;
-import dev.danielholmberg.improve.Models.Company;
-import dev.danielholmberg.improve.Fragments.CompanyDetailsDialogFragment;
-import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.R;
-
-public class CompanyViewHolder extends RecyclerView.ViewHolder {
-
-    private View mView;
-
-    private TextView companyName;
-    private Button quickAddNewContact;
-    public RecyclerView contactRecyclerView;
-
-    public CompanyViewHolder(View companyView) {
-        super(companyView);
-        mView = companyView;
+    fun bindModelToView(company: Company) {
+        companyName = mView.findViewById<View>(R.id.company_list_tv) as TextView
+        companyName!!.text = company.name
+        quickAddNewContact = mView.findViewById<View>(R.id.quick_add_contact_btn) as Button
+        contactRecyclerView = mView.findViewById<View>(R.id.contact_recycler_view) as RecyclerView
+        quickAddNewContact!!.setOnClickListener {
+            val addContactIntent = Intent(instance, AddContactActivity::class.java)
+            addContactIntent.putExtra(AddContactActivity.PRE_SELECTED_COMPANY, company)
+            addContactIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            instance!!.startActivity(addContactIntent)
+        }
+        mView.setOnClickListener {
+            val bundle = createCompanyBundle(company)
+            val companyDetailsDialogFragment = CompanyDetailsDialogFragment()
+            companyDetailsDialogFragment.arguments = bundle
+            companyDetailsDialogFragment.show(
+                instance!!.mainActivityRef!!.supportFragmentManager,
+                companyDetailsDialogFragment.tag
+            )
+        }
     }
 
-    public void bindModelToView(final Company company) {
-        companyName = (TextView) mView.findViewById(R.id.company_list_tv);
-        companyName.setText(company.getName());
-        quickAddNewContact = (Button) mView.findViewById(R.id.quick_add_contact_btn);
-        contactRecyclerView = (RecyclerView) mView.findViewById(R.id.contact_recycler_view);
-
-        quickAddNewContact.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent addContactIntent = new Intent(Improve.getInstance(), AddContactActivity.class);
-                addContactIntent.putExtra(AddContactActivity.PRE_SELECTED_COMPANY, company);
-                addContactIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                Improve.getInstance().startActivity(addContactIntent);
-            }
-        });
-
-        mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Bundle bundle = createCompanyBundle(company);
-                CompanyDetailsDialogFragment companyDetailsDialogFragment = new CompanyDetailsDialogFragment();
-                companyDetailsDialogFragment.setArguments(bundle);
-                companyDetailsDialogFragment.show(Improve.getInstance().getMainActivityRef().getSupportFragmentManager(),
-                        companyDetailsDialogFragment.getTag());
-            }
-        });
-    }
-
-    private Bundle createCompanyBundle(Company company) {
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(CompanyDetailsDialogFragment.COMPANY_KEY, company);
-        return bundle;
+    private fun createCompanyBundle(company: Company): Bundle {
+        val bundle = Bundle()
+        bundle.putParcelable(CompanyDetailsDialogFragment.COMPANY_KEY, company)
+        return bundle
     }
 }
