@@ -123,7 +123,7 @@ class DatabaseManager {
             // Delete all related images from Firebase Storage
             if (noteToDelete.hasImage()) {
                 for (imageId in noteToDelete.vipImages) {
-                    instance!!.storageManager!!.deleteImage(noteToDelete.id, imageId)
+                    instance!!.storageManager!!.deleteImage(noteToDelete.id!!, imageId!!)
                 }
             }
         }
@@ -195,7 +195,7 @@ class DatabaseManager {
             // Delete all related images from Firebase Storage
             if (noteToDelete.hasImage()) {
                 for (imageId in noteToDelete.vipImages) {
-                    instance!!.storageManager!!.deleteImage(noteToDelete.id, imageId)
+                    instance!!.storageManager!!.deleteImage(noteToDelete.id!!, imageId!!)
                 }
             }
         }

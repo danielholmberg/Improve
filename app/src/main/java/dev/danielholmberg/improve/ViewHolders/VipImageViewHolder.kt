@@ -85,7 +85,7 @@ class VipImageViewHolder(
                 "Downloading Preview image from Firebase for Note: " + noteId + " with image id: " + vipImage.id
             )
             instance!!.storageManager
-                ?.downloadImageToLocalFile(vipImage.id, object : FirebaseStorageCallback {
+                ?.downloadImageToLocalFile(vipImage.id!!, object : FirebaseStorageCallback {
                     override fun onSuccess(file: Any) {
                         Picasso.get()
                             .load((file as File))
@@ -130,7 +130,7 @@ class VipImageViewHolder(
         } else {
             Log.d(TAG, "Loading Fullscreen image from Firebase with id: " + vipImage!!.id)
             instance!!.storageManager
-                ?.downloadImageToLocalFile(vipImage!!.id, object : FirebaseStorageCallback {
+                ?.downloadImageToLocalFile(vipImage!!.id!!, object : FirebaseStorageCallback {
                     override fun onSuccess(file: Any) {
                         Picasso.get()
                             .load(file as Uri)
@@ -179,7 +179,7 @@ class VipImageViewHolder(
             // Download image from Firebase to a local file
             Log.d(TAG, "Loading image from Firebase with image id: " + vipImage.id)
             instance!!.storageManager
-                ?.downloadImageToLocalFile(vipImage.id, object : FirebaseStorageCallback {
+                ?.downloadImageToLocalFile(vipImage.id!!, object : FirebaseStorageCallback {
                     override fun onSuccess(file: Any) {
                         Picasso.get()
                             .load((file as File))
