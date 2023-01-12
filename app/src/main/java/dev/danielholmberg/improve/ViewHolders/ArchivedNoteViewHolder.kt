@@ -53,7 +53,7 @@ class ArchivedNoteViewHolder(private val context: Context, itemView: View, paren
         tagsList.removeAllViews()
 
         // Populate Tag list view in Footer.
-        for (tagId in note.tags.keys) {
+        for (tagId in note.getTags().keys) {
             val tagView = LayoutInflater.from(context).inflate(R.layout.item_tag, parent, false)
 
             // Create a Tag View and add it to the Tag list view.

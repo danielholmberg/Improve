@@ -1,252 +1,170 @@
-package dev.danielholmberg.improve.Models;
+package dev.danielholmberg.improve.Models
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import com.google.firebase.database.Exclude;
-import com.google.firebase.database.IgnoreExtraProperties;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-
-import dev.danielholmberg.improve.Improve;
+import dev.danielholmberg.improve.Improve.Companion.instance
+import com.google.firebase.database.IgnoreExtraProperties
+import android.os.Parcelable
+import com.google.firebase.database.Exclude
+import org.json.JSONObject
+import org.json.JSONArray
+import org.json.JSONException
+import android.os.Parcel
+import java.util.*
+import kotlin.collections.HashMap
 
 /**
- * Created by DanielHolmberg on 2018-01-21.
+ * Created by Daniel Holmberg on 2018-01-21.
  */
-
 @IgnoreExtraProperties
-public class Note implements Parcelable {
-
-    private String id;
-    private String title;
-    private String info;
-    private boolean stared = false;
-    private String added;
-    private String updated;
-    private boolean archived = false;
-    private Map<String, Boolean> tags = new HashMap<>();
+class Note : Parcelable {
+    var id: String? = null
+    var title: String? = null
+    var info: String? = null
+    var stared = false
+    var added: String? = null
+    var updated: String? = null
+    var archived = false
+    private var tags: MutableMap<String?, Boolean?> = HashMap()
 
     // VIP values
-    private ArrayList<String> vipImages = new ArrayList<>();
+    var vipImages = ArrayList<String?>()
 
-    public Note() {}
-
-    public Note(String id) {
-        this.id = id;
+    constructor()
+    constructor(id: String?) {
+        this.id = id
     }
 
-    public String getId() {
-        return id;
+    fun getTags(): Map<String?, Boolean?> {
+        return tags
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getInfo() {
-        return info;
-    }
-
-    public void setInfo(String info) {
-        this.info = info;
-    }
-
-    public String getAdded() {
-        return added;
-    }
-
-    public void setAdded(String added) {
-        this.added = added;
-    }
-
-    public String getUpdated() {
-        return updated;
-    }
-
-    public void setUpdated(String updated) {
-        this.updated = updated;
-    }
-
-    public boolean getArchived() {
-        return this.archived;
-    }
-
-    public void setArchived(boolean archived) {
-        this.archived = archived;
-    }
-
-    public boolean getStared() {
-        return stared;
-    }
-
-    public void setStared(boolean stared) {
-        this.stared = stared;
-    }
-
-    public ArrayList<String> getVipImages() {
-        return this.vipImages;
-    }
-
-    public void setVipImages(ArrayList<String> vipImages) {
-        this.vipImages = vipImages;
-    }
-
-    public Map<String, Boolean> getTags() {
-        return this.tags;
-    }
-
-    public void setTags(Map<String, Boolean> tags) {
-        Map<String, Boolean> concurrentMap = new ConcurrentHashMap<String, Boolean>(tags);
+    fun setTags(tags: Map<String?, Boolean?>) {
+        val tagsMap: MutableMap<String?, Boolean?> = HashMap(tags)
 
         // Do not add if Tag has been removed.
-        for(String tagId: concurrentMap.keySet()) {
-            if(Improve.getInstance().getTagsAdapter().getTag(tagId) == null) {
-                concurrentMap.remove(tagId);
+        for (tagId in tagsMap.keys) {
+            if (instance!!.tagsAdapter!!.getTag(tagId) == null) {
+                tagsMap.remove(tagId)
             }
         }
-        this.tags = concurrentMap;
+        this.tags = tagsMap
     }
 
     // Utility functions
     @Exclude
-    public boolean hasImage() {
-        return this.vipImages.size() > 0;
+    fun hasImage(): Boolean {
+        return vipImages.size > 0
     }
 
     @Exclude
-    public boolean isStared() { return getStared(); }
-
-    @Exclude
-    public boolean isArchived() {
-        return getArchived();
+    fun isStared(): Boolean {
+        return stared
     }
 
     @Exclude
-    public String toString() {
-        JSONObject noteData = new JSONObject();
+    fun isArchived(): Boolean {
+        return archived
+    }
 
+    @Exclude
+    override fun toString(): String {
+        val noteData = JSONObject()
         try {
-            noteData.put("id", this.id);
-            noteData.put("archived", this.archived);
-            noteData.put("info", this.info);
-            noteData.put("added", this.added);
-            noteData.put("updated", this.updated);
-            noteData.put("title", this.title);
-            noteData.put("stared", this.stared);
-
-            if(this.vipImages.size() > 0) noteData.put("vipImages", new JSONArray(this.vipImages));
-            if(!this.tags.isEmpty()) noteData.put("tags", new JSONObject(this.tags));
-
-        } catch (JSONException e) {
-            e.printStackTrace();
+            noteData.put("id", id)
+            noteData.put("archived", archived)
+            noteData.put("info", info)
+            noteData.put("added", added)
+            noteData.put("updated", updated)
+            noteData.put("title", title)
+            noteData.put("stared", stared)
+            if (vipImages.size > 0) noteData.put("vipImages", JSONArray(vipImages))
+            if (tags.isNotEmpty()) noteData.put("tags",
+                (tags as Map<*, *>?)?.let { JSONObject(it) })
+        } catch (e: JSONException) {
+            e.printStackTrace()
         }
-
-        return noteData.toString();
+        return noteData.toString()
     }
 
     @Exclude
-    public void addVipImage(String vipImageId) {
-        this.vipImages.add(vipImageId);
+    fun addVipImage(vipImageId: String?) {
+        vipImages.add(vipImageId)
     }
 
     @Exclude
-    public void removeVipImage(String imageId) {
-        this.vipImages.remove(imageId);
+    fun removeVipImage(imageId: String?) {
+        vipImages.remove(imageId)
     }
 
     @Exclude
-    public void addTag(String tagId) {
-        this.tags.put(tagId, true);
+    fun addTag(tagId: String?) {
+        tags[tagId] = true
     }
 
     @Exclude
-    public void removeTag(String tagId) {
-        this.tags.remove(tagId);
+    fun removeTag(tagId: String?) {
+        tags.remove(tagId)
     }
 
     @Exclude
-    public boolean containsTag(String id) {
-        return tags.keySet().contains(id);
+    fun containsTag(id: String?): Boolean {
+        return tags.keys.contains(id)
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    override fun describeContents(): Int {
+        return 0
     }
 
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(id);
-        parcel.writeString(title);
-        parcel.writeString(info);
-        parcel.writeInt((stared ? 1 : 0));
-        parcel.writeInt((archived ? 1 : 0));
-        parcel.writeString(added);
-        parcel.writeString(updated);
-        parcel.writeList(vipImages);
-        parcel.writeMap(tags);
+    override fun writeToParcel(parcel: Parcel, i: Int) {
+        parcel.writeString(id)
+        parcel.writeString(title)
+        parcel.writeString(info)
+        parcel.writeInt(if (stared) 1 else 0)
+        parcel.writeInt(if (archived) 1 else 0)
+        parcel.writeString(added)
+        parcel.writeString(updated)
+        parcel.writeList(vipImages)
+        parcel.writeMap(tags)
     }
 
-    protected Note(Parcel in) {
-        id = in.readString();
-        title = in.readString();
-        info = in.readString();
-        stared = in.readInt() != 0;
-        archived = in.readInt() != 0;
-        added = in.readString();
-        updated = in.readString();
-        in.readList(vipImages, ArrayList.class.getClassLoader());
-        in.readMap(tags, HashMap.class.getClassLoader());
+    constructor(`in`: Parcel) {
+        id = `in`.readString()
+        title = `in`.readString()
+        info = `in`.readString()
+        stared = `in`.readInt() != 0
+        archived = `in`.readInt() != 0
+        added = `in`.readString()
+        updated = `in`.readString()
+        `in`.readList(vipImages, ArrayList::class.java.classLoader)
+        `in`.readMap(tags, HashMap::class.java.classLoader)
     }
 
-    public static final Creator<Note> CREATOR = new Creator<Note>() {
-        @Override
-        public Note createFromParcel(Parcel in) {
-            return new Note(in);
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        val note = other as Note
+        return archived == note.archived && stared == note.stared && id == note.id &&
+                title == note.title &&
+                info == note.info &&
+                added == note.added &&
+                updated == note.updated &&
+                vipImages == note.vipImages &&
+                tags == note.tags
+    }
+
+    override fun hashCode(): Int {
+        return Objects.hash(id, title, info, stared, added, updated, archived, vipImages, tags)
+    }
+
+    companion object {
+        @JvmField
+        val CREATOR: Parcelable.Creator<Note> = object : Parcelable.Creator<Note> {
+            override fun createFromParcel(`in`: Parcel): Note {
+                return Note(`in`)
+            }
+
+            override fun newArray(size: Int): Array<Note?> {
+                return arrayOfNulls(size)
+            }
         }
-
-        @Override
-        public Note[] newArray(int size) {
-            return new Note[size];
-        }
-    };
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Note note = (Note) o;
-        return archived == note.archived &&
-                stared == note.stared &&
-                id.equals(note.id) &&
-                Objects.equals(title, note.title) &&
-                Objects.equals(info, note.info) &&
-                Objects.equals(added, note.added) &&
-                Objects.equals(updated, note.updated) &&
-                Objects.equals(vipImages, note.vipImages) &&
-                Objects.equals(tags, note.tags);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, title, info, stared, added, updated, archived, vipImages, tags);
     }
 }

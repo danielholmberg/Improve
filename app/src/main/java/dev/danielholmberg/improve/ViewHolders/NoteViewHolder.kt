@@ -67,7 +67,7 @@ class NoteViewHolder(private val context: Context, itemView: View, parent: ViewG
         }
 
         // Tags
-        if (note.tags.isNotEmpty()) {
+        if (note.getTags().isNotEmpty()) {
             footer!!.visibility = View.VISIBLE
         } else {
             footer!!.visibility = View.GONE
@@ -77,7 +77,7 @@ class NoteViewHolder(private val context: Context, itemView: View, parent: ViewG
         tagsList.removeAllViews()
 
         // Populate Tag list view in Footer.
-        for (tagId in note.tags.keys) {
+        for (tagId in note.getTags().keys) {
             val tagView = LayoutInflater.from(context).inflate(R.layout.item_tag, parent, false)
 
             // Create a Tag View and add it to the Tag list view.
@@ -88,7 +88,7 @@ class NoteViewHolder(private val context: Context, itemView: View, parent: ViewG
         }
 
         // Stared
-        if (note.isStared) {
+        if (note.isStared()) {
             itemView.background = ContextCompat.getDrawable(context, R.drawable.background_note_stared)
         } else {
             itemView.background = ContextCompat.getDrawable(context, R.drawable.background_note)
