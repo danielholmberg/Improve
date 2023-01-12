@@ -2,7 +2,7 @@ package dev.danielholmberg.improve
 
 import android.app.Application
 import dev.danielholmberg.improve.Managers.AuthManager
-import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager
+import dev.danielholmberg.improve.Managers.DatabaseManager
 import dev.danielholmberg.improve.Managers.FirebaseStorageManager
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import dev.danielholmberg.improve.Services.DriveServiceHelper
@@ -37,7 +37,7 @@ class Improve : Application(), Serializable {
     var authManager: AuthManager? = null
         private set
 
-    var firebaseDatabaseManager: FirebaseDatabaseManager? = null
+    var databaseManager: DatabaseManager? = null
         private set
 
     var firebaseStorageManager: FirebaseStorageManager? = null
@@ -96,7 +96,7 @@ class Improve : Application(), Serializable {
 
         // Initializing managers.
         authManager = AuthManager()
-        firebaseDatabaseManager = FirebaseDatabaseManager()
+        databaseManager = DatabaseManager()
         firebaseStorageManager = FirebaseStorageManager()
         firebaseRemoteConfig = FirebaseRemoteConfig.getInstance()
 
@@ -131,16 +131,16 @@ class Improve : Application(), Serializable {
 
     fun saveState() {
         if (tagsAdapter != null) {
-            firebaseDatabaseManager!!.saveTags(tags)
+            databaseManager!!.saveTags(tags)
         }
         if (notesAdapter != null) {
-            firebaseDatabaseManager!!.saveNotes(notes)
+            databaseManager!!.saveNotes(notes)
         }
         if (archivedNotesAdapter != null) {
-            firebaseDatabaseManager!!.saveArchivedNotes(archivedNotes)
+            databaseManager!!.saveArchivedNotes(archivedNotes)
         }
         if (companyRecyclerViewAdapter != null) {
-            firebaseDatabaseManager!!.saveCompanies(companies)
+            databaseManager!!.saveCompanies(companies)
         }
     }
 

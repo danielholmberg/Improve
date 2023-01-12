@@ -44,7 +44,7 @@ import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Models.Tag;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Managers.DatabaseManager;
 import dev.danielholmberg.improve.Models.VipImage;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Utilities.NoteInputValidator;
@@ -60,7 +60,7 @@ public class AddNoteActivity extends AppCompatActivity {
     private static final int PICK_IMAGE_REQUEST = 1;
 
     private Improve app;
-    private FirebaseDatabaseManager databaseManager;
+    private DatabaseManager databaseManager;
     private Context context;
     private NoteInputValidator validator;
 
@@ -85,7 +85,7 @@ public class AddNoteActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_note);
 
         app = Improve.getInstance();
-        databaseManager = app.getFirebaseDatabaseManager();
+        databaseManager = app.getDatabaseManager();
         context = this;
 
         initActivity();

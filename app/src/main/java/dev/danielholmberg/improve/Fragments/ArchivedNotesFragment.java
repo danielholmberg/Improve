@@ -26,7 +26,7 @@ import com.google.firebase.database.DatabaseError;
 
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Managers.DatabaseManager;
 import dev.danielholmberg.improve.R;
 
 /**
@@ -37,7 +37,7 @@ public class ArchivedNotesFragment extends Fragment implements SearchView.OnQuer
     private static final String TAG = ArchivedNotesFragment.class.getSimpleName();
 
     private Improve app;
-    private FirebaseDatabaseManager databaseManager;
+    private DatabaseManager databaseManager;
 
     private View view;
     private CoordinatorLayout snackbarView;
@@ -53,7 +53,7 @@ public class ArchivedNotesFragment extends Fragment implements SearchView.OnQuer
         super.onCreate(savedInstanceState);
         app = Improve.getInstance();
         app.setArchivedNotesFragmentRef(this);
-        databaseManager = app.getFirebaseDatabaseManager();
+        databaseManager = app.getDatabaseManager();
         setHasOptionsMenu(true);
     }
 

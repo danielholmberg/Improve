@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
@@ -21,7 +20,7 @@ import java.util.HashMap;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Models.Tag;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Managers.DatabaseManager;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.ViewHolders.TagViewHolder;
 
@@ -29,7 +28,7 @@ public class TagsAdapter extends RecyclerView.Adapter<TagViewHolder>{
     private static final String TAG = TagsAdapter.class.getSimpleName();
 
     private Improve app;
-    private FirebaseDatabaseManager databaseManager;
+    private DatabaseManager databaseManager;
     private SortedList<Tag> tags;
     private Note currentNote;
     private View tagView;
@@ -37,7 +36,7 @@ public class TagsAdapter extends RecyclerView.Adapter<TagViewHolder>{
 
     public TagsAdapter() {
         this.app = Improve.getInstance();
-        this.databaseManager = app.getFirebaseDatabaseManager();
+        this.databaseManager = app.getDatabaseManager();
 
         tags = new SortedList<>(Tag.class, new SortedList.Callback<Tag>() {
             @Override

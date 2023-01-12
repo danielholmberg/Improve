@@ -18,7 +18,7 @@ import java.util.Calendar;
 import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback;
 import dev.danielholmberg.improve.Models.Feedback;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Managers.DatabaseManager;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Utilities.NoteInputValidator;
 
@@ -30,7 +30,7 @@ public class SubmitFeedbackActivity extends AppCompatActivity {
     private static final String TAG = SubmitFeedbackActivity.class.getSimpleName();
 
     private Improve app;
-    private FirebaseDatabaseManager storageManager;
+    private DatabaseManager storageManager;
     private NoteInputValidator validator;
 
     private TextInputEditText inputTitle, inputInfo;
@@ -45,7 +45,7 @@ public class SubmitFeedbackActivity extends AppCompatActivity {
         setContentView(R.layout.activity_submit_feedback);
 
         app = Improve.getInstance();
-        storageManager = app.getFirebaseDatabaseManager();
+        storageManager = app.getDatabaseManager();
 
         toolbar = (Toolbar) findViewById(R.id.toolbar_submit_feedback);
         setSupportActionBar(toolbar);

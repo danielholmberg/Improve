@@ -24,7 +24,7 @@ import java.util.List;
 import dev.danielholmberg.improve.Models.Company;
 import dev.danielholmberg.improve.Models.Contact;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Managers.DatabaseManager;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Utilities.ContactInputValidator;
 
@@ -39,7 +39,7 @@ public class AddContactActivity extends AppCompatActivity {
     public static final String PRE_SELECTED_COMPANY = "preSelectedCompany";
 
     private Improve app;
-    private FirebaseDatabaseManager databaseManager;
+    private DatabaseManager databaseManager;
     private ContactInputValidator validator;
 
     private Contact contact;
@@ -63,7 +63,7 @@ public class AddContactActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_contact);
 
         app = Improve.getInstance();
-        databaseManager = app.getFirebaseDatabaseManager();
+        databaseManager = app.getDatabaseManager();
 
         initActivity();
 

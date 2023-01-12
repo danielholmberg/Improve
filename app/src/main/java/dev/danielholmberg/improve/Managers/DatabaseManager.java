@@ -28,8 +28,8 @@ import dev.danielholmberg.improve.Improve;
  * Avoid using .keepSynced(boolean) as it downloads the node even if it hasn't changed.
  */
 
-public class FirebaseDatabaseManager {
-    private static final String TAG = FirebaseDatabaseManager.class.getSimpleName();
+public class DatabaseManager {
+    private static final String TAG = DatabaseManager.class.getSimpleName();
 
     private static final String USERS_REF = "users";
     private static final String NOTES_REF = "notes";
@@ -39,7 +39,7 @@ public class FirebaseDatabaseManager {
     private static final String COMPANIES_REF = "companies";
     private static final String FEEDBACK_REF = "feedback";
 
-    public FirebaseDatabaseManager() {}
+    public DatabaseManager() {}
 
     public FirebaseDatabase getDatabase() {
         return FirebaseDatabase.getInstance();

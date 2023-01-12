@@ -62,7 +62,7 @@ class TagViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                     .setTitle(R.string.dialog_delete_tag_title)
                     .setMessage(R.string.dialog_delete_tag_msg)
                     .setPositiveButton("Yes") { dialogInterface, i ->
-                        instance!!.firebaseDatabaseManager!!.deleteTag(
+                        instance!!.databaseManager!!.deleteTag(
                             tag!!.id
                         )
                     }

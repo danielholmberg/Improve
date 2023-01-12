@@ -22,8 +22,7 @@ import java.util.List;
 import dev.danielholmberg.improve.Models.Company;
 import dev.danielholmberg.improve.Models.Contact;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
-import dev.danielholmberg.improve.Models.Note;
+import dev.danielholmberg.improve.Managers.DatabaseManager;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.ViewHolders.ContactViewHolder;
 
@@ -31,14 +30,14 @@ public class ContactRecyclerViewAdapter extends RecyclerView.Adapter<ContactView
     private static final String TAG = ContactRecyclerViewAdapter.class.getSimpleName();
 
     private Improve app;
-    private FirebaseDatabaseManager databaseManager;
+    private DatabaseManager databaseManager;
 
     private final Company company;
     private SortedList<Contact> contacts;
 
     public ContactRecyclerViewAdapter(Company company) {
         this.app = Improve.getInstance();
-        this.databaseManager = app.getFirebaseDatabaseManager();
+        this.databaseManager = app.getDatabaseManager();
         this.company = company;
 
         contacts = new SortedList<>(Contact.class, new SortedList.Callback<Contact>() {

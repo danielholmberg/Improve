@@ -21,7 +21,7 @@ import java.util.List;
 
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Managers.DatabaseManager;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.ViewHolders.ArchivedNoteViewHolder;
 
@@ -29,13 +29,13 @@ public class ArchivedNotesAdapter extends RecyclerView.Adapter<ArchivedNoteViewH
     private static final String TAG = ArchivedNotesAdapter.class.getSimpleName();
 
     private Improve app;
-    private FirebaseDatabaseManager databaseManager;
+    private DatabaseManager databaseManager;
     private SortedList<Note> archivedNotes;
     private List<Note> archivedNotesCopy, filteredArchivedNotes;
 
     public ArchivedNotesAdapter() {
         this.app = Improve.getInstance();
-        this.databaseManager = app.getFirebaseDatabaseManager();
+        this.databaseManager = app.getDatabaseManager();
 
         archivedNotes = new SortedList<Note>(Note.class, new SortedList.Callback<Note>() {
             @Override

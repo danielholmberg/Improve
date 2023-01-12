@@ -5,7 +5,6 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.SortedList;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,21 +14,17 @@ import android.widget.Toast;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.Query;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
-import dev.danielholmberg.improve.Models.VipImage;
+import dev.danielholmberg.improve.Managers.DatabaseManager;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.ViewHolders.NoteViewHolder;
 
@@ -37,13 +32,13 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
     private static final String TAG = NotesAdapter.class.getSimpleName();
 
     private Improve app;
-    private FirebaseDatabaseManager databaseManager;
+    private DatabaseManager databaseManager;
     private SortedList<Note> notes;
     private List<Note> notesCopy, filteredNotes;
 
     public NotesAdapter() {
         this.app = Improve.getInstance();
-        this.databaseManager = app.getFirebaseDatabaseManager();
+        this.databaseManager = app.getDatabaseManager();
 
         notes = new SortedList<>(Note.class, new SortedList.Callback<Note>() {
             @Override

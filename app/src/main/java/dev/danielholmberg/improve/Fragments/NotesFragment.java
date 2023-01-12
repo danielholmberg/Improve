@@ -1,6 +1,5 @@
 package dev.danielholmberg.improve.Fragments;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -44,7 +43,7 @@ import com.google.gson.JsonParser;
 
 import dev.danielholmberg.improve.Activities.AddNoteActivity;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Managers.DatabaseManager;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Services.DriveServiceHelper;
@@ -61,7 +60,7 @@ public class NotesFragment extends Fragment implements SearchView.OnQueryTextLis
     private static final int REQUEST_CODE_OPEN_FILE = 1;
 
     private Improve app;
-    private FirebaseDatabaseManager databaseManager;
+    private DatabaseManager databaseManager;
     private Context context;
     private DriveServiceHelper mDriveServiceHelper;
 
@@ -82,7 +81,7 @@ public class NotesFragment extends Fragment implements SearchView.OnQueryTextLis
         app = Improve.getInstance();
         app.setNotesFragmentRef(this);
         this.context = getContext();
-        databaseManager = app.getFirebaseDatabaseManager();
+        databaseManager = app.getDatabaseManager();
         mDriveServiceHelper = app.getDriveServiceHelper();
         setHasOptionsMenu(true);
     }

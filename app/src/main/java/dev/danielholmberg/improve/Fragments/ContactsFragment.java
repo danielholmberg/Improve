@@ -26,7 +26,7 @@ import com.google.firebase.database.DatabaseError;
 import dev.danielholmberg.improve.Activities.AddContactActivity;
 import dev.danielholmberg.improve.Models.Company;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Managers.DatabaseManager;
 import dev.danielholmberg.improve.R;
 
 /**
@@ -42,7 +42,7 @@ public class ContactsFragment extends Fragment{
     private FloatingActionButton fab, addContactFAB, addCompanyFAB;
     private TextView addCompanyFABTextView, addContactFABTextView;
     private View snackbarView;
-    private FirebaseDatabaseManager databaseManager;
+    private DatabaseManager databaseManager;
     private View emptyListView;
     private boolean isFABOpen = false;
 
@@ -54,7 +54,7 @@ public class ContactsFragment extends Fragment{
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         app = Improve.getInstance();
-        databaseManager = app.getFirebaseDatabaseManager();
+        databaseManager = app.getDatabaseManager();
         app.setContactFragmentRef(this);
         setHasOptionsMenu(true);
     }

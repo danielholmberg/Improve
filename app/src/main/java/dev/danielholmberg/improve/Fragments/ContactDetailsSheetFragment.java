@@ -35,7 +35,7 @@ import java.util.Calendar;
 import dev.danielholmberg.improve.Activities.AddContactActivity;
 import dev.danielholmberg.improve.Models.Contact;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Managers.DatabaseManager;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Services.DriveServiceHelper;
 
@@ -51,7 +51,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     private static final int REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION = 999;
 
     private Improve app;
-    private FirebaseDatabaseManager databaseManager;
+    private DatabaseManager databaseManager;
     private Context context;
     private DriveServiceHelper mDriveServiceHelper;
 
@@ -77,7 +77,7 @@ public class ContactDetailsSheetFragment extends BottomSheetDialogFragment imple
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         app = Improve.getInstance();
-        databaseManager = app.getFirebaseDatabaseManager();
+        databaseManager = app.getDatabaseManager();
         detailsDialog = this;
         context = getContext();
         activity = (AppCompatActivity) getActivity();

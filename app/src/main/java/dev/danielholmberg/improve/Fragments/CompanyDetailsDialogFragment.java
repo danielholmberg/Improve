@@ -27,7 +27,7 @@ import java.util.Objects;
 
 import dev.danielholmberg.improve.Models.Company;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Managers.DatabaseManager;
 import dev.danielholmberg.improve.R;
 
 public class CompanyDetailsDialogFragment extends DialogFragment {
@@ -36,7 +36,7 @@ public class CompanyDetailsDialogFragment extends DialogFragment {
     public static final String COMPANY_KEY = "company";
 
     private Improve app;
-    private FirebaseDatabaseManager databaseManager;
+    private DatabaseManager databaseManager;
 
     private AppCompatActivity activity;
 
@@ -59,7 +59,7 @@ public class CompanyDetailsDialogFragment extends DialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         app = Improve.getInstance();
-        databaseManager = app.getFirebaseDatabaseManager();
+        databaseManager = app.getDatabaseManager();
         activity = (AppCompatActivity) getActivity();
 
         companyBundle = getArguments();

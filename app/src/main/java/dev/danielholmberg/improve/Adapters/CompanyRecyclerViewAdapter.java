@@ -23,8 +23,7 @@ import java.util.Map;
 
 import dev.danielholmberg.improve.Models.Company;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
-import dev.danielholmberg.improve.Models.Contact;
+import dev.danielholmberg.improve.Managers.DatabaseManager;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.ViewHolders.CompanyViewHolder;
 
@@ -32,12 +31,12 @@ public class CompanyRecyclerViewAdapter extends RecyclerView.Adapter<CompanyView
     private static final String TAG = CompanyRecyclerViewAdapter.class.getSimpleName();
 
     private Improve app;
-    private final FirebaseDatabaseManager databaseManager;
+    private final DatabaseManager databaseManager;
     private SortedList<Company> companies;
 
     public CompanyRecyclerViewAdapter() {
         this.app = Improve.getInstance();
-        this.databaseManager = app.getFirebaseDatabaseManager();
+        this.databaseManager = app.getDatabaseManager();
 
         companies = new SortedList<Company>(Company.class, new SortedList.Callback<Company>() {
             @Override

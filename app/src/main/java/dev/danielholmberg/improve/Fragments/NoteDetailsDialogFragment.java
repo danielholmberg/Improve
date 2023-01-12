@@ -1,6 +1,5 @@
 package dev.danielholmberg.improve.Fragments;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -53,7 +52,6 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -63,7 +61,7 @@ import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Models.Tag;
 import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
+import dev.danielholmberg.improve.Managers.DatabaseManager;
 import dev.danielholmberg.improve.Models.VipImage;
 import dev.danielholmberg.improve.R;
 import dev.danielholmberg.improve.Services.DriveServiceHelper;
@@ -83,7 +81,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     private static final int REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION = 999;
 
     private Improve app;
-    private FirebaseDatabaseManager databaseManager;
+    private DatabaseManager databaseManager;
     private DriveServiceHelper mDriveServiceHelper;
 
     private Context context;
@@ -129,7 +127,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
 
         app = Improve.getInstance();
-        databaseManager = app.getFirebaseDatabaseManager();
+        databaseManager = app.getDatabaseManager();
         activity = (AppCompatActivity) getActivity();
         context = app.getMainActivityRef();
         mDriveServiceHelper = app.getDriveServiceHelper();
