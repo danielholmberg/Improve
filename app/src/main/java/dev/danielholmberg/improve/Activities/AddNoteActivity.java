@@ -117,7 +117,7 @@ public class AddNoteActivity extends AppCompatActivity {
         newNote = new Note(id);
         newTags = new ArrayList<>();
 
-        if(app.isVIPUser()) {
+        if(app.isVipUser()) {
             vipImagesRecyclerView = (RecyclerView) findViewById(R.id.vip_images_list);
             vipImagesAdapter = new VipImagesAdapter(newNote.getId(), false);
 
@@ -134,8 +134,8 @@ public class AddNoteActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_edit_note, menu);
 
         // Show Menu-group with VIP features.
-        menu.setGroupEnabled(R.id.vipMenuGroup, app.isVIPUser());
-        menu.setGroupVisible(R.id.vipMenuGroup, app.isVIPUser());
+        menu.setGroupEnabled(R.id.vipMenuGroup, app.isVipUser());
+        menu.setGroupVisible(R.id.vipMenuGroup, app.isVipUser());
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -448,7 +448,7 @@ public class AddNoteActivity extends AppCompatActivity {
         newNote.setAdded(timestampAdded);
         newNote.setUpdated(timestampAdded);
 
-        if (app.isVIPUser() && vipImagesAdapter.getItemCount() > 0) {
+        if (app.isVipUser() && vipImagesAdapter.getItemCount() > 0) {
             // Wait on adding new note and returning to parent activity
             // until all image uploads has been successfully completed.
             uploadImages();

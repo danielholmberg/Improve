@@ -258,7 +258,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
         if(originalNote != null) {
 
-            if(app.isVIPUser()) {
+            if(app.isVipUser()) {
                 vipImagesAdapter = new VipImagesAdapter(originalNote.getId(), false);
 
                 if(originalNote.hasImage()) {
@@ -332,8 +332,8 @@ public class NoteDetailsDialogFragment extends DialogFragment {
             }
 
             // Show Menu-group with VIP features.
-            menu.setGroupEnabled(R.id.vipMenuGroup, app.isVIPUser());
-            menu.setGroupVisible(R.id.vipMenuGroup, app.isVIPUser());
+            menu.setGroupEnabled(R.id.vipMenuGroup, app.isVipUser());
+            menu.setGroupVisible(R.id.vipMenuGroup, app.isVipUser());
 
         } else {
 
@@ -869,7 +869,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
         updatedNote.setArchived(archived);
         updatedNote.setUpdated(timestampUpdated);
 
-        if(app.isVIPUser() && vipImagesAdapter != null) {
+        if(app.isVipUser() && vipImagesAdapter != null) {
             // User is a VIP user and the VIP image adapter has been initialized.
             currentImages = vipImagesAdapter.getImageList();
 

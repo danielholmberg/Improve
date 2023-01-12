@@ -123,9 +123,9 @@ public class MainActivity extends AppCompatActivity {
                         if (currentUser.getEmail() != null && !currentUser.getEmail().isEmpty()) {
                             Log.d(TAG, "Current user: " + currentUser.getEmail());
 
-                            app.setIsVIPUser(retrievedVIPUsers.contains(currentUser.getEmail()));
+                            app.setVipUser(retrievedVIPUsers.contains(currentUser.getEmail()));
                         } else {
-                            app.setIsVIPUser(false);
+                            app.setVipUser(false);
                         }
 
                         initNavDrawer();
@@ -213,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
         TextView drawer_header_name = (TextView)  navigationView.getHeaderView(0).findViewById(R.id.drawer_header_name_tv);
         TextView drawer_header_email = (TextView)  navigationView.getHeaderView(0).findViewById(R.id.drawer_header_email_tv);
 
-        if(app.isVIPUser()) {
+        if(app.isVipUser()) {
             vip_user_symbol.setVisibility(View.VISIBLE);
         } else {
             vip_user_symbol.setVisibility(View.GONE);

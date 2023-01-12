@@ -1,193 +1,146 @@
-package dev.danielholmberg.improve;
+package dev.danielholmberg.improve
 
-import android.app.Application;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.os.Build;
-import android.os.Environment;
-import android.util.Log;
-
-import androidx.fragment.app.Fragment;
-
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import dev.danielholmberg.improve.Activities.MainActivity;
-import dev.danielholmberg.improve.Adapters.ArchivedNotesAdapter;
-import dev.danielholmberg.improve.Adapters.CompanyRecyclerViewAdapter;
-import dev.danielholmberg.improve.Adapters.ContactRecyclerViewAdapter;
-import dev.danielholmberg.improve.Adapters.NotesAdapter;
-import dev.danielholmberg.improve.Adapters.TagsAdapter;
-import dev.danielholmberg.improve.Adapters.VipImagesAdapter;
-import dev.danielholmberg.improve.Fragments.ArchivedNotesFragment;
-import dev.danielholmberg.improve.Fragments.ContactsFragment;
-import dev.danielholmberg.improve.Fragments.NoteDetailsDialogFragment;
-import dev.danielholmberg.improve.Fragments.NotesFragment;
-import dev.danielholmberg.improve.Managers.AuthManager;
-import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager;
-import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
-import dev.danielholmberg.improve.Services.DriveServiceHelper;
+import android.app.Application
+import dev.danielholmberg.improve.Managers.AuthManager
+import dev.danielholmberg.improve.Managers.FirebaseDatabaseManager
+import dev.danielholmberg.improve.Managers.FirebaseStorageManager
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import dev.danielholmberg.improve.Services.DriveServiceHelper
+import dev.danielholmberg.improve.Activities.MainActivity
+import dev.danielholmberg.improve.Fragments.NotesFragment
+import dev.danielholmberg.improve.Fragments.ContactsFragment
+import dev.danielholmberg.improve.Fragments.ArchivedNotesFragment
+import dev.danielholmberg.improve.Adapters.NotesAdapter
+import dev.danielholmberg.improve.Adapters.ArchivedNotesAdapter
+import dev.danielholmberg.improve.Adapters.TagsAdapter
+import dev.danielholmberg.improve.Adapters.CompanyRecyclerViewAdapter
+import dev.danielholmberg.improve.Adapters.ContactRecyclerViewAdapter
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
+import android.os.Build
+import android.app.NotificationManager
+import android.app.NotificationChannel
+import android.util.Log
+import androidx.fragment.app.Fragment
+import java.io.File
+import java.io.Serializable
+import java.util.HashMap
+import javax.inject.Singleton
+import kotlin.jvm.Volatile
 
 /**
  * Created by Daniel Holmberg.
  */
+@Singleton
+class Improve : Application(), Serializable {
 
-public class Improve extends Application implements Serializable {
+    var authManager: AuthManager? = null
+        private set
 
-    private AuthManager authManager;
-    private FirebaseDatabaseManager firebaseDatabaseManager;
-    private FirebaseStorageManager firebaseStorageManager;
-    private FirebaseRemoteConfig firebaseRemoteConfig;
-    private DriveServiceHelper mDriveServiceHelper;
+    var firebaseDatabaseManager: FirebaseDatabaseManager? = null
+        private set
 
-    // volatile attribute makes the singleton thread safe.
-    private static volatile Improve sImproveInstance;
+    var firebaseStorageManager: FirebaseStorageManager? = null
+        private set
 
-    private File rootDir, imageDir;
+    var firebaseRemoteConfig: FirebaseRemoteConfig? = null
+        private set
 
-    public MainActivity mainActivityRef;
+    var driveServiceHelper: DriveServiceHelper? = null
 
-    private NotesFragment notesFragmentRef;
-    private ContactsFragment contactsFragmentRef;
-    private ArchivedNotesFragment archivedNotesFragmentRef;
+    var mainActivityRef: MainActivity? = null
 
-    private NotesAdapter notesAdapter;
-    private ArchivedNotesAdapter archivedNotesAdapter;
-    private TagsAdapter tagsAdapter;
-    private Fragment currentFragment;
-    private CompanyRecyclerViewAdapter companyRecyclerViewAdapter;
-    private final HashMap<String, ContactRecyclerViewAdapter> contactAdapters = new HashMap<>();
+    private var rootDir: File? = null
+    private var imageDir: File? = null
 
-    private boolean isVIPUser = false;
-    public final Map VIP_USERS = new HashMap<String, Object>() {{
-        put("1", "danielholmberg.dev@gmail.com");
-        put("2", "danielkurtholmberg@gmail.com");
-    }};
+    // ---- Note functions ---- //
+    var notesFragmentRef: NotesFragment? = null
+    var contactsFragmentRef: ContactsFragment? = null
+        private set
 
-    public static Improve getInstance() {
-        // Double checks locking to prevent unnecessary sync.
-        if (sImproveInstance == null) {
-            synchronized (Improve.class) {
-                // If there is no instance available... create new one
-                if (sImproveInstance == null) {
-                    sImproveInstance = new Improve();
-                }
-            }
+    // ---- Archived note functions ---- //
+    var archivedNotesFragmentRef: ArchivedNotesFragment? = null
+    var notesAdapter: NotesAdapter? = null
+    var archivedNotesAdapter: ArchivedNotesAdapter? = null
+
+    // ---- Tag functions ---- //
+    var tagsAdapter: TagsAdapter? = null
+    var currentFragment: Fragment? = null
+
+    // ---- Company functions ---- //
+    var companyRecyclerViewAdapter: CompanyRecyclerViewAdapter? = null
+    private val contactAdapters = HashMap<String, ContactRecyclerViewAdapter>()
+
+    @set:JvmName("setVipUser")
+    var isVipUser: Boolean = false
+
+    private val vipUsers: Map<String, String> = object : HashMap<String, String>() {
+        init {
+            put("1", "danielholmberg.dev@gmail.com")
+            put("2", "danielkurtholmberg@gmail.com")
         }
-        return sImproveInstance;
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        sImproveInstance = this;
+    override fun onCreate() {
+        super.onCreate()
+        sImproveInstance = this
+
         // Enabling offline capabilities for Firebase Storage.
         // OBS!!! Can create Local Firebase cache issue where data changed in console won't take effect.
         // Reset cache by setting this to FASLE if there is an issue with data out of sync,
         // or a crash due to changed Model parameters.
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true)
 
         // Create Root-Dir if not already existing.
-        getRootDir();
+        getRootDir()
 
         // Initializing managers.
-        authManager = new AuthManager();
-        firebaseDatabaseManager = new FirebaseDatabaseManager();
-        firebaseStorageManager = new FirebaseStorageManager();
+        authManager = AuthManager()
+        firebaseDatabaseManager = FirebaseDatabaseManager()
+        firebaseStorageManager = FirebaseStorageManager()
+        firebaseRemoteConfig = FirebaseRemoteConfig.getInstance()
 
-        firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
-                .setMinimumFetchIntervalInSeconds(BuildConfig.DEBUG ? 0 : 3600)
-                .build();
-        firebaseRemoteConfig.setConfigSettingsAsync(configSettings);
-        firebaseRemoteConfig.setDefaultsAsync(R.xml.remote_config_defaults);
-        firebaseRemoteConfig.setDefaultsAsync(VIP_USERS);
+        val configSettings = FirebaseRemoteConfigSettings.Builder()
+            .setMinimumFetchIntervalInSeconds(if (BuildConfig.DEBUG) 0 else 3600.toLong())
+            .build()
+        firebaseRemoteConfig!!.setConfigSettingsAsync(configSettings)
+        firebaseRemoteConfig!!.setDefaultsAsync(R.xml.remote_config_defaults)
+        firebaseRemoteConfig!!.setDefaultsAsync(vipUsers)
 
-        createNotificationChannelExport();
+        createNotificationChannelExport()
     }
 
-    public void setIsVIPUser(boolean isVIPUser) {
-        this.isVIPUser = isVIPUser;
-    }
-
-    public boolean isVIPUser() {
-        return this.isVIPUser;
-    }
-
-    private void createNotificationChannelExport() {
+    private fun createNotificationChannelExport() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String id = getString(R.string.export_channel_id);
-            CharSequence name = getString(R.string.export_channel_name);
-            String description = getString(R.string.export_channel_desc);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(id, name, importance);
-            channel.setDescription(description);
+            val id = getString(R.string.export_channel_id)
+            val name: CharSequence = getString(R.string.export_channel_name)
+            val description = getString(R.string.export_channel_desc)
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(id, name, importance)
+            channel.description = description
             // Register the channel with the system; you can't change the importance
             // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            if (notificationManager != null) {
-                notificationManager.createNotificationChannel(channel);
-            }
+            val notificationManager = getSystemService(
+                NotificationManager::class.java
+            )
+            notificationManager?.createNotificationChannel(channel)
         }
     }
 
-    /**
-     * Returns the Firebase authentication manager.
-     * @return - Authentication manager of Firebase
-     */
-    public AuthManager getAuthManager() {
-        return this.authManager;
-    }
-
-    /**
-     * Returns the application specific Firebase database manager.
-     * @return - Database manager of Firebase
-     */
-    public FirebaseDatabaseManager getFirebaseDatabaseManager() {
-        return this.firebaseDatabaseManager;
-    }
-
-    /**
-     * Returns the application specific Firebase Cloud Storage manager.
-     * @return - Cloud Storage manager of Firebase
-     */
-    public FirebaseStorageManager getFirebaseStorageManager() {
-        return this.firebaseStorageManager;
-    }
-
-    /**
-     * Returns the application specific Firebase remote config.
-     * @return - FirebaseRemoteConfig singleton object.
-     */
-    public FirebaseRemoteConfig getFirebaseRemoteConfig() {
-        return this.firebaseRemoteConfig;
-    }
-
-    public void saveState() {
-        if(getTagsAdapter() != null) {
-            getFirebaseDatabaseManager().saveTags(getTags());
+    fun saveState() {
+        if (tagsAdapter != null) {
+            firebaseDatabaseManager!!.saveTags(tags)
         }
-        if(getNotesAdapter() != null) {
-            getFirebaseDatabaseManager().saveNotes(getNotes());
+        if (notesAdapter != null) {
+            firebaseDatabaseManager!!.saveNotes(notes)
         }
-        if(getArchivedNotesAdapter() != null) {
-            getFirebaseDatabaseManager().saveArchivedNotes(getArchivedNotes());
+        if (archivedNotesAdapter != null) {
+            firebaseDatabaseManager!!.saveArchivedNotes(archivedNotes)
         }
-        if(getCompanyRecyclerViewAdapter() != null) {
-            getFirebaseDatabaseManager().saveCompanies(getCompanies());
+        if (companyRecyclerViewAdapter != null) {
+            firebaseDatabaseManager!!.saveCompanies(companies)
         }
     }
 
@@ -195,135 +148,65 @@ public class Improve extends Application implements Serializable {
      * Returns the application specific Root directory.
      * @return - Root directory of application
      */
-    public File getRootDir() {
-        rootDir = getApplicationContext().getFilesDir();
-        if(!rootDir.exists()) {
-            rootDir.mkdirs();
+    fun getRootDir(): File? {
+        rootDir = applicationContext.filesDir
+        if (!rootDir!!.exists()) {
+            rootDir!!.mkdirs()
         }
-        Log.d("Improve", "RootDir: " + this.rootDir.getPath());
-        return this.rootDir;
+        Log.d("Improve", "RootDir: " + rootDir!!.getPath())
+        return rootDir
     }
 
-    public File getImageDir() {
-        imageDir = new File(rootDir, FirebaseStorageManager.IMAGES_REF);
-        if(!imageDir.exists()) {
-            imageDir.mkdirs();
+    fun getImageDir(): File? {
+        imageDir = File(rootDir, FirebaseStorageManager.IMAGES_REF)
+        if (!imageDir!!.exists()) {
+            imageDir!!.mkdirs()
         }
-        Log.d("Improve", "ImageDir: " + this.imageDir.getPath());
-        return this.imageDir;
+        Log.d("Improve", "ImageDir: " + imageDir!!.path)
+        return imageDir
     }
 
-    public MainActivity getMainActivityRef() {
-        return mainActivityRef;
-    }
-
-    public void setMainActivityRef(MainActivity mainActivity) {
-        this.mainActivityRef = mainActivity;
-    }
-
-    public Fragment getCurrentFragment() {
-        return currentFragment;
-    }
-
-    public void setCurrentFragment(Fragment currentFragment) {
-        this.currentFragment = currentFragment;
-    }
-
-    // ---- Note functions ---- //
-
-    public void setNotesFragmentRef(NotesFragment notesFragmentRef) {
-        this.notesFragmentRef = notesFragmentRef;
-    }
-
-    public NotesFragment getNotesFragmentRef() {
-        return this.notesFragmentRef;
-    }
-
-    public void setNotesAdapter(NotesAdapter notesAdapter) {
-        this.notesAdapter = notesAdapter;
-    }
-
-    public NotesAdapter getNotesAdapter() {
-        return notesAdapter;
-    }
-
-    public HashMap<String, Object> getNotes() {
-        return getNotesAdapter().getHashMap();
-    }
-
-    // ---- Archived note functions ---- //
-
-    public void setArchivedNotesFragmentRef(ArchivedNotesFragment archivedNotesFragmentRef) {
-        this.archivedNotesFragmentRef = archivedNotesFragmentRef;
-    }
-
-    public ArchivedNotesFragment getArchivedNotesFragmentRef() {
-        return this.archivedNotesFragmentRef;
-    }
-
-    public void setArchivedNotesAdapter(ArchivedNotesAdapter archivedNotesAdapter) {
-        this.archivedNotesAdapter = archivedNotesAdapter;
-    }
-
-    public ArchivedNotesAdapter getArchivedNotesAdapter() {
-        return archivedNotesAdapter;
-    }
-
-    public HashMap<String,Object> getArchivedNotes() {
-        return getArchivedNotesAdapter().getHashMap();
-    }
-
-    // ---- Tag functions ---- //
-
-    public void setTagsAdapter(TagsAdapter tagsAdapter) {
-        this.tagsAdapter = tagsAdapter;
-    }
-
-    public TagsAdapter getTagsAdapter() {
-        return tagsAdapter;
-    }
-
-    public HashMap<String,Object> getTags() {
-        return getTagsAdapter().getHashMap();
-    }
+    val notes: HashMap<String, Any>
+        get() = notesAdapter!!.hashMap
+    val archivedNotes: HashMap<String, Any>
+        get() = archivedNotesAdapter!!.hashMap
+    val tags: HashMap<String, Any>
+        get() = tagsAdapter!!.hashMap
 
     // ---- Contact functions ---- //
-
-    public void setContactFragmentRef(ContactsFragment contactFragmentRef) {
-        this.contactsFragmentRef = contactFragmentRef;
+    fun setContactFragmentRef(contactFragmentRef: ContactsFragment?) {
+        contactsFragmentRef = contactFragmentRef
     }
 
-    public ContactsFragment getContactsFragmentRef() {
-        return this.contactsFragmentRef;
+    val companies: HashMap<String, Any>
+        get() = companyRecyclerViewAdapter!!.companiesHashMap
+
+    fun addContactsAdapter(nameId: String, contactsAdapter: ContactRecyclerViewAdapter) {
+        contactAdapters[nameId] = contactsAdapter
     }
 
-    // ---- Company functions ---- //
-
-    public void setCompanyRecyclerViewAdapter(CompanyRecyclerViewAdapter companyRecyclerViewAdapter) {
-        this.companyRecyclerViewAdapter = companyRecyclerViewAdapter;
+    fun getCompanyContactsAdapter(companyId: String): ContactRecyclerViewAdapter? {
+        return contactAdapters[companyId]
     }
 
-    public CompanyRecyclerViewAdapter getCompanyRecyclerViewAdapter() {
-        return companyRecyclerViewAdapter;
-    }
+    companion object {
+        // volatile attribute makes the singleton thread safe.
+        @Volatile
+        private var sImproveInstance: Improve? = null
 
-    public HashMap<String, Object> getCompanies() {
-        return getCompanyRecyclerViewAdapter().getCompaniesHashMap();
-    }
-
-    public void addContactsAdapter(String nameId, ContactRecyclerViewAdapter contactsAdapter) {
-        contactAdapters.put(nameId, contactsAdapter);
-    }
-
-    public ContactRecyclerViewAdapter getCompanyContactsAdapter(String companyId) {
-        return contactAdapters.get(companyId);
-    }
-
-    public void setDriveServiceHelper(DriveServiceHelper mDriveServiceHelper) {
-        this.mDriveServiceHelper = mDriveServiceHelper;
-    }
-
-    public DriveServiceHelper getDriveServiceHelper() {
-        return mDriveServiceHelper;
+        @JvmStatic
+        val instance: Improve?
+            get() {
+                // Double checks locking to prevent unnecessary sync.
+                if (sImproveInstance == null) {
+                    synchronized(Improve::class.java) {
+                        // If there is no instance available... create new one
+                        if (sImproveInstance == null) {
+                            sImproveInstance = Improve()
+                        }
+                    }
+                }
+                return sImproveInstance
+            }
     }
 }
