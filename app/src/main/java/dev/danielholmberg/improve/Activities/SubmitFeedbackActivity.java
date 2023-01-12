@@ -15,7 +15,7 @@ import android.widget.Toast;
 import java.text.DateFormat;
 import java.util.Calendar;
 
-import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback;
+import dev.danielholmberg.improve.Callbacks.DatabaseCallback;
 import dev.danielholmberg.improve.Models.Feedback;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.DatabaseManager;
@@ -97,7 +97,7 @@ public class SubmitFeedbackActivity extends AppCompatActivity {
 
         Feedback feedback = new Feedback(user_id, feedback_id, title, info, timestamp);
 
-        storageManager.submitFeedback(feedback, new FirebaseDatabaseCallback() {
+        storageManager.submitFeedback(feedback, new DatabaseCallback() {
             @Override
             public void onSuccess() {
                 Toast.makeText(app, "Feedback submitted, you're awesome!", Toast.LENGTH_SHORT).show();

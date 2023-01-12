@@ -5,7 +5,7 @@ import android.util.Log
 import dev.danielholmberg.improve.Improve.Companion.instance
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback
+import dev.danielholmberg.improve.Callbacks.StorageCallback
 import dev.danielholmberg.improve.Models.VipImage
 import java.io.File
 import java.io.FileOutputStream
@@ -28,7 +28,7 @@ class StorageManager {
     private val imagesRef: StorageReference
         get() = userRef.child(IMAGES_REF)
 
-    private fun uploadImage(imageId: String?, imageUri: Uri?, callback: FirebaseStorageCallback) {
+    private fun uploadImage(imageId: String?, imageUri: Uri?, callback: StorageCallback) {
         imagesRef.child(imageId!!).putFile(imageUri!!).addOnSuccessListener { taskSnapshot ->
             Log.d(TAG, "SUCCESS: Image ($imageId) uploaded to Firebase Cloud Storage")
             callback.onSuccess(imageId)
@@ -54,7 +54,7 @@ class StorageManager {
             }
     }
 
-    fun downloadImageToLocalFile(imageId: String, callback: FirebaseStorageCallback) {
+    fun downloadImageToLocalFile(imageId: String, callback: StorageCallback) {
         Log.d(TAG, "Downloading image to Local Filesystem...")
         val targetFile = File(instance!!.getImageDir(), imageId + VIP_IMAGE_SUFFIX)
         Log.d(TAG, "targetFile path: " + targetFile.path)
@@ -72,7 +72,7 @@ class StorageManager {
         }
     }
 
-    fun uploadMultipleImages(vipImagesList: List<VipImage>, callback: FirebaseStorageCallback) {
+    fun uploadMultipleImages(vipImagesList: List<VipImage>, callback: StorageCallback) {
         Log.d(TAG, "Uploading multiple (" + vipImagesList.size + ") images to Firebase")
         val vipImagesUploaded = ArrayList<VipImage>()
         for (i in vipImagesList.indices) {
@@ -89,7 +89,8 @@ class StorageManager {
                     callback.onFailure(e.message)
                 }
             }
-            uploadImage(imageId, Uri.fromFile(cachedImage), object : FirebaseStorageCallback {
+            uploadImage(imageId, Uri.fromFile(cachedImage), object :
+                StorageCallback {
                 override fun onSuccess(`object`: Any) {
                     vipImagesUploaded.add(vipImage)
                     if (vipImagesList.size == vipImagesUploaded.size) {

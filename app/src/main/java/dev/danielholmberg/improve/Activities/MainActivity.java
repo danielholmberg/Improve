@@ -56,8 +56,7 @@ import dev.danielholmberg.improve.Adapters.ArchivedNotesAdapter;
 import dev.danielholmberg.improve.Adapters.CompanyRecyclerViewAdapter;
 import dev.danielholmberg.improve.Adapters.NotesAdapter;
 import dev.danielholmberg.improve.Adapters.TagsAdapter;
-import dev.danielholmberg.improve.Adapters.VipImagesAdapter;
-import dev.danielholmberg.improve.Callbacks.FirebaseAuthCallback;
+import dev.danielholmberg.improve.Callbacks.AuthCallback;
 import dev.danielholmberg.improve.Fragments.ArchivedNotesFragment;
 import dev.danielholmberg.improve.Fragments.ContactsFragment;
 import dev.danielholmberg.improve.Fragments.NotesFragment;
@@ -514,7 +513,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void signOutAnonymousUser() {
-        app.getAuthManager().signOutAnonymousAccount(new FirebaseAuthCallback() {
+        app.getAuthManager().signOutAnonymousAccount(new AuthCallback() {
             @Override
             public void onSuccess() {
                 showSignInActivity();
@@ -529,7 +528,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void signOutGoogleUser() {
         Log.d(TAG, "SignOutGooleUser clicked: " + currentUser.getEmail());
-        app.getAuthManager().signOutGoogleAccount(new FirebaseAuthCallback() {
+        app.getAuthManager().signOutGoogleAccount(new AuthCallback() {
             @Override
             public void onSuccess() {
                 showSignInActivity();

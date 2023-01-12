@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
+import dev.danielholmberg.improve.Callbacks.StorageCallback;
 import dev.danielholmberg.improve.Managers.StorageManager;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Improve;
@@ -123,7 +123,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
                                 Log.d(TAG, "Downloading image from Firebase for Note: " + addedNote.getId()
                                         + " with image id: " + imageId);
 
-                                app.getStorageManager().downloadImageToLocalFile(imageId, new FirebaseStorageCallback() {
+                                app.getStorageManager().downloadImageToLocalFile(imageId, new StorageCallback() {
                                     @Override
                                     public void onSuccess(Object file) {}
 

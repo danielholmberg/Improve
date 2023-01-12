@@ -57,7 +57,7 @@ import java.util.UUID;
 
 import dev.danielholmberg.improve.Adapters.TagsAdapter;
 import dev.danielholmberg.improve.Adapters.VipImagesAdapter;
-import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
+import dev.danielholmberg.improve.Callbacks.StorageCallback;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Models.Tag;
 import dev.danielholmberg.improve.Improve;
@@ -973,7 +973,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
         progressDialog.setMessage("Uploading " + imagesToUpload.size() + " image(s)...");
 
-        app.getStorageManager().uploadMultipleImages(imagesToUpload, new FirebaseStorageCallback() {
+        app.getStorageManager().uploadMultipleImages(imagesToUpload, new StorageCallback() {
             @Override
             public void onSuccess(Object object) {
                 Log.d(TAG, "Last image uploaded successfully!");

@@ -1,6 +1,6 @@
 package dev.danielholmberg.improve.Callbacks;
 
-public interface FirebaseStorageCallback {
+public interface StorageCallback {
 
     void onSuccess(Object object);
     void onFailure(String errorMessage);

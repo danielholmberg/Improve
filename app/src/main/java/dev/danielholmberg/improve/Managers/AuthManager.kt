@@ -6,7 +6,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
-import dev.danielholmberg.improve.Callbacks.FirebaseAuthCallback
+import dev.danielholmberg.improve.Callbacks.AuthCallback
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.ValueEventListener
@@ -36,7 +36,7 @@ class AuthManager {
             null
         }
     
-    fun signInAnonymously(callback: FirebaseAuthCallback) {
+    fun signInAnonymously(callback: AuthCallback) {
         Companion.fireAuth.signInAnonymously()
             .addOnSuccessListener {
                 Log.d(TAG, "*** Successfully signed in to Firebase with chosen Google account ***")
@@ -55,7 +55,7 @@ class AuthManager {
      */
     fun authGoogleAccountWithFirebase(
         account: GoogleSignInAccount,
-        callback: FirebaseAuthCallback
+        callback: AuthCallback
     ) {
         val credential = GoogleAuthProvider.getCredential(account.idToken, null)
         Companion.fireAuth.signInWithCredential(credential)
@@ -74,7 +74,7 @@ class AuthManager {
      * Listener for users presence to know if user is connected or not
      * and to set a timestamp of the current sign in.
      */
-    private fun setUserPresence(callback: FirebaseAuthCallback) {
+    private fun setUserPresence(callback: AuthCallback) {
         val userRef = currentUser!!.uid
         // since I can connect from multiple devices, we store each connection instance separately
         // any time that connectionsRef's value is null (i.e. has no children) I am offline
@@ -111,7 +111,7 @@ class AuthManager {
         callback.onSuccess()
     }
 
-    fun signOutGoogleAccount(callback: FirebaseAuthCallback) {
+    fun signOutGoogleAccount(callback: AuthCallback) {
         googleSignInClient!!.signOut()
             .addOnSuccessListener {
                 Log.d(TAG, "*** Successfully Signed out Google Account")
@@ -125,14 +125,14 @@ class AuthManager {
             }
     }
 
-    fun signOutAnonymousAccount(callback: FirebaseAuthCallback) {
+    fun signOutAnonymousAccount(callback: AuthCallback) {
         // Remove UserId in Database.
         instance!!.databaseManager!!.userRef.removeValue()
         Companion.fireAuth.signOut()
         callback.onSuccess()
     }
 
-    fun linkAccount(account: GoogleSignInAccount, callback: FirebaseAuthCallback) {
+    fun linkAccount(account: GoogleSignInAccount, callback: AuthCallback) {
         val credential = GoogleAuthProvider.getCredential(account.idToken, null)
         currentUser!!.linkWithCredential(credential)
             .addOnSuccessListener {

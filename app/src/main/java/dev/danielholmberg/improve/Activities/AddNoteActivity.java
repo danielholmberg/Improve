@@ -40,7 +40,7 @@ import java.util.UUID;
 
 import dev.danielholmberg.improve.Adapters.TagsAdapter;
 import dev.danielholmberg.improve.Adapters.VipImagesAdapter;
-import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
+import dev.danielholmberg.improve.Callbacks.StorageCallback;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Models.Tag;
 import dev.danielholmberg.improve.Improve;
@@ -470,7 +470,7 @@ public class AddNoteActivity extends AppCompatActivity {
         progressDialog.setMessage("Uploading " + vipImagesAdapter.getItemCount() + " image(s)...");
 
         app.getStorageManager()
-                .uploadMultipleImages(vipImagesAdapter.getImageList(), new FirebaseStorageCallback() {
+                .uploadMultipleImages(vipImagesAdapter.getImageList(), new StorageCallback() {
             @Override
             public void onSuccess(Object object) {
                 Log.d(TAG, "Last image uploaded successfully!");

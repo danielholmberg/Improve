@@ -4,7 +4,7 @@ import android.util.Log
 import dev.danielholmberg.improve.Improve.Companion.instance
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.DatabaseReference
-import dev.danielholmberg.improve.Callbacks.FirebaseDatabaseCallback
+import dev.danielholmberg.improve.Callbacks.DatabaseCallback
 import dev.danielholmberg.improve.Models.*
 import java.util.HashMap
 
@@ -317,16 +317,16 @@ class DatabaseManager {
     /**
      * Uploads a feedback to the Feedback-node.
      * @param feedback - The feedback to upload
-     * @param firebaseDatabaseCallback
+     * @param databaseCallback
      */
-    fun submitFeedback(feedback: Feedback, firebaseDatabaseCallback: FirebaseDatabaseCallback) {
+    fun submitFeedback(feedback: Feedback, databaseCallback: DatabaseCallback) {
         feedbackRef.child(feedback.feedback_id!!)
             .setValue(feedback) { databaseError, databaseReference ->
                 if (databaseError != null) {
                     Log.e(TAG, "Failed to submit feedback to Firebase: $databaseError")
-                    firebaseDatabaseCallback.onFailure(databaseError.toString())
+                    databaseCallback.onFailure(databaseError.toString())
                 } else {
-                    firebaseDatabaseCallback.onSuccess()
+                    databaseCallback.onSuccess()
                 }
             }
     }

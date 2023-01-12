@@ -17,10 +17,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.Task;
 
-import dev.danielholmberg.improve.Callbacks.FirebaseAuthCallback;
+import dev.danielholmberg.improve.Callbacks.AuthCallback;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.R;
 
@@ -91,7 +89,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
 
                 // Google Sign In was successful, authenticating with Firebase...
                 GoogleSignInAccount account = result.getSignInAccount();
-                app.getAuthManager().authGoogleAccountWithFirebase(account, new FirebaseAuthCallback() {
+                app.getAuthManager().authGoogleAccountWithFirebase(account, new AuthCallback() {
                     @Override
                     public void onSuccess() {
                         progressBar.setVisibility(View.GONE);
@@ -139,7 +137,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void startAnonymousSignIn() {
-        app.getAuthManager().signInAnonymously(new FirebaseAuthCallback() {
+        app.getAuthManager().signInAnonymously(new AuthCallback() {
             @Override
             public void onSuccess() {
                 startMainActivity();

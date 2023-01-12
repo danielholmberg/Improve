@@ -10,7 +10,7 @@ import dev.danielholmberg.improve.Models.VipImage
 import dev.danielholmberg.improve.Managers.StorageManager
 import dev.danielholmberg.improve.R
 import com.squareup.picasso.Picasso
-import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback
+import dev.danielholmberg.improve.Callbacks.StorageCallback
 import android.widget.LinearLayout
 import android.view.LayoutInflater
 import android.view.View
@@ -85,7 +85,8 @@ class VipImageViewHolder(
                 "Downloading Preview image from Firebase for Note: " + noteId + " with image id: " + vipImage.id
             )
             instance!!.storageManager
-                ?.downloadImageToLocalFile(vipImage.id!!, object : FirebaseStorageCallback {
+                ?.downloadImageToLocalFile(vipImage.id!!, object :
+                    StorageCallback {
                     override fun onSuccess(file: Any) {
                         Picasso.get()
                             .load((file as File))
@@ -130,7 +131,8 @@ class VipImageViewHolder(
         } else {
             Log.d(TAG, "Loading Fullscreen image from Firebase with id: " + vipImage!!.id)
             instance!!.storageManager
-                ?.downloadImageToLocalFile(vipImage!!.id!!, object : FirebaseStorageCallback {
+                ?.downloadImageToLocalFile(vipImage!!.id!!, object :
+                    StorageCallback {
                     override fun onSuccess(file: Any) {
                         Picasso.get()
                             .load(file as Uri)
@@ -179,7 +181,8 @@ class VipImageViewHolder(
             // Download image from Firebase to a local file
             Log.d(TAG, "Loading image from Firebase with image id: " + vipImage.id)
             instance!!.storageManager
-                ?.downloadImageToLocalFile(vipImage.id!!, object : FirebaseStorageCallback {
+                ?.downloadImageToLocalFile(vipImage.id!!, object :
+                    StorageCallback {
                     override fun onSuccess(file: Any) {
                         Picasso.get()
                             .load((file as File))
