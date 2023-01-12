@@ -1,12 +1,9 @@
-package dev.danielholmberg.improve.Callbacks;
+package dev.danielholmberg.improve.Callbacks
 
 /**
  * Created by Daniel Holmberg.
  */
-
-public interface DatabaseCallback {
-
-    void onSuccess();
-    void onFailure(String errorMessage);
-
+interface DatabaseCallback {
+    fun onSuccess()
+    fun onFailure(errorMessage: String?)
 }
