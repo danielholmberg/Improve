@@ -1,62 +1,53 @@
-package dev.danielholmberg.improve.Utilities;
+package dev.danielholmberg.improve.Utilities
 
-import android.content.Context;
-import com.google.android.material.textfield.TextInputEditText;
-
-import androidx.appcompat.app.AppCompatActivity;
-import android.text.TextUtils;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.EditText;
-
-import dev.danielholmberg.improve.R;
+import android.content.Context
+import android.text.TextUtils
+import android.view.View
+import android.widget.EditText
+import dev.danielholmberg.improve.R
+import androidx.appcompat.app.AppCompatActivity
+import android.view.WindowManager
 
 /**
  * Created by Daniel Holmberg.
  */
+class NoteInputValidator(private val context: Context, inputTitleLayout: View) {
+    private val inputTitle: EditText
 
-public class NoteInputValidator {
-    private static final String TAG = NoteInputValidator.class.getSimpleName();
-
-    private Context context;
-    private EditText inputTitle;
-
-    public NoteInputValidator(Context context, View inputTitleLayout) {
-        this.context = context;
-
-        // Input Components
-        inputTitle = (EditText) inputTitleLayout.findViewById(R.id.input_title);
+    init {
+        inputTitle = inputTitleLayout.findViewById<View>(R.id.input_title) as EditText
     }
 
     /**
      * Validating Note form (should at least contain a Title)
      * return true if Title-field is not empty.
      */
-    public boolean formIsValid() {
-        return validateTitle();
+    fun formIsValid(): Boolean {
+        return validateTitle()
     }
 
-    private boolean validateTitle() {
-        String title = inputTitle.getText().toString().trim();
-
-        if(TextUtils.isEmpty(title)) {
-            inputTitle.setError(context.getString(R.string.err_msg_title));
-            requestFocus(inputTitle);
-            return false;
+    private fun validateTitle(): Boolean {
+        val title = inputTitle.text.toString().trim { it <= ' ' }
+        if (TextUtils.isEmpty(title)) {
+            inputTitle.error = context.getString(R.string.err_msg_title)
+            requestFocus(inputTitle)
+            return false
         }
-
-        return true;
+        return true
     }
 
     /**
      * Requests focus of the incoming view.
      * @param view
      */
-    private void requestFocus(View view) {
+    private fun requestFocus(view: View) {
         if (view.requestFocus()) {
-            ((AppCompatActivity) context).getWindow()
-                    .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+            (context as AppCompatActivity).window
+                .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
         }
     }
 
+    companion object {
+        private val TAG = NoteInputValidator::class.java.simpleName
+    }
 }
