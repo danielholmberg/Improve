@@ -1,35 +1,23 @@
-package dev.danielholmberg.improve.ViewHolders;
+package dev.danielholmberg.improve.ViewHolders
 
-import android.content.DialogInterface;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.DrawableContainer;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.StateListDrawable;
-import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
+import dev.danielholmberg.improve.Improve.Companion.instance
+import androidx.recyclerview.widget.RecyclerView
+import android.widget.TextView
+import android.graphics.drawable.GradientDrawable
+import dev.danielholmberg.improve.R
+import android.graphics.Color
+import android.graphics.drawable.DrawableContainer
+import android.graphics.drawable.StateListDrawable
+import android.view.View
+import android.widget.ImageView
+import androidx.appcompat.app.AlertDialog
+import dev.danielholmberg.improve.Models.Tag
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.recyclerview.widget.RecyclerView;
-
-import dev.danielholmberg.improve.Models.Tag;
-import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.R;
-
-public class TagViewHolder extends RecyclerView.ViewHolder{
-
-    private View itemView;
-    private Tag tag;
-    private TextView tagLabel;
-    private ImageView tagEnabledIndicator;
-    private GradientDrawable background;
-
-    public TagViewHolder(View itemView) {
-        super(itemView);
-        this.itemView = itemView;
-    }
+class TagViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    private var tag: Tag? = null
+    private var tagLabel: TextView? = null
+    private var tagEnabledIndicator: ImageView? = null
+    private var background: GradientDrawable? = null
 
     /**
      * Binds data from Tag (Model) object to related View.
@@ -40,63 +28,50 @@ public class TagViewHolder extends RecyclerView.ViewHolder{
      *
      * @param tag - Target Tag (Model)
      */
-    public void bindModelToView(final Tag tag) {
-        if(tag == null) return;
-
-        this.tag = tag;
-
-        tagLabel = (TextView) itemView.findViewById(R.id.tag_label_tv);
-        tagEnabledIndicator = (ImageView) itemView.findViewById(R.id.tag_enabled_indicator);
-
-        if(tag.getLabel() != null) tagLabel.setText(tag.getLabel());
-        if(tag.getTextColor() != null) tagLabel.setTextColor(Color.parseColor(tag.getTextColor()));
-
-        StateListDrawable gradientDrawable = (StateListDrawable) itemView.getBackground();
-        DrawableContainer.DrawableContainerState drawableContainerState =
-                (DrawableContainer.DrawableContainerState) gradientDrawable.getConstantState();
-        if(drawableContainerState != null) {
-            Drawable[] children = drawableContainerState.getChildren();
-            background = (GradientDrawable) children[0];
-            background.setColor(Color.parseColor(tag.getColor()));
+    fun bindModelToView(tag: Tag?) {
+        if (tag == null) return
+        this.tag = tag
+        tagLabel = itemView.findViewById<View>(R.id.tag_label_tv) as TextView
+        tagEnabledIndicator = itemView.findViewById<View>(R.id.tag_enabled_indicator) as ImageView
+        if (tag.label != null) tagLabel!!.text = tag.label
+        if (tag.textColor != null) tagLabel!!.setTextColor(Color.parseColor(tag.textColor))
+        val gradientDrawable = itemView.background as StateListDrawable
+        val drawableContainerState =
+            gradientDrawable.constantState as DrawableContainer.DrawableContainerState?
+        if (drawableContainerState != null) {
+            val children = drawableContainerState.children
+            background = children[0] as GradientDrawable
+            background!!.setColor(Color.parseColor(tag.color))
         }
     }
 
-    public void setTagStatusOnNote(boolean isEnabled) {
-        if(isEnabled) {
-            tagEnabledIndicator.setVisibility(View.VISIBLE);
+    fun setTagStatusOnNote(isEnabled: Boolean) {
+        if (isEnabled) {
+            tagEnabledIndicator!!.visibility = View.VISIBLE
         } else {
-            tagEnabledIndicator.setVisibility(View.GONE);
+            tagEnabledIndicator!!.visibility = View.GONE
         }
     }
 
-    public void setEditMode(boolean editMode) {
-        ImageView deleteButton = itemView.findViewById(R.id.tag_delete_btn);
-        if(editMode) {
-            deleteButton.setVisibility(View.VISIBLE);
-            deleteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    AlertDialog.Builder alertDialogBuilder =
-                            new AlertDialog.Builder(itemView.getContext())
-                                    .setTitle(R.string.dialog_delete_tag_title)
-                                    .setMessage(R.string.dialog_delete_tag_msg)
-                                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            Improve.getInstance().getFirebaseDatabaseManager().deleteTag(tag.getId());
-                                        }
-                                    }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    dialogInterface.dismiss();
-                                }
-                            });
-                    final AlertDialog dialog = alertDialogBuilder.create();
-                    dialog.show();
-                }
-            });
+    fun setEditMode(editMode: Boolean) {
+        val deleteButton = itemView.findViewById<ImageView>(R.id.tag_delete_btn)
+        if (editMode) {
+            deleteButton.visibility = View.VISIBLE
+            deleteButton.setOnClickListener {
+                val alertDialogBuilder = AlertDialog.Builder(itemView.context)
+                    .setTitle(R.string.dialog_delete_tag_title)
+                    .setMessage(R.string.dialog_delete_tag_msg)
+                    .setPositiveButton("Yes") { dialogInterface, i ->
+                        instance!!.firebaseDatabaseManager!!.deleteTag(
+                            tag!!.id
+                        )
+                    }
+                    .setNegativeButton("No") { dialogInterface, i -> dialogInterface.dismiss() }
+                val dialog = alertDialogBuilder.create()
+                dialog.show()
+            }
         } else {
-            deleteButton.setVisibility(View.GONE);
+            deleteButton.visibility = View.GONE
         }
     }
 }
