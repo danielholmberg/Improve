@@ -33,7 +33,7 @@ class ContactViewHolder(private val mView: View) : RecyclerView.ViewHolder(
 
         // [START] Define each view
         name.text = contact.name
-        if (contact.email == null || contact.email.isEmpty()) {
+        if (contact.email == null || contact.email!!.isEmpty()) {
             mailBtn.background = ContextCompat.getDrawable(
                 instance!!,
                 R.drawable.ic_contact_email_grey
@@ -43,7 +43,7 @@ class ContactViewHolder(private val mView: View) : RecyclerView.ViewHolder(
                 ContextCompat.getDrawable(instance!!, R.drawable.ic_contact_email_active)
         }
         mailBtn.setOnClickListener(this)
-        if (contact.phone == null || contact.phone.isEmpty()) {
+        if (contact.phone == null || contact.phone!!.isEmpty()) {
             callBtn.background =
                 ContextCompat.getDrawable(instance!!, R.drawable.ic_contact_mobile_grey)
         } else {
@@ -72,7 +72,7 @@ class ContactViewHolder(private val mView: View) : RecyclerView.ViewHolder(
 
     override fun onClick(view: View) {
         when (view.id) {
-            R.id.call_contact_btn -> if (contact!!.phone == null || contact!!.phone.isEmpty()) {
+            R.id.call_contact_btn -> if (contact!!.phone == null || contact!!.phone!!.isEmpty()) {
                 Toast.makeText(
                     instance,
                     instance!!.resources.getString(R.string.contact_no_phone_message),
@@ -84,7 +84,7 @@ class ContactViewHolder(private val mView: View) : RecyclerView.ViewHolder(
                 callIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 instance!!.startActivity(callIntent)
             }
-            R.id.mail_contact_btn -> if (contact!!.email == null || contact!!.email.isEmpty()) {
+            R.id.mail_contact_btn -> if (contact!!.email == null || contact!!.email!!.isEmpty()) {
                 Toast.makeText(
                     instance,
                     instance!!.resources.getString(R.string.contact_no_email_message),

@@ -1,187 +1,130 @@
-package dev.danielholmberg.improve.Models;
+package dev.danielholmberg.improve.Models
 
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.text.TextUtils;
-
-import androidx.annotation.NonNull;
-
-import java.util.Objects;
-
-import dev.danielholmberg.improve.Improve;
+import dev.danielholmberg.improve.Improve.Companion.instance
+import android.os.Parcelable
+import android.os.Parcel
+import java.util.*
 
 /**
- * Created by DanielHolmberg on 2018-01-17.
+ * Created by Daniel Holmberg on 2018-01-17.
  */
+class Contact : Parcelable {
+    var id: String? = null
+    var name: String? = null
+    var companyId: String? = null
+    var email: String? = ""
+    var phone: String? = ""
+    var comment: String? = ""
+    var timestampAdded: String? = null
+    var timestampUpdated: String? = null
 
-public class Contact implements Parcelable {
-
-    private String id;
-    private String name;
-    private String companyId;
-    private String email = "";
-    private String phone = "";
-    private String comment = "";
-    private String timestampAdded;
-    private String timestampUpdated;
-
-    public Contact() {}
-
-    public Contact(String id, String name, String companyId, String email, String phone, String comment, String timestampAdded) {
-        this.id = id;
-        this.name = name;
-        this.companyId = companyId;
-        this.email = email;
-        this.phone = phone;
-        this.comment = comment;
-        this.timestampAdded = timestampAdded;
+    constructor()
+    constructor(
+        id: String?,
+        name: String?,
+        companyId: String?,
+        email: String?,
+        phone: String?,
+        comment: String?,
+        timestampAdded: String?
+    ) {
+        this.id = id
+        this.name = name
+        this.companyId = companyId
+        this.email = email
+        this.phone = phone
+        this.comment = comment
+        this.timestampAdded = timestampAdded
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getCompanyId() {
-        return companyId;
-    }
-
-    public void setCompanyId(String companyId) {
-        this.companyId = companyId;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public String getTimestampAdded() {
-        return timestampAdded;
-    }
-
-    public void setTimestampAdded(String timestampAdded) {
-        this.timestampAdded = timestampAdded;
-    }
-
-    public String getTimestampUpdated() {
-        return timestampUpdated;
-    }
-
-    public void setTimestampUpdated(String timestampUpdated) {
-        this.timestampUpdated = timestampUpdated;
-    }
-
-    @NonNull
-    @Override
-    public String toString() {
-        String contactAsString = "BEGIN:VCARD\r\n" + "VERSION:3.0\r\n" +
-                "FN:" + this.name + "\r\n";
-
-        Company company = (Company) Improve.getInstance().getCompanies().get(this.companyId);
-
-        if(company != null) {
-            contactAsString += "ORG:" + company.getName() + "\r\n";
+    override fun toString(): String {
+        var contactAsString = """
+               BEGIN:VCARD
+               VERSION:3.0
+               FN:${name}
+               
+               """.trimIndent()
+        val company = instance!!.companies[companyId] as Company?
+        if (company != null) {
+            contactAsString += """
+                ORG:${company.name}
+                
+                """.trimIndent()
         }
-        if(this.phone != null) {
-            contactAsString += "TEL;TYPE=HOME,VOICE:" + this.phone + "\r\n";
+        if (phone != null) {
+            contactAsString += """
+                TEL;TYPE=HOME,VOICE:${phone}
+                
+                """.trimIndent()
         }
-        if(this.email != null) {
-            contactAsString += "EMAIL;TYPE=PREF,INTERNET:" + this.email + "\r\n";
+        if (email != null) {
+            contactAsString += """
+                EMAIL;TYPE=PREF,INTERNET:${email}
+                
+                """.trimIndent()
         }
-        if(this.comment != null) {
-            contactAsString += "NOTE:" + this.comment + "\r\n";
+        if (comment != null) {
+            contactAsString += """
+                NOTE:${comment}
+                
+                """.trimIndent()
         }
-
-        contactAsString += "END:VCARD\r\n";
-
-        return contactAsString;
+        contactAsString += "END:VCARD\r\n"
+        return contactAsString
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    override fun describeContents(): Int {
+        return 0
     }
 
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(id);
-        parcel.writeString(name);
-        parcel.writeString(companyId);
-        parcel.writeString(email);
-        parcel.writeString(phone);
-        parcel.writeString(comment);
-        parcel.writeString(timestampAdded);
-        parcel.writeString(timestampUpdated);
+    override fun writeToParcel(parcel: Parcel, i: Int) {
+        parcel.writeString(id)
+        parcel.writeString(name)
+        parcel.writeString(companyId)
+        parcel.writeString(email)
+        parcel.writeString(phone)
+        parcel.writeString(comment)
+        parcel.writeString(timestampAdded)
+        parcel.writeString(timestampUpdated)
     }
 
-    protected Contact(Parcel in) {
-        id = in.readString();
-        name = in.readString();
-        companyId = in.readString();
-        email = in.readString();
-        phone = in.readString();
-        comment = in.readString();
-        timestampAdded = in.readString();
-        timestampUpdated = in.readString();
+    protected constructor(`in`: Parcel) {
+        id = `in`.readString()
+        name = `in`.readString()
+        companyId = `in`.readString()
+        email = `in`.readString()
+        phone = `in`.readString()
+        comment = `in`.readString()
+        timestampAdded = `in`.readString()
+        timestampUpdated = `in`.readString()
     }
 
-    public static final Creator<Contact> CREATOR = new Creator<Contact>() {
-        @Override
-        public Contact createFromParcel(Parcel in) {
-            return new Contact(in);
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        val contact = other as Contact
+        return id == contact.id &&
+                name == contact.name &&
+                companyId == contact.companyId &&
+                email == contact.email &&
+                phone == contact.phone &&
+                comment == contact.comment
+    }
+
+    override fun hashCode(): Int {
+        return Objects.hash(id, name, companyId, email, phone, comment)
+    }
+
+    companion object {
+        @JvmField
+        val CREATOR: Parcelable.Creator<Contact> = object : Parcelable.Creator<Contact> {
+            override fun createFromParcel(`in`: Parcel): Contact {
+                return Contact(`in`)
+            }
+
+            override fun newArray(size: Int): Array<Contact?> {
+                return arrayOfNulls(size)
+            }
         }
-
-        @Override
-        public Contact[] newArray(int size) {
-            return new Contact[size];
-        }
-    };
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Contact contact = (Contact) o;
-        return id.equals(contact.id) &&
-                Objects.equals(name, contact.name) &&
-                Objects.equals(companyId, contact.companyId) &&
-                Objects.equals(email, contact.email) &&
-                Objects.equals(phone, contact.phone) &&
-                Objects.equals(comment, contact.comment);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, companyId, email, phone, comment);
     }
 }
