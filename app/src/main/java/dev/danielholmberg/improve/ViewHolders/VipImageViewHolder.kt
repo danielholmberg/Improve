@@ -7,7 +7,7 @@ import dev.danielholmberg.improve.Improve.Companion.instance
 import dev.danielholmberg.improve.Adapters.VipImagesAdapter
 import androidx.recyclerview.widget.RecyclerView
 import dev.danielholmberg.improve.Models.VipImage
-import dev.danielholmberg.improve.Managers.FirebaseStorageManager
+import dev.danielholmberg.improve.Managers.StorageManager
 import dev.danielholmberg.improve.R
 import com.squareup.picasso.Picasso
 import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback
@@ -52,7 +52,7 @@ class VipImageViewHolder(
         this.vipImage = vipImage
         val image = File(
             instance!!.getImageDir(),
-            vipImage.id + FirebaseStorageManager.VIP_IMAGE_SUFFIX
+            vipImage.id + StorageManager.VIP_IMAGE_SUFFIX
         )
         val targetSize = instance!!.resources.getDimension(R.dimen.vip_image_view_size).toInt()
         val vipImageView = this.itemView.findViewById<View>(R.id.vip_image_view) as ImageView
@@ -84,7 +84,7 @@ class VipImageViewHolder(
                 TAG,
                 "Downloading Preview image from Firebase for Note: " + noteId + " with image id: " + vipImage.id
             )
-            instance!!.firebaseStorageManager
+            instance!!.storageManager
                 ?.downloadImageToLocalFile(vipImage.id, object : FirebaseStorageCallback {
                     override fun onSuccess(file: Any) {
                         Picasso.get()
@@ -112,7 +112,7 @@ class VipImageViewHolder(
             vipImageViewFullscreenLayout.findViewById<View>(R.id.vip_image_view_full) as ImageView
         val image = File(
             instance!!.getImageDir(),
-            vipImage!!.id + FirebaseStorageManager.VIP_IMAGE_SUFFIX
+            vipImage!!.id + StorageManager.VIP_IMAGE_SUFFIX
         )
         if (image.exists()) {
             Log.d(TAG, "Loading Fullscreen image from Local Filesystem at path: " + image.path)
@@ -129,7 +129,7 @@ class VipImageViewHolder(
                 .into(vipImageViewFull)
         } else {
             Log.d(TAG, "Loading Fullscreen image from Firebase with id: " + vipImage!!.id)
-            instance!!.firebaseStorageManager
+            instance!!.storageManager
                 ?.downloadImageToLocalFile(vipImage!!.id, object : FirebaseStorageCallback {
                     override fun onSuccess(file: Any) {
                         Picasso.get()
@@ -159,7 +159,7 @@ class VipImageViewHolder(
         vipImageView.visibility = View.GONE
         val image = File(
             instance!!.getImageDir(),
-            vipImage.id + FirebaseStorageManager.VIP_IMAGE_SUFFIX
+            vipImage.id + StorageManager.VIP_IMAGE_SUFFIX
         )
         val thumbnailSize =
             instance!!.resources.getDimension(R.dimen.vip_image_view_thumbnail_size).toInt()
@@ -178,7 +178,7 @@ class VipImageViewHolder(
         } else {
             // Download image from Firebase to a local file
             Log.d(TAG, "Loading image from Firebase with image id: " + vipImage.id)
-            instance!!.firebaseStorageManager
+            instance!!.storageManager
                 ?.downloadImageToLocalFile(vipImage.id, object : FirebaseStorageCallback {
                     override fun onSuccess(file: Any) {
                         Picasso.get()

@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
-import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
+import dev.danielholmberg.improve.Managers.StorageManager;
 import dev.danielholmberg.improve.Models.Note;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Managers.DatabaseManager;
@@ -114,7 +114,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
                         for(String imageId : addedNote.getVipImages()) {
 
                             File cachedImage = new File(Improve.getInstance().getImageDir(),
-                                    imageId + FirebaseStorageManager.VIP_IMAGE_SUFFIX);
+                                    imageId + StorageManager.VIP_IMAGE_SUFFIX);
 
                             if(cachedImage.exists()) {
                                 Log.d(TAG, "Image for Note: " + addedNote.getId() +
@@ -123,7 +123,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NoteViewHolder> {
                                 Log.d(TAG, "Downloading image from Firebase for Note: " + addedNote.getId()
                                         + " with image id: " + imageId);
 
-                                app.getFirebaseStorageManager().downloadImageToLocalFile(imageId, new FirebaseStorageCallback() {
+                                app.getStorageManager().downloadImageToLocalFile(imageId, new FirebaseStorageCallback() {
                                     @Override
                                     public void onSuccess(Object file) {}
 

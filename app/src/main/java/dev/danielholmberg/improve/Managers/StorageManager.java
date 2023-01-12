@@ -25,14 +25,14 @@ import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
 import dev.danielholmberg.improve.Improve;
 import dev.danielholmberg.improve.Models.VipImage;
 
-public class FirebaseStorageManager {
-    private static final String TAG = FirebaseStorageManager.class.getSimpleName();
+public class StorageManager {
+    private static final String TAG = StorageManager.class.getSimpleName();
 
     public static final String USERS_REF = "Users";
     public static final String IMAGES_REF = "Images";
     public static final String VIP_IMAGE_SUFFIX = ".jpg";
 
-    public FirebaseStorageManager() {}
+    public StorageManager() {}
 
     public FirebaseStorage getStorage() {
         return FirebaseStorage.getInstance();

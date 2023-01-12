@@ -973,7 +973,7 @@ public class NoteDetailsDialogFragment extends DialogFragment {
 
         progressDialog.setMessage("Uploading " + imagesToUpload.size() + " image(s)...");
 
-        app.getFirebaseStorageManager().uploadMultipleImages(imagesToUpload, new FirebaseStorageCallback() {
+        app.getStorageManager().uploadMultipleImages(imagesToUpload, new FirebaseStorageCallback() {
             @Override
             public void onSuccess(Object object) {
                 Log.d(TAG, "Last image uploaded successfully!");

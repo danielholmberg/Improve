@@ -3,7 +3,7 @@ package dev.danielholmberg.improve
 import android.app.Application
 import dev.danielholmberg.improve.Managers.AuthManager
 import dev.danielholmberg.improve.Managers.DatabaseManager
-import dev.danielholmberg.improve.Managers.FirebaseStorageManager
+import dev.danielholmberg.improve.Managers.StorageManager
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import dev.danielholmberg.improve.Services.DriveServiceHelper
 import dev.danielholmberg.improve.Activities.MainActivity
@@ -40,7 +40,7 @@ class Improve : Application(), Serializable {
     var databaseManager: DatabaseManager? = null
         private set
 
-    var firebaseStorageManager: FirebaseStorageManager? = null
+    var storageManager: StorageManager? = null
         private set
 
     var firebaseRemoteConfig: FirebaseRemoteConfig? = null
@@ -97,7 +97,7 @@ class Improve : Application(), Serializable {
         // Initializing managers.
         authManager = AuthManager()
         databaseManager = DatabaseManager()
-        firebaseStorageManager = FirebaseStorageManager()
+        storageManager = StorageManager()
         firebaseRemoteConfig = FirebaseRemoteConfig.getInstance()
 
         val configSettings = FirebaseRemoteConfigSettings.Builder()
@@ -158,7 +158,7 @@ class Improve : Application(), Serializable {
     }
 
     fun getImageDir(): File? {
-        imageDir = File(rootDir, FirebaseStorageManager.IMAGES_REF)
+        imageDir = File(rootDir, StorageManager.IMAGES_REF)
         if (!imageDir!!.exists()) {
             imageDir!!.mkdirs()
         }
