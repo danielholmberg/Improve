@@ -1,46 +1,41 @@
-package dev.danielholmberg.improve.ViewHolders;
+package dev.danielholmberg.improve.ViewHolders
 
-import android.content.Context;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
+import android.content.Context
+import android.net.Uri
+import android.util.Log
+import dev.danielholmberg.improve.Improve.Companion.instance
+import dev.danielholmberg.improve.Adapters.VipImagesAdapter
+import androidx.recyclerview.widget.RecyclerView
+import dev.danielholmberg.improve.Models.VipImage
+import dev.danielholmberg.improve.Managers.FirebaseStorageManager
+import dev.danielholmberg.improve.R
+import com.squareup.picasso.Picasso
+import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback
+import android.widget.LinearLayout
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.ProgressBar
+import dev.danielholmberg.improve.Utilities.CircleTransform
+import android.widget.ImageButton
+import android.widget.ImageView
+import androidx.appcompat.app.AlertDialog
+import java.io.File
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.recyclerview.widget.RecyclerView;
+class VipImageViewHolder(
+    private val context: Context,
+    itemView: View,
+    noteId: String,
+    vipImagesAdapter: VipImagesAdapter
+) : RecyclerView.ViewHolder(
+    itemView
+) {
+    private val noteId: String
+    private var vipImage: VipImage? = null
+    private val vipImagesAdapter: VipImagesAdapter
 
-import com.squareup.picasso.Picasso;
-
-import java.io.File;
-
-import dev.danielholmberg.improve.Adapters.VipImagesAdapter;
-import dev.danielholmberg.improve.Callbacks.FirebaseStorageCallback;
-import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.FirebaseStorageManager;
-import dev.danielholmberg.improve.Models.VipImage;
-import dev.danielholmberg.improve.R;
-import dev.danielholmberg.improve.Utilities.CircleTransform;
-
-public class VipImageViewHolder extends RecyclerView.ViewHolder{
-    private final static String TAG = VipImageViewHolder.class.getSimpleName();
-
-    private Context context;
-    private String noteId;
-    private View itemView;
-    private VipImage vipImage;
-    private VipImagesAdapter vipImagesAdapter;
-
-    public VipImageViewHolder(Context context, View itemView, String noteId, VipImagesAdapter vipImagesAdapter) {
-        super(itemView);
-        this.context = context;
-        this.itemView = itemView;
-        this.noteId = noteId;
-        this.vipImagesAdapter = vipImagesAdapter;
+    init {
+        this.noteId = noteId
+        this.vipImagesAdapter = vipImagesAdapter
     }
 
     /**
@@ -52,195 +47,170 @@ public class VipImageViewHolder extends RecyclerView.ViewHolder{
      *
      * @param vipImage - Target VipImage (Model)
      */
-    public void bindModelToPreviewView(final VipImage vipImage) {
-        if(vipImage == null) return;
-
-        this.vipImage = vipImage;
-
-        File image = new File(Improve.getInstance().getImageDir(),
-                vipImage.getId() + FirebaseStorageManager.VIP_IMAGE_SUFFIX);
-
-        int targetSize = (int) Improve.getInstance().getResources().getDimension(R.dimen.vip_image_view_size);
-
-        ImageView vipImageView = (ImageView) this.itemView.findViewById(R.id.vip_image_view);
-
-        if(image.exists()) {
-            Log.d(TAG, "Loading Preview image from Local Filesystem at path: " + image.getPath());
-
+    fun bindModelToPreviewView(vipImage: VipImage?) {
+        if (vipImage == null) return
+        this.vipImage = vipImage
+        val image = File(
+            instance!!.getImageDir(),
+            vipImage.id + FirebaseStorageManager.VIP_IMAGE_SUFFIX
+        )
+        val targetSize = instance!!.resources.getDimension(R.dimen.vip_image_view_size).toInt()
+        val vipImageView = this.itemView.findViewById<View>(R.id.vip_image_view) as ImageView
+        if (image.exists()) {
+            Log.d(TAG, "Loading Preview image from Local Filesystem at path: " + image.path)
             Picasso.get()
-                    .load(image)
-                    .centerCrop()
-                    .resize(targetSize, targetSize)
-                    .into(vipImageView);
+                .load(image)
+                .centerCrop()
+                .resize(targetSize, targetSize)
+                .into(vipImageView)
 
             //vipImagePlaceholder.setVisibility(View.GONE);
-            vipImageView.setVisibility(View.VISIBLE);
-
-        } else if(vipImage.getOriginalFilePath() != null) {
-            Log.d(TAG, "Loading Preview image from Device Filesystem at path: " + vipImage.getOriginalFilePath());
-
+            vipImageView.visibility = View.VISIBLE
+        } else if (vipImage.originalFilePath != null) {
+            Log.d(
+                TAG,
+                "Loading Preview image from Device Filesystem at path: " + vipImage.originalFilePath
+            )
             Picasso.get()
-                    .load(Uri.parse(vipImage.getOriginalFilePath()))
-                    .centerCrop()
-                    .resize(targetSize, targetSize)
-                    .into(vipImageView);
+                .load(Uri.parse(vipImage.originalFilePath))
+                .centerCrop()
+                .resize(targetSize, targetSize)
+                .into(vipImageView)
 
             //vipImagePlaceholder.setVisibility(View.GONE);
-            vipImageView.setVisibility(View.VISIBLE);
-
+            vipImageView.visibility = View.VISIBLE
         } else {
-            Log.d(TAG, "Downloading Preview image from Firebase for Note: " + noteId + " with image id: " + vipImage.getId());
-
-            Improve.getInstance().getFirebaseStorageManager()
-                    .downloadImageToLocalFile(vipImage.getId(), new FirebaseStorageCallback() {
-                @Override
-                public void onSuccess(Object file) {
-                    Picasso.get()
-                            .load((File) file)
+            Log.d(
+                TAG,
+                "Downloading Preview image from Firebase for Note: " + noteId + " with image id: " + vipImage.id
+            )
+            instance!!.firebaseStorageManager
+                ?.downloadImageToLocalFile(vipImage.id, object : FirebaseStorageCallback {
+                    override fun onSuccess(file: Any) {
+                        Picasso.get()
+                            .load((file as File))
                             .centerCrop()
                             .resize(targetSize, targetSize)
-                            .into(vipImageView);
+                            .into(vipImageView)
 
-                    //vipImagePlaceholder.setVisibility(View.GONE);
-                    vipImageView.setVisibility(View.VISIBLE);
-                    vipImagesAdapter.notifyDataSetChanged();
-                }
+                        //vipImagePlaceholder.setVisibility(View.GONE);
+                        vipImageView.visibility = View.VISIBLE
+                        vipImagesAdapter.notifyDataSetChanged()
+                    }
 
-                @Override
-                public void onFailure(String errorMessage) {}
-
-                @Override
-                public void onProgress(int progress) {}
-            });
+                    override fun onFailure(errorMessage: String) {}
+                    override fun onProgress(progress: Int) {}
+                })
         }
-
-        vipImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showImageFullscreen();
-            }
-        });
+        vipImageView.setOnClickListener { showImageFullscreen() }
     }
 
-    private void showImageFullscreen() {
-        LinearLayout vipImageViewFullscreenLayout = (LinearLayout) LayoutInflater.from(context)
-                .inflate(R.layout.dialog_vip_image_fullscreen, null);
-        ImageView vipImageViewFull = (ImageView) vipImageViewFullscreenLayout.findViewById(R.id.vip_image_view_full);
-
-        File image = new File(Improve.getInstance().getImageDir(),
-                vipImage.getId() + FirebaseStorageManager.VIP_IMAGE_SUFFIX);
-
-        if(image.exists()) {
-            Log.d(TAG, "Loading Fullscreen image from Local Filesystem at path: " + image.getPath());
+    private fun showImageFullscreen() {
+        val vipImageViewFullscreenLayout = LayoutInflater.from(context)
+            .inflate(R.layout.dialog_vip_image_fullscreen, null) as LinearLayout
+        val vipImageViewFull =
+            vipImageViewFullscreenLayout.findViewById<View>(R.id.vip_image_view_full) as ImageView
+        val image = File(
+            instance!!.getImageDir(),
+            vipImage!!.id + FirebaseStorageManager.VIP_IMAGE_SUFFIX
+        )
+        if (image.exists()) {
+            Log.d(TAG, "Loading Fullscreen image from Local Filesystem at path: " + image.path)
             Picasso.get()
-                    .load(image)
-                    .into(vipImageViewFull);
-        } else if(vipImage.getOriginalFilePath() != null) {
-            Log.d(TAG, "Loading Fullscreen image from Local Filesystem at path: " + vipImage.getOriginalFilePath());
+                .load(image)
+                .into(vipImageViewFull)
+        } else if (vipImage!!.originalFilePath != null) {
+            Log.d(
+                TAG,
+                "Loading Fullscreen image from Local Filesystem at path: " + vipImage!!.originalFilePath
+            )
             Picasso.get()
-                    .load(Uri.parse(vipImage.getOriginalFilePath()))
-                    .into(vipImageViewFull);
+                .load(Uri.parse(vipImage!!.originalFilePath))
+                .into(vipImageViewFull)
         } else {
-            Log.d(TAG, "Loading Fullscreen image from Firebase with id: " + vipImage.getId());
-            Improve.getInstance().getFirebaseStorageManager()
-                    .downloadImageToLocalFile(vipImage.getId(), new FirebaseStorageCallback() {
-                @Override
-                public void onSuccess(Object file) {
-                    Picasso.get()
-                            .load((Uri) file)
-                            .into(vipImageViewFull);
-                }
+            Log.d(TAG, "Loading Fullscreen image from Firebase with id: " + vipImage!!.id)
+            instance!!.firebaseStorageManager
+                ?.downloadImageToLocalFile(vipImage!!.id, object : FirebaseStorageCallback {
+                    override fun onSuccess(file: Any) {
+                        Picasso.get()
+                            .load(file as Uri)
+                            .into(vipImageViewFull)
+                    }
 
-                @Override
-                public void onFailure(String errorMessage) {}
-
-                @Override
-                public void onProgress(int progress) {}
-            });
+                    override fun onFailure(errorMessage: String) {}
+                    override fun onProgress(progress: Int) {}
+                })
         }
-
-        AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(context, R.style.CustomFullscreenDialogStyle)
-                        .setView(vipImageViewFullscreenLayout)
-                        .setCancelable(true);
-        final AlertDialog dialog = alertDialogBuilder.create();
-        dialog.show();
+        val alertDialogBuilder = AlertDialog.Builder(
+            context, R.style.CustomFullscreenDialogStyle
+        )
+            .setView(vipImageViewFullscreenLayout)
+            .setCancelable(true)
+        val dialog = alertDialogBuilder.create()
+        dialog.show()
     }
 
-    public void bindModelToThumbnailView(VipImage vipImage) {
-        if(vipImage == null) return;
-
-        this.vipImage = vipImage;
-
-        ImageView vipImageView = itemView.findViewById(R.id.vip_image_view_thumbnail);
-        ProgressBar vipImagePlaceholder = itemView.findViewById(R.id.vip_image_progressBar);
-
-        vipImagePlaceholder.setVisibility(View.VISIBLE);
-        vipImageView.setVisibility(View.GONE);
-
-        File image = new File(Improve.getInstance().getImageDir(),
-                vipImage.getId() + FirebaseStorageManager.VIP_IMAGE_SUFFIX);
-
-        int thumbnailSize = (int) Improve.getInstance().getResources().getDimension(R.dimen.vip_image_view_thumbnail_size);
+    fun bindModelToThumbnailView(vipImage: VipImage?) {
+        if (vipImage == null) return
+        this.vipImage = vipImage
+        val vipImageView = itemView.findViewById<ImageView>(R.id.vip_image_view_thumbnail)
+        val vipImagePlaceholder = itemView.findViewById<ProgressBar>(R.id.vip_image_progressBar)
+        vipImagePlaceholder.visibility = View.VISIBLE
+        vipImageView.visibility = View.GONE
+        val image = File(
+            instance!!.getImageDir(),
+            vipImage.id + FirebaseStorageManager.VIP_IMAGE_SUFFIX
+        )
+        val thumbnailSize =
+            instance!!.resources.getDimension(R.dimen.vip_image_view_thumbnail_size).toInt()
 
         // If an image has previously been downloaded to local storage
-        if(image.exists()) {
-            Log.d(TAG, "Loading image from Local Filesystem with file at path: " + image.getPath());
-
+        if (image.exists()) {
+            Log.d(TAG, "Loading image from Local Filesystem with file at path: " + image.path)
             Picasso.get()
-                    .load(image)
-                    .centerCrop()
-                    .transform(new CircleTransform())
-                    .resize(thumbnailSize, thumbnailSize)
-                    .into(vipImageView);
-
-            vipImagePlaceholder.setVisibility(View.GONE);
-            vipImageView.setVisibility(View.VISIBLE);
-
+                .load(image)
+                .centerCrop()
+                .transform(CircleTransform())
+                .resize(thumbnailSize, thumbnailSize)
+                .into(vipImageView)
+            vipImagePlaceholder.visibility = View.GONE
+            vipImageView.visibility = View.VISIBLE
         } else {
             // Download image from Firebase to a local file
-            Log.d(TAG, "Loading image from Firebase with image id: " + vipImage.getId());
-
-            Improve.getInstance().getFirebaseStorageManager()
-                    .downloadImageToLocalFile(vipImage.getId(), new FirebaseStorageCallback() {
-                @Override
-                public void onSuccess(Object file) {
-                    Picasso.get()
-                            .load((File) file)
+            Log.d(TAG, "Loading image from Firebase with image id: " + vipImage.id)
+            instance!!.firebaseStorageManager
+                ?.downloadImageToLocalFile(vipImage.id, object : FirebaseStorageCallback {
+                    override fun onSuccess(file: Any) {
+                        Picasso.get()
+                            .load((file as File))
                             .centerCrop()
-                            .transform(new CircleTransform())
+                            .transform(CircleTransform())
                             .resize(thumbnailSize, thumbnailSize)
-                            .into(vipImageView);
+                            .into(vipImageView)
+                        vipImagePlaceholder.visibility = View.GONE
+                        vipImageView.visibility = View.VISIBLE
+                        vipImagesAdapter.notifyDataSetChanged()
+                    }
 
-                    vipImagePlaceholder.setVisibility(View.GONE);
-                    vipImageView.setVisibility(View.VISIBLE);
-                    vipImagesAdapter.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onFailure(String errorMessage) {}
-
-                @Override
-                public void onProgress(int progress) {}
-            });
+                    override fun onFailure(errorMessage: String) {}
+                    override fun onProgress(progress: Int) {}
+                })
         }
     }
 
-    public void setEditMode(boolean editMode) {
-        ImageButton vipImageClearBtn = (ImageButton) this.itemView.findViewById(R.id.vip_image_clear_btn);
-
-        if(vipImageClearBtn != null) {
-            if(editMode) {
-                vipImageClearBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        vipImagesAdapter.remove(vipImage);
-                    }
-                });
-                vipImageClearBtn.setVisibility(View.VISIBLE);
+    fun setEditMode(editMode: Boolean) {
+        val vipImageClearBtn: ImageButton? = this.itemView.findViewById(R.id.vip_image_clear_btn)
+        if (vipImageClearBtn != null) {
+            if (editMode) {
+                vipImageClearBtn.setOnClickListener { vipImagesAdapter.remove(vipImage) }
+                vipImageClearBtn.visibility = View.VISIBLE
             } else {
-                vipImageClearBtn.setVisibility(View.GONE);
+                vipImageClearBtn.visibility = View.GONE
             }
         }
+    }
+
+    companion object {
+        private val TAG = VipImageViewHolder::class.java.simpleName
     }
 }
