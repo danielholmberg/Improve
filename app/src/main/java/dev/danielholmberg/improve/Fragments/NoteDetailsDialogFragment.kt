@@ -1,634 +1,536 @@
-package dev.danielholmberg.improve.Fragments;
+package dev.danielholmberg.improve.Fragments
 
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.Bundle;
+import dev.danielholmberg.improve.Improve.Companion.instance
+import dev.danielholmberg.improve.Managers.DatabaseManager
+import dev.danielholmberg.improve.Services.DriveServiceHelper
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.app.ProgressDialog
+import android.widget.ImageButton
+import dev.danielholmberg.improve.Utilities.NoteInputValidator
+import com.google.android.material.textfield.TextInputLayout
+import android.widget.EditText
+import com.google.android.flexbox.FlexboxLayout
+import androidx.recyclerview.widget.RecyclerView
+import dev.danielholmberg.improve.Adapters.VipImagesAdapter
+import dev.danielholmberg.improve.Models.VipImage
+import android.os.Parcelable
+import android.widget.Toast
+import dev.danielholmberg.improve.R
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.api.services.drive.DriveScopes
+import android.widget.TextView
+import android.content.Intent
+import android.widget.RelativeLayout
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.JustifyContent
+import com.google.android.flexbox.AlignItems
+import com.google.android.flexbox.FlexWrap
+import android.text.TextWatcher
+import android.text.Editable
+import dev.danielholmberg.improve.ViewHolders.TagViewHolder
+import dev.danielholmberg.improve.Callbacks.StorageCallback
+import android.app.Activity
+import android.text.TextUtils
+import android.util.Log
+import android.view.*
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.DialogFragment
+import com.google.android.gms.common.api.Scope
+import dev.danielholmberg.improve.Models.Note
+import dev.danielholmberg.improve.Models.Tag
+import java.text.DateFormat
+import java.util.*
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+class NoteDetailsDialogFragment : DialogFragment() {
 
-import com.google.android.flexbox.AlignItems;
-import com.google.android.flexbox.FlexDirection;
-import com.google.android.flexbox.FlexWrap;
-import com.google.android.flexbox.FlexboxLayout;
-import com.google.android.flexbox.FlexboxLayoutManager;
-import com.google.android.flexbox.JustifyContent;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
-import com.google.api.services.drive.DriveScopes;
-
-import androidx.fragment.app.DialogFragment;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.UUID;
-
-import dev.danielholmberg.improve.Adapters.TagsAdapter;
-import dev.danielholmberg.improve.Adapters.VipImagesAdapter;
-import dev.danielholmberg.improve.Callbacks.StorageCallback;
-import dev.danielholmberg.improve.Models.Note;
-import dev.danielholmberg.improve.Models.Tag;
-import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.DatabaseManager;
-import dev.danielholmberg.improve.Models.VipImage;
-import dev.danielholmberg.improve.R;
-import dev.danielholmberg.improve.Services.DriveServiceHelper;
-import dev.danielholmberg.improve.Utilities.NoteInputValidator;
-import dev.danielholmberg.improve.ViewHolders.TagViewHolder;
-
-import static android.app.Activity.RESULT_OK;
-
-public class NoteDetailsDialogFragment extends DialogFragment {
-    public static final String TAG = NoteDetailsDialogFragment.class.getSimpleName();
-
-    public static final String NOTE_PARENT_FRAGMENT_KEY = "parentFragment";
-    public static final String NOTE_ADAPTER_POS_KEY = "adapterItemPos";
-    public static final String NOTE_KEY = "originalNote";
-
-    private static final int PICK_IMAGE_REQUEST = 1;
-    private static final int REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION = 999;
-
-    private Improve app;
-    private DatabaseManager databaseManager;
-    private DriveServiceHelper mDriveServiceHelper;
-
-    private Context context;
-    private AppCompatActivity activity;
-
-    private Toolbar toolbar;
-
-    private Bundle noteBundle;
-    private Note originalNote;
-    private boolean isOriginallyStared;
-    private int parentFragment;
-
-    private ProgressDialog exportDialog;
-
-    private boolean editMode = false;
-
-    private Note updatedNote;
-
-    private String newTagColor;
-    private ImageButton noTagColor, tagColor1, tagColor2, tagColor3, tagColor4, tagColor5, tagColor6, tagColor7, tagColor8;
-    private ArrayList<String> newTags;
-    private HashMap<String, Boolean> oldTags;
-
-    private NoteInputValidator validator;
-
-    private TextInputLayout inputTitleLayout, inputInfoLayout;
-    private EditText inputTitle, inputInfo;
-    private FlexboxLayout tagsList;
-    private String noteId, noteTitle, noteInfo, noteTimestampAdded, noteTimestampUpdated;
+    private var databaseManager: DatabaseManager? = null
+    private var mDriveServiceHelper: DriveServiceHelper? = null
+    private var activity: AppCompatActivity? = null
+    private var toolbar: Toolbar? = null
+    private var noteBundle: Bundle? = null
+    private var originalNote: Note? = null
+    private var isOriginallyStared = false
+    private var parentFragment = 0
+    private var exportDialog: ProgressDialog? = null
+    private var editMode = false
+    private var updatedNote: Note? = null
+    private var newTagColor: String? = null
+    private var noTagColor: ImageButton? = null
+    private var tagColor1: ImageButton? = null
+    private var tagColor2: ImageButton? = null
+    private var tagColor3: ImageButton? = null
+    private var tagColor4: ImageButton? = null
+    private var tagColor5: ImageButton? = null
+    private var tagColor6: ImageButton? = null
+    private var tagColor7: ImageButton? = null
+    private var tagColor8: ImageButton? = null
+    private var newTags: ArrayList<String?>? = null
+    private var oldTags: HashMap<String?, Boolean?>? = null
+    private var validator: NoteInputValidator? = null
+    private var inputTitleLayout: TextInputLayout? = null
+    private var inputInfoLayout: TextInputLayout? = null
+    private var inputTitle: EditText? = null
+    private var inputInfo: EditText? = null
+    private var tagsList: FlexboxLayout? = null
+    private var noteId: String? = null
+    private var noteTitle: String? = null
+    private var noteInfo: String? = null
+    private var noteTimestampAdded: String? = null
+    private var noteTimestampUpdated: String? = null
 
     // VIP
-    private RecyclerView vipImagesRecyclerView;
-    private VipImagesAdapter vipImagesAdapter;
-    private ArrayList<VipImage> currentImages;
-    private ArrayList<VipImage> originalImages;
-
-    public static NoteDetailsDialogFragment newInstance() {
-        return new NoteDetailsDialogFragment();
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        app = Improve.getInstance();
-        databaseManager = app.getDatabaseManager();
-        activity = (AppCompatActivity) getActivity();
-        context = app.getMainActivityRef();
-        mDriveServiceHelper = app.getDriveServiceHelper();
-
-        noteBundle = getArguments();
-
-        if(noteBundle != null) {
-            parentFragment = noteBundle.getInt(NOTE_PARENT_FRAGMENT_KEY);
-            originalNote = (Note) noteBundle.getParcelable(NOTE_KEY);
+    private var vipImagesRecyclerView: RecyclerView? = null
+    private var vipImagesAdapter: VipImagesAdapter? = null
+    private var currentImages: ArrayList<VipImage>? = null
+    private var originalImages: ArrayList<VipImage>? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        databaseManager = instance!!.databaseManager
+        activity = getActivity() as AppCompatActivity?
+        mDriveServiceHelper = instance!!.driveServiceHelper
+        noteBundle = arguments
+        if (noteBundle != null) {
+            parentFragment = noteBundle!!.getInt(NOTE_PARENT_FRAGMENT_KEY)
+            originalNote = noteBundle!!.getParcelable<Parcelable>(NOTE_KEY) as Note?
         } else {
-            Toast.makeText(context, "Failed to show Note details, please try again",
-                    Toast.LENGTH_SHORT).show();
-            dismissDialog();
+            Toast.makeText(
+                context, "Failed to show Note details, please try again",
+                Toast.LENGTH_SHORT
+            ).show()
+            dismissDialog()
         }
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_note_details, container);
-        setCancelable(false);
-
-        newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColorNull));
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val view = inflater.inflate(R.layout.fragment_note_details, container)
+        isCancelable = false
+        newTagColor = "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColorNull))
 
 
         // Set transparent background and no title to enable corner radius.
-        if (getDialog() != null && getDialog().getWindow() != null) {
-            getDialog().getWindow().setBackgroundDrawableResource(R.drawable.background_note_details);
-            getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-
-            getDialog().setOnKeyListener(new DialogInterface.OnKeyListener() {
-                @Override
-                public boolean onKey(DialogInterface dialogInterface, int keyCode, KeyEvent keyEvent) {
-                    if (keyCode == KeyEvent.KEYCODE_BACK
-                            && getDialog() != null
-                            && getFragmentManager() != null) {
-                        getDialog().dismiss();
-                        getFragmentManager().popBackStackImmediate();
-                    }
-                    return true;
+        if (dialog != null && dialog!!.window != null) {
+            dialog!!.window!!.setBackgroundDrawableResource(R.drawable.background_note_details)
+            dialog!!.window!!.requestFeature(Window.FEATURE_NO_TITLE)
+            dialog!!.setOnKeyListener { _, keyCode, _ ->
+                if ((keyCode == KeyEvent.KEYCODE_BACK
+                            ) && (dialog != null
+                            ) && (fragmentManager != null)
+                ) {
+                    dialog!!.dismiss()
+                    fragmentManager!!.popBackStackImmediate()
                 }
-            });
+                true
+            }
         }
-
-        return view;
+        return view
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        Objects.requireNonNull(this.getDialog().getWindow())
-                .setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-
-        toolbar = (Toolbar) view.findViewById(R.id.toolbar_note_details_fragment);
-        createOptionsMenu();
-        toolbar.setNavigationIcon(R.drawable.ic_menu_close_primary);
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if(editMode) {
-                    switch (item.getItemId()) {
-                        case R.id.addTag:
-                            showAddNewTagDialog();
-                            return true;
-                        case R.id.starNote:
-                            originalNote.setStared(!originalNote.isStared());
-                            createOptionsMenu();
-                            return true;
-                        case R.id.noteDone:
-                            if (validator.formIsValid()) {
-                                updateNote();
-                            }
-                            return true;
-                        case R.id.vipAddImage:
-                            chooseImage();
-                            return true;
-                        default:
-                            return true;
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        Objects.requireNonNull(this.dialog!!.window)
+            ?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        toolbar = view.findViewById<View>(R.id.toolbar_note_details_fragment) as Toolbar
+        createOptionsMenu()
+        toolbar!!.setNavigationIcon(R.drawable.ic_menu_close_primary)
+        toolbar!!.setOnMenuItemClickListener { item ->
+            if (editMode) {
+                when (item.itemId) {
+                    R.id.addTag -> {
+                        showAddNewTagDialog()
+                        true
                     }
-                } else {
-                    switch (item.getItemId()) {
-                        case R.id.noteInfo:
-                            showInfoDialog();
-                            return true;
-                        case R.id.noteUnarchive:
-                            unarchiveNote();
-                            return true;
-                        case R.id.noteArchive:
-                            showArchiveDialog();
-                            return true;
-                        case R.id.noteDelete:
-                            showDeleteNoteDialog();
-                            return true;
-                        case R.id.noteExport:
-                            checkDrivePermission();
-                            return true;
-                        case R.id.noteEdit:
-                            editMode = true;
-                            newTags = new ArrayList<>();
-                            createOptionsMenu();
-                            toggleMode(editMode);
-                            return true;
-                        default:
-                            return true;
+                    R.id.starNote -> {
+                        originalNote!!.stared = !originalNote!!.isStared()
+                        createOptionsMenu()
+                        true
                     }
+                    R.id.noteDone -> {
+                        if (validator!!.formIsValid()) {
+                            updateNote()
+                        }
+                        true
+                    }
+                    R.id.vipAddImage -> {
+                        chooseImage()
+                        true
+                    }
+                    else -> true
+                }
+            } else {
+                when (item.itemId) {
+                    R.id.noteInfo -> {
+                        showInfoDialog()
+                        true
+                    }
+                    R.id.noteUnarchive -> {
+                        unarchiveNote()
+                        true
+                    }
+                    R.id.noteArchive -> {
+                        showArchiveDialog()
+                        true
+                    }
+                    R.id.noteDelete -> {
+                        showDeleteNoteDialog()
+                        true
+                    }
+                    R.id.noteExport -> {
+                        checkDrivePermission()
+                        true
+                    }
+                    R.id.noteEdit -> {
+                        editMode = true
+                        newTags = ArrayList()
+                        createOptionsMenu()
+                        toggleMode(editMode)
+                        true
+                    }
+                    else -> true
                 }
             }
-        });
-
-        inputTitleLayout = (TextInputLayout) view.findViewById(R.id.input_title_layout);
-        inputInfoLayout = (TextInputLayout) view.findViewById(R.id.input_info_layout);
-
-        inputTitle = (EditText) inputTitleLayout.findViewById(R.id.input_title);
-        inputInfo = (EditText) inputInfoLayout.findViewById(R.id.input_info);
+        }
+        inputTitleLayout = view.findViewById<View>(R.id.input_title_layout) as TextInputLayout
+        inputInfoLayout = view.findViewById<View>(R.id.input_info_layout) as TextInputLayout
+        inputTitle = inputTitleLayout!!.findViewById<View>(R.id.input_title) as EditText
+        inputInfo = inputInfoLayout!!.findViewById<View>(R.id.input_info) as EditText
 
         // VIP Views
-        vipImagesRecyclerView = (RecyclerView) view.findViewById(R.id.vip_images_list);
-
-        tagsList = (FlexboxLayout) view.findViewById(R.id.footer_note_tags_list);
-
-        validator = new NoteInputValidator(context, inputTitleLayout);
-
-        toggleMode(editMode);
-
-        if(originalNote != null) {
-
-            if(app.isVipUser()) {
-                vipImagesAdapter = new VipImagesAdapter(originalNote.getId(), false);
-
-                if(originalNote.hasImage()) {
-                    originalImages = new ArrayList<>();
-                    for(String vipImageId: originalNote.getVipImages()) {
-                        originalImages.add(new VipImage(vipImageId));
+        vipImagesRecyclerView = view.findViewById<View>(R.id.vip_images_list) as RecyclerView
+        tagsList = view.findViewById<View>(R.id.footer_note_tags_list) as FlexboxLayout
+        validator = NoteInputValidator((context)!!, (inputTitleLayout)!!)
+        toggleMode(editMode)
+        if (originalNote != null) {
+            if (instance!!.isVipUser) {
+                vipImagesAdapter = VipImagesAdapter((originalNote!!.id)!!, false)
+                if (originalNote!!.hasImage()) {
+                    originalImages = ArrayList()
+                    for (vipImageId: String? in originalNote!!.vipImages) {
+                        originalImages!!.add(VipImage(vipImageId))
                     }
-                    currentImages = originalImages;
-
-                    vipImagesAdapter.addImages(originalImages);
-                    Log.d(TAG, "Initial image count: " + originalImages.size());
+                    currentImages = originalImages
+                    vipImagesAdapter!!.addImages(originalImages!!)
+                    Log.d(TAG, "Initial image count: " + originalImages!!.size)
                 }
-
-                vipImagesRecyclerView.setAdapter(vipImagesAdapter);
-                LinearLayoutManager layoutManager
-                        = new LinearLayoutManager(app, LinearLayoutManager.HORIZONTAL, false);
-                vipImagesRecyclerView.setLayoutManager(layoutManager);
+                vipImagesRecyclerView!!.adapter = vipImagesAdapter
+                val layoutManager = LinearLayoutManager(instance, LinearLayoutManager.HORIZONTAL, false)
+                vipImagesRecyclerView!!.layoutManager = layoutManager
             }
-
-            populateNoteDetails();
-            oldTags = new HashMap<String, Boolean>(originalNote.getTags());
+            populateNoteDetails()
+            oldTags = HashMap(originalNote!!.getTags())
         } else {
-            Toast.makeText(context, "Unable to show Note details", Toast.LENGTH_SHORT).show();
-            dismissDialog();
+            Toast.makeText(context, "Unable to show Note details", Toast.LENGTH_SHORT).show()
+            dismissDialog()
         }
     }
 
-    private void checkDrivePermission() {
-        if (!GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(app), new Scope(DriveScopes.DRIVE_FILE))) {
-
+    private fun checkDrivePermission() {
+        if (!GoogleSignIn.hasPermissions(
+                GoogleSignIn.getLastSignedInAccount(instance),
+                Scope(DriveScopes.DRIVE_FILE)
+            )
+        ) {
             GoogleSignIn.requestPermissions(
-                    app.getNotesFragmentRef(),
-                    REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION,
-                    GoogleSignIn.getLastSignedInAccount(app), new Scope(DriveScopes.DRIVE_FILE));
+                (instance!!.notesFragmentRef)!!,
+                REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION,
+                GoogleSignIn.getLastSignedInAccount(instance), Scope(DriveScopes.DRIVE_FILE)
+            )
         } else {
-            exportNoteToDrive();
+            exportNoteToDrive()
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        Objects.requireNonNull(getDialog().getWindow())
-                .setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+    override fun onResume() {
+        super.onResume()
+        Objects.requireNonNull(dialog!!.window)
+            ?.setLayout(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.WRAP_CONTENT
+            )
     }
 
-    private void createOptionsMenu() {
-        Log.d(TAG, "Menu is redrawn");
-        TextView menuTitle = ((TextView) toolbar.findViewById(R.id.toolbar_note_dialog_title_tv));
-        Menu menu = toolbar.getMenu();
-        menu.clear();
+    private fun createOptionsMenu() {
+        Log.d(TAG, "Menu is redrawn")
+        val menuTitle =
+            (toolbar!!.findViewById<View>(R.id.toolbar_note_dialog_title_tv) as TextView)
+        val menu = toolbar!!.menu
+        menu.clear()
 
         // Check (if)Edit or (else)Show.
-        if(editMode) {
-
-            menuTitle.setText(R.string.title_edit_note);
-            toolbar.inflateMenu(R.menu.menu_edit_note);
-            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    showDiscardChangesDialog();
-                }
-            });
-
-            if(originalNote.isStared()) {
-                menu.findItem(R.id.starNote).setIcon(R.drawable.ic_star_enabled_accent);
-                menu.findItem(R.id.starNote).setTitle(R.string.menu_note_star_disable);
+        if (editMode) {
+            menuTitle.setText(R.string.title_edit_note)
+            toolbar!!.inflateMenu(R.menu.menu_edit_note)
+            toolbar!!.setNavigationOnClickListener { showDiscardChangesDialog() }
+            if (originalNote!!.isStared()) {
+                menu.findItem(R.id.starNote).setIcon(R.drawable.ic_star_enabled_accent)
+                menu.findItem(R.id.starNote).setTitle(R.string.menu_note_star_disable)
             } else {
-                menu.findItem(R.id.starNote).setIcon(R.drawable.ic_star_disabled_accent);
-                menu.findItem(R.id.starNote).setTitle(R.string.menu_note_star_enable);
+                menu.findItem(R.id.starNote).setIcon(R.drawable.ic_star_disabled_accent)
+                menu.findItem(R.id.starNote).setTitle(R.string.menu_note_star_enable)
             }
 
             // Show Menu-group with VIP features.
-            menu.setGroupEnabled(R.id.vipMenuGroup, app.isVipUser());
-            menu.setGroupVisible(R.id.vipMenuGroup, app.isVipUser());
-
+            menu.setGroupEnabled(R.id.vipMenuGroup, instance!!.isVipUser)
+            menu.setGroupVisible(R.id.vipMenuGroup, instance!!.isVipUser)
         } else {
-
-            menuTitle.setText(R.string.note_activity_details);
-            toolbar.inflateMenu(R.menu.fragment_note_details_show);
-            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    dismissDialog();
-                }
-            });
+            menuTitle.setText(R.string.note_activity_details)
+            toolbar!!.inflateMenu(R.menu.fragment_note_details_show)
+            toolbar!!.setNavigationOnClickListener { dismissDialog() }
 
             // Depending on the parent fragment.
             // Change MenuItem "Archive" and "Unarchive".
-            if(parentFragment == R.integer.NOTES_FRAGMENT) {
-                menu.findItem(R.id.noteArchive).setVisible(true);
-                menu.findItem(R.id.noteUnarchive).setVisible(false);
-            } else if(parentFragment == R.integer.ARCHIVED_NOTES_FRAGMENT){
-                menu.findItem(R.id.noteUnarchive).setVisible(true);
-                menu.findItem(R.id.noteArchive).setVisible(false);
+            if (parentFragment == R.integer.NOTES_FRAGMENT) {
+                menu.findItem(R.id.noteArchive).isVisible = true
+                menu.findItem(R.id.noteUnarchive).isVisible = false
+            } else if (parentFragment == R.integer.ARCHIVED_NOTES_FRAGMENT) {
+                menu.findItem(R.id.noteUnarchive).isVisible = true
+                menu.findItem(R.id.noteArchive).isVisible = false
             }
         }
     }
 
-    private void chooseImage() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGE_REQUEST);
+    private fun chooseImage() {
+        val intent = Intent()
+        intent.type = "image/*"
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+        intent.action = Intent.ACTION_GET_CONTENT
+        startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGE_REQUEST)
     }
 
-    private void showDiscardChangesDialog() {
-        AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(context)
-                        .setMessage(R.string.dialog_discard_changes_msg)
-                        .setPositiveButton("Discard", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                editMode = false;
-                                toggleMode(editMode);
-                                originalNote.setStared(isOriginallyStared);
-
-                                if(originalNote.hasImage()) {
-                                    currentImages = originalImages;
-                                    vipImagesAdapter = new VipImagesAdapter(originalNote.getId(), false);
-                                    vipImagesAdapter.addImages(currentImages);
-                                    vipImagesRecyclerView.setAdapter(vipImagesAdapter);
-                                }
-
-                                originalNote.setTags(oldTags);
-
-                                createOptionsMenu();
-                                populateNoteDetails();
-                                dialogInterface.dismiss();
-                            }
-                        }).setNegativeButton("Keep editing", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.dismiss();
-                            }
-                        });
-        final AlertDialog dialog = alertDialogBuilder.create();
-        dialog.show();
+    private fun showDiscardChangesDialog() {
+        val alertDialogBuilder = AlertDialog.Builder(
+            (context)!!
+        )
+            .setMessage(R.string.dialog_discard_changes_msg)
+            .setPositiveButton("Discard") { dialogInterface, _ ->
+                editMode = false
+                toggleMode(editMode)
+                originalNote!!.stared = isOriginallyStared
+                if (originalNote!!.hasImage()) {
+                    currentImages = originalImages
+                    vipImagesAdapter = VipImagesAdapter((originalNote!!.id)!!, false)
+                    vipImagesAdapter!!.addImages((currentImages)!!)
+                    vipImagesRecyclerView!!.adapter = vipImagesAdapter
+                }
+                originalNote!!.setTags((oldTags)!!)
+                createOptionsMenu()
+                populateNoteDetails()
+                dialogInterface.dismiss()
+            }
+            .setNegativeButton("Keep editing") { dialogInterface, _ -> dialogInterface.dismiss() }
+        val dialog = alertDialogBuilder.create()
+        dialog.show()
     }
 
     /**
      * Displays a dialog window to the user in order to choose a Tag color and enter a new Tag label.
      * Adds the new Tag to Firebase.
      */
-    private void showAddNewTagDialog() {
-        View addDialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_tag, null, false);
-
-        final RelativeLayout tagInputContainer = (RelativeLayout) addDialogView.findViewById(R.id.tag_input_container);
-        final TextInputEditText labelEditText = (TextInputEditText) addDialogView.findViewById(R.id.tag_label_et);
-        final ImageButton createTagButton = (ImageButton) addDialogView.findViewById(R.id.create_tag_btn);
-        final RecyclerView existingTagsListView = (RecyclerView) addDialogView.findViewById(R.id.existing_tags_list);
-        final TextView labelCounterCurrent = (TextView) addDialogView.findViewById(R.id.tag_label_counter_current);
-
-        noTagColor = (ImageButton) addDialogView.findViewById(R.id.tag_no_color);
-        tagColor1 = (ImageButton) addDialogView.findViewById(R.id.tag_color_1);
-        tagColor2 = (ImageButton) addDialogView.findViewById(R.id.tag_color_2);
-        tagColor3 = (ImageButton) addDialogView.findViewById(R.id.tag_color_3);
-        tagColor4 = (ImageButton) addDialogView.findViewById(R.id.tag_color_4);
-        tagColor5 = (ImageButton) addDialogView.findViewById(R.id.tag_color_5);
-        tagColor6 = (ImageButton) addDialogView.findViewById(R.id.tag_color_6);
-        tagColor7 = (ImageButton) addDialogView.findViewById(R.id.tag_color_7);
-        tagColor8 = (ImageButton) addDialogView.findViewById(R.id.tag_color_8);
-
-        existingTagsListView.setHasFixedSize(false);
-        final FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(context);
-        layoutManager.setFlexDirection(FlexDirection.ROW);
-        layoutManager.setJustifyContent(JustifyContent.CENTER);
-        layoutManager.setAlignItems(AlignItems.STRETCH);
-        layoutManager.setFlexWrap(FlexWrap.WRAP);
-        existingTagsListView.setLayoutManager(layoutManager);
-
-        final TagsAdapter tagsAdapter = app.getTagsAdapter();
-        existingTagsListView.setAdapter(tagsAdapter);
-
-        labelCounterCurrent.setText("0");
-        labelEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+    private fun showAddNewTagDialog() {
+        val addDialogView =
+            LayoutInflater.from(context).inflate(R.layout.dialog_add_tag, null, false)
+        val tagInputContainer =
+            addDialogView.findViewById<View>(R.id.tag_input_container) as RelativeLayout
+        val labelEditText = addDialogView.findViewById<View>(R.id.tag_label_et) as TextInputEditText
+        val createTagButton = addDialogView.findViewById<View>(R.id.create_tag_btn) as ImageButton
+        val existingTagsListView =
+            addDialogView.findViewById<View>(R.id.existing_tags_list) as RecyclerView
+        val labelCounterCurrent =
+            addDialogView.findViewById<View>(R.id.tag_label_counter_current) as TextView
+        noTagColor = addDialogView.findViewById<View>(R.id.tag_no_color) as ImageButton
+        tagColor1 = addDialogView.findViewById<View>(R.id.tag_color_1) as ImageButton
+        tagColor2 = addDialogView.findViewById<View>(R.id.tag_color_2) as ImageButton
+        tagColor3 = addDialogView.findViewById<View>(R.id.tag_color_3) as ImageButton
+        tagColor4 = addDialogView.findViewById<View>(R.id.tag_color_4) as ImageButton
+        tagColor5 = addDialogView.findViewById<View>(R.id.tag_color_5) as ImageButton
+        tagColor6 = addDialogView.findViewById<View>(R.id.tag_color_6) as ImageButton
+        tagColor7 = addDialogView.findViewById<View>(R.id.tag_color_7) as ImageButton
+        tagColor8 = addDialogView.findViewById<View>(R.id.tag_color_8) as ImageButton
+        existingTagsListView.setHasFixedSize(false)
+        val layoutManager = FlexboxLayoutManager(context)
+        layoutManager.flexDirection = FlexDirection.ROW
+        layoutManager.justifyContent = JustifyContent.CENTER
+        layoutManager.alignItems = AlignItems.STRETCH
+        layoutManager.flexWrap = FlexWrap.WRAP
+        existingTagsListView.layoutManager = layoutManager
+        val tagsAdapter = instance!!.tagsAdapter
+        existingTagsListView.adapter = tagsAdapter
+        labelCounterCurrent.text = "0"
+        labelEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+            override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {
+                labelCounterCurrent.text = charSequence.length.toString()
             }
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                labelCounterCurrent.setText(String.valueOf(charSequence.length()));
+            override fun afterTextChanged(editable: Editable) {}
+        })
+        tagsAdapter!!.setCurrentNote(originalNote)
+        val addNewTagDialog = AlertDialog.Builder(
+            (context)!!
+        )
+            .setTitle(R.string.menu_tag_add)
+            .setView(addDialogView)
+            .setCancelable(false)
+            .setNeutralButton("Edit Tags", null)
+            .setPositiveButton("Done") { dialogInterface, _ ->
+                tagsAdapter.removeCurrentNote()
+                tagsAdapter.setEditMode(false)
+                tagInputContainer.visibility = View.VISIBLE
+                renderTagList()
+                dialogInterface.dismiss()
             }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-
-        tagsAdapter.setCurrentNote(originalNote);
-
-        final AlertDialog addNewTagDialog = new AlertDialog.Builder(context)
-                .setTitle(R.string.menu_tag_add)
-                .setView(addDialogView)
-                .setCancelable(false)
-                .setNeutralButton("Edit Tags", null)
-                .setPositiveButton("Done", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        tagsAdapter.removeCurrentNote();
-                        tagsAdapter.setEditMode(false);
-                        tagInputContainer.setVisibility(View.VISIBLE);
-                        renderTagList();
-                        dialogInterface.dismiss();
+            .create()
+        addNewTagDialog.show()
+        addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL)
+            .setOnClickListener(object : View.OnClickListener {
+                override fun onClick(view: View) {
+                    val listener: View.OnClickListener = this
+                    tagsAdapter.setEditMode(true)
+                    tagInputContainer.visibility = View.GONE
+                    renderTagList()
+                    addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).text = "Stop Edit"
+                    addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
+                        tagsAdapter.setEditMode(false)
+                        tagInputContainer.visibility = View.VISIBLE
+                        renderTagList()
+                        addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).text = "Edit Tags"
+                        addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL)
+                            .setOnClickListener(listener)
                     }
-                })
-                .create();
-        addNewTagDialog.show();
-
-        addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final View.OnClickListener listener = this;
-                tagsAdapter.setEditMode(true);
-                tagInputContainer.setVisibility(View.GONE);
-                renderTagList();
-                addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setText("Stop Edit");
-                addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        tagsAdapter.setEditMode(false);
-                        tagInputContainer.setVisibility(View.VISIBLE);
-                        renderTagList();
-                        addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setText("Edit Tags");
-                        addNewTagDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(listener);
-                    }
-                });
-            }
-        });
-
-        Objects.requireNonNull(addNewTagDialog.getWindow()).setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-
-        createTagButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(TextUtils.isEmpty(labelEditText.getText())) {
-                    labelEditText.setError(getString(R.string.err_msg_tag_label));
-                    return;
                 }
-
-                final String newTagId = databaseManager.getTagRef().push().getKey();
-                final Tag newTag = new Tag(newTagId);
-
-                newTag.setLabel(labelEditText.getText().toString());
-                newTag.setColor(newTagColor);
-                if(newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColorNull)))) {
-                    newTag.setTextColor("#" + Integer.toHexString(getResources().getColor(R.color.tagTextColorNull)));
+            })
+        Objects.requireNonNull(addNewTagDialog.window)?.setSoftInputMode(
+            WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+        )
+        createTagButton.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(view: View) {
+                if (TextUtils.isEmpty(labelEditText.text)) {
+                    labelEditText.error = getString(R.string.err_msg_tag_label)
+                    return
+                }
+                val newTagId = databaseManager!!.tagRef.push().key
+                val newTag = Tag(newTagId)
+                newTag.setLabel(labelEditText.text.toString())
+                newTag.color = newTagColor
+                if ((newTagColor == "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColorNull)))) {
+                    newTag.textColor =
+                        "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagTextColorNull))
                 } else {
-                    newTag.setTextColor("#" + Integer.toHexString(getResources().getColor(R.color.tagTextColor)));
+                    newTag.textColor =
+                        "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagTextColor))
                 }
-
-                databaseManager.addTag(newTag);
-                tagsAdapter.addTag(newTag);
-
-                originalNote.addTag(newTag.getId());
-                newTags.add(newTag.getId());
+                databaseManager!!.addTag(newTag)
+                tagsAdapter.addTag(newTag)
+                originalNote!!.addTag(newTag.id)
+                newTags!!.add(newTag.id)
 
                 // Only update the List of Tags to keep all other edited information in check.
-                renderTagList();
+                renderTagList()
 
                 // Reset
-                if(labelEditText.getText() != null) labelEditText.getText().clear();
-                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColorNull));
-                uncheckAllOtherTags();
+                if (labelEditText.text != null) labelEditText.text!!.clear()
+                newTagColor = "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColorNull))
+                uncheckAllOtherTags()
 
                 // Display the latest added Tag
-                layoutManager.scrollToPosition(tagsAdapter.getItemCount()-1);
+                layoutManager.scrollToPosition(tagsAdapter.itemCount - 1)
             }
-        });
-
-        noTagColor.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColorNull));
-                uncheckAllOtherTags();
-            }
-        });
-        tagColor1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor1));
-                tagColor1.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_1_checked));
-                uncheckAllOtherTags();
-            }
-        });
-        tagColor2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor2));
-                tagColor2.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_2_checked));
-                uncheckAllOtherTags();
-            }
-        });
-        tagColor3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor3));
-                tagColor3.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_3_checked));
-                uncheckAllOtherTags();
-            }
-        });
-        tagColor4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor4));
-                tagColor4.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_4_checked));
-                uncheckAllOtherTags();
-            }
-        });
-        tagColor5.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor5));
-                tagColor5.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_5_checked));
-                uncheckAllOtherTags();
-            }
-        });
-        tagColor6.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor6));
-                tagColor6.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_6_checked));
-                uncheckAllOtherTags();
-            }
-        });
-        tagColor7.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor7));
-                tagColor7.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_7_checked));
-                uncheckAllOtherTags();
-            }
-        });
-        tagColor8.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                newTagColor = "#" + Integer.toHexString(getResources().getColor(R.color.tagColor8));
-                tagColor8.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_8_checked));
-                uncheckAllOtherTags();
-            }
-        });
+        })
+        noTagColor!!.setOnClickListener {
+            newTagColor =
+                "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColorNull))
+            uncheckAllOtherTags()
+        }
+        tagColor1!!.setOnClickListener {
+            newTagColor =
+                "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColor1))
+            tagColor1!!.background =
+                ContextCompat.getDrawable(instance!!, R.drawable.ic_tag_1_checked)
+            uncheckAllOtherTags()
+        }
+        tagColor2!!.setOnClickListener {
+            newTagColor =
+                "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColor2))
+            tagColor2!!.background =
+                ContextCompat.getDrawable(instance!!, R.drawable.ic_tag_2_checked)
+            uncheckAllOtherTags()
+        }
+        tagColor3!!.setOnClickListener {
+            newTagColor =
+                "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColor3))
+            tagColor3!!.background =
+                ContextCompat.getDrawable(instance!!, R.drawable.ic_tag_3_checked)
+            uncheckAllOtherTags()
+        }
+        tagColor4!!.setOnClickListener {
+            newTagColor =
+                "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColor4))
+            tagColor4!!.background =
+                ContextCompat.getDrawable(instance!!, R.drawable.ic_tag_4_checked)
+            uncheckAllOtherTags()
+        }
+        tagColor5!!.setOnClickListener {
+            newTagColor =
+                "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColor5))
+            tagColor5!!.background =
+                ContextCompat.getDrawable(instance!!, R.drawable.ic_tag_5_checked)
+            uncheckAllOtherTags()
+        }
+        tagColor6!!.setOnClickListener {
+            newTagColor =
+                "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColor6))
+            tagColor6!!.background =
+                ContextCompat.getDrawable(instance!!, R.drawable.ic_tag_6_checked)
+            uncheckAllOtherTags()
+        }
+        tagColor7!!.setOnClickListener {
+            newTagColor =
+                "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColor7))
+            tagColor7!!.background =
+                ContextCompat.getDrawable(instance!!, R.drawable.ic_tag_7_checked)
+            uncheckAllOtherTags()
+        }
+        tagColor8!!.setOnClickListener {
+            newTagColor =
+                "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColor8))
+            tagColor8!!.background =
+                ContextCompat.getDrawable(instance!!, R.drawable.ic_tag_8_checked)
+            uncheckAllOtherTags()
+        }
     }
 
-    private void uncheckAllOtherTags() {
-        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor1)))) {
-            tagColor1.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_1));
+    private fun uncheckAllOtherTags() {
+        if (newTagColor != "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColor1))) {
+            tagColor1!!.background = ContextCompat.getDrawable(instance!!, R.drawable.ic_tag_1)
         }
-        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor2)))) {
-            tagColor2.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_2));
+        if (newTagColor != "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColor2))) {
+            tagColor2!!.background = ContextCompat.getDrawable(instance!!, R.drawable.ic_tag_2)
         }
-        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor3)))) {
-            tagColor3.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_3));
+        if (newTagColor != "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColor3))) {
+            tagColor3!!.background = ContextCompat.getDrawable(instance!!, R.drawable.ic_tag_3)
         }
-        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor4)))) {
-            tagColor4.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_4));
+        if (newTagColor != "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColor4))) {
+            tagColor4!!.background = ContextCompat.getDrawable(instance!!, R.drawable.ic_tag_4)
         }
-        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor5)))) {
-            tagColor5.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_5));
+        if (newTagColor != "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColor5))) {
+            tagColor5!!.background = ContextCompat.getDrawable(instance!!, R.drawable.ic_tag_5)
         }
-        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor6)))) {
-            tagColor6.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_6));
+        if (newTagColor != "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColor6))) {
+            tagColor6!!.background = ContextCompat.getDrawable(instance!!, R.drawable.ic_tag_6)
         }
-        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor7)))) {
-            tagColor7.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_7));
+        if (newTagColor != "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColor7))) {
+            tagColor7!!.background = ContextCompat.getDrawable(instance!!, R.drawable.ic_tag_7)
         }
-        if(!newTagColor.equals("#" + Integer.toHexString(getResources().getColor(R.color.tagColor8)))) {
-            tagColor8.setBackground(app.getResources().getDrawable(R.drawable.ic_tag_8));
+        if (newTagColor != "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColor8))) {
+            tagColor8!!.background = ContextCompat.getDrawable(instance!!, R.drawable.ic_tag_8)
         }
     }
 
@@ -636,32 +538,27 @@ public class NoteDetailsDialogFragment extends DialogFragment {
      * Changes the NoteDetails layout depending on the incoming editMode.
      * @param editMode - True; Edit, False; Show
      */
-    private void toggleMode(boolean editMode) {
-        inputTitleLayout.setCounterEnabled(editMode);
-        inputTitle.setEnabled(editMode);
-        inputInfo.setEnabled(editMode);
-
-        if(editMode) {
-            isOriginallyStared = originalNote.isStared();
-
-            if(vipImagesAdapter != null) {
-                vipImagesAdapter.setEditMode(true);
+    private fun toggleMode(editMode: Boolean) {
+        inputTitleLayout!!.isCounterEnabled = editMode
+        inputTitle!!.isEnabled = editMode
+        inputInfo!!.isEnabled = editMode
+        if (editMode) {
+            isOriginallyStared = originalNote!!.isStared()
+            if (vipImagesAdapter != null) {
+                vipImagesAdapter!!.setEditMode(true)
             }
-
-            inputInfo.setVisibility(View.VISIBLE);
-            inputTitle.requestFocus();
-            getDialog().setCancelable(false);
-            activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+            inputInfo!!.visibility = View.VISIBLE
+            inputTitle!!.requestFocus()
+            dialog!!.setCancelable(false)
+            activity!!.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
         } else {
-
-            if(vipImagesAdapter != null) {
-                vipImagesAdapter.setEditMode(false);
+            if (vipImagesAdapter != null) {
+                vipImagesAdapter!!.setEditMode(false)
             }
-
-            getDialog().setCancelable(true);
-            activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-            if(TextUtils.isEmpty(noteInfo)) {
-                inputInfo.setVisibility(View.GONE);
+            dialog!!.setCancelable(true)
+            activity!!.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
+            if (TextUtils.isEmpty(noteInfo)) {
+                inputInfo!!.visibility = View.GONE
             }
         }
     }
@@ -669,427 +566,362 @@ public class NoteDetailsDialogFragment extends DialogFragment {
     /**
      * Sets all the necessary detailed information about the Note.
      */
-    private void populateNoteDetails() {
-        noteId = originalNote.getId();
-        noteTitle = originalNote.getTitle();
-        noteInfo = originalNote.getInfo();
-
-        if(originalNote.getAdded() != null) {
-            noteTimestampAdded = tranformMillisToDateSring(Long.parseLong(originalNote.getAdded()));
+    private fun populateNoteDetails() {
+        noteId = originalNote!!.id
+        noteTitle = originalNote!!.title
+        noteInfo = originalNote!!.info
+        if (originalNote!!.added != null) {
+            noteTimestampAdded = transformMillisToDateString(originalNote!!.added!!.toLong())
         }
-        if(originalNote.getUpdated() != null) {
-            noteTimestampUpdated = tranformMillisToDateSring(Long.parseLong(originalNote.getUpdated()));
+        if (originalNote!!.updated != null) {
+            noteTimestampUpdated = transformMillisToDateString(originalNote!!.updated!!.toLong())
         }
-        if(originalNote.getTitle() != null) {
-            inputTitle.setText(noteTitle);
+        if (originalNote!!.title != null) {
+            inputTitle!!.setText(noteTitle)
         }
-        if(originalNote.getInfo() != null) {
-            inputInfo.setText(noteInfo);
+        if (originalNote!!.info != null) {
+            inputInfo!!.setText(noteInfo)
         }
-
-        if(TextUtils.isEmpty(noteInfo)) {
-            inputInfo.setVisibility(View.GONE);
+        if (TextUtils.isEmpty(noteInfo)) {
+            inputInfo!!.visibility = View.GONE
         } else {
-            inputInfo.setVisibility(View.VISIBLE);
+            inputInfo!!.visibility = View.VISIBLE
         }
-
-        if(originalNote.hasImage()) {
-            vipImagesRecyclerView.setVisibility(View.VISIBLE);
+        if (originalNote!!.hasImage()) {
+            vipImagesRecyclerView!!.visibility = View.VISIBLE
         } else {
             // Hide VIP Images List
-            vipImagesRecyclerView.setVisibility(View.GONE);
+            vipImagesRecyclerView!!.visibility = View.GONE
         }
-
-        renderTagList();
-
+        renderTagList()
     }
 
-    private void renderTagList() {
-        tagsList.removeAllViews();
-        for(String tagId: originalNote.getTags().keySet()) {
-            View tagView = LayoutInflater.from(context).inflate(R.layout.item_tag, tagsList, false);
-            TagViewHolder tagViewHolder = new TagViewHolder(tagView);
-            tagViewHolder.bindModelToView(Improve.getInstance().getTagsAdapter().getTag(tagId));
-            tagsList.addView(tagView);
+    private fun renderTagList() {
+        tagsList!!.removeAllViews()
+        for (tagId: String? in originalNote!!.getTags().keys) {
+            val tagView = LayoutInflater.from(context).inflate(R.layout.item_tag, tagsList, false)
+            val tagViewHolder = TagViewHolder(tagView)
+            tagViewHolder.bindModelToView(instance!!.tagsAdapter!!.getTag(tagId))
+            tagsList!!.addView(tagView)
         }
     }
 
-    private String tranformMillisToDateSring(long timeInMillis) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(timeInMillis);
-
-        return DateFormat.getDateTimeInstance().format(calendar.getTime());
+    private fun transformMillisToDateString(timeInMillis: Long): String {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = timeInMillis
+        return DateFormat.getDateTimeInstance().format(calendar.time)
     }
 
-    private void showInfoDialog() {
-        RelativeLayout noteInfoLayout = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.dialog_note_info, null);
-        TextView noteAddedTimestamp = noteInfoLayout.findViewById(R.id.note_info_added_timestamp_tv);
-        TextView noteUpdatedTimestamp = noteInfoLayout.findViewById(R.id.note_info_updated_timestamp_tv);
-
-        noteAddedTimestamp.setText(noteTimestampAdded);
-        noteUpdatedTimestamp.setText(noteTimestampUpdated);
-
-        AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(context).setTitle(R.string.dialog_info_note_title)
-                        .setIcon(R.drawable.ic_menu_info_primary)
-                        .setView(noteInfoLayout)
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.dismiss();
-                            }
-                        });
-        final AlertDialog dialog = alertDialogBuilder.create();
-        dialog.show();
+    private fun showInfoDialog() {
+        val noteInfoLayout =
+            LayoutInflater.from(context).inflate(R.layout.dialog_note_info, null) as RelativeLayout
+        val noteAddedTimestamp =
+            noteInfoLayout.findViewById<TextView>(R.id.note_info_added_timestamp_tv)
+        val noteUpdatedTimestamp =
+            noteInfoLayout.findViewById<TextView>(R.id.note_info_updated_timestamp_tv)
+        noteAddedTimestamp.text = noteTimestampAdded
+        noteUpdatedTimestamp.text = noteTimestampUpdated
+        val alertDialogBuilder = AlertDialog.Builder(
+            (context)!!
+        ).setTitle(R.string.dialog_info_note_title)
+            .setIcon(R.drawable.ic_menu_info_primary)
+            .setView(noteInfoLayout)
+            .setPositiveButton("OK"
+            ) { dialogInterface, _ -> dialogInterface.dismiss() }
+        val dialog = alertDialogBuilder.create()
+        dialog.show()
     }
 
     /**
      * Creates a new file via the Drive REST API.
      */
-    public void exportNoteToDrive() {
+    private fun exportNoteToDrive() {
         if (mDriveServiceHelper != null) {
-            Log.d(TAG, "Creating a file.");
-
-            exportDialog = ProgressDialog.show(context, "Exporting Note to Google Drive",
-                    "In progress...", true);
-
-            exportDialog.show();
-
-            Log.d(TAG, "Note exported info: " + originalNote.toString());
-
-            mDriveServiceHelper.createFile(DriveServiceHelper.TYPE_NOTE, originalNote.getTitle(), originalNote.toString())
-                    .addOnSuccessListener(new OnSuccessListener<String>() {
-                        @Override
-                        public void onSuccess(String id) {
-                            Log.d(TAG, "Created file");
-                            exportDialog.cancel();
-                            dismissDialog();
-                            Toast.makeText(app, "Note exported", Toast.LENGTH_LONG).show();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e(TAG, "Couldn't create file.", e);
-                            exportDialog.cancel();
-                            Toast.makeText(app, "Failed to export Note", Toast.LENGTH_LONG).show();
-                        }
-                    });
+            Log.d(TAG, "Creating a file.")
+            exportDialog = ProgressDialog.show(
+                context, "Exporting Note to Google Drive",
+                "In progress...", true
+            )
+            exportDialog!!.show()
+            Log.d(TAG, "Note exported info: " + originalNote.toString())
+            mDriveServiceHelper!!.createFile(
+                DriveServiceHelper.TYPE_NOTE,
+                originalNote!!.title,
+                originalNote.toString()
+            )
+                .addOnSuccessListener {
+                    Log.d(TAG, "Created file")
+                    exportDialog!!.cancel()
+                    dismissDialog()
+                    Toast.makeText(instance, "Note exported", Toast.LENGTH_LONG).show()
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Couldn't create file.", e)
+                    exportDialog!!.cancel()
+                    Toast.makeText(instance, "Failed to export Note", Toast.LENGTH_LONG).show()
+                }
         } else {
-            Log.e(TAG, "DriveServiceHelper wasn't initialized.");
-            Toast.makeText(app, "Failed to export Note", Toast.LENGTH_LONG).show();
+            Log.e(TAG, "DriveServiceHelper wasn't initialized.")
+            Toast.makeText(instance, "Failed to export Note", Toast.LENGTH_LONG).show()
         }
     }
 
-    private void showArchiveDialog() {
-        AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(context).setTitle(R.string.dialog_archive_note_title)
-                        .setMessage(R.string.dialog_archive_note_msg)
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                archiveNote();
-                            }
-                        }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                });
-        final AlertDialog dialog = alertDialogBuilder.create();
-        dialog.show();
+    private fun showArchiveDialog() {
+        val alertDialogBuilder = AlertDialog.Builder(
+            (context)!!
+        ).setTitle(R.string.dialog_archive_note_title)
+            .setMessage(R.string.dialog_archive_note_msg)
+            .setPositiveButton("Yes"
+            ) { _, _ -> archiveNote() }.setNegativeButton("No"
+            ) { dialogInterface, _ -> dialogInterface.dismiss() }
+        val dialog = alertDialogBuilder.create()
+        dialog.show()
     }
 
-    private void showDeleteNoteDialog() {
-        AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(context).setTitle(R.string.dialog_delete_note_title)
-                        .setMessage(R.string.dialog_delete_note_msg)
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                if(originalNote.isArchived()) {
-                                    deleteNoteFromArchive(originalNote);
-                                } else {
-                                    deleteNote(originalNote);
-                                }
-                            }
-                        }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                });
-        final AlertDialog dialog = alertDialogBuilder.create();
-        dialog.show();
+    private fun showDeleteNoteDialog() {
+        val alertDialogBuilder = AlertDialog.Builder(
+            (context)!!
+        ).setTitle(R.string.dialog_delete_note_title)
+            .setMessage(R.string.dialog_delete_note_msg)
+            .setPositiveButton("Yes"
+            ) { _, _ ->
+                if (originalNote!!.isArchived()) {
+                    deleteNoteFromArchive(originalNote)
+                } else {
+                    deleteNote(originalNote)
+                }
+            }.setNegativeButton("No"
+            ) { dialogInterface, _ -> dialogInterface.dismiss() }
+        val dialog = alertDialogBuilder.create()
+        dialog.show()
     }
 
-    private void deleteNoteFromArchive(final Note note) {
-        databaseManager.deleteNoteFromArchive(note);
-        dismissDialog();
+    private fun deleteNoteFromArchive(note: Note?) {
+        databaseManager!!.deleteNoteFromArchive((note)!!)
+        dismissDialog()
     }
 
-    private void deleteNote(final Note note) {
-        databaseManager.deleteNote(note);
-        dismissDialog();
-
+    private fun deleteNote(note: Note?) {
+        databaseManager!!.deleteNote((note)!!)
+        dismissDialog()
     }
 
-    private void unarchiveNote() {
-        databaseManager.unarchiveNote(originalNote);
-        dismissDialog();
+    private fun unarchiveNote() {
+        databaseManager!!.unarchiveNote((originalNote)!!)
+        dismissDialog()
     }
 
-    private void archiveNote() {
-        databaseManager.archiveNote(originalNote);
-        dismissDialog();
+    private fun archiveNote() {
+        databaseManager!!.archiveNote((originalNote)!!)
+        dismissDialog()
     }
 
-    public void updateNote(){
-        String oldId = originalNote.getId();
-        boolean archived = originalNote.isArchived();
-        String newTitle = inputTitle.getText().toString();
-        String newInfo = inputInfo.getText().toString();
-        boolean stared = originalNote.isStared();
-        String timestampAdded = originalNote.getAdded();
-        String timestampUpdated = Long.toString(System.currentTimeMillis());
-
-        if(TextUtils.isEmpty(newInfo.trim())) {
-            newInfo = "";
+    private fun updateNote() {
+        val oldId = originalNote!!.id
+        val archived = originalNote!!.isArchived()
+        val newTitle = inputTitle!!.text.toString()
+        var newInfo = inputInfo!!.text.toString()
+        val stared = originalNote!!.isStared()
+        val timestampAdded = originalNote!!.added
+        val timestampUpdated = System.currentTimeMillis().toString()
+        if (TextUtils.isEmpty(newInfo.trim { it <= ' ' })) {
+            newInfo = ""
         }
-
-        updatedNote = new Note(oldId);
-
-        updatedNote.setTitle(newTitle);
-        updatedNote.setInfo(newInfo);
-        updatedNote.setStared(stared);
-        updatedNote.setTags(originalNote.getTags());
-        updatedNote.setAdded(timestampAdded);
-        updatedNote.setArchived(archived);
-        updatedNote.setUpdated(timestampUpdated);
-
-        if(app.isVipUser() && vipImagesAdapter != null) {
+        updatedNote = Note(oldId)
+        updatedNote!!.title = newTitle
+        updatedNote!!.info = newInfo
+        updatedNote!!.stared = stared
+        updatedNote!!.setTags(originalNote!!.getTags())
+        updatedNote!!.added = timestampAdded
+        updatedNote!!.archived = archived
+        updatedNote!!.updated = timestampUpdated
+        if (instance!!.isVipUser && vipImagesAdapter != null) {
             // User is a VIP user and the VIP image adapter has been initialized.
-            currentImages = vipImagesAdapter.getImageList();
-
-            if (currentImages.size() > 0) {
+            currentImages = vipImagesAdapter!!.imageList
+            if (currentImages!!.size > 0) {
                 // The VIP user has added a image to the current Note.
-                Log.d(TAG, "Updated image count: " + currentImages.size());
-
-                boolean vipImageDiff = false;
-                for (VipImage vipImage : currentImages) {
+                Log.d(TAG, "Updated image count: " + currentImages!!.size)
+                var vipImageDiff = false
+                for (vipImage: VipImage in currentImages!!) {
                     if (originalImages == null) {
-                        vipImageDiff = true;
-                        break;
+                        vipImageDiff = true
+                        break
                     } else {
-                        if (!originalImages.contains(vipImage)) {
-                            vipImageDiff = true;
-                            break;
+                        if (!originalImages!!.contains(vipImage)) {
+                            vipImageDiff = true
+                            break
                         }
                     }
                 }
-
-
-                Log.d(TAG, "vipImageDiff: " + vipImageDiff);
-
+                Log.d(TAG, "vipImageDiff: $vipImageDiff")
                 if (vipImageDiff) {
-                    uploadImages();
+                    uploadImages()
                 } else {
-                    ArrayList<String> images = new ArrayList<>();
-                    for (VipImage vipImage : currentImages) {
-                        images.add(vipImage.getId());
+                    val images = ArrayList<String?>()
+                    for (vipImage: VipImage in currentImages!!) {
+                        images.add(vipImage.id)
                     }
-                    updatedNote.setVipImages(images);
-
-                    originalNote = updatedNote;
-                    oldTags = new HashMap<String, Boolean>(originalNote.getTags());
-
-                    if (originalNote.isArchived()) {
-                        databaseManager.updateArchivedNote(updatedNote);
+                    updatedNote!!.vipImages = images
+                    originalNote = updatedNote
+                    oldTags = HashMap(originalNote!!.getTags())
+                    if (originalNote!!.isArchived()) {
+                        databaseManager!!.updateArchivedNote(updatedNote!!)
                     } else {
-                        databaseManager.updateNote(updatedNote);
+                        databaseManager!!.updateNote(updatedNote!!)
                     }
-
-                    editMode = false;
-                    populateNoteDetails();
-                    createOptionsMenu();
-                    toggleMode(editMode);
+                    editMode = false
+                    populateNoteDetails()
+                    createOptionsMenu()
+                    toggleMode(editMode)
                 }
             } else {
-                originalNote = updatedNote;
-                oldTags = new HashMap<String, Boolean>(originalNote.getTags());
-
-                if (originalNote.isArchived()) {
-                    databaseManager.updateArchivedNote(updatedNote);
+                originalNote = updatedNote
+                oldTags = HashMap(originalNote!!.getTags())
+                if (originalNote!!.isArchived()) {
+                    databaseManager!!.updateArchivedNote(updatedNote!!)
                 } else {
-                    databaseManager.updateNote(updatedNote);
+                    databaseManager!!.updateNote(updatedNote!!)
                 }
-
-                editMode = false;
-                populateNoteDetails();
-                createOptionsMenu();
-                toggleMode(editMode);
+                editMode = false
+                populateNoteDetails()
+                createOptionsMenu()
+                toggleMode(editMode)
             }
         } else {
-            originalNote = updatedNote;
-            oldTags = new HashMap<String, Boolean>(originalNote.getTags());
-
-            if (originalNote.isArchived()) {
-                databaseManager.updateArchivedNote(updatedNote);
+            originalNote = updatedNote
+            oldTags = HashMap(originalNote!!.getTags())
+            if (originalNote!!.isArchived()) {
+                databaseManager!!.updateArchivedNote(updatedNote!!)
             } else {
-                databaseManager.updateNote(updatedNote);
+                databaseManager!!.updateNote(updatedNote!!)
             }
-
-            editMode = false;
-            populateNoteDetails();
-            createOptionsMenu();
-            toggleMode(editMode);
+            editMode = false
+            populateNoteDetails()
+            createOptionsMenu()
+            toggleMode(editMode)
         }
-
     }
 
-    private void uploadImages() {
-        Log.d(TAG, "Uploading " + vipImagesAdapter.getItemCount() + " image(s)");
-
-        ArrayList<VipImage> imagesToUpload = new ArrayList<>();
-
-        if(originalImages != null) {
-            for(VipImage vipImage: vipImagesAdapter.getImageList()) {
-                if(originalImages.contains(vipImage)) {
-                    updatedNote.addVipImage(vipImage.getId());
+    private fun uploadImages() {
+        Log.d(TAG, "Uploading " + vipImagesAdapter!!.itemCount + " image(s)")
+        var imagesToUpload = ArrayList<VipImage>()
+        if (originalImages != null) {
+            for (vipImage: VipImage in vipImagesAdapter!!.imageList) {
+                if (originalImages!!.contains(vipImage)) {
+                    updatedNote!!.addVipImage(vipImage.id)
                 } else {
-                    imagesToUpload.add(vipImage);
+                    imagesToUpload.add(vipImage)
                 }
             }
         } else {
-            imagesToUpload = vipImagesAdapter.getImageList();
+            imagesToUpload = vipImagesAdapter!!.imageList
         }
-
-
-        String progressDialogText = "Saving attached image(s)";
-
-        final ProgressDialog progressDialog = new ProgressDialog(app.getMainActivityRef());
-        progressDialog.setTitle(progressDialogText);
-        progressDialog.show();
-
-        progressDialog.setMessage("Uploading " + imagesToUpload.size() + " image(s)...");
-
-        app.getStorageManager().uploadMultipleImages(imagesToUpload, new StorageCallback() {
-            @Override
-            public void onSuccess(Object object) {
-                Log.d(TAG, "Last image uploaded successfully!");
-
-                ArrayList<VipImage> uploadedImages = (ArrayList<VipImage>) object;
-
-                for(VipImage vipImage: uploadedImages) {
-                    updatedNote.addVipImage(vipImage.getId());
+        val progressDialogText = "Saving attached image(s)"
+        val progressDialog = ProgressDialog(instance!!.mainActivityRef)
+        progressDialog.setTitle(progressDialogText)
+        progressDialog.show()
+        progressDialog.setMessage("Uploading " + imagesToUpload.size + " image(s)...")
+        instance!!.storageManager!!.uploadMultipleImages(imagesToUpload, object : StorageCallback {
+            override fun onSuccess(`object`: Any) {
+                Log.d(TAG, "Last image uploaded successfully!")
+                val uploadedImages = `object` as ArrayList<VipImage>
+                for (vipImage: VipImage in uploadedImages) {
+                    updatedNote!!.addVipImage(vipImage.id)
                 }
-
-                originalImages = currentImages;
-
-                originalNote = updatedNote;
-                oldTags = new HashMap<String, Boolean>(originalNote.getTags());
-
-                if(originalNote.isArchived()) {
-                    databaseManager.updateArchivedNote(updatedNote);
+                originalImages = currentImages
+                originalNote = updatedNote
+                oldTags = HashMap(originalNote!!.getTags())
+                if (originalNote!!.isArchived()) {
+                    databaseManager!!.updateArchivedNote((updatedNote)!!)
                 } else {
-                    databaseManager.updateNote(updatedNote);
+                    databaseManager!!.updateNote((updatedNote)!!)
                 }
-
-                progressDialog.dismiss();
-                editMode = false;
-                populateNoteDetails();
-                createOptionsMenu();
-                toggleMode(editMode);            }
-
-            @Override
-            public void onFailure(String errorMessage) {
-                progressDialog.dismiss();
-                Toast.makeText(app, "Failed to upload images!", Toast.LENGTH_LONG).show();
+                progressDialog.dismiss()
+                editMode = false
+                populateNoteDetails()
+                createOptionsMenu()
+                toggleMode(editMode)
             }
 
-            @Override
-            public void onProgress(int progress) {}
-        });
-    }
-
-    private void dismissDialog() {
-        this.dismiss();
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == RESULT_OK) {
-            if(requestCode == REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION) {
-                exportNoteToDrive();
+            override fun onFailure(errorMessage: String?) {
+                progressDialog.dismiss()
+                Toast.makeText(instance, "Failed to upload images!", Toast.LENGTH_LONG).show()
             }
 
-            if(requestCode == PICK_IMAGE_REQUEST) {
+            override fun onProgress(progress: Int) {}
+        })
+    }
 
-                if(data.getClipData() != null) {
+    private fun dismissDialog() {
+        dismiss()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION) {
+                exportNoteToDrive()
+            }
+            if (requestCode == PICK_IMAGE_REQUEST) {
+                if (data!!.clipData != null) {
                     // User selected multiple images.
-
-                    int numberOfImagesSelected = data.getClipData().getItemCount();
-
-                    Log.d(TAG, "Multiple (" + numberOfImagesSelected + ") images selected.");
-
-                    for (int i = 0; i < numberOfImagesSelected; i++) {
-                        String originalFilePath = data.getClipData().getItemAt(i).getUri().toString();
-                        String imageId = UUID.randomUUID().toString();
-
-                        Log.d(TAG, "ImageId: " + imageId);
-                        Log.d(TAG, "ImagePath: " + originalFilePath);
-
-                        VipImage vipImage = new VipImage(imageId);
-                        vipImage.setOriginalFilePath(originalFilePath);
-
-                        vipImagesAdapter.add(vipImage);
-                        vipImagesRecyclerView.setVisibility(View.VISIBLE);
+                    val numberOfImagesSelected = data.clipData!!.itemCount
+                    Log.d(TAG, "Multiple ($numberOfImagesSelected) images selected.")
+                    for (i in 0 until numberOfImagesSelected) {
+                        val originalFilePath = data.clipData!!.getItemAt(i).uri.toString()
+                        val imageId = UUID.randomUUID().toString()
+                        Log.d(TAG, "ImageId: $imageId")
+                        Log.d(TAG, "ImagePath: $originalFilePath")
+                        val vipImage = VipImage(imageId)
+                        vipImage.originalFilePath = originalFilePath
+                        vipImagesAdapter!!.add(vipImage)
+                        vipImagesRecyclerView!!.visibility = View.VISIBLE
                     }
-
-                } else if (data.getData() != null) {
+                } else if (data.data != null) {
                     // User selected a single image.
-
-                    Log.d(TAG, "1 image selected.");
-
-                    String originalFilePath = data.getData().toString();
-                    String imageId = UUID.randomUUID().toString();
-
-                    VipImage vipImage = new VipImage(imageId);
-                    vipImage.setOriginalFilePath(originalFilePath);
-
-                    vipImagesAdapter.add(vipImage);
-                    vipImagesRecyclerView.setVisibility(View.VISIBLE);
+                    Log.d(TAG, "1 image selected.")
+                    val originalFilePath = data.data.toString()
+                    val imageId = UUID.randomUUID().toString()
+                    val vipImage = VipImage(imageId)
+                    vipImage.originalFilePath = originalFilePath
+                    vipImagesAdapter!!.add(vipImage)
+                    vipImagesRecyclerView!!.visibility = View.VISIBLE
                 }
             }
         }
-
-
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        if(editMode) {
-            if(newTags != null) {
+    override fun onStart() {
+        super.onStart()
+        if (editMode) {
+            if (newTags != null) {
                 // Re-add newly created (and therefore added) Tags from Note.
-                for (String tagId : newTags) {
-                    originalNote.addTag(tagId);
+                for (tagId: String? in newTags!!) {
+                    originalNote!!.addTag(tagId)
                 }
             }
         }
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        if(editMode) {
+    override fun onPause() {
+        super.onPause()
+        if (editMode) {
             // Remove newly created (and therefore added) Tags from Note.
-            for(String tagId: newTags) {
-                originalNote.removeTag(tagId);
+            for (tagId: String? in newTags!!) {
+                originalNote!!.removeTag(tagId)
             }
         }
     }
 
+    companion object {
+        val TAG: String = NoteDetailsDialogFragment::class.java.simpleName
+        const val NOTE_PARENT_FRAGMENT_KEY = "parentFragment"
+        const val NOTE_ADAPTER_POS_KEY = "adapterItemPos"
+        const val NOTE_KEY = "originalNote"
+        private const val PICK_IMAGE_REQUEST = 1
+        private const val REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION = 999
+        fun newInstance(): NoteDetailsDialogFragment {
+            return NoteDetailsDialogFragment()
+        }
+    }
 }
