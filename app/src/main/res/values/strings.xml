@@ -87,8 +87,8 @@
     <string name="vip_images_additionals_indicator">+%d</string>
 
     <!-- Feedback strings -->
-    <string name="title_submit_feedback">Feedback</string>
-    <string name="submit_feedback_informing_text">Thank you for reaching this page! \n
+    <string name="title_feedback">Feedback</string>
+    <string name="feedback_informing_text">Thank you for reaching this page! \n
         \nFrom here you have the ability to provide some <b>feedback</b> directly to the developers about: \n
         \n\u2022 <b>New features</b> you would like to see in an upcoming version
         \n\u2022 <b>Bugs</b> you discover during your use of the app

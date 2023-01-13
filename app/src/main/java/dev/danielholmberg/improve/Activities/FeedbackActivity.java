@@ -26,8 +26,8 @@ import dev.danielholmberg.improve.Utilities.NoteInputValidator;
  * Created by DanielHolmberg on 2018-01-27.
  */
 
-public class SubmitFeedbackActivity extends AppCompatActivity {
-    private static final String TAG = SubmitFeedbackActivity.class.getSimpleName();
+public class FeedbackActivity extends AppCompatActivity {
+    private static final String TAG = FeedbackActivity.class.getSimpleName();
 
     private Improve app;
     private DatabaseManager storageManager;
@@ -42,12 +42,12 @@ public class SubmitFeedbackActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_submit_feedback);
+        setContentView(R.layout.activity_feedback);
 
         app = Improve.getInstance();
         storageManager = app.getDatabaseManager();
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar_submit_feedback);
+        toolbar = (Toolbar) findViewById(R.id.toolbar_feedback);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

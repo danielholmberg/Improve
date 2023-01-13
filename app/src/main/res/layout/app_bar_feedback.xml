@@ -8,7 +8,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_submit_feedback"
+        android:id="@+id/toolbar_feedback"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
         android:background="@color/cardInfoBackground"
@@ -16,11 +16,11 @@
         app:popupTheme="@style/AppTheme.Base.FlatToolbar">
 
         <TextView
-            android:id="@+id/toolbar_submit_feedback_tv"
+            android:id="@+id/toolbar_feedback_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:text="@string/title_submit_feedback"
+            android:text="@string/title_feedback"
             style="@style/AppTheme.Base.ActivityTitle" />
 
     </androidx.appcompat.widget.Toolbar>

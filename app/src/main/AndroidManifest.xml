@@ -65,8 +65,8 @@
             android:windowSoftInputMode="adjustPan"
             android:exported="false"/>
         <activity
-            android:name=".Activities.SubmitFeedbackActivity"
-            android:label="@string/title_submit_feedback"
+            android:name=".Activities.FeedbackActivity"
+            android:label="@string/title_feedback"
             android:launchMode="singleInstance"
             android:parentActivityName=".Activities.MainActivity"
             android:windowSoftInputMode="adjustPan"

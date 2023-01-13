@@ -227,7 +227,7 @@ class MainActivity : AppCompatActivity() {
                     drawer!!.addDrawerListener(object : SimpleDrawerListener() {
                         override fun onDrawerClosed(drawerView: View) {
                             super.onDrawerClosed(drawerView)
-                            startActivity(Intent(context, SubmitFeedbackActivity::class.java))
+                            startActivity(Intent(context, FeedbackActivity::class.java))
                             drawer!!.removeDrawerListener(this)
                         }
                     })

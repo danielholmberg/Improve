@@ -7,18 +7,18 @@
     android:orientation="vertical"
     android:background="@color/cardInfoBackground"
     android:fitsSystemWindows="true"
-    tools:context="dev.danielholmberg.improve.Activities.SubmitFeedbackActivity">
+    tools:context="dev.danielholmberg.improve.Activities.FeedbackActivity">
 
     <include
-        android:id="@+id/include_toolbar_submit_feedback"
-        layout="@layout/app_bar_submit_feedback" />
+        android:id="@+id/include_toolbar_feedback"
+        layout="@layout/app_bar_feedback" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingEnd="16dp"
         android:paddingStart="16dp"
-        android:text="@string/submit_feedback_informing_text"
+        android:text="@string/feedback_informing_text"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
