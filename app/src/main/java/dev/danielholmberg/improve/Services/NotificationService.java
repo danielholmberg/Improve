@@ -9,8 +9,8 @@ import com.google.firebase.messaging.RemoteMessage;
  * Created by Daniel Holmberg.
  */
 
-public class MyFirebaseMessagingService extends FirebaseMessagingService {
-    private static final String TAG = MyFirebaseMessagingService.class.getSimpleName();
+public class NotificationService extends FirebaseMessagingService {
+    private static final String TAG = NotificationService.class.getSimpleName();
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
