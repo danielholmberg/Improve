@@ -1,226 +1,193 @@
-package dev.danielholmberg.improve.Adapters;
+package dev.danielholmberg.improve.Adapters
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.SortedList;
-import androidx.recyclerview.widget.RecyclerView;
+import android.util.Log
+import dev.danielholmberg.improve.Improve.Companion.instance
+import androidx.recyclerview.widget.RecyclerView
+import dev.danielholmberg.improve.ViewHolders.TagViewHolder
+import dev.danielholmberg.improve.Managers.DatabaseManager
+import androidx.recyclerview.widget.SortedList
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import android.widget.Toast
+import com.google.firebase.database.DatabaseError
+import android.view.ViewGroup
+import android.view.LayoutInflater
+import android.view.View
+import dev.danielholmberg.improve.Models.Note
+import dev.danielholmberg.improve.Models.Tag
+import dev.danielholmberg.improve.R
+import java.util.HashMap
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
+class TagsAdapter : RecyclerView.Adapter<TagViewHolder>() {
 
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-
-import java.util.HashMap;
-
-import dev.danielholmberg.improve.Models.Note;
-import dev.danielholmberg.improve.Models.Tag;
-import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.DatabaseManager;
-import dev.danielholmberg.improve.R;
-import dev.danielholmberg.improve.ViewHolders.TagViewHolder;
-
-public class TagsAdapter extends RecyclerView.Adapter<TagViewHolder>{
-    private static final String TAG = TagsAdapter.class.getSimpleName();
-
-    private Improve app;
-    private DatabaseManager databaseManager;
-    private SortedList<Tag> tags;
-    private Note currentNote;
-    private View tagView;
-    private boolean editMode = false;
-
-    public TagsAdapter() {
-        this.app = Improve.getInstance();
-        this.databaseManager = app.getDatabaseManager();
-
-        tags = new SortedList<>(Tag.class, new SortedList.Callback<Tag>() {
-            @Override
-            public int compare(Tag o1, Tag o2) {
-                return o1.getId().compareTo(o2.getId());
+    private val databaseManager: DatabaseManager? = instance!!.databaseManager
+    private val tags: SortedList<Tag> =
+        SortedList(Tag::class.java, object : SortedList.Callback<Tag>() {
+            override fun compare(o1: Tag, o2: Tag): Int {
+                return o1.id!!.compareTo(o2.id!!)
             }
 
-            @Override
-            public void onChanged(int position, int count) {
-                notifyItemRangeChanged(position, count);
+            override fun onChanged(position: Int, count: Int) {
+                notifyItemRangeChanged(position, count)
             }
 
-            @Override
-            public boolean areContentsTheSame(Tag oldItem, Tag newItem) {
-                return oldItem.getLabel().equals(newItem.getLabel())
-                        && oldItem.getColor().equals(newItem.getColor())
-                        && oldItem.getTextColor().equals(newItem.getTextColor());
+            override fun areContentsTheSame(oldItem: Tag, newItem: Tag): Boolean {
+                return oldItem.label == newItem.label
+                        && oldItem.color == newItem.color
+                        && oldItem.textColor == newItem.textColor
             }
 
-            @Override
-            public boolean areItemsTheSame(Tag oldItem, Tag newItem) {
-                return oldItem.getId().equals(newItem.getId());
+            override fun areItemsTheSame(oldItem: Tag, newItem: Tag): Boolean {
+                return oldItem.id == newItem.id
             }
 
-            @Override
-            public void onInserted(int position, int count) {
-                notifyItemRangeInserted(position, count);
+            override fun onInserted(position: Int, count: Int) {
+                notifyItemRangeInserted(position, count)
             }
 
-            @Override
-            public void onRemoved(int position, int count) {
-                notifyItemRangeRemoved(position, count);
+            override fun onRemoved(position: Int, count: Int) {
+                notifyItemRangeRemoved(position, count)
             }
 
-            @Override
-            public void onMoved(int fromPosition, int toPosition) {
-                notifyItemMoved(fromPosition, toPosition);
+            override fun onMoved(fromPosition: Int, toPosition: Int) {
+                notifyItemMoved(fromPosition, toPosition)
             }
-        });
+        })
 
-        initDatabaseListener();
+    private var currentNote: Note? = null
+    private var tagView: View? = null
+    private var editMode = false
+
+    init {
+        initDatabaseListener()
     }
 
     /**
      * Downloads all tags from the Notes-node and adds a childEventListener to detect changes.
      */
-    private void initDatabaseListener() {
-        databaseManager.getTagRef().addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
+    private fun initDatabaseListener() {
+        databaseManager!!.tagRef.addChildEventListener(object : ChildEventListener {
+            override fun onChildAdded(dataSnapshot: DataSnapshot, previousChildName: String?) {
                 // This method is triggered when a new child is added
                 // to the location to which this listener was added.
-
-                Log.d(TAG, "Tag OnChildAdded()");
-
-                Tag addedTag = dataSnapshot.getValue(Tag.class);
-
-                if(addedTag != null) {
-                    tags.add(addedTag);
+                Log.d(TAG, "Tag OnChildAdded()")
+                val addedTag = dataSnapshot.getValue(
+                    Tag::class.java
+                )
+                if (addedTag != null) {
+                    tags.add(addedTag)
                 }
             }
 
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
+            override fun onChildChanged(dataSnapshot: DataSnapshot, previousChildName: String?) {
                 // This method is triggered when the data at a child location has changed.
 
                 // TODO - Not used at the moment, useful when user can edit Tags.
-
-                Log.d(TAG, "Tag OnChildChanged()");
-
-                Tag updatedTag = dataSnapshot.getValue(Tag.class);
-
-                if(updatedTag != null) {
-                    tags.add(updatedTag);
-                    Toast.makeText(app, "Tag updated", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "Tag OnChildChanged()")
+                val updatedTag = dataSnapshot.getValue(
+                    Tag::class.java
+                )
+                if (updatedTag != null) {
+                    tags.add(updatedTag)
+                    Toast.makeText(instance, "Tag updated", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+            override fun onChildRemoved(dataSnapshot: DataSnapshot) {
                 // This method is triggered when a child is removed from the location
                 // to which this listener was added.
 
                 // TODO - Not used at the moment, useful when user can edit Tags.
-
-                Log.d(TAG, "Tag OnChildRemoved()");
-
-                final Tag removedTag = dataSnapshot.getValue(Tag.class);
-
-                if(removedTag != null) {
-                    tags.remove(removedTag);
+                Log.d(TAG, "Tag OnChildRemoved()")
+                val removedTag = dataSnapshot.getValue(
+                    Tag::class.java
+                )
+                if (removedTag != null) {
+                    tags.remove(removedTag)
                 } else {
-                    Toast.makeText(app, "Failed to delete tag, please try again later",
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(
+                        instance, "Failed to delete tag, please try again later",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
 
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            override fun onChildMoved(dataSnapshot: DataSnapshot, s: String?) {
                 // This method is triggered when a child location's priority changes.
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+            override fun onCancelled(databaseError: DatabaseError) {
                 // This method will be triggered in the event that this listener either failed
                 // at the server, or is removed as a result of the security and Firebase rules.
-
-                Log.e(TAG, "Tags ChildEventListener cancelled: " + databaseError);
+                Log.e(TAG, "Tags ChildEventListener cancelled: $databaseError")
             }
-        });
+        })
     }
 
-    public HashMap<String, Object> getHashMap() {
-        HashMap<String, Object> hashMap = new HashMap<>();
-        for(int i = 0; i < tags.size(); i++) {
-            Tag tag = tags.get(i);
-            hashMap.put(tag.getId(), tag);
+    val hashMap: HashMap<String?, Any>
+        get() {
+            val hashMap = HashMap<String?, Any>()
+            for (i in 0 until tags.size()) {
+                val tag = tags[i]
+                hashMap[tag.id] = tag
+            }
+            return hashMap
         }
-        return hashMap;
+
+    fun getTag(tagId: String?): Tag? {
+        return hashMap[tagId] as Tag?
     }
 
-    public Tag getTag(String tagId) {
-        return (Tag) getHashMap().get(tagId);
+    fun addTag(tag: Tag) {
+        tags.add(tag)
     }
 
-    public void addTag(Tag tag) {
-        this.tags.add(tag);
+    fun setCurrentNote(currentNote: Note?) {
+        this.currentNote = currentNote
     }
 
-    public void setCurrentNote(Note currentNote) {
-        this.currentNote = currentNote;
+    fun removeCurrentNote() {
+        currentNote = null
     }
 
-    public void removeCurrentNote() {
-        this.currentNote = null;
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TagViewHolder {
+        tagView = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_tag, parent, false)
+        return TagViewHolder(tagView!!)
     }
 
-    @NonNull
-    @Override
-    public TagViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        tagView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_tag, parent, false);
-
-        return new TagViewHolder(tagView);
-
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull final TagViewHolder holder, int position) {
-        final Tag tag = this.tags.get(position);
-
-        holder.bindModelToView(tag);
-
-        holder.setEditMode(editMode);
-
-        if(currentNote != null) {
-            tagView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(currentNote.containsTag(tag.getId())) {
-                        currentNote.removeTag(tag.getId());
-                        holder.setTagStatusOnNote(false);
-                    } else {
-                        currentNote.addTag(tag.getId());
-                        holder.setTagStatusOnNote(true);
-                    }
+    override fun onBindViewHolder(holder: TagViewHolder, position: Int) {
+        val tag = tags[position]
+        holder.bindModelToView(tag)
+        holder.setEditMode(editMode)
+        if (currentNote != null) {
+            tagView!!.setOnClickListener {
+                if (currentNote!!.containsTag(tag.id)) {
+                    currentNote!!.removeTag(tag.id)
+                    holder.setTagStatusOnNote(false)
+                } else {
+                    currentNote!!.addTag(tag.id)
+                    holder.setTagStatusOnNote(true)
                 }
-            });
-
-            if(currentNote.containsTag(tag.getId())) {
-                holder.setTagStatusOnNote(true);
+            }
+            if (currentNote!!.containsTag(tag.id)) {
+                holder.setTagStatusOnNote(true)
             } else {
-                holder.setTagStatusOnNote(false);
+                holder.setTagStatusOnNote(false)
             }
         }
     }
 
-    @Override
-    public int getItemCount() {
-        return tags.size();
+    override fun getItemCount(): Int {
+        return tags.size()
     }
 
-    public void setEditMode(boolean editMode) {
-        this.editMode = editMode;
-        notifyDataSetChanged();
+    fun setEditMode(editMode: Boolean) {
+        this.editMode = editMode
+        notifyDataSetChanged()
+    }
+
+    companion object {
+        private val TAG = TagsAdapter::class.java.simpleName
     }
 }

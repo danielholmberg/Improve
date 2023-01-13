@@ -170,7 +170,7 @@ class Improve : Application(), Serializable {
         get() = notesAdapter!!.hashMap
     val archivedNotes: HashMap<String?, Any>
         get() = archivedNotesAdapter!!.hashMap
-    val tags: HashMap<String, Any>
+    val tags: HashMap<String?, Any>
         get() = tagsAdapter!!.hashMap
 
     // ---- Contact functions ---- //

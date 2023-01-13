@@ -357,7 +357,7 @@ class DatabaseManager {
     /**
      * Uploads all tags to the Tags-node.
      */
-    fun saveTags(tags: HashMap<String, Any>) {
+    fun saveTags(tags: HashMap<String?, Any>) {
         tagRef.updateChildren(tags) { databaseError, databaseReference ->
             if (databaseError != null) {
                 Log.e(TAG, "Failed to save Tags: $databaseError")

@@ -9,6 +9,7 @@ import org.json.JSONArray
 import org.json.JSONException
 import android.os.Parcel
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.HashMap
 
 /**
@@ -38,7 +39,7 @@ class Note : Parcelable {
     }
 
     fun setTags(tags: Map<String?, Boolean?>) {
-        val tagsMap: MutableMap<String?, Boolean?> = HashMap(tags)
+        val tagsMap: MutableMap<String?, Boolean?> = ConcurrentHashMap(tags)
 
         // Do not add if Tag has been removed.
         for (tagId in tagsMap.keys) {
