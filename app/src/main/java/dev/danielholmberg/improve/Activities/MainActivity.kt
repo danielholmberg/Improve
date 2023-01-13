@@ -31,6 +31,7 @@ import dev.danielholmberg.improve.Fragments.ArchivedNotesFragment
 import dev.danielholmberg.improve.Fragments.ContactsFragment
 import android.content.res.Configuration
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -49,7 +50,6 @@ class MainActivity : AppCompatActivity() {
     // flag to load home fragment when currentUser presses back key
     private val shouldLoadHomeFragOnBackPress = true
     private var doubleBackToExitPressedOnce = false
-    private var mHandler: Handler? = null
     private var currentUser: FirebaseUser? = null
     private var toolbar: Toolbar? = null
     private var drawer: DrawerLayout? = null
@@ -104,8 +104,6 @@ class MainActivity : AppCompatActivity() {
         drawer!!.addDrawerListener(actionBarDrawerToggle!!)
         actionBarDrawerToggle!!.syncState()
 
-        // Initializing the Handler for fragment transactions.
-        mHandler = Handler()
         initNavDrawer()
         initDriveService()
     }
@@ -346,7 +344,7 @@ class MainActivity : AppCompatActivity() {
             fragmentTransaction.commitAllowingStateLoss()
         }
 
-        mHandler!!.post(mPendingRunnable)
+        Handler(Looper.getMainLooper()).post(mPendingRunnable)
 
         // Closing drawer on item click
         drawer!!.closeDrawers()
@@ -476,7 +474,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 doubleBackToExitPressedOnce = true
                 Toast.makeText(this, "Press BACK again to exit", Toast.LENGTH_SHORT).show()
-                Handler().postDelayed({ doubleBackToExitPressedOnce = false }, 2000)
+                Handler(Looper.getMainLooper()).postDelayed({ doubleBackToExitPressedOnce = false }, 2000)
             }
         }
     }
