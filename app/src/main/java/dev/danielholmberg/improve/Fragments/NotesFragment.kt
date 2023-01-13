@@ -1,389 +1,304 @@
-package dev.danielholmberg.improve.Fragments;
+package dev.danielholmberg.improve.Fragments
 
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import dev.danielholmberg.improve.Improve.Companion.instance
+import dev.danielholmberg.improve.Managers.DatabaseManager
+import dev.danielholmberg.improve.Services.DriveServiceHelper
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
+import android.widget.TextView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import android.os.Bundle
+import dev.danielholmberg.improve.R
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.database.DatabaseError
+import android.content.Intent
+import dev.danielholmberg.improve.Activities.AddNoteActivity
+import android.widget.EditText
+import android.app.Activity
+import android.net.Uri
+import android.util.Log
+import android.view.*
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.api.services.drive.DriveScopes
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import android.widget.Toast
+import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import com.google.android.gms.common.api.Scope
+import com.google.gson.Gson
+import com.google.gson.JsonParser
+import dev.danielholmberg.improve.Models.Note
+import java.lang.Exception
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+class NotesFragment : Fragment(), SearchView.OnQueryTextListener {
 
-import androidx.core.util.Pair;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.google.api.services.drive.DriveScopes;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import dev.danielholmberg.improve.Activities.AddNoteActivity;
-import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.DatabaseManager;
-import dev.danielholmberg.improve.Models.Note;
-import dev.danielholmberg.improve.R;
-import dev.danielholmberg.improve.Services.DriveServiceHelper;
-
-import static android.app.Activity.RESULT_OK;
-
-/**
- * Created by DanielHolmberg on 2018-01-20.
- */
-
-public class NotesFragment extends Fragment implements SearchView.OnQueryTextListener {
-    private static final String TAG = NotesFragment.class.getSimpleName();
-
-    private static final int REQUEST_CODE_OPEN_FILE = 1;
-
-    private Improve app;
-    private DatabaseManager databaseManager;
-    private Context context;
-    private DriveServiceHelper mDriveServiceHelper;
-
-    private View view;
-    private CoordinatorLayout snackbarView;
-    private RecyclerView notesRecyclerView;
-    private LinearLayoutManager recyclerLayoutManager;
-    private TextView emptyListText;
-    private FloatingActionButton fab;
-
-    public NotesFragment() {
-        // Required empty public constructor
+    private var databaseManager: DatabaseManager? = null
+    private var mDriveServiceHelper: DriveServiceHelper? = null
+    private var snackBarView: CoordinatorLayout? = null
+    private var notesRecyclerView: RecyclerView? = null
+    private var recyclerLayoutManager: LinearLayoutManager? = null
+    private var emptyListText: TextView? = null
+    private var fab: FloatingActionButton? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        instance!!.notesFragmentRef = this
+        databaseManager = instance!!.databaseManager
+        mDriveServiceHelper = instance!!.driveServiceHelper
+        setHasOptionsMenu(true)
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        app = Improve.getInstance();
-        app.setNotesFragmentRef(this);
-        this.context = getContext();
-        databaseManager = app.getDatabaseManager();
-        mDriveServiceHelper = app.getDriveServiceHelper();
-        setHasOptionsMenu(true);
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val view = inflater.inflate(
+            R.layout.fragment_notes,
+            container, false
+        )
+        instance!!.mainActivityRef!!.findViewById<View>(R.id.toolbar_dropshadow).visibility = View.GONE
+        snackBarView = view.findViewById(R.id.note_fragment_container)
+        notesRecyclerView = view.findViewById<View>(R.id.notes_list) as RecyclerView
+        emptyListText = view.findViewById<View>(R.id.empty_notes_list_tv) as TextView
+        fab = view.findViewById<View>(R.id.add_note) as FloatingActionButton
+        recyclerLayoutManager = LinearLayoutManager(activity)
+        recyclerLayoutManager!!.reverseLayout = true
+        recyclerLayoutManager!!.stackFromEnd = true
+        notesRecyclerView!!.layoutManager = recyclerLayoutManager
+        notesRecyclerView!!.adapter = instance!!.notesAdapter
+        initListScrollListener()
+        initListDataChangeListener()
+        return view
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_notes,
-                container, false);
-
-        app.getMainActivityRef().findViewById(R.id.toolbar_dropshadow).setVisibility(View.GONE);
-
-        snackbarView = view.findViewById(R.id.note_fragment_container);
-
-        notesRecyclerView = (RecyclerView) view.findViewById(R.id.notes_list);
-        emptyListText = (TextView) view.findViewById(R.id.empty_notes_list_tv);
-        fab = (FloatingActionButton) view.findViewById(R.id.add_note);
-
-        recyclerLayoutManager = new LinearLayoutManager(getActivity());
-        recyclerLayoutManager.setReverseLayout(true);
-        recyclerLayoutManager.setStackFromEnd(true);
-        notesRecyclerView.setLayoutManager(recyclerLayoutManager);
-
-        notesRecyclerView.setAdapter(app.getNotesAdapter());
-
-        initListScrollListener();
-        initListDataChangeListener();
-
-        return view;
-    }
-
-    private void initListScrollListener() {
-        notesRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener(){
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (dy > 0 && fab.isShown()) {
+    private fun initListScrollListener() {
+        notesRecyclerView!!.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (dy > 0 && fab!!.isShown) {
                     // Hide the FAB when the user scrolls down.
-                    fab.hide();
+                    fab!!.hide()
                 }
-
-                if(!recyclerView.canScrollVertically(-1)) {
+                if (!recyclerView.canScrollVertically(-1)) {
                     // we have reached the top of the list
-                    app.getMainActivityRef().findViewById(R.id.toolbar_dropshadow).setVisibility(View.GONE);
+                    instance!!.mainActivityRef!!.findViewById<View>(R.id.toolbar_dropshadow).visibility =
+                        View.GONE
                 } else {
                     // we are not at the top yet
-                    app.getMainActivityRef().findViewById(R.id.toolbar_dropshadow).setVisibility(View.VISIBLE);
+                    instance!!.mainActivityRef!!.findViewById<View>(R.id.toolbar_dropshadow).visibility =
+                        View.VISIBLE
                 }
             }
 
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     // Show the FAB when the user has stopped scrolling.
-                    fab.show();
+                    fab!!.show()
                 }
-
-                super.onScrollStateChanged(recyclerView, newState);
+                super.onScrollStateChanged(recyclerView, newState)
             }
-        });
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addNote();
-            }
-        });
+        })
+        fab!!.setOnClickListener { addNote() }
     }
 
-    private void initListDataChangeListener() {
-        databaseManager.getNotesRef().addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                if(app.getNotesAdapter().getItemCount() > 0) {
-                    notesRecyclerView.setVisibility(View.VISIBLE);
-                    emptyListText.setVisibility(View.GONE);
+    private fun initListDataChangeListener() {
+        databaseManager!!.notesRef.addChildEventListener(object : ChildEventListener {
+            override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
+                if (instance!!.notesAdapter!!.itemCount > 0) {
+                    notesRecyclerView!!.visibility = View.VISIBLE
+                    emptyListText!!.visibility = View.GONE
 
                     // Scroll to the "top" (bottom) to show changed Note.
-                    notesRecyclerView.scrollToPosition(app.getNotesAdapter().getItemCount()-1);
+                    notesRecyclerView!!.scrollToPosition(instance!!.notesAdapter!!.itemCount - 1)
                 } else {
-                    notesRecyclerView.setVisibility(View.GONE);
-                    emptyListText.setVisibility(View.VISIBLE);
+                    notesRecyclerView!!.visibility = View.GONE
+                    emptyListText!!.visibility = View.VISIBLE
                 }
             }
 
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                final Note removedNote = dataSnapshot.getValue(Note.class);
-
-                if(removedNote != null) {
-                    if(app.getArchivedNotes().containsKey(removedNote.getId())) {
+            override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {}
+            override fun onChildRemoved(dataSnapshot: DataSnapshot) {
+                val removedNote = dataSnapshot.getValue(
+                    Note::class.java
+                )
+                if (removedNote != null) {
+                    if (instance!!.archivedNotes.containsKey(removedNote.id)) {
                         // Note is Archived and not truly deleted.
-                        Snackbar.make(snackbarView,
-                                "Note archived", Snackbar.LENGTH_LONG)
-                                .setAction("UNDO", new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        databaseManager.unarchiveNote(removedNote);
-                                    }
-                                }).show();
+                        Snackbar.make(
+                            snackBarView!!,
+                            "Note archived", Snackbar.LENGTH_LONG
+                        )
+                            .setAction("UNDO") { databaseManager!!.unarchiveNote(removedNote) }
+                            .show()
                     } else {
-                        Snackbar.make(snackbarView,
-                                "Note deleted", Snackbar.LENGTH_LONG)
-                                .setAction("UNDO", new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        databaseManager.addNote(removedNote);
-                                    }
-                                }).show();
+                        Snackbar.make(
+                            snackBarView!!,
+                            "Note deleted", Snackbar.LENGTH_LONG
+                        )
+                            .setAction("UNDO") { databaseManager!!.addNote(removedNote) }.show()
                     }
                 }
-
-                if(app.getNotesAdapter().getItemCount() > 0) {
-                    notesRecyclerView.setVisibility(View.VISIBLE);
-                    emptyListText.setVisibility(View.GONE);
+                if (instance!!.notesAdapter!!.itemCount > 0) {
+                    notesRecyclerView!!.visibility = View.VISIBLE
+                    emptyListText!!.visibility = View.GONE
                 } else {
-                    notesRecyclerView.setVisibility(View.GONE);
-                    emptyListText.setVisibility(View.VISIBLE);
+                    notesRecyclerView!!.visibility = View.GONE
+                    emptyListText!!.visibility = View.VISIBLE
                 }
             }
 
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {}
-        });
+            override fun onChildMoved(dataSnapshot: DataSnapshot, s: String?) {}
+            override fun onCancelled(databaseError: DatabaseError) {}
+        })
     }
 
     /**
      * Called when a user clicks on the Floating Action Button to add a new Note.
      */
-    private void addNote() {
-        Intent addNoteIntent = new Intent(getContext(), AddNoteActivity.class);
-        startActivity(addNoteIntent);
+    private fun addNote() {
+        val addNoteIntent = Intent(instance, AddNoteActivity::class.java)
+        startActivity(addNoteIntent)
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_notes, menu);
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.fragment_notes, menu)
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.noteImport:
-                openFilePicker();
-                return true;
-            case R.id.noteSearch:
-                SearchView searchView = (SearchView) item.getActionView();
-                searchView.setQueryHint("Search Note");
-                searchView.setOnQueryTextListener(this);
-                searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-                    @Override
-                    public boolean onClose() {
-                        Log.d(TAG, "Search closed!");
-                        app.getNotesAdapter().clearFilter();
-                        return true;
-                    }
-                });
-
-                EditText searchEditText = (EditText) searchView.findViewById(androidx.appcompat.R.id.search_src_text);
-                searchEditText.setTextColor(getResources().getColor(R.color.search_text_color));
-                searchEditText.setHintTextColor(getResources().getColor(R.color.search_hint_color));
-                searchEditText.setCursorVisible(false);
-
-                item.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
-                    @Override
-                    public boolean onMenuItemActionExpand(MenuItem menuItem) {
-                        Log.d(TAG, "Search opened!");
-                        app.getNotesAdapter().initSearch();
-                        return true;
-                    }
-
-                    @Override
-                    public boolean onMenuItemActionCollapse(MenuItem menuItem) {
-                        Log.d(TAG, "Search closed!");
-                        app.getNotesAdapter().clearFilter();
-                        return true;
-                    }
-                });
-
-                return true;
-            default:
-                break;
-        }
-        return false;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
-        if (resultCode == RESULT_OK) {
-            if (requestCode == REQUEST_CODE_OPEN_FILE && resultData != null) {
-                Uri uri = resultData.getData();
-                if (uri != null) {
-                    openFileFromFilePicker(uri);
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.noteImport -> {
+                openFilePicker()
+                return true
+            }
+            R.id.noteSearch -> {
+                val searchView = item.actionView as SearchView
+                searchView.queryHint = "Search Note"
+                searchView.setOnQueryTextListener(this)
+                searchView.setOnCloseListener {
+                    Log.d(TAG, "Search closed!")
+                    instance!!.notesAdapter!!.clearFilter()
+                    true
                 }
+                val searchEditText =
+                    searchView.findViewById<View>(androidx.appcompat.R.id.search_src_text) as EditText
+                searchEditText.setTextColor(ContextCompat.getColor(instance!!, R.color.search_text_color))
+                searchEditText.setHintTextColor(ContextCompat.getColor(instance!!, R.color.search_hint_color))
+                searchEditText.isCursorVisible = false
+                item.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+                    override fun onMenuItemActionExpand(menuItem: MenuItem): Boolean {
+                        Log.d(TAG, "Search opened!")
+                        instance!!.notesAdapter!!.initSearch()
+                        return true
+                    }
+
+                    override fun onMenuItemActionCollapse(menuItem: MenuItem): Boolean {
+                        Log.d(TAG, "Search closed!")
+                        instance!!.notesAdapter!!.clearFilter()
+                        return true
+                    }
+                })
+                return true
+            }
+            else -> {}
+        }
+        return false
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == REQUEST_CODE_OPEN_FILE && resultData != null) {
+                val uri = resultData.data
+                uri?.let { openFileFromFilePicker(it) }
             }
         }
-        super.onActivityResult(requestCode, resultCode, resultData);
+        super.onActivityResult(requestCode, resultCode, resultData)
     }
 
     /**
      * Opens the Storage Access Framework file picker.
      */
-    public void openFilePicker() {
-
-        GoogleSignInOptions signInOptions =
-                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestEmail()
-                        .requestScopes(new Scope(DriveScopes.DRIVE_FILE))
-                        .build();
-        GoogleSignIn.getClient(app, signInOptions);
-
-
+    private fun openFilePicker() {
+        val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .requestScopes(Scope(DriveScopes.DRIVE_FILE))
+            .build()
+        GoogleSignIn.getClient(instance!!, signInOptions)
         if (mDriveServiceHelper != null) {
-            Log.d(TAG, "Opening file picker.");
-
-            Intent pickerIntent = mDriveServiceHelper.createFilePickerIntent(DriveServiceHelper.TYPE_NOTE);
+            Log.d(TAG, "Opening file picker.")
+            val pickerIntent =
+                mDriveServiceHelper!!.createFilePickerIntent(DriveServiceHelper.TYPE_NOTE)
 
             // The result of the SAF Intent is handled in onActivityResult.
-            startActivityForResult(pickerIntent, REQUEST_CODE_OPEN_FILE);
+            startActivityForResult(pickerIntent, REQUEST_CODE_OPEN_FILE)
         }
     }
 
     /**
-     * Opens a file from its {@code uri} returned from the Storage Access Framework file picker
-     * initiated by {@link #openFilePicker()}.
+     * Opens a file from its `uri` returned from the Storage Access Framework file picker
+     * initiated by [.openFilePicker].
      */
-    public void openFileFromFilePicker(Uri uri) {
+    private fun openFileFromFilePicker(uri: Uri) {
         if (mDriveServiceHelper != null) {
-            Log.d(TAG, "Opening " + uri.getPath());
-
-            mDriveServiceHelper.openFileUsingStorageAccessFramework(app.getContentResolver(), uri)
-                    .addOnSuccessListener(new OnSuccessListener<Pair<String, String>>() {
-                        @Override
-                        public void onSuccess(Pair<String, String> nameAndContent) {
-                            String name = nameAndContent.first;
-                            String content = nameAndContent.second;
-
-                            Log.d(TAG, "Note picked: " + name + " with content: " + content);
-
-                            try {
-                                if(name != null && content != null) {
-                                    JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
-
-                                    Log.d(TAG, "Parsed jsonObject: " + jsonObject);
-
-                                    Note importedNote = new Gson().fromJson(jsonObject, Note.class);
-
-                                    Log.d(TAG, "Imported Note: " + importedNote.getTitle() + "(" + importedNote.getId() + ")");
-
-                                    boolean noteIdExists = app.getNotes().containsKey(importedNote.getId())
-                                            || app.getArchivedNotes().containsKey(importedNote.getId());
-
-                                    if(noteIdExists) {
-                                        // Change id of imported Note to avoid duplicates.
-                                        String newId = databaseManager.getNotesRef().push().getKey();
-                                        importedNote.setId(newId);
-                                        Log.d(TAG, "New id: " + importedNote.getId());
-                                    }
-
-                                    databaseManager.addNote(importedNote);
-                                    Toast.makeText(app, "Note imported: " + importedNote.getTitle(), Toast.LENGTH_LONG).show();
-
-                                } else {
-                                    Toast.makeText(app, "Note was empty!", Toast.LENGTH_LONG).show();
-                                }
-                            } catch (Exception e) {
-                                Log.e(TAG, "Failed to import Note.", e);
-                                Toast.makeText(app, "Failed to import Note", Toast.LENGTH_LONG).show();
+            Log.d(TAG, "Opening " + uri.path)
+            mDriveServiceHelper!!.openFileUsingStorageAccessFramework(instance!!.contentResolver, uri)
+                .addOnSuccessListener { nameAndContent ->
+                    val name = nameAndContent.first
+                    val content = nameAndContent.second
+                    Log.d(TAG, "Note picked: $name with content: $content")
+                    try {
+                        if (name != null && content != null) {
+                            val jsonObject = JsonParser.parseString(content).asJsonObject
+                            Log.d(TAG, "Parsed jsonObject: $jsonObject")
+                            val importedNote = Gson().fromJson(jsonObject, Note::class.java)
+                            Log.d(
+                                TAG,
+                                "Imported Note: " + importedNote.title + "(" + importedNote.id + ")"
+                            )
+                            val noteIdExists = (instance!!.notes.containsKey(importedNote.id)
+                                    || instance!!.archivedNotes.containsKey(importedNote.id))
+                            if (noteIdExists) {
+                                // Change id of imported Note to avoid duplicates.
+                                val newId = databaseManager!!.notesRef.push().key
+                                importedNote.id = newId
+                                Log.d(TAG, "New id: " + importedNote.id)
                             }
-
+                            databaseManager!!.addNote(importedNote)
+                            Toast.makeText(
+                                instance,
+                                "Note imported: " + importedNote.title,
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } else {
+                            Toast.makeText(instance, "Note was empty!", Toast.LENGTH_LONG).show()
                         }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e(TAG, "Unable to open file from picker.", e);
-                            Toast.makeText(app, "Failed to import Note", Toast.LENGTH_LONG).show();
-                        }
-                    });
-
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to import Note.", e)
+                        Toast.makeText(instance, "Failed to import Note", Toast.LENGTH_LONG).show()
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Unable to open file from picker.", e)
+                    Toast.makeText(instance, "Failed to import Note", Toast.LENGTH_LONG).show()
+                }
         }
     }
 
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        Log.d(TAG, "Query Submitted: " + query);
-        return true;
+    override fun onQueryTextSubmit(query: String): Boolean {
+        Log.d(TAG, "Query Submitted: $query")
+        return true
     }
 
-    @Override
-    public boolean onQueryTextChange(String newText) {
-        Log.d(TAG, "Query Inserted: " + newText);
+    override fun onQueryTextChange(newText: String): Boolean {
+        Log.d(TAG, "Query Inserted: $newText")
+        instance!!.notesAdapter!!.filter(newText)
+        notesRecyclerView!!.scrollToPosition(instance!!.notesAdapter!!.itemCount - 1)
+        return true
+    }
 
-        app.getNotesAdapter().filter(newText);
-        notesRecyclerView.scrollToPosition(app.getNotesAdapter().getItemCount()-1);
-
-        return true;
+    companion object {
+        private val TAG = NotesFragment::class.java.simpleName
+        private const val REQUEST_CODE_OPEN_FILE = 1
     }
 }
