@@ -335,7 +335,7 @@ class DatabaseManager {
     /**
      * Uploads all notes to the Notes-node.
      */
-    fun saveNotes(notes: HashMap<String, Any>) {
+    fun saveNotes(notes: HashMap<String?, Any>) {
         notesRef.updateChildren(notes) { databaseError, databaseReference ->
             if (databaseError != null) {
                 Log.e(TAG, "Failed to save Notes: $databaseError")

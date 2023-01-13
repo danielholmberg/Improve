@@ -166,7 +166,7 @@ class Improve : Application(), Serializable {
         return imageDir
     }
 
-    val notes: HashMap<String, Any>
+    val notes: HashMap<String?, Any>
         get() = notesAdapter!!.hashMap
     val archivedNotes: HashMap<String, Any>
         get() = archivedNotesAdapter!!.hashMap
