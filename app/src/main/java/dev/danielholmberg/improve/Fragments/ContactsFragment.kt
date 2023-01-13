@@ -1,330 +1,255 @@
-package dev.danielholmberg.improve.Fragments;
+package dev.danielholmberg.improve.Fragments
 
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+import dev.danielholmberg.improve.Improve.Companion.instance
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import android.widget.TextView
+import dev.danielholmberg.improve.Managers.DatabaseManager
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import dev.danielholmberg.improve.R
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import dev.danielholmberg.improve.Models.Company
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.database.DatabaseError
+import android.widget.EditText
+import android.content.DialogInterface
+import android.content.Intent
+import android.view.View
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.Fragment
+import dev.danielholmberg.improve.Activities.AddContactActivity
+import java.util.*
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+class ContactsFragment : Fragment() {
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.TextView;
+    private var companyRecyclerView: RecyclerView? = null
+    private var fab: FloatingActionButton? = null
+    private var addContactFAB: FloatingActionButton? = null
+    private var addCompanyFAB: FloatingActionButton? = null
+    private var addCompanyFABTextView: TextView? = null
+    private var addContactFABTextView: TextView? = null
+    private var snackBarView: View? = null
+    private var databaseManager: DatabaseManager? = instance!!.databaseManager
+    private var emptyListView: View? = null
+    private var isFABOpen = false
 
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-
-import dev.danielholmberg.improve.Activities.AddContactActivity;
-import dev.danielholmberg.improve.Models.Company;
-import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.DatabaseManager;
-import dev.danielholmberg.improve.R;
-
-/**
- * Created by DanielHolmberg on 2018-01-18.
- */
-
-public class ContactsFragment extends Fragment{
-    private static final String TAG = ContactsFragment.class.getSimpleName();
-
-    private Improve app;
-    private View view;
-    private RecyclerView companyRecyclerView;
-    private FloatingActionButton fab, addContactFAB, addCompanyFAB;
-    private TextView addCompanyFABTextView, addContactFABTextView;
-    private View snackbarView;
-    private DatabaseManager databaseManager;
-    private View emptyListView;
-    private boolean isFABOpen = false;
-
-    public ContactsFragment() {
-        // Required empty public constructor
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        instance!!.setContactFragmentRef(this)
+        setHasOptionsMenu(true)
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        app = Improve.getInstance();
-        databaseManager = app.getDatabaseManager();
-        app.setContactFragmentRef(this);
-        setHasOptionsMenu(true);
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val view = inflater.inflate(
+            R.layout.fragment_contacts,
+            container, false
+        )
+        instance!!.mainActivityRef!!.findViewById<View>(R.id.toolbar_dropshadow).visibility =
+            View.GONE
+        snackBarView = view.findViewById(R.id.contacts_fragment_container)
+        companyRecyclerView = view.findViewById(R.id.company_recycler_view)
+        emptyListView = view.findViewById(R.id.empty_contact_list_tv)
+        fab = view.findViewById(R.id.fab_menu)
+        addCompanyFABTextView = view.findViewById(R.id.add_company_fab_text)
+        addContactFABTextView = view.findViewById(R.id.add_contact_fab_text)
+        addContactFAB = view.findViewById(R.id.add_contact)
+        addCompanyFAB = view.findViewById(R.id.add_company)
+        val recyclerLayoutManager = LinearLayoutManager(activity)
+        companyRecyclerView!!.layoutManager = recyclerLayoutManager
+        initListScrollListener()
+        initAdapter()
+        initListDataChangeListener()
+        return view
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_contacts,
-                container, false);
-
-        app.getMainActivityRef().findViewById(R.id.toolbar_dropshadow).setVisibility(View.GONE);
-
-        snackbarView = view.findViewById(R.id.contacts_fragment_container);
-
-        companyRecyclerView = view.findViewById(R.id.company_recycler_view);
-        emptyListView = view.findViewById(R.id.empty_contact_list_tv);
-
-        fab = view.findViewById(R.id.fab_menu);
-        addCompanyFABTextView = view.findViewById(R.id.add_company_fab_text);
-        addContactFABTextView = view.findViewById(R.id.add_contact_fab_text);
-        addContactFAB = view.findViewById(R.id.add_contact);
-        addCompanyFAB = view.findViewById(R.id.add_company);
-
-        LinearLayoutManager recyclerLayoutManager = new LinearLayoutManager(getActivity());
-        companyRecyclerView.setLayoutManager(recyclerLayoutManager);
-
-        initListScrollListener();
-        initAdapter();
-
-        initListDataChangeListener();
-
-        return view;
-    }
-
-    private void initListDataChangeListener() {
+    private fun initListDataChangeListener() {
         // Company listener
-        databaseManager.getCompaniesRef().addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                if(app.getCompanyRecyclerViewAdapter().getItemCount() > 0) {
-                    companyRecyclerView.setVisibility(View.VISIBLE);
-                    emptyListView.setVisibility(View.GONE);
+        databaseManager!!.companiesRef.addChildEventListener(object : ChildEventListener {
+            override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
+                if (instance!!.companyRecyclerViewAdapter!!.itemCount > 0) {
+                    companyRecyclerView!!.visibility = View.VISIBLE
+                    emptyListView!!.visibility = View.GONE
                 } else {
-                    companyRecyclerView.setVisibility(View.GONE);
-                    emptyListView.setVisibility(View.VISIBLE);
+                    companyRecyclerView!!.visibility = View.GONE
+                    emptyListView!!.visibility = View.VISIBLE
                 }
             }
 
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                final Company removedCompany = dataSnapshot.getValue(Company.class);
-
-                if(removedCompany != null) {
-                    Snackbar.make(snackbarView,
-                            "Company deleted", Snackbar.LENGTH_LONG)
-                            .setAction("UNDO", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    databaseManager.addCompany(removedCompany);
-                                }
-                            }).show();
+            override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {}
+            override fun onChildRemoved(dataSnapshot: DataSnapshot) {
+                val removedCompany = dataSnapshot.getValue(Company::class.java)
+                if (removedCompany != null) {
+                    Snackbar.make(
+                        (snackBarView)!!,
+                        "Company deleted", Snackbar.LENGTH_LONG
+                    )
+                        .setAction("UNDO") { databaseManager!!.addCompany(removedCompany) }.show()
                 }
-
-                if(app.getCompanyRecyclerViewAdapter().getItemCount() > 0) {
-                    companyRecyclerView.setVisibility(View.VISIBLE);
-                    emptyListView.setVisibility(View.GONE);
+                if (instance!!.companyRecyclerViewAdapter!!.itemCount > 0) {
+                    companyRecyclerView!!.visibility = View.VISIBLE
+                    emptyListView!!.visibility = View.GONE
                 } else {
-                    companyRecyclerView.setVisibility(View.GONE);
-                    emptyListView.setVisibility(View.VISIBLE);
+                    companyRecyclerView!!.visibility = View.GONE
+                    emptyListView!!.visibility = View.VISIBLE
                 }
             }
 
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {}
-        });
+            override fun onChildMoved(dataSnapshot: DataSnapshot, s: String?) {}
+            override fun onCancelled(databaseError: DatabaseError) {}
+        })
     }
 
-    private void initListScrollListener() {
+    private fun initListScrollListener() {
         // Add a OnScrollListener to change when to show the Floating Action Button for adding a new Note.
-        companyRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener(){
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (dy > 0 && fab.isShown()) {
+        companyRecyclerView!!.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (dy > 0 && fab!!.isShown) {
                     // Hide FABs when the user scrolls down.
-                    closeFABMenu();
-                    fab.hide();
+                    closeFABMenu()
+                    fab!!.hide()
                 }
-
-                if(!recyclerView.canScrollVertically(-1)) {
+                if (!recyclerView.canScrollVertically(-1)) {
                     // we have reached the top of the list
-                    app.getMainActivityRef().findViewById(R.id.toolbar_dropshadow).setVisibility(View.GONE);
+                    instance!!.mainActivityRef!!.findViewById<View>(R.id.toolbar_dropshadow).visibility =
+                        View.GONE
                 } else {
                     // we are not at the top yet
-                    app.getMainActivityRef().findViewById(R.id.toolbar_dropshadow).setVisibility(View.VISIBLE);
+                    instance!!.mainActivityRef!!.findViewById<View>(R.id.toolbar_dropshadow).visibility =
+                        View.VISIBLE
                 }
             }
 
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     // Show FABs when the user has stopped scrolling.
-                    fab.show();
+                    fab!!.show()
                 }
-                super.onScrollStateChanged(recyclerView, newState);
+                super.onScrollStateChanged(recyclerView, newState)
             }
-        });
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(isFABOpen) {
-                    closeFABMenu();
-                } else {
-                    showFABMenu();
-                }
+        })
+        fab!!.setOnClickListener {
+            if (isFABOpen) {
+                closeFABMenu()
+            } else {
+                showFABMenu()
             }
-        });
-        addContactFAB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addContact();
-                closeFABMenu();
-            }
-        });
-        addCompanyFAB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addCompany();
-                closeFABMenu();
-            }
-        });
+        }
+        addContactFAB!!.setOnClickListener {
+            addContact()
+            closeFABMenu()
+        }
+        addCompanyFAB!!.setOnClickListener {
+            addCompany()
+            closeFABMenu()
+        }
     }
 
-    private void addCompany() {
-        View addCompanyDialogView = getLayoutInflater().inflate(R.layout.dialog_new_company, null, false);
-
-        final EditText companyNameEditText = (EditText) addCompanyDialogView.findViewById(R.id.new_company_name_et);
-
-        final AlertDialog addNewCompanyDialog = new AlertDialog.Builder(getContext())
-                .setTitle("Add new company")
-                .setView(addCompanyDialogView)
-                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        // Dummy
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.cancel();
-                    }
-                })
-                .create();
-        addNewCompanyDialog.show();
-
-        companyNameEditText.requestFocus();
-
+    private fun addCompany() {
+        val addCompanyDialogView = layoutInflater.inflate(R.layout.dialog_new_company, null, false)
+        val companyNameEditText =
+            addCompanyDialogView.findViewById<View>(R.id.new_company_name_et) as EditText
+        val addNewCompanyDialog = AlertDialog.Builder(
+            (context)!!
+        )
+            .setTitle("Add new company")
+            .setView(addCompanyDialogView)
+            .setPositiveButton("Add") { _, _ ->
+                // Dummy
+            }
+            .setNegativeButton("Cancel") { dialogInterface, _ -> dialogInterface.cancel() }
+            .create()
+        addNewCompanyDialog.show()
+        companyNameEditText.requestFocus()
         addNewCompanyDialog.getButton(DialogInterface.BUTTON_POSITIVE)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        String newCompanyName = companyNameEditText.getText().toString().toUpperCase();
-
-                        if(!newCompanyName.isEmpty()) {
-                            Company company;
-
-                            if(app.getCompanyRecyclerViewAdapter().getCompaniesName().contains(newCompanyName)) {
-                                companyNameEditText.setError("Company already exists!");
-                                companyNameEditText.requestFocus();
-                            } else {
-                                String newCompanyId = databaseManager.getCompaniesRef().push().getKey();
-                                company = new Company(newCompanyId, newCompanyName);
-                                databaseManager.addCompany(company);
-                                addNewCompanyDialog.dismiss();
-                            }
-
-                        } else {
-                            companyNameEditText.setError("Please enter a company name");
-                            companyNameEditText.requestFocus();
-                        }
+            .setOnClickListener {
+                val newCompanyName =
+                    companyNameEditText.text.toString().uppercase(Locale.getDefault())
+                if (newCompanyName.isNotEmpty()) {
+                    val company: Company
+                    if (instance!!.companyRecyclerViewAdapter!!.companiesName.contains(newCompanyName)) {
+                        companyNameEditText.error = "Company already exists!"
+                        companyNameEditText.requestFocus()
+                    } else {
+                        val newCompanyId = databaseManager!!.companiesRef.push().key
+                        company = Company(newCompanyId, newCompanyName)
+                        databaseManager!!.addCompany(company)
+                        addNewCompanyDialog.dismiss()
                     }
-                });
+                } else {
+                    companyNameEditText.error = "Please enter a company name"
+                    companyNameEditText.requestFocus()
+                }
+            }
     }
 
-    private void showFABMenu(){
-        isFABOpen = true;
-        fab.animate().rotation(45).setDuration(300).start();
-
-        if (app.getCompanyRecyclerViewAdapter().getItemCount() > 0) {
+    private fun showFABMenu() {
+        isFABOpen = true
+        fab!!.animate().rotation(45f).setDuration(300).start()
+        if (instance!!.companyRecyclerViewAdapter!!.itemCount > 0) {
             // If a Company has already been added, make the FAB for adding a Contact visible.
-
-            addContactFAB.show();
-            addContactFAB.animate().translationY(-getResources().getDimension(R.dimen.fab_menu_item_position_1)).setDuration(300).withEndAction(new Runnable() {
-                @Override
-                public void run() {
-                    addContactFABTextView.setVisibility(View.VISIBLE);
-                    addContactFABTextView.animate().alpha(1f).setDuration(300);
+            addContactFAB!!.show()
+            addContactFAB!!.animate()
+                .translationY(-resources.getDimension(R.dimen.fab_menu_item_position_1))
+                .setDuration(300).withEndAction {
+                    addContactFABTextView!!.visibility = View.VISIBLE
+                    addContactFABTextView!!.animate().alpha(1f).duration = 300
                 }
-            });
-
-            addCompanyFAB.show();
-            addCompanyFAB.animate().translationY(-getResources().getDimension(R.dimen.fab_menu_item_position_2)).setDuration(300).withEndAction(new Runnable() {
-                @Override
-                public void run() {
-                    addCompanyFABTextView.setVisibility(View.VISIBLE);
-                    addCompanyFABTextView.animate().alpha(1f).setDuration(300);
+            addCompanyFAB!!.show()
+            addCompanyFAB!!.animate()
+                .translationY(-resources.getDimension(R.dimen.fab_menu_item_position_2))
+                .setDuration(300).withEndAction {
+                    addCompanyFABTextView!!.visibility = View.VISIBLE
+                    addCompanyFABTextView!!.animate().alpha(1f).duration = 300
                 }
-            });
         } else {
             // No Company has been added, hide the FAB for adding a Contact and switch position of Company FAB.
-            addContactFAB.hide();
-            addContactFABTextView.setVisibility(View.GONE);
-            addContactFABTextView.setAlpha(0f);
-
-            addCompanyFAB.show();
-            addCompanyFAB.animate().translationY(-getResources().getDimension(R.dimen.fab_menu_item_position_1)).setDuration(300).withEndAction(new Runnable() {
-                @Override
-                public void run() {
-                    addCompanyFABTextView.setVisibility(View.VISIBLE);
-                    addCompanyFABTextView.animate().alpha(1f).setDuration(300);
+            addContactFAB!!.hide()
+            addContactFABTextView!!.visibility = View.GONE
+            addContactFABTextView!!.alpha = 0f
+            addCompanyFAB!!.show()
+            addCompanyFAB!!.animate()
+                .translationY(-resources.getDimension(R.dimen.fab_menu_item_position_1))
+                .setDuration(300).withEndAction {
+                    addCompanyFABTextView!!.visibility = View.VISIBLE
+                    addCompanyFABTextView!!.animate().alpha(1f).duration = 300
                 }
-            });
         }
-
     }
 
-    private void closeFABMenu(){
-        isFABOpen = false;
-        fab.animate().rotation(0).setDuration(300).start();
-
-        addContactFAB.hide();
-        addContactFABTextView.animate().alpha(0f).setDuration(300).withEndAction(new Runnable() {
-            @Override
-            public void run() {
-                addContactFAB.animate().translationY(0).setDuration(300).withStartAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        addContactFABTextView.setVisibility(View.GONE);
-                    }
-                });
+    private fun closeFABMenu() {
+        isFABOpen = false
+        fab!!.animate().rotation(0f).setDuration(300).start()
+        addContactFAB!!.hide()
+        addContactFABTextView!!.animate().alpha(0f).setDuration(300)
+            .withEndAction {
+                addContactFAB!!.animate().translationY(0f).setDuration(300)
+                    .withStartAction { addContactFABTextView!!.visibility = View.GONE }
             }
-        });
-
-        addCompanyFAB.hide();
-        addCompanyFABTextView.animate().alpha(0f).setDuration(300).withEndAction(new Runnable() {
-            @Override
-            public void run() {
-                addCompanyFAB.animate().translationY(0).setDuration(300).withStartAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        addCompanyFABTextView.setVisibility(View.GONE);
-                    }
-                });
+        addCompanyFAB!!.hide()
+        addCompanyFABTextView!!.animate().alpha(0f).setDuration(300)
+            .withEndAction {
+                addCompanyFAB!!.animate().translationY(0f).setDuration(300)
+                    .withStartAction { addCompanyFABTextView!!.visibility = View.GONE }
             }
-        });
     }
 
-    public void initAdapter() {
-        companyRecyclerView.setAdapter(app.getCompanyRecyclerViewAdapter());
+    private fun initAdapter() {
+        companyRecyclerView!!.adapter = instance!!.companyRecyclerViewAdapter
     }
 
-    public void addContact() {
-        Intent addContactIntent = new Intent(getContext(), AddContactActivity.class);
-        startActivity(addContactIntent);
+    private fun addContact() {
+        val addContactIntent = Intent(context, AddContactActivity::class.java)
+        startActivity(addContactIntent)
+    }
+
+    companion object {
+        private val TAG = ContactsFragment::class.java.simpleName
     }
 }
