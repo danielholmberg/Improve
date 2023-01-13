@@ -1,346 +1,309 @@
-package dev.danielholmberg.improve.Fragments;
+package dev.danielholmberg.improve.Fragments
 
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import androidx.annotation.NonNull;
+import dev.danielholmberg.improve.Improve.Companion.instance
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import dev.danielholmberg.improve.Managers.DatabaseManager
+import dev.danielholmberg.improve.Services.DriveServiceHelper
+import android.os.Bundle
+import dev.danielholmberg.improve.Models.Contact
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import android.app.ProgressDialog
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import dev.danielholmberg.improve.R
+import android.content.Intent
+import dev.danielholmberg.improve.Activities.AddContactActivity
+import android.os.Parcelable
+import android.widget.Toast
+import android.text.method.ScrollingMovementMethod
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.api.services.drive.DriveScopes
+import android.widget.RelativeLayout
+import android.net.Uri
+import android.util.Log
+import android.view.View
+import android.widget.Button
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
+import com.google.android.gms.common.api.Scope
+import java.text.DateFormat
+import java.util.*
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.api.services.drive.DriveScopes;
+class ContactDetailsSheetFragment : BottomSheetDialogFragment(), View.OnClickListener {
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+    private var databaseManager: DatabaseManager? = null
+    private var mDriveServiceHelper: DriveServiceHelper? = null
+    private var contactBundle: Bundle? = null
+    private var contact: Contact? = null
+    private var detailsDialog: ContactDetailsSheetFragment? = null
+    private var parentFragment = 0
+    private var toolbar: Toolbar? = null
+    private var title: TextView? = null
+    private var name: TextView? = null
+    private var email: TextView? = null
+    private var mobile: TextView? = null
+    private var comment: TextView? = null
+    private var timestampAdded: String? = null
+    private var timestampUpdated: String? = null
+    private var activity: AppCompatActivity? = null
+    private var exportDialog: ProgressDialog? = null
 
-import java.text.DateFormat;
-import java.util.Calendar;
-
-import dev.danielholmberg.improve.Activities.AddContactActivity;
-import dev.danielholmberg.improve.Models.Contact;
-import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.DatabaseManager;
-import dev.danielholmberg.improve.R;
-import dev.danielholmberg.improve.Services.DriveServiceHelper;
-
-/**
- * Created by DanielHolmberg on 2018-02-21.
- */
-
-public class ContactDetailsSheetFragment extends BottomSheetDialogFragment implements View.OnClickListener{
-    private static final String TAG = ContactDetailsSheetFragment.class.getSimpleName();
-    public static final String CONTACT_KEY = "contact";
-    public static final String PARENT_FRAGMENT_KEY = "parentFragment";
-
-    private static final int REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION = 999;
-
-    private Improve app;
-    private DatabaseManager databaseManager;
-    private Context context;
-    private DriveServiceHelper mDriveServiceHelper;
-
-    private Bundle contactBundle;
-    private Contact contact;
-
-    private ContactDetailsSheetFragment detailsDialog;
-    private View view;
-    private int parentFragment;
-
-    private Toolbar toolbar;
-    private TextView title, name, email, mobile, comment;
-    private String timestampAdded, timestampUpdated;
-
-    private AppCompatActivity activity;
-    private ProgressDialog exportDialog;
-
-    public ContactDetailsSheetFragment() {
-        // Required empty public constructor
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        databaseManager = instance!!.databaseManager
+        detailsDialog = this
+        activity = getActivity() as AppCompatActivity?
+        mDriveServiceHelper = instance!!.driveServiceHelper
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        app = Improve.getInstance();
-        databaseManager = app.getDatabaseManager();
-        detailsDialog = this;
-        context = getContext();
-        activity = (AppCompatActivity) getActivity();
-        mDriveServiceHelper = app.getDriveServiceHelper();
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_contact_details, container, false);
-
-        toolbar = view.findViewById(R.id.toolbar_contact_details_fragment);
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.contactEdit:
-                        detailsDialog.dismiss();
-                        Intent updateContact = new Intent(getContext(), AddContactActivity.class);
-                        updateContact.putExtra(AddContactActivity.CONTACT_BUNDLE_KEY, contactBundle);
-                        startActivity(updateContact);
-                        return true;
-                    case R.id.contactDelete:
-                        showDeleteContactDialog();
-                        return true;
-                    case R.id.contactInfo:
-                        showInfoDialog();
-                        return true;
-                    case R.id.contactExport:
-                        checkDrivePermission();
-                        return true;
-                    default:
-                        return true;
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val view = inflater.inflate(R.layout.fragment_contact_details, container, false)
+        toolbar = view.findViewById(R.id.toolbar_contact_details_fragment)
+        toolbar!!.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.contactEdit -> {
+                    detailsDialog!!.dismiss()
+                    val updateContact = Intent(instance!!, AddContactActivity::class.java)
+                    updateContact.putExtra(AddContactActivity.CONTACT_BUNDLE_KEY, contactBundle)
+                    startActivity(updateContact)
+                    true
                 }
+                R.id.contactDelete -> {
+                    showDeleteContactDialog()
+                    true
+                }
+                R.id.contactInfo -> {
+                    showInfoDialog()
+                    true
+                }
+                R.id.contactExport -> {
+                    checkDrivePermission()
+                    true
+                }
+                else -> true
             }
-        });
-        toolbar.inflateMenu(R.menu.fragment_contact_details_show);
-
-        Button actionCallContact = (Button) view.findViewById(R.id.details_call_contact_btn);
-        Button actionSendMailToContact = (Button) view.findViewById(R.id.details_mail_contact_btn);
-
-        contactBundle =  this.getArguments();
-
-        if(contactBundle != null) {
-            parentFragment = contactBundle.getInt(PARENT_FRAGMENT_KEY);
-            contact = (Contact) contactBundle.getParcelable(CONTACT_KEY);
-        } else {
-            Toast.makeText(context, "Unable to show contact details", Toast.LENGTH_SHORT).show();
-            detailsDialog.dismiss();
         }
-
-        title = (TextView) view.findViewById(R.id.toolbar_contact_details_company_tv);
-        name = (TextView) view.findViewById(R.id.contact_details_name_tv);
-        email = (TextView) view.findViewById(R.id.contact_details_email_tv);
-        mobile = (TextView) view.findViewById(R.id.contact_details_mobile_tv);
-        comment = (TextView) view.findViewById(R.id.contact_details_comment_tv);
-
-        if(contact != null){
-            name.setText(contact.getName());
-            email.setText(contact.getEmail());
-            mobile.setText(contact.getPhone());
-            comment.setText(contact.getComment());
-            comment.setMovementMethod(new ScrollingMovementMethod());
-
-            if(contact.getTimestampAdded() != null) {
-                timestampAdded = tranformMillisToDateSring(Long.parseLong(contact.getTimestampAdded()));
+        toolbar!!.inflateMenu(R.menu.fragment_contact_details_show)
+        val actionCallContact = view.findViewById<View>(R.id.details_call_contact_btn) as Button
+        val actionSendMailToContact =
+            view.findViewById<View>(R.id.details_mail_contact_btn) as Button
+        contactBundle = this.arguments
+        if (contactBundle != null) {
+            parentFragment = contactBundle!!.getInt(PARENT_FRAGMENT_KEY)
+            contact = contactBundle!!.getParcelable<Parcelable>(CONTACT_KEY) as Contact?
+        } else {
+            Toast.makeText(context, "Unable to show contact details", Toast.LENGTH_SHORT).show()
+            detailsDialog!!.dismiss()
+        }
+        title = view.findViewById<View>(R.id.toolbar_contact_details_company_tv) as TextView
+        name = view.findViewById<View>(R.id.contact_details_name_tv) as TextView
+        email = view.findViewById<View>(R.id.contact_details_email_tv) as TextView
+        mobile = view.findViewById<View>(R.id.contact_details_mobile_tv) as TextView
+        comment = view.findViewById<View>(R.id.contact_details_comment_tv) as TextView
+        if (contact != null) {
+            name!!.text = contact!!.name
+            email!!.text = contact!!.email
+            mobile!!.text = contact!!.phone
+            comment!!.text = contact!!.comment
+            comment!!.movementMethod = ScrollingMovementMethod()
+            if (contact!!.timestampAdded != null) {
+                timestampAdded = transformMillisToDateString(contact!!.timestampAdded!!.toLong())
             }
-
-            if(contact.getTimestampUpdated() != null) {
-                timestampUpdated = tranformMillisToDateSring(Long.parseLong(contact.getTimestampUpdated()));
+            if (contact!!.timestampUpdated != null) {
+                timestampUpdated = transformMillisToDateString(contact!!.timestampUpdated!!.toLong())
             }
-
-            if(contact.getCompanyId() != null) {
-                if (app.getCompanyRecyclerViewAdapter().getCompany(contact.getCompanyId()) != null) {
-                    title.setText(app.getCompanyRecyclerViewAdapter().getCompany(contact.getCompanyId()).getName());
+            if (contact!!.companyId != null) {
+                if (instance!!.companyRecyclerViewAdapter!!.getCompany(contact!!.companyId!!) != null) {
+                    title!!.text =
+                        instance!!.companyRecyclerViewAdapter!!.getCompany(contact!!.companyId!!)!!.name
                 }
             }
 
             // Handle if the voluntary contact information fields is empty
             // Change e-mail field
-            if(contact.getEmail() != null) {
-                if (contact.getEmail().isEmpty()) {
+            if (contact!!.email != null) {
+                if (contact!!.email!!.isEmpty()) {
                     // Change text and disable mail action
-                    email.setText(getString(R.string.contact_details_empty_email_text));
-                    email.setTextColor(getResources().getColor(R.color.contact_form_icon));
-                    actionSendMailToContact.setEnabled(false);
-                    actionSendMailToContact.setTextColor(getResources().getColor(R.color.contact_form_icon));
+                    email!!.text = getString(R.string.contact_details_empty_email_text)
+                    email!!.setTextColor(ContextCompat.getColor(instance!!, R.color.contact_form_icon))
+                    actionSendMailToContact.isEnabled = false
+                    actionSendMailToContact.setTextColor(ContextCompat.getColor(instance!!, R.color.contact_form_icon))
                     actionSendMailToContact.setCompoundDrawablesWithIntrinsicBounds(
-                            getResources().getDrawable(R.drawable.ic_contact_email_grey),
-                            null, null, null);
+                        ContextCompat.getDrawable(instance!!, R.drawable.ic_contact_email_grey),
+                        null, null, null
+                    )
                 }
             } else {
-                email.setText(getString(R.string.contact_details_empty_email_text));
-                email.setTextColor(getResources().getColor(R.color.contact_form_icon));
-                actionSendMailToContact.setEnabled(false);
-                actionSendMailToContact.setTextColor(getResources().getColor(R.color.contact_form_icon));
+                email!!.text = getString(R.string.contact_details_empty_email_text)
+                email!!.setTextColor(ContextCompat.getColor(instance!!, R.color.contact_form_icon))
+                actionSendMailToContact.isEnabled = false
+                actionSendMailToContact.setTextColor(ContextCompat.getColor(instance!!, R.color.contact_form_icon))
                 actionSendMailToContact.setCompoundDrawablesWithIntrinsicBounds(
-                        getResources().getDrawable(R.drawable.ic_contact_email_grey),
-                        null, null, null);
+                    ContextCompat.getDrawable(instance!!, R.drawable.ic_contact_email_grey),
+                    null, null, null
+                )
             }
             // Change phone field
-            if(contact.getPhone() != null) {
-                if (contact.getPhone().isEmpty()) {
+            if (contact!!.phone != null) {
+                if (contact!!.phone!!.isEmpty()) {
                     // Change text and disable call action
-                    mobile.setText(getString(R.string.contact_details_empty_mobile_text));
-                    mobile.setTextColor(getResources().getColor(R.color.contact_form_icon));
-                    actionCallContact.setEnabled(false);
-                    actionCallContact.setTextColor(getResources().getColor(R.color.contact_form_icon));
+                    mobile!!.text = getString(R.string.contact_details_empty_mobile_text)
+                    mobile!!.setTextColor(ContextCompat.getColor(instance!!, R.color.contact_form_icon))
+                    actionCallContact.isEnabled = false
+                    actionCallContact.setTextColor(ContextCompat.getColor(instance!!, R.color.contact_form_icon))
                     actionCallContact.setCompoundDrawablesWithIntrinsicBounds(
-                            getResources().getDrawable(R.drawable.ic_contact_mobile_grey),
-                            null, null, null);
+                        ContextCompat.getDrawable(instance!!, R.drawable.ic_contact_mobile_grey),
+                        null, null, null
+                    )
                 }
             } else {
-                mobile.setText(getString(R.string.contact_details_empty_mobile_text));
-                mobile.setTextColor(getResources().getColor(R.color.contact_form_icon));
-                actionCallContact.setEnabled(false);
-                actionCallContact.setTextColor(getResources().getColor(R.color.contact_form_icon));
+                mobile!!.text = getString(R.string.contact_details_empty_mobile_text)
+                mobile!!.setTextColor(ContextCompat.getColor(instance!!, R.color.contact_form_icon))
+                actionCallContact.isEnabled = false
+                actionCallContact.setTextColor(ContextCompat.getColor(instance!!, R.color.contact_form_icon))
                 actionCallContact.setCompoundDrawablesWithIntrinsicBounds(
-                        getResources().getDrawable(R.drawable.ic_contact_mobile_grey),
-                        null, null, null);
+                    ContextCompat.getDrawable(instance!!, R.drawable.ic_contact_mobile_grey),
+                    null, null, null
+                )
             }
             // Change comment field
-            if(contact.getComment() != null) {
-                if (contact.getComment().isEmpty()) {
+            if (contact!!.comment != null) {
+                if (contact!!.comment!!.isEmpty()) {
                     // Change text
-                    comment.setText(getString(R.string.contact_details_empty_comment_text));
-                    comment.setTextColor(getResources().getColor(R.color.contact_form_icon));
+                    comment!!.text = getString(R.string.contact_details_empty_comment_text)
+                    comment!!.setTextColor(ContextCompat.getColor(instance!!, R.color.contact_form_icon))
                 }
             } else {
-                comment.setText(getString(R.string.contact_details_empty_comment_text));
-                comment.setTextColor(getResources().getColor(R.color.contact_form_icon));
+                comment!!.text = getString(R.string.contact_details_empty_comment_text)
+                comment!!.setTextColor(ContextCompat.getColor(instance!!, R.color.contact_form_icon))
             }
         } else {
             // Dismiss dialog and show Toast.
-            this.dismiss();
-            Toast.makeText(context, "Unable to show contact details", Toast.LENGTH_SHORT).show();
+            dismiss()
+            Toast.makeText(context, "Unable to show contact details", Toast.LENGTH_SHORT).show()
         }
-
-        actionCallContact.setOnClickListener(this);
-        actionSendMailToContact.setOnClickListener(this);
+        actionCallContact.setOnClickListener(this)
+        actionSendMailToContact.setOnClickListener(this)
 
         // Inflate the layout for this fragment
-        return view;
+        return view
     }
 
-    private void exportContactToDrive(Contact contact) {
-        Log.d(TAG, "Exporting contact (" + contact.getId() + " to Google Drive...");
-
+    private fun exportContactToDrive(contact: Contact?) {
+        Log.d(TAG, "Exporting contact (" + contact!!.id + " to Google Drive...")
         if (mDriveServiceHelper != null) {
-            Log.d(TAG, "Creating a file.");
-
-            exportDialog = ProgressDialog.show(context, "Exporting Contact to Google Drive",
-                    "In progress...", true);
-
-            exportDialog.show();
-
-            Log.d(TAG, "Contact exported info: " + contact.toString());
-
-            mDriveServiceHelper.createFile(DriveServiceHelper.TYPE_CONTACT, contact.getName(), contact.toString())
-                    .addOnSuccessListener(new OnSuccessListener<String>() {
-                        @Override
-                        public void onSuccess(String id) {
-                            Log.d(TAG, "Created file");
-                            exportDialog.cancel();
-                            dismiss();
-                            Toast.makeText(app, "Contact exported", Toast.LENGTH_LONG).show();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.e(TAG, "Couldn't create file.", e);
-                            exportDialog.cancel();
-                            Toast.makeText(app, "Failed to export Contact", Toast.LENGTH_LONG).show();
-                        }
-                    });
+            Log.d(TAG, "Creating a file.")
+            exportDialog = ProgressDialog.show(
+                context, "Exporting Contact to Google Drive",
+                "In progress...", true
+            )
+            exportDialog!!.show()
+            Log.d(TAG, "Contact exported info: $contact")
+            mDriveServiceHelper!!.createFile(
+                DriveServiceHelper.TYPE_CONTACT,
+                contact.name,
+                contact.toString()
+            )
+                .addOnSuccessListener {
+                    Log.d(TAG, "Created file")
+                    exportDialog!!.cancel()
+                    dismiss()
+                    Toast.makeText(instance, "Contact exported", Toast.LENGTH_LONG).show()
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Couldn't create file.", e)
+                    exportDialog!!.cancel()
+                    Toast.makeText(instance, "Failed to export Contact", Toast.LENGTH_LONG).show()
+                }
         } else {
-            Log.e(TAG, "DriveServiceHelper wasn't initialized.");
-            Toast.makeText(app, "Failed to export Contact", Toast.LENGTH_LONG).show();
+            Log.e(TAG, "DriveServiceHelper wasn't initialized.")
+            Toast.makeText(instance, "Failed to export Contact", Toast.LENGTH_LONG).show()
         }
     }
 
-    private void checkDrivePermission() {
-        if (!GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(app), new Scope(DriveScopes.DRIVE_FILE))) {
-
+    private fun checkDrivePermission() {
+        if (!GoogleSignIn.hasPermissions(
+                GoogleSignIn.getLastSignedInAccount(instance),
+                Scope(DriveScopes.DRIVE_FILE)
+            )
+        ) {
             GoogleSignIn.requestPermissions(
-                    app.getContactsFragmentRef(),
-                    REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION,
-                    GoogleSignIn.getLastSignedInAccount(app), new Scope(DriveScopes.DRIVE_FILE));
+                instance!!.contactsFragmentRef!!,
+                REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION,
+                GoogleSignIn.getLastSignedInAccount(instance), Scope(DriveScopes.DRIVE_FILE)
+            )
         } else {
-            exportContactToDrive(contact);
+            exportContactToDrive(contact)
         }
     }
 
-    private void deleteContact(final Contact contact) {
-        databaseManager.deleteContact(contact);
-        detailsDialog.dismiss();
+    private fun deleteContact(contact: Contact?) {
+        databaseManager!!.deleteContact(contact!!)
+        detailsDialog!!.dismiss()
     }
 
-    private String tranformMillisToDateSring(long timeInMillis) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(timeInMillis);
-
-        return DateFormat.getDateTimeInstance().format(calendar.getTime());
+    private fun transformMillisToDateString(timeInMillis: Long): String {
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = timeInMillis
+        return DateFormat.getDateTimeInstance().format(calendar.time)
     }
 
-    private void showInfoDialog() {
-        RelativeLayout contactInfoLayout = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.dialog_contact_info, null);
-        TextView contactAddedTimestamp = contactInfoLayout.findViewById(R.id.contact_info_added_timestamp_tv);
-        TextView contactUpdatedTimestamp = contactInfoLayout.findViewById(R.id.contact_info_updated_timestamp_tv);
-
-        contactAddedTimestamp.setText(timestampAdded);
-        contactUpdatedTimestamp.setText(timestampUpdated);
-
-        AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(context).setTitle(R.string.dialog_info_contact_title)
-                        .setIcon(R.drawable.ic_menu_info_primary)
-                        .setView(contactInfoLayout)
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                dialogInterface.dismiss();
-                            }
-                        });
-        final AlertDialog dialog = alertDialogBuilder.create();
-        dialog.show();
+    private fun showInfoDialog() {
+        val contactInfoLayout = LayoutInflater.from(context)
+            .inflate(R.layout.dialog_contact_info, null) as RelativeLayout
+        val contactAddedTimestamp =
+            contactInfoLayout.findViewById<TextView>(R.id.contact_info_added_timestamp_tv)
+        val contactUpdatedTimestamp =
+            contactInfoLayout.findViewById<TextView>(R.id.contact_info_updated_timestamp_tv)
+        contactAddedTimestamp.text = timestampAdded
+        contactUpdatedTimestamp.text = timestampUpdated
+        val alertDialogBuilder = AlertDialog.Builder(
+            context!!
+        ).setTitle(R.string.dialog_info_contact_title)
+            .setIcon(R.drawable.ic_menu_info_primary)
+            .setView(contactInfoLayout)
+            .setPositiveButton("OK") { dialogInterface, _ -> dialogInterface.dismiss() }
+        val dialog = alertDialogBuilder.create()
+        dialog.show()
     }
 
-    private void showDeleteContactDialog() {
-        AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(context).setTitle(R.string.dialog_delete_contact_title)
-                        .setMessage(R.string.dialog_delete_contact_msg)
-                        .setIcon(R.drawable.ic_menu_delete_grey)
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                deleteContact(contact);
-                            }
-                        }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                });
-        final AlertDialog dialog = alertDialogBuilder.create();
-        dialog.show();
+    private fun showDeleteContactDialog() {
+        val alertDialogBuilder = AlertDialog.Builder(
+            context!!
+        ).setTitle(R.string.dialog_delete_contact_title)
+            .setMessage(R.string.dialog_delete_contact_msg)
+            .setIcon(R.drawable.ic_menu_delete_grey)
+            .setPositiveButton("Yes") { _, _ -> deleteContact(contact) }
+            .setNegativeButton("No") { dialogInterface, _ -> dialogInterface.dismiss() }
+        val dialog = alertDialogBuilder.create()
+        dialog.show()
     }
 
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.details_call_contact_btn:
-                Intent callIntent = new Intent(Intent.ACTION_DIAL);
-                callIntent.setData(Uri.parse("tel:" + contact.getPhone()));
-                startActivity(callIntent);
-                break;
-            case R.id.details_mail_contact_btn:
-                Intent mailIntent = new Intent(Intent.ACTION_SENDTO);
-                mailIntent.setData(Uri.parse("mailto:" + contact.getEmail()));
-                startActivity(mailIntent);
-                break;
-            default:
-                break;
+    override fun onClick(view: View) {
+        when (view.id) {
+            R.id.details_call_contact_btn -> {
+                val callIntent = Intent(Intent.ACTION_DIAL)
+                callIntent.data = Uri.parse("tel:" + contact!!.phone)
+                startActivity(callIntent)
+            }
+            R.id.details_mail_contact_btn -> {
+                val mailIntent = Intent(Intent.ACTION_SENDTO)
+                mailIntent.data = Uri.parse("mailto:" + contact!!.email)
+                startActivity(mailIntent)
+            }
+            else -> {}
         }
+    }
+
+    companion object {
+        private val TAG = ContactDetailsSheetFragment::class.java.simpleName
+        const val CONTACT_KEY = "contact"
+        const val PARENT_FRAGMENT_KEY = "parentFragment"
+        private const val REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION = 999
     }
 }
