@@ -1,234 +1,187 @@
-package dev.danielholmberg.improve.Fragments;
+package dev.danielholmberg.improve.Fragments
 
-import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import dev.danielholmberg.improve.Improve.Companion.instance
+import dev.danielholmberg.improve.Managers.DatabaseManager
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.recyclerview.widget.RecyclerView
+import android.widget.TextView
+import android.os.Bundle
+import android.util.Log
+import android.view.*
+import dev.danielholmberg.improve.R
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.database.DatabaseError
+import android.widget.EditText
+import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import dev.danielholmberg.improve.Models.Note
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.TextView;
+class ArchivedNotesFragment : Fragment(), SearchView.OnQueryTextListener {
 
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
+    private var databaseManager: DatabaseManager? = null
+    private var snackBarView: CoordinatorLayout? = null
+    private var archivedNotesRecyclerView: RecyclerView? = null
+    private var emptyListText: TextView? = null
 
-import dev.danielholmberg.improve.Models.Note;
-import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.DatabaseManager;
-import dev.danielholmberg.improve.R;
-
-/**
- * Created by DanielHolmberg on 2018-01-20.
- */
-
-public class ArchivedNotesFragment extends Fragment implements SearchView.OnQueryTextListener {
-    private static final String TAG = ArchivedNotesFragment.class.getSimpleName();
-
-    private Improve app;
-    private DatabaseManager databaseManager;
-
-    private View view;
-    private CoordinatorLayout snackbarView;
-    private RecyclerView archivedNotesRecyclerView;
-    private TextView emptyListText;
-
-    public ArchivedNotesFragment() {
-        // Required empty public constructor
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        instance!!.archivedNotesFragmentRef = this
+        databaseManager = instance!!.databaseManager
+        setHasOptionsMenu(true)
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        app = Improve.getInstance();
-        app.setArchivedNotesFragmentRef(this);
-        databaseManager = app.getDatabaseManager();
-        setHasOptionsMenu(true);
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val view = inflater.inflate(
+            R.layout.fragment_archived_notes,
+            container, false
+        )
+        instance!!.mainActivityRef!!.findViewById<View>(R.id.toolbar_dropshadow).visibility =
+            View.GONE
+        snackBarView = view.findViewById(R.id.archivednote_fragment_container)
+        archivedNotesRecyclerView =
+            view.findViewById<View>(R.id.archived_notes_list) as RecyclerView
+        emptyListText = view.findViewById<View>(R.id.empty_archive_list_tv) as TextView
+        val recyclerLayoutManager = LinearLayoutManager(activity)
+        recyclerLayoutManager.reverseLayout = true
+        recyclerLayoutManager.stackFromEnd = true
+        archivedNotesRecyclerView!!.layoutManager = recyclerLayoutManager
+        archivedNotesRecyclerView!!.adapter = instance!!.archivedNotesAdapter
+        initListScrollListener()
+        initListDataChangeListener()
+        return view
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_archived_notes,
-                container, false);
-
-        app.getMainActivityRef().findViewById(R.id.toolbar_dropshadow).setVisibility(View.GONE);
-
-        snackbarView = view.findViewById(R.id.archivednote_fragment_container);
-
-        archivedNotesRecyclerView = (RecyclerView) view.findViewById(R.id.archived_notes_list);
-        emptyListText = (TextView) view.findViewById(R.id.empty_archive_list_tv);
-
-        LinearLayoutManager recyclerLayoutManager = new LinearLayoutManager(getActivity());
-        recyclerLayoutManager.setReverseLayout(true);
-        recyclerLayoutManager.setStackFromEnd(true);
-        archivedNotesRecyclerView.setLayoutManager(recyclerLayoutManager);
-
-        archivedNotesRecyclerView.setAdapter(app.getArchivedNotesAdapter());
-
-        initListScrollListener();
-        initListDataChangeListener();
-
-        return view;
-    }
-
-    private void initListScrollListener() {
-        archivedNotesRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                if(!recyclerView.canScrollVertically(-1)) {
+    private fun initListScrollListener() {
+        archivedNotesRecyclerView!!.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (!recyclerView.canScrollVertically(-1)) {
                     // we have reached the top of the list
-                    Log.d(TAG, "Reached the top!");
-                    app.getMainActivityRef().findViewById(R.id.toolbar_dropshadow).setVisibility(View.GONE);
+                    Log.d(TAG, "Reached the top!")
+                    instance!!.mainActivityRef!!.findViewById<View>(R.id.toolbar_dropshadow).visibility =
+                        View.GONE
                 } else {
                     // we are not at the top yet
-                    Log.d(TAG, "not at top yet!");
-                    app.getMainActivityRef().findViewById(R.id.toolbar_dropshadow).setVisibility(View.VISIBLE);
+                    Log.d(TAG, "not at top yet!")
+                    instance!!.mainActivityRef!!.findViewById<View>(R.id.toolbar_dropshadow).visibility =
+                        View.VISIBLE
                 }
             }
-        });
+        })
     }
 
-    private void initListDataChangeListener() {
-        databaseManager.getArchivedNotesRef().addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                if(app.getArchivedNotesAdapter().getItemCount() > 0) {
-                    archivedNotesRecyclerView.setVisibility(View.VISIBLE);
-                    emptyListText.setVisibility(View.GONE);
+    private fun initListDataChangeListener() {
+        databaseManager!!.archivedNotesRef.addChildEventListener(object : ChildEventListener {
+            override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
+                if (instance!!.archivedNotesAdapter!!.itemCount > 0) {
+                    archivedNotesRecyclerView!!.visibility = View.VISIBLE
+                    emptyListText!!.visibility = View.GONE
                 } else {
-                    archivedNotesRecyclerView.setVisibility(View.GONE);
-                    emptyListText.setVisibility(View.VISIBLE);
+                    archivedNotesRecyclerView!!.visibility = View.GONE
+                    emptyListText!!.visibility = View.VISIBLE
                 }
             }
 
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                final Note removedArchivedNote = dataSnapshot.getValue(Note.class);
-
-                if(removedArchivedNote != null) {
-                    if(app.getNotes().containsKey(removedArchivedNote.getId())) {
+            override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {}
+            override fun onChildRemoved(dataSnapshot: DataSnapshot) {
+                val removedArchivedNote = dataSnapshot.getValue(
+                    Note::class.java
+                )
+                if (removedArchivedNote != null) {
+                    if (instance!!.notes.containsKey(removedArchivedNote.id)) {
                         // Note is Unarchived and not truly deleted.
-                        Snackbar.make(snackbarView,
-                                "Note unarchived", Snackbar.LENGTH_LONG)
-                                .setAction("UNDO", new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        databaseManager.archiveNote(removedArchivedNote);
-                                    }
-                                }).show();
+                        Snackbar.make(
+                            snackBarView!!,
+                            "Note unarchived", Snackbar.LENGTH_LONG
+                        )
+                            .setAction("UNDO") { databaseManager!!.archiveNote(removedArchivedNote) }
+                            .show()
                     } else {
-                        Snackbar.make(snackbarView,
-                                "Note deleted", Snackbar.LENGTH_LONG)
-                                .setAction("UNDO", new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        databaseManager.addArchivedNote(removedArchivedNote);
-                                    }
-                                }).show();
+                        Snackbar.make(
+                            snackBarView!!,
+                            "Note deleted", Snackbar.LENGTH_LONG
+                        )
+                            .setAction("UNDO") {
+                                databaseManager!!.addArchivedNote(
+                                    removedArchivedNote
+                                )
+                            }
+                            .show()
                     }
                 }
-
-                if(app.getArchivedNotesAdapter().getItemCount() > 0) {
-                    archivedNotesRecyclerView.setVisibility(View.VISIBLE);
-                    emptyListText.setVisibility(View.GONE);
+                if (instance!!.archivedNotesAdapter!!.itemCount > 0) {
+                    archivedNotesRecyclerView!!.visibility = View.VISIBLE
+                    emptyListText!!.visibility = View.GONE
                 } else {
-                    archivedNotesRecyclerView.setVisibility(View.GONE);
-                    emptyListText.setVisibility(View.VISIBLE);
+                    archivedNotesRecyclerView!!.visibility = View.GONE
+                    emptyListText!!.visibility = View.VISIBLE
                 }
             }
 
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+            override fun onChildMoved(dataSnapshot: DataSnapshot, s: String?) {}
+            override fun onCancelled(databaseError: DatabaseError) {}
+        })
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_archived_notes, menu);
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.fragment_archived_notes, menu)
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.search_archived_note:
-                SearchView searchView = (SearchView) item.getActionView();
-                searchView.setQueryHint("Search Archived Note");
-                searchView.setOnQueryTextListener(this);
-                searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-                    @Override
-                    public boolean onClose() {
-                        Log.d(TAG, "Search closed!");
-                        app.getArchivedNotesAdapter().clearFilter();
-                        return true;
-                    }
-                });
-
-                EditText searchEditText = (EditText) searchView.findViewById(androidx.appcompat.R.id.search_src_text);
-                searchEditText.setTextColor(getResources().getColor(R.color.search_text_color));
-                searchEditText.setHintTextColor(getResources().getColor(R.color.search_hint_color));
-                searchEditText.setCursorVisible(false);
-
-                item.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
-                    @Override
-                    public boolean onMenuItemActionExpand(MenuItem menuItem) {
-                        Log.d(TAG, "Search opened!");
-                        app.getArchivedNotesAdapter().initSearch();
-                        return true;
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.search_archived_note -> {
+                val searchView = item.actionView as SearchView
+                searchView.queryHint = "Search Archived Note"
+                searchView.setOnQueryTextListener(this)
+                searchView.setOnCloseListener {
+                    Log.d(TAG, "Search closed!")
+                    instance!!.archivedNotesAdapter!!.clearFilter()
+                    true
+                }
+                val searchEditText =
+                    searchView.findViewById<View>(androidx.appcompat.R.id.search_src_text) as EditText
+                searchEditText.setTextColor(ContextCompat.getColor(instance!!, R.color.search_text_color))
+                searchEditText.setHintTextColor(ContextCompat.getColor(instance!!, R.color.search_hint_color))
+                searchEditText.isCursorVisible = false
+                item.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+                    override fun onMenuItemActionExpand(menuItem: MenuItem): Boolean {
+                        Log.d(TAG, "Search opened!")
+                        instance!!.archivedNotesAdapter!!.initSearch()
+                        return true
                     }
 
-                    @Override
-                    public boolean onMenuItemActionCollapse(MenuItem menuItem) {
-                        Log.d(TAG, "Search closed!");
-                        app.getArchivedNotesAdapter().clearFilter();
-                        return true;
+                    override fun onMenuItemActionCollapse(menuItem: MenuItem): Boolean {
+                        Log.d(TAG, "Search closed!")
+                        instance!!.archivedNotesAdapter!!.clearFilter()
+                        return true
                     }
-                });
-
-                return true;
-            default:
-                break;
+                })
+                return true
+            }
+            else -> {}
         }
-        return false;
+        return false
     }
 
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        Log.d(TAG, "Query Submitted: " + query);
-        return true;
+    override fun onQueryTextSubmit(query: String): Boolean {
+        Log.d(TAG, "Query Submitted: $query")
+        return true
     }
 
-    @Override
-    public boolean onQueryTextChange(String newText) {
-        Log.d(TAG, "Query Inserted: " + newText);
+    override fun onQueryTextChange(newText: String): Boolean {
+        Log.d(TAG, "Query Inserted: $newText")
+        instance!!.archivedNotesAdapter!!.filter(newText)
+        archivedNotesRecyclerView!!.scrollToPosition(instance!!.archivedNotesAdapter!!.itemCount - 1)
+        return true
+    }
 
-        app.getArchivedNotesAdapter().filter(newText);
-        archivedNotesRecyclerView.scrollToPosition(app.getArchivedNotesAdapter().getItemCount()-1);
-
-        return true;
+    companion object {
+        private val TAG = ArchivedNotesFragment::class.java.simpleName
     }
 }
