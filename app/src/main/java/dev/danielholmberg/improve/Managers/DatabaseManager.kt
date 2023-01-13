@@ -346,7 +346,7 @@ class DatabaseManager {
     /**
      * Uploads all archived notes to the Archived_notes-node.
      */
-    fun saveArchivedNotes(archivedNotes: HashMap<String, Any>) {
+    fun saveArchivedNotes(archivedNotes: HashMap<String?, Any>) {
         archivedNotesRef.updateChildren(archivedNotes) { databaseError, databaseReference ->
             if (databaseError != null) {
                 Log.e(TAG, "Failed to save Archived notes: $databaseError")

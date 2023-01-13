@@ -1,221 +1,200 @@
-package dev.danielholmberg.improve.Adapters;
+package dev.danielholmberg.improve.Adapters
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import android.util.Log
+import dev.danielholmberg.improve.Improve.Companion.instance
+import androidx.recyclerview.widget.RecyclerView
+import dev.danielholmberg.improve.ViewHolders.ArchivedNoteViewHolder
+import dev.danielholmberg.improve.Managers.DatabaseManager
+import androidx.recyclerview.widget.SortedList
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import android.widget.Toast
+import com.google.firebase.database.DatabaseError
+import android.view.ViewGroup
+import android.view.LayoutInflater
+import dev.danielholmberg.improve.Models.Note
+import dev.danielholmberg.improve.R
+import java.util.*
 
-import androidx.recyclerview.widget.SortedList;
-import androidx.recyclerview.widget.RecyclerView;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
+class ArchivedNotesAdapter : RecyclerView.Adapter<ArchivedNoteViewHolder>() {
 
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import dev.danielholmberg.improve.Models.Note;
-import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.DatabaseManager;
-import dev.danielholmberg.improve.R;
-import dev.danielholmberg.improve.ViewHolders.ArchivedNoteViewHolder;
-
-public class ArchivedNotesAdapter extends RecyclerView.Adapter<ArchivedNoteViewHolder> {
-    private static final String TAG = ArchivedNotesAdapter.class.getSimpleName();
-
-    private Improve app;
-    private DatabaseManager databaseManager;
-    private SortedList<Note> archivedNotes;
-    private List<Note> archivedNotesCopy, filteredArchivedNotes;
-
-    public ArchivedNotesAdapter() {
-        this.app = Improve.getInstance();
-        this.databaseManager = app.getDatabaseManager();
-
-        archivedNotes = new SortedList<Note>(Note.class, new SortedList.Callback<Note>() {
-            @Override
-            public int compare(@NonNull Note o1, @NonNull Note o2) {
+    private val databaseManager: DatabaseManager? = instance!!.databaseManager
+    private val archivedNotes: SortedList<Note> =
+        SortedList(Note::class.java, object : SortedList.Callback<Note>() {
+            override fun compare(o1: Note, o2: Note): Int {
                 // Makes sure that the objects has a value for parameter "updated".
                 // Those with a value are greater than those without.
                 // This issue is only related to Notes created with v1.
-                if(o1.getUpdated() == null && o2.getUpdated() == null) {
-                    return 0;
-                } else if(o1.getUpdated() != null && o2.getUpdated() == null) {
-                    return 1;
-                } else if(o1.getUpdated() == null && o2.getUpdated() != null) {
-                    return -1;
+                return if (o1.updated == null && o2.updated == null) {
+                    0
+                } else if (o1.updated != null && o2.updated == null) {
+                    1
+                } else if (o1.updated == null) {
+                    -1
                 } else {
-                    return o1.getUpdated().compareTo(o2.getUpdated());
+                    o1.updated!!.compareTo(o2.updated!!)
                 }
             }
 
-            @Override
-            public void onChanged(int position, int count) {
-                notifyItemRangeChanged(position, count);
+            override fun onChanged(position: Int, count: Int) {
+                notifyItemRangeChanged(position, count)
             }
 
-            @Override
-            public boolean areContentsTheSame(@NonNull Note oldItem, @NonNull Note newItem) {
-                return oldItem.getTitle().trim().equals(newItem.getTitle().trim())
-                        && oldItem.getInfo().trim().equals(newItem.getInfo().trim())
-                        && oldItem.getTags().size() != newItem.getTags().size();
+            override fun areContentsTheSame(oldItem: Note, newItem: Note): Boolean {
+                return oldItem.title!!.trim { it <= ' ' } == newItem.title!!.trim { it <= ' ' }
+                        && oldItem.info!!.trim { it <= ' ' } == newItem.info!!.trim { it <= ' ' }
+                        && oldItem.getTags().size != newItem.getTags().size
             }
 
-            @Override
-            public boolean areItemsTheSame(@NonNull Note oldItem, @NonNull Note newItem) {
-                return oldItem.getId().equals(newItem.getId());
+            override fun areItemsTheSame(oldItem: Note, newItem: Note): Boolean {
+                return oldItem.id == newItem.id
             }
 
-            @Override
-            public void onInserted(int position, int count) {
-                notifyItemRangeInserted(position, count);
+            override fun onInserted(position: Int, count: Int) {
+                notifyItemRangeInserted(position, count)
             }
 
-            @Override
-            public void onRemoved(int position, int count) {
-                notifyItemRangeRemoved(position, count);
+            override fun onRemoved(position: Int, count: Int) {
+                notifyItemRangeRemoved(position, count)
             }
 
-            @Override
-            public void onMoved(int fromPosition, int toPosition) {
-                notifyItemMoved(fromPosition, toPosition);
+            override fun onMoved(fromPosition: Int, toPosition: Int) {
+                notifyItemMoved(fromPosition, toPosition)
             }
-        });
+        })
 
-        initDatabaseListener();
+    private var archivedNotesCopy: List<Note>? = null
+    private var filteredArchivedNotes: MutableList<Note>? = null
 
+    init {
+        initDatabaseListener()
     }
 
     /**
      * Downloads all archivedNotes from the Notes-node and adds a childEventListener to detect changes.
      */
-    private void initDatabaseListener() {
-        databaseManager.getArchivedNotesRef().addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
+    private fun initDatabaseListener() {
+        databaseManager!!.archivedNotesRef.addChildEventListener(object : ChildEventListener {
+            override fun onChildAdded(dataSnapshot: DataSnapshot, previousChildName: String?) {
                 // This method is triggered when a new child is added
                 // to the location to which this listener was added.
-                Note archivedNote = dataSnapshot.getValue(Note.class);
-
-                if(archivedNote != null) {
-                    archivedNotes.add(archivedNote);
+                val archivedNote = dataSnapshot.getValue(
+                    Note::class.java
+                )
+                if (archivedNote != null) {
+                    archivedNotes.add(archivedNote)
                 }
             }
 
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
+            override fun onChildChanged(dataSnapshot: DataSnapshot, previousChildName: String?) {
                 // This method is triggered when the data at a child location has changed.
-                Note updatedNote = dataSnapshot.getValue(Note.class);
-
-                if(updatedNote != null) {
-                    Note existingNote = (Note) getHashMap().get(updatedNote.getId());
-                    if(existingNote == null) {
-                        archivedNotes.add(updatedNote);
+                val updatedNote = dataSnapshot.getValue(
+                    Note::class.java
+                )
+                if (updatedNote != null) {
+                    val existingNote = hashMap[updatedNote.id] as Note?
+                    if (existingNote == null) {
+                        archivedNotes.add(updatedNote)
                     } else {
-                        archivedNotes.updateItemAt(getArchivedNotesList().indexOf(existingNote), updatedNote);
+                        archivedNotes.updateItemAt(
+                            archivedNotesList.indexOf(existingNote),
+                            updatedNote
+                        )
                     }
-
-                    Toast.makeText(app, "Archived note updated", Toast.LENGTH_SHORT).show();
-
+                    Toast.makeText(instance, "Archived note updated", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+            override fun onChildRemoved(dataSnapshot: DataSnapshot) {
                 // This method is triggered when a child is removed from the location
                 // to which this listener was added.
-                final Note removedNote = dataSnapshot.getValue(Note.class);
-
-                if(removedNote != null) {
-                    archivedNotes.remove(removedNote);
+                val removedNote = dataSnapshot.getValue(
+                    Note::class.java
+                )
+                if (removedNote != null) {
+                    archivedNotes.remove(removedNote)
                 } else {
-                    Toast.makeText(app, "Failed to delete note, please try again later",
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(
+                        instance, "Failed to delete note, please try again later",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
 
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            override fun onChildMoved(dataSnapshot: DataSnapshot, s: String?) {
                 // This method is triggered when a child location's priority changes.
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+            override fun onCancelled(databaseError: DatabaseError) {
                 // This method will be triggered in the event that this listener either failed
                 // at the server, or is removed as a result of the security and Firebase rules.
-
-                Log.e(TAG, "ArchivedNotes ChildEventListener cancelled: " + databaseError);
+                Log.e(TAG, "ArchivedNotes ChildEventListener cancelled: $databaseError")
             }
-        });
-
+        })
     }
 
-    public void initSearch() {
-        archivedNotesCopy = getArchivedNotesList();
-        filteredArchivedNotes = new ArrayList<>();
+    fun initSearch() {
+        archivedNotesCopy = archivedNotesList
+        filteredArchivedNotes = ArrayList()
     }
 
-    public void clearFilter() {
-        for(Note note: filteredArchivedNotes) {
-            archivedNotes.add(note);
+    fun clearFilter() {
+        for (note in filteredArchivedNotes!!) {
+            archivedNotes.add(note)
+            notifyItemChanged(archivedNotes.indexOf(note))
         }
-        notifyDataSetChanged();
     }
 
-    public void filter(String queryText) {
-        final String lowerCaseQuery = queryText.toLowerCase();
-
-        for (Note note : archivedNotesCopy) {
-            if (!note.getTitle().toLowerCase().contains(lowerCaseQuery) &&
-                    !note.getInfo().toLowerCase().contains(lowerCaseQuery)) {
-                archivedNotes.remove(note);
-                filteredArchivedNotes.add(note);
+    fun filter(queryText: String) {
+        val lowerCaseQuery = queryText.lowercase(Locale.getDefault())
+        for (note in archivedNotesCopy!!) {
+            if (!note.title!!.lowercase(Locale.getDefault()).contains(lowerCaseQuery) &&
+                !note.info!!.lowercase(Locale.getDefault()).contains(lowerCaseQuery)
+            ) {
+                archivedNotes.remove(note)
+                filteredArchivedNotes!!.add(note)
+                notifyItemChanged(archivedNotes.indexOf(note))
             } else {
-                archivedNotes.add(note);
-                filteredArchivedNotes.remove(note);
+                archivedNotes.add(note)
+                filteredArchivedNotes!!.remove(note)
+                notifyItemChanged(archivedNotes.indexOf(note))
             }
-            notifyDataSetChanged();
         }
     }
 
-    public List<Note> getArchivedNotesList() {
-        List<Note> archivedNotesCopy = new ArrayList<>();
-        for(int i = 0; i < archivedNotes.size(); i++) {
-            archivedNotesCopy.add(archivedNotes.get(i));
+    val archivedNotesList: List<Note>
+        get() {
+            val archivedNotesCopy: MutableList<Note> = ArrayList()
+            for (i in 0 until archivedNotes.size()) {
+                archivedNotesCopy.add(archivedNotes[i])
+            }
+            return archivedNotesCopy
         }
-        return archivedNotesCopy;
-    }
-
-    public HashMap<String, Object> getHashMap() {
-        HashMap<String, Object> hashMap = new HashMap<>();
-        for(int i = 0; i < archivedNotes.size(); i++) {
-            Note note = archivedNotes.get(i);
-            hashMap.put(note.getId(), note);
+    val hashMap: HashMap<String?, Any>
+        get() {
+            val hashMap = HashMap<String?, Any>()
+            for (i in 0 until archivedNotes.size()) {
+                val note = archivedNotes[i]
+                hashMap[note.id] = note
+            }
+            return hashMap
         }
-        return hashMap;
+
+    override fun getItemCount(): Int {
+        return archivedNotes.size()
     }
 
-    @Override
-    public int getItemCount() {
-        return archivedNotes.size();
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArchivedNoteViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_archived_note, parent, false)
+        return ArchivedNoteViewHolder(parent.context, view, parent)
     }
 
-    @NonNull
-    @Override
-    public ArchivedNoteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_archived_note, parent, false);
-
-        return new ArchivedNoteViewHolder(parent.getContext(), view, parent);
+    override fun onBindViewHolder(holder: ArchivedNoteViewHolder, position: Int) {
+        holder.bindModelToView(archivedNotes[position])
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull ArchivedNoteViewHolder holder, int position) {
-        holder.bindModelToView(archivedNotes.get(position));
+    companion object {
+        private val TAG = ArchivedNotesAdapter::class.java.simpleName
     }
 }
