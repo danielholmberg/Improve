@@ -1,118 +1,101 @@
-package dev.danielholmberg.improve.Activities;
+package dev.danielholmberg.improve.Activities
 
-import android.content.Intent;
-import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.Toast;
+import dev.danielholmberg.improve.Improve.Companion.instance
+import androidx.appcompat.app.AppCompatActivity
+import android.widget.ProgressBar
+import android.widget.LinearLayout
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import android.os.Bundle
+import dev.danielholmberg.improve.R
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import android.content.Intent
+import android.util.Log
+import android.view.View
+import android.widget.Button
+import dev.danielholmberg.improve.Callbacks.AuthCallback
+import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
+import android.widget.Toast
+import com.google.android.gms.auth.api.Auth
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
+class SignInActivity : AppCompatActivity(), View.OnClickListener {
+    private var progressBar: ProgressBar? = null
+    private var signInButtonsLayout: LinearLayout? = null
+    private var googleSignInBtn: Button? = null
+    private var anonymousSignInBtn: Button? = null
+    private var googleSignInClient: GoogleSignInClient? = null
 
-import dev.danielholmberg.improve.Callbacks.AuthCallback;
-import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.R;
-
-/**
- * Google Login Activity
- */
-
-public class SignInActivity extends AppCompatActivity implements View.OnClickListener{
-    private static final String TAG = SignInActivity.class.getSimpleName();
-    private static final int RC_SIGN_IN = 9001;
-
-    private Improve app;
-    private ProgressBar progressBar;
-    private LinearLayout signInButtonsLayout;
-    private Button googleSignInBtn;
-    private Button anonymousSignInBtn;
-
-    private GoogleSignInClient googleSignInClient;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.d(TAG, "Starting application...");
-
-        // Initialize Singleton.
-        app = Improve.getInstance();
+    public override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.d(TAG, "Starting application...")
 
         // The getFireAuth().getCurrentUser() is not null, then the user has been previously authenticated.
-        if(app.getAuthManager().getFireAuth().getCurrentUser() != null) {
-            startMainActivity();
+        if (instance!!.authManager!!.fireAuth.currentUser != null) {
+            startMainActivity()
         }
-
-        setContentView(R.layout.activity_sign_in);
+        setContentView(R.layout.activity_sign_in)
 
         // ProgressBar
-        progressBar = (ProgressBar) findViewById(R.id.sign_in_progressBar);
+        progressBar = findViewById<View>(R.id.sign_in_progressBar) as ProgressBar
 
         // Sign in buttons layout
-        signInButtonsLayout = (LinearLayout) findViewById(R.id.sign_in_buttons_layout);
+        signInButtonsLayout = findViewById<View>(R.id.sign_in_buttons_layout) as LinearLayout
 
         // Anonymous Sign in button
-        anonymousSignInBtn = (Button) findViewById(R.id.anonymous_login_btn);
-        anonymousSignInBtn.setOnClickListener(this);
+        anonymousSignInBtn = findViewById<View>(R.id.anonymous_login_btn) as Button
+        anonymousSignInBtn!!.setOnClickListener(this)
 
         // Google Sign in button
-        googleSignInBtn = (Button) findViewById(R.id.google_sign_in_btn);
-        googleSignInBtn.setOnClickListener(this);
+        googleSignInBtn = findViewById<View>(R.id.google_sign_in_btn) as Button
+        googleSignInBtn!!.setOnClickListener(this)
 
         // Configure Google Sign In Client
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        googleSignInClient = GoogleSignIn.getClient(this, gso);
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
         // Add the Google Sign In Client to AuthManager.
-        app.getAuthManager().setGoogleSignInClient(googleSignInClient);
+        instance!!.authManager!!.googleSignInClient = googleSignInClient
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-
-            if(result.isSuccess()) {
-                Log.d(TAG, "Google sign in was successful!");
+            val result = Auth.GoogleSignInApi.getSignInResultFromIntent(data)
+            if (result.isSuccess) {
+                Log.d(TAG, "Google sign in was successful!")
 
                 // Google Sign In was successful, authenticating with Firebase...
-                GoogleSignInAccount account = result.getSignInAccount();
-                app.getAuthManager().authGoogleAccountWithFirebase(account, new AuthCallback() {
-                    @Override
-                    public void onSuccess() {
-                        progressBar.setVisibility(View.GONE);
-                        startMainActivity();
+                val account = result.signInAccount
+                instance!!.authManager!!.authGoogleAccountWithFirebase(account!!, object : AuthCallback {
+                    override fun onSuccess() {
+                        progressBar!!.visibility = View.GONE
+                        startMainActivity()
                     }
 
-                    @Override
-                    public void onFailure(String errorMessage) {
-                        Log.e(TAG, "!!! Failed to authenticate with Firebase: " + errorMessage);
-                        progressBar.setVisibility(View.GONE);
-                        signInButtonsLayout.setVisibility(View.VISIBLE);
+                    override fun onFailure(errorMessage: String?) {
+                        Log.e(TAG, "!!! Failed to authenticate with Firebase: $errorMessage")
+                        progressBar!!.visibility = View.GONE
+                        signInButtonsLayout!!.visibility = View.VISIBLE
                     }
-                });
-            } else if(result.getStatus().getStatusCode() == GoogleSignInStatusCodes.SIGN_IN_CANCELLED) {
-                Log.e(TAG, "Google sign in was cancelled!");
-                Toast.makeText(getApplicationContext(), "Google sign in was cancelled", Toast.LENGTH_SHORT).show();
-                progressBar.setVisibility(View.GONE);
-                signInButtonsLayout.setVisibility(View.VISIBLE);
+                })
+            } else if (result.status.statusCode == GoogleSignInStatusCodes.SIGN_IN_CANCELLED) {
+                Log.e(TAG, "Google sign in was cancelled!")
+                Toast.makeText(
+                    applicationContext,
+                    "Google sign in was cancelled",
+                    Toast.LENGTH_SHORT
+                ).show()
+                progressBar!!.visibility = View.GONE
+                signInButtonsLayout!!.visibility = View.VISIBLE
             } else {
-                Log.e(TAG, "Google sign in failed!");
-                Toast.makeText(getApplicationContext(), "Google sign in failed", Toast.LENGTH_SHORT).show();
-                progressBar.setVisibility(View.GONE);
-                signInButtonsLayout.setVisibility(View.VISIBLE);
+                Log.e(TAG, "Google sign in failed!")
+                Toast.makeText(applicationContext, "Google sign in failed", Toast.LENGTH_SHORT)
+                    .show()
+                progressBar!!.visibility = View.GONE
+                signInButtonsLayout!!.visibility = View.VISIBLE
             }
         }
     }
@@ -121,63 +104,62 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
      * Sends the user to the MainActivity.
      * Called when the user is correctly authenticated with Google and Firebase.
      */
-    private void startMainActivity() {
-        Intent i = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(i);
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-        finish();
+    private fun startMainActivity() {
+        val i = Intent(applicationContext, MainActivity::class.java)
+        startActivity(i)
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        finish()
     }
 
     /**
      * Starts an Intent to get the users Google-account to be used to sign in.
      */
-    private void startGoogleSignIn() {
-        Intent signInIntent = googleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
+    private fun startGoogleSignIn() {
+        val signInIntent = googleSignInClient!!.signInIntent
+        startActivityForResult(signInIntent, RC_SIGN_IN)
     }
 
-    private void startAnonymousSignIn() {
-        app.getAuthManager().signInAnonymously(new AuthCallback() {
-            @Override
-            public void onSuccess() {
-                startMainActivity();
+    private fun startAnonymousSignIn() {
+        instance!!.authManager!!.signInAnonymously(object : AuthCallback {
+            override fun onSuccess() {
+                startMainActivity()
             }
 
-            @Override
-            public void onFailure(String errorMessage) {
-                Log.e(TAG, "!!! Failed to Sign in Anonymously: " + errorMessage);
+            override fun onFailure(errorMessage: String?) {
+                Log.e(TAG, "!!! Failed to Sign in Anonymously: $errorMessage")
             }
-        });
+        })
     }
 
-    @Override
-    public void onClick(View v) {
-        switch(v.getId()) {
-            case R.id.google_sign_in_btn:
-                signInButtonsLayout.setVisibility(View.GONE);
-                progressBar.setVisibility(View.VISIBLE);
-                startGoogleSignIn();
-                break;
-            case R.id.anonymous_login_btn:
-                signInButtonsLayout.setVisibility(View.GONE);
-                progressBar.setVisibility(View.VISIBLE);
-                startAnonymousSignIn();
-                break;
-            default:
-                break;
+    override fun onClick(v: View) {
+        when (v.id) {
+            R.id.google_sign_in_btn -> {
+                signInButtonsLayout!!.visibility = View.GONE
+                progressBar!!.visibility = View.VISIBLE
+                startGoogleSignIn()
+            }
+            R.id.anonymous_login_btn -> {
+                signInButtonsLayout!!.visibility = View.GONE
+                progressBar!!.visibility = View.VISIBLE
+                startAnonymousSignIn()
+            }
+            else -> {}
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+    override fun onStart() {
+        super.onStart()
         // Locking the app to the orientation that was used at startup.
         // So that the UI does not re-render when the user turns the device.
-        setRequestedOrientation(getResources().getConfiguration().orientation);
+        requestedOrientation = resources.configuration.orientation
     }
 
-    @Override
-    public void onBackPressed() {
-        finish();
+    override fun onBackPressed() {
+        finish()
+    }
+
+    companion object {
+        private val TAG = SignInActivity::class.java.simpleName
+        private const val RC_SIGN_IN = 9001
     }
 }
