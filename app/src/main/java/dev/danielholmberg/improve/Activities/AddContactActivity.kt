@@ -88,7 +88,7 @@ class AddContactActivity : AppCompatActivity() {
 
             // If the company already exists, set that company as selected by default.
             if (contact!!.companyId != null) {
-                val company = instance!!.companyRecyclerViewAdapter!!.getCompany(contact!!.companyId)
+                val company = instance!!.companyRecyclerViewAdapter!!.getCompany(contact!!.companyId!!)
                 if (company != null) {
                     val adapterPosition = companies!!.indexOf(company)
                     contactCompany!!.setSelection(adapterPosition)
