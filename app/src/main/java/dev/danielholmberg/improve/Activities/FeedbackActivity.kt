@@ -1,132 +1,110 @@
-package dev.danielholmberg.improve.Activities;
+package dev.danielholmberg.improve.Activities
 
-import android.content.Intent;
-import android.os.Bundle;
-import androidx.annotation.Nullable;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.textfield.TextInputEditText;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.Toast;
+import dev.danielholmberg.improve.Improve.Companion.instance
+import androidx.appcompat.app.AppCompatActivity
+import dev.danielholmberg.improve.Managers.DatabaseManager
+import dev.danielholmberg.improve.Utilities.NoteInputValidator
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import android.os.Bundle
+import dev.danielholmberg.improve.R
+import android.view.WindowManager
+import dev.danielholmberg.improve.Models.Feedback
+import dev.danielholmberg.improve.Callbacks.DatabaseCallback
+import android.widget.Toast
+import android.content.Intent
+import android.view.MenuItem
+import android.view.View
+import androidx.appcompat.widget.Toolbar
+import java.text.DateFormat
+import java.util.*
 
-import java.text.DateFormat;
-import java.util.Calendar;
+class FeedbackActivity : AppCompatActivity() {
 
-import dev.danielholmberg.improve.Callbacks.DatabaseCallback;
-import dev.danielholmberg.improve.Models.Feedback;
-import dev.danielholmberg.improve.Improve;
-import dev.danielholmberg.improve.Managers.DatabaseManager;
-import dev.danielholmberg.improve.R;
-import dev.danielholmberg.improve.Utilities.NoteInputValidator;
+    private var storageManager: DatabaseManager? = null
+    private var validator: NoteInputValidator? = null
+    private var inputTitle: TextInputEditText? = null
+    private var inputInfo: TextInputEditText? = null
+    private var toolbar: Toolbar? = null
+    private var inputLayout: View? = null
+    private var fab: FloatingActionButton? = null
 
-/**
- * Created by DanielHolmberg on 2018-01-27.
- */
-
-public class FeedbackActivity extends AppCompatActivity {
-    private static final String TAG = FeedbackActivity.class.getSimpleName();
-
-    private Improve app;
-    private DatabaseManager storageManager;
-    private NoteInputValidator validator;
-
-    private TextInputEditText inputTitle, inputInfo;
-
-    private Toolbar toolbar;
-    private View inputLayout;
-    private FloatingActionButton fab;
-
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_feedback);
-
-        app = Improve.getInstance();
-        storageManager = app.getDatabaseManager();
-
-        toolbar = (Toolbar) findViewById(R.id.toolbar_feedback);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        inputLayout = (View) findViewById(R.id.input_layout);
-        inputTitle = (TextInputEditText) findViewById(R.id.input_title);
-        inputInfo = (TextInputEditText) findViewById(R.id.input_info);
-
-        fab = (FloatingActionButton) findViewById(R.id.submit_feedback);
-
-        inputTitle.requestFocus();
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
-        validator = new NoteInputValidator(this, inputLayout);
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(validator.formIsValid()) {
-                    submitFeedback();
-                }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_feedback)
+        storageManager = instance!!.databaseManager
+        toolbar = findViewById<View>(R.id.toolbar_feedback) as Toolbar
+        setSupportActionBar(toolbar)
+        supportActionBar!!.setDisplayShowTitleEnabled(false)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        inputLayout = findViewById(R.id.input_layout)
+        inputTitle = findViewById<View>(R.id.input_title) as TextInputEditText
+        inputInfo = findViewById<View>(R.id.input_info) as TextInputEditText
+        fab = findViewById<View>(R.id.submit_feedback) as FloatingActionButton
+        inputTitle!!.requestFocus()
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+        validator = NoteInputValidator(this, inputLayout!!)
+        fab!!.setOnClickListener {
+            if (validator!!.formIsValid()) {
+                submitFeedback()
             }
-        });
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
         }
     }
 
-    public void submitFeedback(){
-        String user_id = Improve.getInstance().getAuthManager().getCurrentUserId();
-        String feedback_id = storageManager.getFeedbackRef().push().getKey();
-        String title = inputTitle.getText().toString();
-        String info = inputInfo.getText().toString();
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        String timestamp = DateFormat.getDateTimeInstance().format(calendar.getTime());
-
-        Feedback feedback = new Feedback(user_id, feedback_id, title, info, timestamp);
-
-        storageManager.submitFeedback(feedback, new DatabaseCallback() {
-            @Override
-            public void onSuccess() {
-                Toast.makeText(app, "Feedback submitted, you're awesome!", Toast.LENGTH_SHORT).show();
+    private fun submitFeedback() {
+        val userId = instance!!.authManager!!.currentUserId
+        val feedbackId = storageManager!!.feedbackRef.push().key
+        val title = inputTitle!!.text.toString()
+        val info = inputInfo!!.text.toString()
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = System.currentTimeMillis()
+        val timestamp = DateFormat.getDateTimeInstance().format(calendar.time)
+        val feedback = Feedback(userId, feedbackId, title, info, timestamp)
+        storageManager!!.submitFeedback(feedback, object : DatabaseCallback {
+            override fun onSuccess() {
+                Toast.makeText(instance, "Feedback submitted, you're awesome!", Toast.LENGTH_SHORT)
+                    .show()
             }
 
-            @Override
-            public void onFailure(String errorMessage) {
-                Toast.makeText(app, "Failed to submit feedback, please try again", Toast.LENGTH_SHORT).show();
+            override fun onFailure(errorMessage: String?) {
+                Toast.makeText(
+                    instance,
+                    "Failed to submit feedback, please try again",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
-        });
-
-        showParentActivity();
-
+        })
+        showParentActivity()
     }
 
-    private void showParentActivity() {
-        restUI();
-        startActivity(new Intent(this, MainActivity.class));
-        finishAfterTransition();
+    private fun showParentActivity() {
+        restUI()
+        startActivity(Intent(this, MainActivity::class.java))
+        finishAfterTransition()
     }
 
-    private void restUI(){
-        inputTitle.getText().clear();
-        inputInfo.getText().clear();
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+    private fun restUI() {
+        inputTitle!!.text!!.clear()
+        inputInfo!!.text!!.clear()
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
     }
 
-    @Override
-    public void onBackPressed() {
-        showParentActivity();
+    override fun onBackPressed() {
+        showParentActivity()
+    }
+
+    companion object {
+        private val TAG = FeedbackActivity::class.java.simpleName
     }
 }
