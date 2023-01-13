@@ -92,7 +92,7 @@ class AddNoteActivity : AppCompatActivity() {
         newTags = ArrayList()
         if (instance!!.isVipUser) {
             vipImagesRecyclerView = findViewById<View>(R.id.vip_images_list) as RecyclerView
-            vipImagesAdapter = VipImagesAdapter(newNote!!.id, false)
+            vipImagesAdapter = VipImagesAdapter(newNote!!.id!!, false)
             vipImagesRecyclerView!!.adapter = vipImagesAdapter
             val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
             vipImagesRecyclerView!!.layoutManager = layoutManager

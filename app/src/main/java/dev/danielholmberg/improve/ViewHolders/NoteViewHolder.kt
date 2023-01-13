@@ -96,7 +96,7 @@ class NoteViewHolder(private val context: Context, itemView: View, parent: ViewG
 
         // Note has VIP image or not
         if (note.hasImage()) {
-            val vipImagesAdapter = VipImagesAdapter(note.id, true)
+            val vipImagesAdapter = VipImagesAdapter(note.id!!, true)
             vipImagesRecyclerView.adapter = vipImagesAdapter
             val layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             vipImagesRecyclerView.layoutManager = layoutManager

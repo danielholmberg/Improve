@@ -205,7 +205,7 @@ class VipImageViewHolder(
         val vipImageClearBtn: ImageButton? = this.itemView.findViewById(R.id.vip_image_clear_btn)
         if (vipImageClearBtn != null) {
             if (editMode) {
-                vipImageClearBtn.setOnClickListener { vipImagesAdapter.remove(vipImage) }
+                vipImageClearBtn.setOnClickListener { vipImagesAdapter.remove(vipImage!!) }
                 vipImageClearBtn.visibility = View.VISIBLE
             } else {
                 vipImageClearBtn.visibility = View.GONE
