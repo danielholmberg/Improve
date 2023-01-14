@@ -69,13 +69,13 @@ class MainActivity : AppCompatActivity() {
         currentUser = instance!!.authManager!!.currentUser
 
         // Retrieve VIP_USERS from Firebase RemoteConfig
-        instance!!.firebaseRemoteConfig!!.fetchAndActivate()
+        instance!!.remoteConfig!!.fetchAndActivate()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful && task.result != null) {
                     val updated = task.result
                     Log.d(TAG, "Config params updated: $updated")
                 }
-                val retrievedVIPUsers = instance!!.firebaseRemoteConfig!!.getString("vip_users")
+                val retrievedVIPUsers = instance!!.remoteConfig!!.getString("vip_users")
                 Log.d(TAG, "Retrieved VIP_USERS: $retrievedVIPUsers")
                 if (currentUser!!.email != null && currentUser!!.email!!.isNotEmpty()) {
                     Log.d(TAG, "Current user: " + currentUser!!.email)

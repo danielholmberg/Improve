@@ -39,7 +39,7 @@ class ContactsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        instance!!.setContactFragmentRef(this)
+        instance!!.contactsFragmentRef = this
         setHasOptionsMenu(true)
     }
 

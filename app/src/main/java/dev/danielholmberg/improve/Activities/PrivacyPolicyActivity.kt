@@ -21,7 +21,7 @@ class PrivacyPolicyActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_privacy_policy)
-        firebaseRemoteConfig = instance!!.firebaseRemoteConfig
+        firebaseRemoteConfig = instance!!.remoteConfig
         toolbar = findViewById<View>(R.id.toolbar_privacy_policy) as Toolbar
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayShowTitleEnabled(false)

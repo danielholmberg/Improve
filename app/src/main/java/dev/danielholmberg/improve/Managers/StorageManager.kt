@@ -56,7 +56,7 @@ class StorageManager {
 
     fun downloadImageToLocalFile(imageId: String, callback: StorageCallback) {
         Log.d(TAG, "Downloading image to Local Filesystem...")
-        val targetFile = File(instance!!.getImageDir(), imageId + VIP_IMAGE_SUFFIX)
+        val targetFile = File(instance!!.imageDir, imageId + VIP_IMAGE_SUFFIX)
         Log.d(TAG, "targetFile path: " + targetFile.path)
         imagesRef.child(imageId).getFile(targetFile).addOnSuccessListener {
             Log.d(
@@ -79,7 +79,7 @@ class StorageManager {
             val vipImage = vipImagesList[i]
             val imageId = vipImage.id
             val originalFilePath = Uri.parse(vipImage.originalFilePath)
-            val cachedImage = File(instance!!.getImageDir(), imageId + VIP_IMAGE_SUFFIX)
+            val cachedImage = File(instance!!.imageDir, imageId + VIP_IMAGE_SUFFIX)
             if (!cachedImage.exists()) {
                 try {
                     Log.d(TAG, "Copying image to Local Filesystem with image id: $imageId")

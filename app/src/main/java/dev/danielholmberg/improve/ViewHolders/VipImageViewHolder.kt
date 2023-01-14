@@ -51,7 +51,7 @@ class VipImageViewHolder(
         if (vipImage == null) return
         this.vipImage = vipImage
         val image = File(
-            instance!!.getImageDir(),
+            instance!!.imageDir,
             vipImage.id + StorageManager.VIP_IMAGE_SUFFIX
         )
         val targetSize = instance!!.resources.getDimension(R.dimen.vip_image_view_size).toInt()
@@ -112,7 +112,7 @@ class VipImageViewHolder(
         val vipImageViewFull =
             vipImageViewFullscreenLayout.findViewById<View>(R.id.vip_image_view_full) as ImageView
         val image = File(
-            instance!!.getImageDir(),
+            instance!!.imageDir,
             vipImage!!.id + StorageManager.VIP_IMAGE_SUFFIX
         )
         if (image.exists()) {
@@ -160,7 +160,7 @@ class VipImageViewHolder(
         vipImagePlaceholder.visibility = View.VISIBLE
         vipImageView.visibility = View.GONE
         val image = File(
-            instance!!.getImageDir(),
+            instance!!.imageDir,
             vipImage.id + StorageManager.VIP_IMAGE_SUFFIX
         )
         val thumbnailSize =

@@ -29,48 +29,47 @@ import java.util.*
 import javax.inject.Singleton
 import kotlin.jvm.Volatile
 
-/**
- * Created by Daniel Holmberg.
- */
 @Singleton
 class Improve : Application(), Serializable {
 
-    var authManager: AuthManager? = null
+    lateinit var authManager: AuthManager
+        private set
+    lateinit var databaseManager: DatabaseManager
+        private set
+    lateinit var storageManager: StorageManager
         private set
 
-    var databaseManager: DatabaseManager? = null
-        private set
-
-    var storageManager: StorageManager? = null
-        private set
-
-    var firebaseRemoteConfig: FirebaseRemoteConfig? = null
+    lateinit var remoteConfig: FirebaseRemoteConfig
         private set
 
     var driveServiceHelper: DriveServiceHelper? = null
 
     var mainActivityRef: MainActivity? = null
 
-    private var rootDir: File? = null
-    private var imageDir: File? = null
-
-    // ---- Note functions ---- //
-    var notesFragmentRef: NotesFragment? = null
-    var contactsFragmentRef: ContactsFragment? = null
+    lateinit var imageDir: File
         private set
 
-    // ---- Archived note functions ---- //
+    var notesFragmentRef: NotesFragment? = null
+    var contactsFragmentRef: ContactsFragment? = null
+
     var archivedNotesFragmentRef: ArchivedNotesFragment? = null
     var notesAdapter: NotesAdapter? = null
     var archivedNotesAdapter: ArchivedNotesAdapter? = null
 
-    // ---- Tag functions ---- //
     var tagsAdapter: TagsAdapter? = null
     var currentFragment: Fragment? = null
 
-    // ---- Company functions ---- //
     var companyRecyclerViewAdapter: CompanyRecyclerViewAdapter? = null
     private val contactAdapters = HashMap<String, ContactRecyclerViewAdapter>()
+
+    val notes: HashMap<String?, Any>
+        get() = notesAdapter!!.hashMap
+    val archivedNotes: HashMap<String?, Any>
+        get() = archivedNotesAdapter!!.hashMap
+    val tags: HashMap<String?, Any>
+        get() = tagsAdapter!!.hashMap
+    val companies: HashMap<String, Any>
+        get() = companyRecyclerViewAdapter!!.companiesHashMap
 
     @set:JvmName("setVipUser")
     var isVipUser: Boolean = false
@@ -90,30 +89,27 @@ class Improve : Application(), Serializable {
         sImproveInstance = this
 
         loadPreferences()
+        enableFirebaseStorageOfflineCapabilities()
 
-        // Enabling offline capabilities for Firebase Storage.
-        // OBS!!! Can create Local Firebase cache issue where data changed in console won't take effect.
-        // Reset cache by setting this to FASLE if there is an issue with data out of sync,
-        // or a crash due to changed Model parameters.
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true)
+        val rootDir = generateRootDir()
+        generateImageDir(rootDir)
 
-        // Create Root-Dir if not already existing.
-        getRootDir()
-
-        // Initializing managers.
         authManager = AuthManager()
         databaseManager = DatabaseManager()
         storageManager = StorageManager()
-        firebaseRemoteConfig = FirebaseRemoteConfig.getInstance()
 
-        val configSettings = FirebaseRemoteConfigSettings.Builder()
-            .setMinimumFetchIntervalInSeconds(if (BuildConfig.DEBUG) 0 else 3600.toLong())
-            .build()
-        firebaseRemoteConfig!!.setConfigSettingsAsync(configSettings)
-        firebaseRemoteConfig!!.setDefaultsAsync(R.xml.remote_config_defaults)
-        firebaseRemoteConfig!!.setDefaultsAsync(vipUsers)
+        remoteConfig = FirebaseRemoteConfig.getInstance()
+        setRemoteConfigSettings()
 
         createNotificationChannelExport()
+    }
+
+    private fun enableFirebaseStorageOfflineCapabilities() {
+        // Enabling offline capabilities for Firebase Storage.
+        // OBS!!! Can create Local Firebase cache issue where data changed in console won't take effect.
+        // Reset cache by setting this to FALSE if there is an issue with data out of sync,
+        // or a crash due to changed Model parameters.
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true)
     }
 
     private fun loadPreferences() {
@@ -122,7 +118,7 @@ class Improve : Application(), Serializable {
         // Retrieve the stored Device ID or generate a new
         val deviceIdKey = "device_id"
         val storedDeviceId = sharedPrefsService.getString(deviceIdKey)
-        if (storedDeviceId == null || storedDeviceId.isEmpty()) {
+        if ((storedDeviceId == null) || storedDeviceId.isEmpty()) {
             deviceId = UUID.randomUUID().toString()
             sharedPrefsService.putString(deviceIdKey, deviceId)
         } else {
@@ -130,6 +126,15 @@ class Improve : Application(), Serializable {
         }
 
         Log.i(TAG, "Device ID: $deviceId")
+    }
+
+    private fun setRemoteConfigSettings() {
+        val configSettings = FirebaseRemoteConfigSettings.Builder()
+            .setMinimumFetchIntervalInSeconds(if (BuildConfig.DEBUG) 0 else 3600.toLong())
+            .build()
+        remoteConfig.setConfigSettingsAsync(configSettings)
+        remoteConfig.setDefaultsAsync(R.xml.remote_config_defaults)
+        remoteConfig.setDefaultsAsync(vipUsers)
     }
 
     private fun createNotificationChannelExport() {
@@ -152,56 +157,33 @@ class Improve : Application(), Serializable {
     }
 
     fun saveState() {
-        if (tagsAdapter != null) {
-            databaseManager!!.saveTags(tags)
-        }
-        if (notesAdapter != null) {
-            databaseManager!!.saveNotes(notes)
-        }
-        if (archivedNotesAdapter != null) {
-            databaseManager!!.saveArchivedNotes(archivedNotes)
-        }
-        if (companyRecyclerViewAdapter != null) {
-            databaseManager!!.saveCompanies(companies)
-        }
+        tagsAdapter?.let { databaseManager.saveTags(tags) }
+        notesAdapter?.let { databaseManager.saveNotes(notes) }
+        archivedNotesAdapter?.let { databaseManager.saveArchivedNotes(archivedNotes) }
+        companyRecyclerViewAdapter?.let { databaseManager.saveCompanies(companies) }
     }
 
     /**
      * Returns the application specific Root directory.
      * @return - Root directory of application
      */
-    fun getRootDir(): File? {
-        rootDir = applicationContext.filesDir
-        if (!rootDir!!.exists()) {
-            rootDir!!.mkdirs()
+    private fun generateRootDir(): File {
+        val rootDir = applicationContext.filesDir
+        if (!rootDir.exists()) {
+            rootDir.mkdirs()
         }
-        Log.d("Improve", "RootDir: " + rootDir!!.getPath())
+        Log.d("Improve", "RootDir: " + rootDir.path)
         return rootDir
     }
 
-    fun getImageDir(): File? {
+    private fun generateImageDir(rootDir: File): File {
         imageDir = File(rootDir, StorageManager.IMAGES_REF)
-        if (!imageDir!!.exists()) {
-            imageDir!!.mkdirs()
+        if (!imageDir.exists()) {
+            imageDir.mkdirs()
         }
-        Log.d("Improve", "ImageDir: " + imageDir!!.path)
+        Log.d("Improve", "ImageDir: " + imageDir.path)
         return imageDir
     }
-
-    val notes: HashMap<String?, Any>
-        get() = notesAdapter!!.hashMap
-    val archivedNotes: HashMap<String?, Any>
-        get() = archivedNotesAdapter!!.hashMap
-    val tags: HashMap<String?, Any>
-        get() = tagsAdapter!!.hashMap
-
-    // ---- Contact functions ---- //
-    fun setContactFragmentRef(contactFragmentRef: ContactsFragment?) {
-        contactsFragmentRef = contactFragmentRef
-    }
-
-    val companies: HashMap<String, Any>
-        get() = companyRecyclerViewAdapter!!.companiesHashMap
 
     fun addContactsAdapter(nameId: String, contactsAdapter: ContactRecyclerViewAdapter) {
         contactAdapters[nameId] = contactsAdapter
