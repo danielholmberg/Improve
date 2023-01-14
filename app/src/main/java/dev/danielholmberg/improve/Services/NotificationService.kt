@@ -8,11 +8,11 @@ import dev.danielholmberg.improve.Managers.DatabaseManager
 
 class NotificationService : FirebaseMessagingService() {
 
-    private val databaseManager: DatabaseManager? = instance!!.databaseManager
+    private val databaseManager: DatabaseManager = instance!!.databaseManager
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        databaseManager?.updateNotificationToken(token)
+        databaseManager.updateNotificationToken(token)
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {

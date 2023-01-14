@@ -146,7 +146,7 @@ class AuthManager {
 
     fun signOutAnonymousAccount(callback: AuthCallback) {
         // Remove UserId in Database.
-        instance!!.databaseManager!!.userRef.removeValue()
+        instance!!.databaseManager.userRef.removeValue()
         Companion.fireAuth.signOut()
         callback.onSuccess()
     }

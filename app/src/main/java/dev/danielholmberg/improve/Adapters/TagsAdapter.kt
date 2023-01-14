@@ -20,7 +20,7 @@ import java.util.HashMap
 
 class TagsAdapter : RecyclerView.Adapter<TagViewHolder>() {
 
-    private val databaseManager: DatabaseManager? = instance!!.databaseManager
+    private val databaseManager: DatabaseManager = instance!!.databaseManager
     private val tags: SortedList<Tag> =
         SortedList(Tag::class.java, object : SortedList.Callback<Tag>() {
             override fun compare(o1: Tag, o2: Tag): Int {
@@ -66,7 +66,7 @@ class TagsAdapter : RecyclerView.Adapter<TagViewHolder>() {
      * Downloads all tags from the Notes-node and adds a childEventListener to detect changes.
      */
     private fun initDatabaseListener() {
-        databaseManager!!.tagRef.addChildEventListener(object : ChildEventListener {
+        databaseManager.tagRef.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(dataSnapshot: DataSnapshot, previousChildName: String?) {
                 // This method is triggered when a new child is added
                 // to the location to which this listener was added.

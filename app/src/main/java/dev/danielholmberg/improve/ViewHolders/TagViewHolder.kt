@@ -61,12 +61,12 @@ class TagViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
                 val alertDialogBuilder = AlertDialog.Builder(itemView.context)
                     .setTitle(R.string.dialog_delete_tag_title)
                     .setMessage(R.string.dialog_delete_tag_msg)
-                    .setPositiveButton("Yes") { dialogInterface, i ->
-                        instance!!.databaseManager!!.deleteTag(
+                    .setPositiveButton("Yes") { _, _ ->
+                        instance!!.databaseManager.deleteTag(
                             tag!!.id
                         )
                     }
-                    .setNegativeButton("No") { dialogInterface, i -> dialogInterface.dismiss() }
+                    .setNegativeButton("No") { dialogInterface, _ -> dialogInterface.dismiss() }
                 val dialog = alertDialogBuilder.create()
                 dialog.show()
             }

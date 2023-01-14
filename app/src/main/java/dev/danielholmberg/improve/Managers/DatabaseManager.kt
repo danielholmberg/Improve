@@ -21,7 +21,7 @@ class DatabaseManager {
         get() = FirebaseDatabase.getInstance()
     val userRef: DatabaseReference
         get() {
-            val userId = instance!!.authManager!!.currentUserId
+            val userId = instance!!.authManager.currentUserId
             return database.getReference(USERS_REF).child(userId!!)
         }
 
@@ -81,7 +81,7 @@ class DatabaseManager {
      */
     fun addNote(newNote: Note) {
         Log.d(TAG, "addNote: " + newNote.id)
-        notesRef.child(newNote.id!!).setValue(newNote) { databaseError, databaseReference ->
+        notesRef.child(newNote.id!!).setValue(newNote) { databaseError, _ ->
             if (databaseError != null) {
                 Log.e(TAG, "Failed to add Note: " + newNote.id + " to Firebase: " + databaseError)
             }
@@ -93,7 +93,7 @@ class DatabaseManager {
      * @param updatedNote - The note to upload
      */
     fun updateNote(updatedNote: Note) {
-        notesRef.child(updatedNote.id!!).setValue(updatedNote) { databaseError, databaseReference ->
+        notesRef.child(updatedNote.id!!).setValue(updatedNote) { databaseError, _ ->
             if (databaseError != null) {
                 Log.e(
                     TAG,
@@ -111,7 +111,7 @@ class DatabaseManager {
         if (noteToDelete.isArchived()) {
             updateNote(noteToDelete)
         }
-        notesRef.child(noteToDelete.id!!).removeValue { databaseError, databaseReference ->
+        notesRef.child(noteToDelete.id!!).removeValue { databaseError, _ ->
             if (databaseError != null) {
                 Log.e(
                     TAG,
@@ -122,7 +122,7 @@ class DatabaseManager {
             // Delete all related images from Firebase Storage
             if (noteToDelete.hasImage()) {
                 for (imageId in noteToDelete.vipImages) {
-                    instance!!.storageManager!!.deleteImage(noteToDelete.id!!, imageId!!)
+                    instance!!.storageManager.deleteImage(noteToDelete.id!!, imageId!!)
                 }
             }
         }
@@ -149,7 +149,7 @@ class DatabaseManager {
      */
     fun addArchivedNote(archivedNote: Note) {
         archivedNotesRef.child(archivedNote.id!!)
-            .setValue(archivedNote) { databaseError, databaseReference ->
+            .setValue(archivedNote) { databaseError, _ ->
                 if (databaseError != null) {
                     Log.e(
                         TAG,
@@ -165,7 +165,7 @@ class DatabaseManager {
      */
     fun updateArchivedNote(archivedNote: Note) {
         archivedNotesRef.child(archivedNote.id!!)
-            .setValue(archivedNote) { databaseError, databaseReference ->
+            .setValue(archivedNote) { databaseError, _ ->
                 if (databaseError != null) {
                     Log.e(
                         TAG,
@@ -183,7 +183,7 @@ class DatabaseManager {
         if (!noteToDelete.isArchived()) {
             updateArchivedNote(noteToDelete)
         }
-        archivedNotesRef.child(noteToDelete.id!!).removeValue { databaseError, databaseReference ->
+        archivedNotesRef.child(noteToDelete.id!!).removeValue { databaseError, _ ->
             if (databaseError != null) {
                 Log.e(
                     TAG,
@@ -194,7 +194,7 @@ class DatabaseManager {
             // Delete all related images from Firebase Storage
             if (noteToDelete.hasImage()) {
                 for (imageId in noteToDelete.vipImages) {
-                    instance!!.storageManager!!.deleteImage(noteToDelete.id!!, imageId!!)
+                    instance!!.storageManager.deleteImage(noteToDelete.id!!, imageId!!)
                 }
             }
         }
@@ -207,7 +207,7 @@ class DatabaseManager {
      */
     fun addTag(newTag: Tag) {
         Log.d(TAG, "addTag: " + newTag.id)
-        tagRef.child(newTag.id!!).setValue(newTag) { databaseError, databaseReference ->
+        tagRef.child(newTag.id!!).setValue(newTag) { databaseError, _ ->
             if (databaseError != null) {
                 Log.e(TAG, "Failed to add Tag: " + newTag.id + " to Firebase: " + databaseError)
                 tagRef.child(newTag.id!!).removeValue()
@@ -221,7 +221,7 @@ class DatabaseManager {
      */
     fun deleteTag(tagId: String?) {
         Log.d(TAG, "deleteTag: $tagId")
-        tagRef.child(tagId!!).removeValue { databaseError, databaseReference ->
+        tagRef.child(tagId!!).removeValue { databaseError, _ ->
             if (databaseError != null) {
                 Log.e(TAG, "Failed to delete Tag: " + tagId + "from Firebase: " + databaseError)
             } else {
@@ -245,7 +245,7 @@ class DatabaseManager {
     fun addContact(contact: Contact) {
         Log.d(TAG, "addContact: " + contact.id)
         companiesRef.child(contact.companyId!!).child(CONTACTS_REF)
-            .child(contact.id!!).setValue(contact) { databaseError, databaseReference ->
+            .child(contact.id!!).setValue(contact) { databaseError, _ ->
                 if (databaseError != null) {
                     Log.e(TAG, "Failed to add new Contact-id to Company-ref: $databaseError")
                 }
@@ -259,7 +259,7 @@ class DatabaseManager {
     fun updateContact(oldContact: Contact, updatedContact: Contact) {
         companiesRef.child(updatedContact.companyId!!).child(CONTACTS_REF)
             .child(updatedContact.id!!)
-            .setValue(updatedContact) { databaseError, databaseReference ->
+            .setValue(updatedContact) { databaseError, _ ->
                 if (databaseError != null) {
                     Log.e(
                         TAG,
@@ -279,7 +279,7 @@ class DatabaseManager {
      */
     fun deleteContact(contactToDelete: Contact) {
         companiesRef.child(contactToDelete.companyId!!).child(CONTACTS_REF)
-            .child(contactToDelete.id!!).removeValue { databaseError, databaseReference ->
+            .child(contactToDelete.id!!).removeValue { databaseError, _ ->
                 if (databaseError != null) {
                     Log.e(
                         TAG,
@@ -291,7 +291,7 @@ class DatabaseManager {
 
     // ---- Company specific functions ---- //
     fun addCompany(newCompany: Company) {
-        companiesRef.child(newCompany.id).setValue(newCompany) { databaseError, databaseReference ->
+        companiesRef.child(newCompany.id).setValue(newCompany) { databaseError, _ ->
             if (databaseError != null) {
                 Log.e(
                     TAG,
@@ -302,7 +302,7 @@ class DatabaseManager {
     }
 
     fun deleteCompany(company: Company) {
-        companiesRef.child(company.id).removeValue { databaseError, databaseReference ->
+        companiesRef.child(company.id).removeValue { databaseError, _ ->
             if (databaseError != null) {
                 Log.e(
                     TAG,
@@ -320,7 +320,7 @@ class DatabaseManager {
      */
     fun submitFeedback(feedback: Feedback, databaseCallback: DatabaseCallback) {
         feedbackRef.child(feedback.feedback_id!!)
-            .setValue(feedback) { databaseError, databaseReference ->
+            .setValue(feedback) { databaseError, _ ->
                 if (databaseError != null) {
                     Log.e(TAG, "Failed to submit feedback to Firebase: $databaseError")
                     databaseCallback.onFailure(databaseError.toString())
@@ -335,7 +335,7 @@ class DatabaseManager {
      * Uploads all notes to the Notes-node.
      */
     fun saveNotes(notes: HashMap<String?, Any>) {
-        notesRef.updateChildren(notes) { databaseError, databaseReference ->
+        notesRef.updateChildren(notes) { databaseError, _ ->
             if (databaseError != null) {
                 Log.e(TAG, "Failed to save Notes: $databaseError")
             }
@@ -346,7 +346,7 @@ class DatabaseManager {
      * Uploads all archived notes to the Archived_notes-node.
      */
     fun saveArchivedNotes(archivedNotes: HashMap<String?, Any>) {
-        archivedNotesRef.updateChildren(archivedNotes) { databaseError, databaseReference ->
+        archivedNotesRef.updateChildren(archivedNotes) { databaseError, _ ->
             if (databaseError != null) {
                 Log.e(TAG, "Failed to save Archived notes: $databaseError")
             }
@@ -357,7 +357,7 @@ class DatabaseManager {
      * Uploads all tags to the Tags-node.
      */
     fun saveTags(tags: HashMap<String?, Any>) {
-        tagRef.updateChildren(tags) { databaseError, databaseReference ->
+        tagRef.updateChildren(tags) { databaseError, _ ->
             if (databaseError != null) {
                 Log.e(TAG, "Failed to save Tags: $databaseError")
             }
@@ -368,7 +368,7 @@ class DatabaseManager {
      * Uploads all companies to the Companies-node.
      */
     fun saveCompanies(companies: HashMap<String, Any>) {
-        companiesRef.updateChildren(companies) { databaseError, databaseReference ->
+        companiesRef.updateChildren(companies) { databaseError, _ ->
             if (databaseError != null) {
                 Log.e(TAG, "Failed to save Companies: $databaseError")
             }

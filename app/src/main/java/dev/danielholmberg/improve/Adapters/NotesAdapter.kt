@@ -21,7 +21,7 @@ import java.util.*
 
 class NotesAdapter : RecyclerView.Adapter<NoteViewHolder>() {
 
-    private val databaseManager: DatabaseManager? = instance!!.databaseManager
+    private val databaseManager: DatabaseManager = instance!!.databaseManager
     private val notes: SortedList<Note> =
         SortedList(Note::class.java, object : SortedList.Callback<Note>() {
             override fun compare(o1: Note, o2: Note): Int {
@@ -78,7 +78,7 @@ class NotesAdapter : RecyclerView.Adapter<NoteViewHolder>() {
      * Downloads all notes from the Notes-node and adds a childEventListener to detect changes.
      */
     private fun initDatabaseListener() {
-        databaseManager!!.notesRef.addChildEventListener(object : ChildEventListener {
+        databaseManager.notesRef.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(dataSnapshot: DataSnapshot, previousChildName: String?) {
                 // This method is triggered when a new child is added
                 // to the location to which this listener was added.
@@ -103,7 +103,7 @@ class NotesAdapter : RecyclerView.Adapter<NoteViewHolder>() {
                                     TAG, "Downloading image from Firebase for Note: " + addedNote.id
                                             + " with image id: " + imageId
                                 )
-                                instance!!.storageManager!!.downloadImageToLocalFile(
+                                instance!!.storageManager.downloadImageToLocalFile(
                                     imageId!!,
                                     object : StorageCallback {
                                         override fun onSuccess(`object`: Any) {}

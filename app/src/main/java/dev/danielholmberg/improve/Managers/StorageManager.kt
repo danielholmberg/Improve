@@ -15,12 +15,12 @@ import java.util.ArrayList
 import kotlin.Throws
 
 class StorageManager {
-    val storage: FirebaseStorage
+    private val storage: FirebaseStorage
         get() = FirebaseStorage.getInstance()
 
     private val userRef: StorageReference
         get() {
-            val userId = instance!!.authManager!!.currentUserId
+            val userId = instance!!.authManager.currentUserId
             return storage.getReference(USERS_REF).child(
                 userId!!
             )
@@ -29,7 +29,7 @@ class StorageManager {
         get() = userRef.child(IMAGES_REF)
 
     private fun uploadImage(imageId: String?, imageUri: Uri?, callback: StorageCallback) {
-        imagesRef.child(imageId!!).putFile(imageUri!!).addOnSuccessListener { taskSnapshot ->
+        imagesRef.child(imageId!!).putFile(imageUri!!).addOnSuccessListener {
             Log.d(TAG, "SUCCESS: Image ($imageId) uploaded to Firebase Cloud Storage")
             callback.onSuccess(imageId)
         }.addOnFailureListener { e ->

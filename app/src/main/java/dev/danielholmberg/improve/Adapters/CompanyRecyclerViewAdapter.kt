@@ -20,7 +20,7 @@ import java.util.HashMap
 
 class CompanyRecyclerViewAdapter : RecyclerView.Adapter<CompanyViewHolder>() {
 
-    private val databaseManager: DatabaseManager? = instance!!.databaseManager
+    private val databaseManager: DatabaseManager = instance!!.databaseManager
     private val companies: SortedList<Company> =
         SortedList(Company::class.java, object : SortedList.Callback<Company>() {
             override fun compare(o1: Company, o2: Company): Int {
@@ -62,7 +62,7 @@ class CompanyRecyclerViewAdapter : RecyclerView.Adapter<CompanyViewHolder>() {
     }
 
     private fun initDatabaseListener() {
-        val query = databaseManager!!.companiesRef.orderByChild("name")
+        val query = databaseManager.companiesRef.orderByChild("name")
         query.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(dataSnapshot: DataSnapshot, previousChildName: String?) {
                 // This method is triggered when a new child is added

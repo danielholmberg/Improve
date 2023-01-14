@@ -18,7 +18,7 @@ import java.util.*
 
 class ArchivedNotesAdapter : RecyclerView.Adapter<ArchivedNoteViewHolder>() {
 
-    private val databaseManager: DatabaseManager? = instance!!.databaseManager
+    private val databaseManager: DatabaseManager = instance!!.databaseManager
     private val archivedNotes: SortedList<Note> =
         SortedList(Note::class.java, object : SortedList.Callback<Note>() {
             override fun compare(o1: Note, o2: Note): Int {
@@ -74,7 +74,7 @@ class ArchivedNotesAdapter : RecyclerView.Adapter<ArchivedNoteViewHolder>() {
      * Downloads all archivedNotes from the Notes-node and adds a childEventListener to detect changes.
      */
     private fun initDatabaseListener() {
-        databaseManager!!.archivedNotesRef.addChildEventListener(object : ChildEventListener {
+        databaseManager.archivedNotesRef.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(dataSnapshot: DataSnapshot, previousChildName: String?) {
                 // This method is triggered when a new child is added
                 // to the location to which this listener was added.

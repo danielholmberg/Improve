@@ -20,7 +20,7 @@ import java.util.*
 class ContactRecyclerViewAdapter(private val company: Company) :
     RecyclerView.Adapter<ContactViewHolder>() {
 
-    private val databaseManager: DatabaseManager? = instance!!.databaseManager
+    private val databaseManager: DatabaseManager = instance!!.databaseManager
     private val contacts: SortedList<Contact> =
         SortedList(Contact::class.java, object : SortedList.Callback<Contact>() {
             override fun compare(o1: Contact, o2: Contact): Int {
@@ -65,7 +65,7 @@ class ContactRecyclerViewAdapter(private val company: Company) :
 
     private fun initDatabaseListener() {
         val query =
-            databaseManager!!.companiesRef.child(company.id).child("contacts").orderByChild("name")
+            databaseManager.companiesRef.child(company.id).child("contacts").orderByChild("name")
         query.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(dataSnapshot: DataSnapshot, previousChildName: String?) {
                 // This method is triggered when a new child is added
