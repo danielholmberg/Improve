@@ -22,9 +22,10 @@ import android.app.NotificationManager
 import android.app.NotificationChannel
 import android.util.Log
 import androidx.fragment.app.Fragment
+import dev.danielholmberg.improve.Services.SharedPrefsService
 import java.io.File
 import java.io.Serializable
-import java.util.HashMap
+import java.util.*
 import javax.inject.Singleton
 import kotlin.jvm.Volatile
 
@@ -81,9 +82,14 @@ class Improve : Application(), Serializable {
         }
     }
 
+    private lateinit var sharedPrefsService: SharedPrefsService
+    lateinit var deviceId: String
+
     override fun onCreate() {
         super.onCreate()
         sImproveInstance = this
+
+        loadPreferences()
 
         // Enabling offline capabilities for Firebase Storage.
         // OBS!!! Can create Local Firebase cache issue where data changed in console won't take effect.
@@ -108,6 +114,22 @@ class Improve : Application(), Serializable {
         firebaseRemoteConfig!!.setDefaultsAsync(vipUsers)
 
         createNotificationChannelExport()
+    }
+
+    private fun loadPreferences() {
+        sharedPrefsService = SharedPrefsService(this, "DEVICE_PREFS")
+
+        // Retrieve the stored Device ID or generate a new
+        val deviceIdKey = "device_id"
+        val storedDeviceId = sharedPrefsService.getString(deviceIdKey)
+        if (storedDeviceId == null || storedDeviceId.isEmpty()) {
+            deviceId = UUID.randomUUID().toString()
+            sharedPrefsService.putString(deviceIdKey, deviceId)
+        } else {
+            deviceId = storedDeviceId
+        }
+
+        Log.i(TAG, "Device ID: $deviceId")
     }
 
     private fun createNotificationChannelExport() {
@@ -190,6 +212,8 @@ class Improve : Application(), Serializable {
     }
 
     companion object {
+        private val TAG = this::class.simpleName
+
         // volatile attribute makes the singleton thread safe.
         @Volatile
         private var sImproveInstance: Improve? = null

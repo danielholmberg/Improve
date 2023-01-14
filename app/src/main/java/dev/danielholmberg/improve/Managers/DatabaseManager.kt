@@ -6,7 +6,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.DatabaseReference
 import dev.danielholmberg.improve.Callbacks.DatabaseCallback
 import dev.danielholmberg.improve.Models.*
-import java.util.HashMap
 
 /**
  * Created by Daniel Holmberg.
@@ -374,6 +373,25 @@ class DatabaseManager {
                 Log.e(TAG, "Failed to save Companies: $databaseError")
             }
         }
+    }
+
+    /**
+     * Stores the Notification token for the targeted device
+     */
+    fun updateNotificationToken(token: String) {
+        val notificationData: Map<String, String> = object : java.util.HashMap<String, String>() {
+            init {
+                put("updated", System.currentTimeMillis().toString())
+                put("token", token)
+            }
+        }
+        database.reference.child("notification")
+            .child(instance!!.deviceId).updateChildren(notificationData) { databaseError, _ ->
+                if (databaseError != null) {
+                    Log.e(TAG, "Failed to store notification token: $databaseError")
+                }
+                Log.i(TAG, "Successfully stored notification token: $token")
+            }
     }
 
     companion object {

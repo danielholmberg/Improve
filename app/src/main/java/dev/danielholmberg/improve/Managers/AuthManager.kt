@@ -108,6 +108,21 @@ class AuthManager {
                 // Crashlytics.log("Failed to SetUserPresence: " + error.toString());
             }
         })
+
+        // Add the unique device id to the user
+        val deviceId = instance!!.deviceId
+        database.reference.child("users")
+            .child(userRef)
+            .child("deviceIds")
+            .child(deviceId)
+            .setValue(System.currentTimeMillis().toString())
+            .addOnSuccessListener {
+                Log.i(TAG, "Successfully added Device ID ($deviceId) to user ($userRef)")
+            }
+            .addOnFailureListener {
+                Log.e(TAG, "Failed to add Device ID ($deviceId) to user ($userRef)")
+            }
+
         callback.onSuccess()
     }
 
@@ -115,7 +130,11 @@ class AuthManager {
         googleSignInClient!!.signOut()
             .addOnSuccessListener {
                 Log.d(TAG, "*** Successfully Signed out Google Account")
+
+                val userId = currentUserId
                 Companion.fireAuth.signOut()
+                if (userId != null) removeDeviceIdFromUser(userId)
+
                 callback.onSuccess()
             }
             .addOnFailureListener { e ->
@@ -130,6 +149,22 @@ class AuthManager {
         instance!!.databaseManager!!.userRef.removeValue()
         Companion.fireAuth.signOut()
         callback.onSuccess()
+    }
+
+    private fun removeDeviceIdFromUser(userId: String) {
+        val database = FirebaseDatabase.getInstance()
+        val deviceId = instance!!.deviceId
+        database.reference.child("users")
+            .child(userId)
+            .child("deviceIds")
+            .child(deviceId)
+            .removeValue()
+            .addOnSuccessListener {
+                Log.i(TAG, "Successfully removed Device ID ($deviceId) from user ($userId)")
+            }
+            .addOnFailureListener {
+                Log.e(TAG, "Failed to remove Device ID ($deviceId) from user ($userId)")
+            }
     }
 
     fun linkAccount(account: GoogleSignInAccount, callback: AuthCallback) {
