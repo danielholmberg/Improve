@@ -65,7 +65,7 @@ class ContactRecyclerViewAdapter(private val company: Company) :
 
     private fun initDatabaseListener() {
         val query =
-            databaseManager.companiesRef.child(company.id).child("contacts").orderByChild("name")
+            databaseManager.companiesRef.child(company.id!!).child("contacts").orderByChild("name")
         query.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(dataSnapshot: DataSnapshot, previousChildName: String?) {
                 // This method is triggered when a new child is added

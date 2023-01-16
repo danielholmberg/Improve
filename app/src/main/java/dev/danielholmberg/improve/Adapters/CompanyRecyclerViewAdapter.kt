@@ -25,7 +25,7 @@ class CompanyRecyclerViewAdapter : RecyclerView.Adapter<CompanyViewHolder>() {
         SortedList(Company::class.java, object : SortedList.Callback<Company>() {
             override fun compare(o1: Company, o2: Company): Int {
                 // Sorts the list depending on the compared attribute
-                return o1.name.compareTo(o2.name)
+                return o1.name!!.compareTo(o2.name!!)
             }
 
             override fun onChanged(position: Int, count: Int) {
@@ -78,7 +78,7 @@ class CompanyRecyclerViewAdapter : RecyclerView.Adapter<CompanyViewHolder>() {
                 // This method is triggered when the data at a child location has changed.
                 val updatedCompany = dataSnapshot.getValue(Company::class.java)
                 if (updatedCompany != null) {
-                    val existingCompany = getCompany(updatedCompany.id)
+                    val existingCompany = getCompany(updatedCompany.id!!)
                     var index = companies.size()
                     if (existingCompany == null) {
                         companies.add(updatedCompany)
@@ -125,7 +125,7 @@ class CompanyRecyclerViewAdapter : RecyclerView.Adapter<CompanyViewHolder>() {
             val hashMap = HashMap<String, Any>()
             for (i in 0 until companies.size()) {
                 val company = companies[i]
-                hashMap[company.id] = company
+                hashMap[company.id!!] = company
             }
             return hashMap
         }
@@ -134,7 +134,7 @@ class CompanyRecyclerViewAdapter : RecyclerView.Adapter<CompanyViewHolder>() {
             val companiesName = ArrayList<String>()
             for ((_, value) in companiesHashMap) {
                 val company = value as Company
-                companiesName.add(company.name)
+                companiesName.add(company.name!!)
             }
             return companiesName
         }
@@ -156,7 +156,7 @@ class CompanyRecyclerViewAdapter : RecyclerView.Adapter<CompanyViewHolder>() {
         holder.contactRecyclerView!!.layoutManager = linearLayoutManager
         val contactsAdapter = ContactRecyclerViewAdapter(company)
         holder.contactRecyclerView!!.adapter = contactsAdapter
-        instance!!.addContactsAdapter(company.id, contactsAdapter)
+        instance!!.addContactsAdapter(company.id!!, contactsAdapter)
     }
 
     override fun getItemCount(): Int {

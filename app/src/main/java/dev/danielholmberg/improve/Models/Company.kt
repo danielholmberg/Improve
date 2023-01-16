@@ -1,101 +1,76 @@
-package dev.danielholmberg.improve.Models;
+package dev.danielholmberg.improve.Models
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.os.Parcelable
+import android.os.Parcel
+import java.util.*
 
-import java.util.HashMap;
-import java.util.Objects;
+class Company : Parcelable {
+    var id: String? = null
+    var name: String? = null
+    private var contactsList: HashMap<String, Any>? = null
 
-public class Company implements Parcelable{
-
-    private String id;
-    private String name;
-    private HashMap contactsList;
-
-    public Company() {}
-
-    public Company(String id, String name) {
-        this.id = id;
-        this.name = name;
+    constructor() {}
+    constructor(id: String?, name: String?) {
+        this.id = id
+        this.name = name
     }
 
-    public Company(String id, String name, HashMap<String, Object> contacts) {
-        this.id = id;
-        this.name = name;
-        this.contactsList = contacts;
+    constructor(id: String?, name: String?, contacts: HashMap<String, Any>?) {
+        this.id = id
+        this.name = name
+        contactsList = contacts
     }
 
-    public String getId() {
-        return id;
+    val contacts: HashMap<String, Any>?
+        get() = contactsList
+
+    fun setContacts(contactsList: HashMap<String, Any>?) {
+        this.contactsList = contactsList
     }
 
-    public void setId(String id) {
-        this.id = id;
+    override fun toString(): String {
+        return name!!
     }
 
-    public String getName() {
-        return name;
+    override fun describeContents(): Int {
+        return 0
     }
 
-    public void setName(String name) {
-        this.name = name;
+    override fun writeToParcel(parcel: Parcel, i: Int) {
+        parcel.writeString(id)
+        parcel.writeString(name)
+        parcel.writeMap(contactsList)
     }
 
-    public HashMap<String, Object> getContacts() {
-        return contactsList;
+    protected constructor(`in`: Parcel) {
+        id = `in`.readString()
+        name = `in`.readString()
+        contactsList = `in`.readHashMap(HashMap::class.java.classLoader) as HashMap<String, Any>?
     }
 
-    public void setContacts(HashMap<String, Object> contactsList) {
-        this.contactsList = contactsList;
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        val company = other as Company
+        return id == company.id &&
+                name == company.name &&
+                contactsList == company.contactsList
     }
 
-    @Override
-    public String toString() {
-        return getName();
+    override fun hashCode(): Int {
+        return Objects.hash(id, name, contactsList)
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
+    companion object {
+        @JvmField
+        val CREATOR: Parcelable.Creator<Company> = object : Parcelable.Creator<Company> {
+            override fun createFromParcel(`in`: Parcel): Company {
+                return Company(`in`)
+            }
 
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(id);
-        parcel.writeString(name);
-        parcel.writeMap(contactsList);
-    }
-
-    protected Company(Parcel in) {
-        id = in.readString();
-        name = in.readString();
-        contactsList = in.readHashMap(HashMap.class.getClassLoader());
-    }
-
-    public static final Creator<Company> CREATOR = new Creator<Company>() {
-        @Override
-        public Company createFromParcel(Parcel in) {
-            return new Company(in);
+            override fun newArray(size: Int): Array<Company?> {
+                return arrayOfNulls(size)
+            }
         }
-
-        @Override
-        public Company[] newArray(int size) {
-            return new Company[size];
-        }
-    };
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Company company = (Company) o;
-        return id.equals(company.id) &&
-                Objects.equals(name, company.name) &&
-                Objects.equals(contactsList, company.contactsList);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, contactsList);
     }
 }

@@ -186,7 +186,7 @@ class AddContactActivity : AppCompatActivity() {
 
     private fun addContact() {
         val company = contactCompany!!.selectedItem as Company
-        val id = databaseManager!!.companiesRef.child(company.id).child("contacts").push().key
+        val id = databaseManager!!.companiesRef.child(company.id!!).child("contacts").push().key
         val name = contactName!!.text.toString()
         val email = contactEmail!!.text.toString().trim { it <= ' ' }
         val phone = contactPhone!!.text.toString().trim { it <= ' ' }

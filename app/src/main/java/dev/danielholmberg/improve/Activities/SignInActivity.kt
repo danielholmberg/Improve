@@ -30,7 +30,7 @@ class SignInActivity : AppCompatActivity(), View.OnClickListener {
         Log.d(TAG, "Starting application...")
 
         // The getFireAuth().getCurrentUser() is not null, then the user has been previously authenticated.
-        if (instance!!.authManager!!.fireAuth.currentUser != null) {
+        if (instance!!.authManager.fireAuth.currentUser != null) {
             startMainActivity()
         }
         setContentView(R.layout.activity_sign_in)

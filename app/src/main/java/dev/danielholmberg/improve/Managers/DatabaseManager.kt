@@ -291,7 +291,7 @@ class DatabaseManager {
 
     // ---- Company specific functions ---- //
     fun addCompany(newCompany: Company) {
-        companiesRef.child(newCompany.id).setValue(newCompany) { databaseError, _ ->
+        companiesRef.child(newCompany.id!!).setValue(newCompany) { databaseError, _ ->
             if (databaseError != null) {
                 Log.e(
                     TAG,
@@ -302,7 +302,7 @@ class DatabaseManager {
     }
 
     fun deleteCompany(company: Company) {
-        companiesRef.child(company.id).removeValue { databaseError, _ ->
+        companiesRef.child(company.id!!).removeValue { databaseError, _ ->
             if (databaseError != null) {
                 Log.e(
                     TAG,
