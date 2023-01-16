@@ -56,7 +56,7 @@ class SignInActivity : AppCompatActivity(), View.OnClickListener {
             .build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
         // Add the Google Sign In Client to AuthManager.
-        instance!!.authManager!!.googleSignInClient = googleSignInClient
+        instance!!.authManager.googleSignInClient = googleSignInClient
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -69,7 +69,7 @@ class SignInActivity : AppCompatActivity(), View.OnClickListener {
 
                 // Google Sign In was successful, authenticating with Firebase...
                 val account = result.signInAccount
-                instance!!.authManager!!.authGoogleAccountWithFirebase(account!!, object : AuthCallback {
+                instance!!.authManager.authGoogleAccountWithFirebase(account!!, object : AuthCallback {
                     override fun onSuccess() {
                         progressBar!!.visibility = View.GONE
                         startMainActivity()
@@ -120,7 +120,7 @@ class SignInActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun startAnonymousSignIn() {
-        instance!!.authManager!!.signInAnonymously(object : AuthCallback {
+        instance!!.authManager.signInAnonymously(object : AuthCallback {
             override fun onSuccess() {
                 startMainActivity()
             }
