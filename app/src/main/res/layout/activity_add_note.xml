@@ -8,7 +8,7 @@
     android:orientation="vertical"
     android:background="@color/cardInfoBackground"
     android:fitsSystemWindows="true"
-    tools:context="dev.danielholmberg.improve.Activities.AddNoteActivity">
+    tools:context="dev.danielholmberg.improve.legacy.Activities.AddNoteActivity">
 
     <include
         android:id="@+id/include_toolbar_add_note"

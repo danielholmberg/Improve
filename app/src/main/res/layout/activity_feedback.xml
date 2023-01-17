@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:background="@color/cardInfoBackground"
     android:fitsSystemWindows="true"
-    tools:context="dev.danielholmberg.improve.Activities.FeedbackActivity">
+    tools:context="dev.danielholmberg.improve.legacy.Activities.FeedbackActivity">
 
     <include
         android:id="@+id/include_toolbar_feedback"

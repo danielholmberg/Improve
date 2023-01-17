@@ -37,7 +37,7 @@
         </provider>
 
         <activity
-            android:name=".Activities.SignInActivity"
+            android:name=".legacy.Activities.SignInActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -46,42 +46,42 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Activities.MainActivity"
+            android:name=".legacy.Activities.MainActivity"
             android:configChanges="orientation|screenSize"
             android:launchMode="singleInstance"
             android:windowSoftInputMode="adjustResize"
             android:exported="false"/>
         <activity
-            android:name=".Activities.AddNoteActivity"
+            android:name=".legacy.Activities.AddNoteActivity"
             android:label="@string/title_new_note"
             android:launchMode="singleInstance"
-            android:parentActivityName=".Activities.MainActivity"
+            android:parentActivityName=".legacy.Activities.MainActivity"
             android:windowSoftInputMode="adjustPan"
             android:exported="false"/>
         <activity
-            android:name=".Activities.AddContactActivity"
+            android:name=".legacy.Activities.AddContactActivity"
             android:label="@string/title_new_contact"
             android:launchMode="singleInstance"
-            android:parentActivityName=".Activities.MainActivity"
+            android:parentActivityName=".legacy.Activities.MainActivity"
             android:windowSoftInputMode="adjustPan"
             android:exported="false"/>
         <activity
-            android:name=".Activities.FeedbackActivity"
+            android:name=".legacy.Activities.FeedbackActivity"
             android:label="@string/title_feedback"
             android:launchMode="singleInstance"
-            android:parentActivityName=".Activities.MainActivity"
+            android:parentActivityName=".legacy.Activities.MainActivity"
             android:windowSoftInputMode="adjustPan"
             android:exported="false"/>
         <activity
-            android:name=".Activities.PrivacyPolicyActivity"
+            android:name=".legacy.Activities.PrivacyPolicyActivity"
             android:label="@string/title_privacy_policy"
             android:launchMode="singleInstance"
-            android:parentActivityName=".Activities.MainActivity"
+            android:parentActivityName=".legacy.Activities.MainActivity"
             android:windowSoftInputMode="adjustPan"
             android:exported="false"/>
 
         <service
-            android:name=".Services.NotificationService"
+            android:name=".legacy.Services.NotificationService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
