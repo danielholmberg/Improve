@@ -2,7 +2,6 @@ package dev.danielholmberg.improve.Activities
 
 import dev.danielholmberg.improve.Improve.Companion.instance
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import android.os.Bundle
 import dev.danielholmberg.improve.R
 import android.webkit.WebView
@@ -12,16 +11,17 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.Toolbar
+import dev.danielholmberg.improve.Managers.RemoteConfigManager
 
 class PrivacyPolicyActivity : AppCompatActivity() {
 
     private var toolbar: Toolbar? = null
-    private var firebaseRemoteConfig: FirebaseRemoteConfig? = null
+    private var remoteConfig: RemoteConfigManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_privacy_policy)
-        firebaseRemoteConfig = instance!!.remoteConfig
+        remoteConfig = instance!!.remoteConfigManager
         toolbar = findViewById<View>(R.id.toolbar_privacy_policy) as Toolbar
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayShowTitleEnabled(false)
@@ -30,14 +30,14 @@ class PrivacyPolicyActivity : AppCompatActivity() {
         privacyPolicyWebView.setBackgroundColor(Color.TRANSPARENT)
 
         // [START fetch_config_with_callback]
-        firebaseRemoteConfig!!.fetchAndActivate()
+        remoteConfig!!.fetchAndActivate()
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     val updated = task.result
                     Log.d(TAG, "Config params updated: $updated")
                 }
                 privacyPolicyWebView.loadData(
-                    firebaseRemoteConfig!!.getString("privacy_policy_text"),
+                    remoteConfig!!.getPrivatePolicyText(),
                     "text/html",
                     "utf-8"
                 )

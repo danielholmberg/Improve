@@ -4,7 +4,6 @@ import android.app.Application
 import dev.danielholmberg.improve.Managers.AuthManager
 import dev.danielholmberg.improve.Managers.DatabaseManager
 import dev.danielholmberg.improve.Managers.StorageManager
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import dev.danielholmberg.improve.Services.DriveServiceHelper
 import dev.danielholmberg.improve.Activities.MainActivity
 import dev.danielholmberg.improve.Fragments.NotesFragment
@@ -22,6 +21,8 @@ import android.app.NotificationManager
 import android.app.NotificationChannel
 import android.util.Log
 import androidx.fragment.app.Fragment
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import dev.danielholmberg.improve.Managers.RemoteConfigManager
 import dev.danielholmberg.improve.Services.SharedPrefsService
 import java.io.File
 import java.io.Serializable
@@ -38,8 +39,7 @@ class Improve : Application(), Serializable {
         private set
     lateinit var storageManager: StorageManager
         private set
-
-    lateinit var remoteConfig: FirebaseRemoteConfig
+    lateinit var remoteConfigManager: RemoteConfigManager
         private set
 
     var driveServiceHelper: DriveServiceHelper? = null
@@ -97,8 +97,8 @@ class Improve : Application(), Serializable {
         authManager = AuthManager()
         databaseManager = DatabaseManager()
         storageManager = StorageManager()
+        remoteConfigManager = RemoteConfigManager(remoteConfig = FirebaseRemoteConfig.getInstance())
 
-        remoteConfig = FirebaseRemoteConfig.getInstance()
         setRemoteConfigSettings()
 
         createNotificationChannelExport()
@@ -132,9 +132,9 @@ class Improve : Application(), Serializable {
         val configSettings = FirebaseRemoteConfigSettings.Builder()
             .setMinimumFetchIntervalInSeconds(if (BuildConfig.DEBUG) 0 else 3600.toLong())
             .build()
-        remoteConfig.setConfigSettingsAsync(configSettings)
-        remoteConfig.setDefaultsAsync(R.xml.remote_config_defaults)
-        remoteConfig.setDefaultsAsync(vipUsers)
+        remoteConfigManager.setConfigSettingsAsync(configSettings)
+        remoteConfigManager.setDefaultsAsync(R.xml.remote_config_defaults)
+        remoteConfigManager.setDefaultsAsync(vipUsers)
     }
 
     private fun createNotificationChannelExport() {
