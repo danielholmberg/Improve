@@ -30,6 +30,7 @@ import dev.danielholmberg.improve.Fragments.NotesFragment
 import dev.danielholmberg.improve.Fragments.ArchivedNotesFragment
 import dev.danielholmberg.improve.Fragments.ContactsFragment
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -66,16 +67,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         instance!!.mainActivityRef = this
-        currentUser = instance!!.authManager!!.currentUser
+        currentUser = instance!!.authManager.currentUser
 
         // Retrieve VIP_USERS from Firebase RemoteConfig
-        instance!!.remoteConfig!!.fetchAndActivate()
+        instance!!.remoteConfig.fetchAndActivate()
             .addOnCompleteListener { task ->
                 if (task.isSuccessful && task.result != null) {
                     val updated = task.result
                     Log.d(TAG, "Config params updated: $updated")
                 }
-                val retrievedVIPUsers = instance!!.remoteConfig!!.getString("vip_users")
+                val retrievedVIPUsers = instance!!.remoteConfig.getString("vip_users")
                 Log.d(TAG, "Retrieved VIP_USERS: $retrievedVIPUsers")
                 if (currentUser!!.email != null && currentUser!!.email!!.isNotEmpty()) {
                     Log.d(TAG, "Current user: " + currentUser!!.email)
@@ -88,6 +89,12 @@ class MainActivity : AppCompatActivity() {
         initActivity()
         initData()
         loadCurrentFragment()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(0) {
+                handleBackNavigation()
+            }
+        }
     }
 
     private fun initActivity() {
@@ -426,7 +433,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun signOutAnonymousUser() {
-        instance!!.authManager!!.signOutAnonymousAccount(object : AuthCallback {
+        instance!!.authManager.signOutAnonymousAccount(object : AuthCallback {
             override fun onSuccess() {
                 showSignInActivity()
             }
@@ -439,7 +446,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun signOutGoogleUser() {
         Log.d(TAG, "SignOutGoogleUser clicked: " + currentUser!!.email)
-        instance!!.authManager!!.signOutGoogleAccount(object : AuthCallback {
+        instance!!.authManager.signOutGoogleAccount(object : AuthCallback {
             override fun onSuccess() {
                 showSignInActivity()
             }
@@ -458,37 +465,47 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        handleBackNavigation()
+    }
+
+    private fun handleBackNavigation() {
         if (drawer!!.isDrawerOpen(GravityCompat.START)) {
             drawer!!.closeDrawers()
             return
         }
+
         if (shouldLoadHomeFragOnBackPress) {
             if (navItemIndex != 0) {
                 navItemIndex = 0
                 CURRENT_TAG = TAG_NOTES_FRAGMENT
                 loadCurrentFragment()
-            } else {
-                if (doubleBackToExitPressedOnce) {
-                    super.onBackPressed()
-                    return
-                }
-                doubleBackToExitPressedOnce = true
-                Toast.makeText(this, "Press BACK again to exit", Toast.LENGTH_SHORT).show()
-                Handler(Looper.getMainLooper()).postDelayed({ doubleBackToExitPressedOnce = false }, 2000)
+                return
             }
+
+            if (doubleBackToExitPressedOnce) {
+                super.onBackPressed()
+                return
+            }
+
+            doubleBackToExitPressedOnce = true
+            Toast.makeText(this, "Press BACK again to exit", Toast.LENGTH_SHORT)
+                .show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                doubleBackToExitPressedOnce = false
+            }, 2000)
         }
     }
 
     override fun onStop() {
         super.onStop()
-        if (instance!!.authManager!!.currentUser != null) {
+        if (instance!!.authManager.currentUser != null) {
             instance!!.saveState()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (instance!!.authManager!!.currentUser != null) {
+        if (instance!!.authManager.currentUser != null) {
             instance!!.saveState()
         }
     }

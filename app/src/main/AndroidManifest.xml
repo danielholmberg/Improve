@@ -17,6 +17,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.Base"
         android:windowSoftInputMode="stateAlwaysHidden"
+        android:enableOnBackInvokedCallback="true"
         tools:ignore="GoogleAppIndexingWarning">
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
