@@ -1,19 +1,14 @@
-package dev.danielholmberg.improve.legacy.Fragments
+package dev.danielholmberg.improve.clean.feature_note.presentation.notes.fragment
 
-import dev.danielholmberg.improve.Improve.Companion.instance
-import dev.danielholmberg.improve.legacy.Managers.DatabaseManager
-import dev.danielholmberg.improve.legacy.Services.DriveServiceHelper
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.app.ProgressDialog
 import android.widget.ImageButton
-import dev.danielholmberg.improve.legacy.Utilities.NoteInputValidator
+import dev.danielholmberg.improve.clean.feature_note.domain.util.NoteInputValidator
 import com.google.android.material.textfield.TextInputLayout
 import android.widget.EditText
 import com.google.android.flexbox.FlexboxLayout
 import androidx.recyclerview.widget.RecyclerView
-import dev.danielholmberg.improve.legacy.Adapters.VipImagesAdapter
-import dev.danielholmberg.improve.legacy.Models.VipImage
 import android.os.Parcelable
 import android.widget.Toast
 import dev.danielholmberg.improve.R
@@ -31,8 +26,6 @@ import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexWrap
 import android.text.TextWatcher
 import android.text.Editable
-import dev.danielholmberg.improve.legacy.ViewHolders.TagViewHolder
-import dev.danielholmberg.improve.legacy.Callbacks.StorageCallback
 import android.app.Activity
 import android.text.TextUtils
 import android.util.Log
@@ -42,15 +35,23 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import com.google.android.gms.common.api.Scope
-import dev.danielholmberg.improve.legacy.Models.Note
-import dev.danielholmberg.improve.legacy.Models.Tag
+import dev.danielholmberg.improve.clean.Improve.Companion.instance
+import dev.danielholmberg.improve.clean.core.GoogleDriveService
+import dev.danielholmberg.improve.clean.feature_note.presentation.util.ImageCallback
+import dev.danielholmberg.improve.clean.feature_note.domain.model.Note
+import dev.danielholmberg.improve.clean.feature_note.domain.model.Tag
+import dev.danielholmberg.improve.clean.feature_note.domain.model.Image
+import dev.danielholmberg.improve.clean.feature_note.domain.repository.NoteRepository
+import dev.danielholmberg.improve.clean.feature_note.domain.repository.TagRepository
+import dev.danielholmberg.improve.clean.feature_note.presentation.notes.TagViewHolder
+import dev.danielholmberg.improve.clean.feature_note.presentation.notes.adapter.ImagesAdapter
 import java.text.DateFormat
 import java.util.*
 
 class NoteDetailsDialogFragment : DialogFragment() {
 
-    private var databaseManager: DatabaseManager? = null
-    private var mDriveServiceHelper: DriveServiceHelper? = null
+    private lateinit var noteRepository: NoteRepository
+    private lateinit var tagRepository: TagRepository
     private var activity: AppCompatActivity? = null
     private var toolbar: Toolbar? = null
     private var noteBundle: Bundle? = null
@@ -85,15 +86,16 @@ class NoteDetailsDialogFragment : DialogFragment() {
     private var noteTimestampUpdated: String? = null
 
     // VIP
-    private var vipImagesRecyclerView: RecyclerView? = null
-    private var vipImagesAdapter: VipImagesAdapter? = null
-    private var currentImages: ArrayList<VipImage>? = null
-    private var originalImages: ArrayList<VipImage>? = null
+    private var imagesRecyclerView: RecyclerView? = null
+    private var imagesAdapter: ImagesAdapter? = null
+    private var currentImages: ArrayList<Image>? = null
+    private var originalImages: ArrayList<Image>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        databaseManager = instance!!.databaseManager
+        noteRepository = instance!!.noteRepository
+        tagRepository = instance!!.tagRepository
+
         activity = getActivity() as AppCompatActivity?
-        mDriveServiceHelper = instance!!.driveServiceHelper
         noteBundle = arguments
         if (noteBundle != null) {
             parentFragment = noteBundle!!.getInt(NOTE_PARENT_FRAGMENT_KEY)
@@ -149,7 +151,7 @@ class NoteDetailsDialogFragment : DialogFragment() {
                         true
                     }
                     R.id.starNote -> {
-                        originalNote!!.stared = !originalNote!!.isStared()
+                        originalNote!!.isStared = !originalNote!!.isStared
                         createOptionsMenu()
                         true
                     }
@@ -204,28 +206,28 @@ class NoteDetailsDialogFragment : DialogFragment() {
         inputInfo = inputInfoLayout!!.findViewById<View>(R.id.input_info) as EditText
 
         // VIP Views
-        vipImagesRecyclerView = view.findViewById<View>(R.id.images_list) as RecyclerView
+        imagesRecyclerView = view.findViewById<View>(R.id.images_list) as RecyclerView
         tagsList = view.findViewById<View>(R.id.footer_note_tags_list) as FlexboxLayout
         validator = NoteInputValidator((context)!!, (inputTitleLayout)!!)
         toggleMode(editMode)
         if (originalNote != null) {
             if (instance!!.isVipUser) {
-                vipImagesAdapter = VipImagesAdapter((originalNote!!.id)!!, false)
+                imagesAdapter = ImagesAdapter((originalNote!!.id)!!, false)
                 if (originalNote!!.hasImage()) {
                     originalImages = ArrayList()
-                    for (vipImageId: String? in originalNote!!.vipImages) {
-                        originalImages!!.add(VipImage(vipImageId))
+                    for (vipImageId: String? in originalNote!!.images) {
+                        originalImages!!.add(Image(vipImageId))
                     }
                     currentImages = originalImages
-                    vipImagesAdapter!!.addImages(originalImages!!)
+                    imagesAdapter!!.addImages(originalImages!!)
                     Log.d(TAG, "Initial image count: " + originalImages!!.size)
                 }
-                vipImagesRecyclerView!!.adapter = vipImagesAdapter
+                imagesRecyclerView!!.adapter = imagesAdapter
                 val layoutManager = LinearLayoutManager(instance, LinearLayoutManager.HORIZONTAL, false)
-                vipImagesRecyclerView!!.layoutManager = layoutManager
+                imagesRecyclerView!!.layoutManager = layoutManager
             }
             populateNoteDetails()
-            oldTags = HashMap(originalNote!!.getTags())
+            oldTags = HashMap(originalNote!!.tags)
         } else {
             Toast.makeText(context, "Unable to show Note details", Toast.LENGTH_SHORT).show()
             dismissDialog()
@@ -239,7 +241,7 @@ class NoteDetailsDialogFragment : DialogFragment() {
             )
         ) {
             GoogleSignIn.requestPermissions(
-                (instance!!.notesFragmentRef)!!,
+                (instance!!.currentFragment)!!,
                 REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION,
                 GoogleSignIn.getLastSignedInAccount(instance), Scope(DriveScopes.DRIVE_FILE)
             )
@@ -269,7 +271,7 @@ class NoteDetailsDialogFragment : DialogFragment() {
             menuTitle.setText(R.string.title_edit_note)
             toolbar!!.inflateMenu(R.menu.menu_edit_note)
             toolbar!!.setNavigationOnClickListener { showDiscardChangesDialog() }
-            if (originalNote!!.isStared()) {
+            if (originalNote!!.isStared) {
                 menu.findItem(R.id.starNote).setIcon(R.drawable.ic_star_enabled_accent)
                 menu.findItem(R.id.starNote).setTitle(R.string.menu_note_star_disable)
             } else {
@@ -313,12 +315,12 @@ class NoteDetailsDialogFragment : DialogFragment() {
             .setPositiveButton("Discard") { dialogInterface, _ ->
                 editMode = false
                 toggleMode(editMode)
-                originalNote!!.stared = isOriginallyStared
+                originalNote!!.isStared = isOriginallyStared
                 if (originalNote!!.hasImage()) {
                     currentImages = originalImages
-                    vipImagesAdapter = VipImagesAdapter((originalNote!!.id)!!, false)
-                    vipImagesAdapter!!.addImages((currentImages)!!)
-                    vipImagesRecyclerView!!.adapter = vipImagesAdapter
+                    imagesAdapter = ImagesAdapter((originalNote!!.id)!!, false)
+                    imagesAdapter!!.addImages((currentImages)!!)
+                    imagesRecyclerView!!.adapter = imagesAdapter
                 }
                 originalNote!!.setTags((oldTags)!!)
                 createOptionsMenu()
@@ -416,9 +418,9 @@ class NoteDetailsDialogFragment : DialogFragment() {
                     labelEditText.error = getString(R.string.err_msg_tag_label)
                     return
                 }
-                val newTagId = databaseManager!!.tagRef.push().key
+                val newTagId = tagRepository.generateNewTagId()
                 val newTag = Tag(newTagId)
-                newTag.setLabel(labelEditText.text.toString())
+                newTag.label = labelEditText.text.toString()
                 newTag.color = newTagColor
                 if ((newTagColor == "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColorNull)))) {
                     newTag.textColor =
@@ -427,7 +429,10 @@ class NoteDetailsDialogFragment : DialogFragment() {
                     newTag.textColor =
                         "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagTextColor))
                 }
-                databaseManager!!.addTag(newTag)
+
+                // TODO: Should be moved to UseCase
+                tagRepository.addTag(newTag)
+
                 tagsAdapter.addTag(newTag)
                 originalNote!!.addTag(newTag.id)
                 newTags!!.add(newTag.id)
@@ -543,17 +548,17 @@ class NoteDetailsDialogFragment : DialogFragment() {
         inputTitle!!.isEnabled = editMode
         inputInfo!!.isEnabled = editMode
         if (editMode) {
-            isOriginallyStared = originalNote!!.isStared()
-            if (vipImagesAdapter != null) {
-                vipImagesAdapter!!.setEditMode(true)
+            isOriginallyStared = originalNote!!.isStared
+            if (imagesAdapter != null) {
+                imagesAdapter!!.setEditMode(true)
             }
             inputInfo!!.visibility = View.VISIBLE
             inputTitle!!.requestFocus()
             dialog!!.setCancelable(false)
             activity!!.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
         } else {
-            if (vipImagesAdapter != null) {
-                vipImagesAdapter!!.setEditMode(false)
+            if (imagesAdapter != null) {
+                imagesAdapter!!.setEditMode(false)
             }
             dialog!!.setCancelable(true)
             activity!!.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
@@ -570,11 +575,11 @@ class NoteDetailsDialogFragment : DialogFragment() {
         noteId = originalNote!!.id
         noteTitle = originalNote!!.title
         noteInfo = originalNote!!.info
-        if (originalNote!!.added != null) {
-            noteTimestampAdded = transformMillisToDateString(originalNote!!.added!!.toLong())
+        if (originalNote!!.addedAt != null) {
+            noteTimestampAdded = transformMillisToDateString(originalNote!!.addedAt!!.toLong())
         }
-        if (originalNote!!.updated != null) {
-            noteTimestampUpdated = transformMillisToDateString(originalNote!!.updated!!.toLong())
+        if (originalNote!!.updatedAt != null) {
+            noteTimestampUpdated = transformMillisToDateString(originalNote!!.updatedAt!!.toLong())
         }
         if (originalNote!!.title != null) {
             inputTitle!!.setText(noteTitle)
@@ -588,17 +593,17 @@ class NoteDetailsDialogFragment : DialogFragment() {
             inputInfo!!.visibility = View.VISIBLE
         }
         if (originalNote!!.hasImage()) {
-            vipImagesRecyclerView!!.visibility = View.VISIBLE
+            imagesRecyclerView!!.visibility = View.VISIBLE
         } else {
             // Hide VIP Images List
-            vipImagesRecyclerView!!.visibility = View.GONE
+            imagesRecyclerView!!.visibility = View.GONE
         }
         renderTagList()
     }
 
     private fun renderTagList() {
         tagsList!!.removeAllViews()
-        for (tagId: String? in originalNote!!.getTags().keys) {
+        for (tagId: String? in originalNote!!.tags.keys) {
             val tagView = LayoutInflater.from(context).inflate(R.layout.item_tag, tagsList, false)
             val tagViewHolder = TagViewHolder(tagView)
             tagViewHolder.bindModelToView(instance!!.tagsAdapter!!.getTag(tagId))
@@ -636,34 +641,29 @@ class NoteDetailsDialogFragment : DialogFragment() {
      * Creates a new file via the Drive REST API.
      */
     private fun exportNoteToDrive() {
-        if (mDriveServiceHelper != null) {
-            Log.d(TAG, "Creating a file.")
-            exportDialog = ProgressDialog.show(
-                context, "Exporting Note to Google Drive",
-                "In progress...", true
-            )
-            exportDialog!!.show()
-            Log.d(TAG, "Note exported info: " + originalNote.toString())
-            mDriveServiceHelper!!.createFile(
-                DriveServiceHelper.TYPE_NOTE,
-                originalNote!!.title,
-                originalNote.toString()
-            )
-                .addOnSuccessListener {
-                    Log.d(TAG, "Created file")
-                    exportDialog!!.cancel()
-                    dismissDialog()
-                    Toast.makeText(instance, "Note exported", Toast.LENGTH_LONG).show()
-                }
-                .addOnFailureListener { e ->
-                    Log.e(TAG, "Couldn't create file.", e)
-                    exportDialog!!.cancel()
-                    Toast.makeText(instance, "Failed to export Note", Toast.LENGTH_LONG).show()
-                }
-        } else {
-            Log.e(TAG, "DriveServiceHelper wasn't initialized.")
-            Toast.makeText(instance, "Failed to export Note", Toast.LENGTH_LONG).show()
-        }
+        Log.d(TAG, "Creating a file.")
+        exportDialog = ProgressDialog.show(
+            context, "Exporting Note to Google Drive",
+            "In progress...", true
+        )
+        exportDialog!!.show()
+        Log.d(TAG, "Note exported info: " + originalNote.toString())
+        instance!!.googleDriveService.createFile(
+            GoogleDriveService.TYPE_NOTE,
+            originalNote!!.title,
+            originalNote.toString()
+        )
+            .addOnSuccessListener {
+                Log.d(TAG, "Created file")
+                exportDialog!!.cancel()
+                dismissDialog()
+                Toast.makeText(instance, "Note exported", Toast.LENGTH_LONG).show()
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Couldn't create file.", e)
+                exportDialog!!.cancel()
+                Toast.makeText(instance, "Failed to export Note", Toast.LENGTH_LONG).show()
+            }
     }
 
     private fun showArchiveDialog() {
@@ -685,7 +685,7 @@ class NoteDetailsDialogFragment : DialogFragment() {
             .setMessage(R.string.dialog_delete_note_msg)
             .setPositiveButton("Yes"
             ) { _, _ ->
-                if (originalNote!!.isArchived()) {
+                if (originalNote!!.isArchived) {
                     deleteNoteFromArchive(originalNote)
                 } else {
                     deleteNote(originalNote)
@@ -697,32 +697,32 @@ class NoteDetailsDialogFragment : DialogFragment() {
     }
 
     private fun deleteNoteFromArchive(note: Note?) {
-        databaseManager!!.deleteNoteFromArchive((note)!!)
+        noteRepository.deleteNoteFromArchive((note)!!)
         dismissDialog()
     }
 
     private fun deleteNote(note: Note?) {
-        databaseManager!!.deleteNote((note)!!)
+        noteRepository.deleteNote((note)!!)
         dismissDialog()
     }
 
     private fun unarchiveNote() {
-        databaseManager!!.unarchiveNote((originalNote)!!)
+        noteRepository.unarchiveNote((originalNote)!!)
         dismissDialog()
     }
 
     private fun archiveNote() {
-        databaseManager!!.archiveNote((originalNote)!!)
+        noteRepository.archiveNote((originalNote)!!)
         dismissDialog()
     }
 
     private fun updateNote() {
         val oldId = originalNote!!.id
-        val archived = originalNote!!.isArchived()
+        val archived = originalNote!!.isArchived
         val newTitle = inputTitle!!.text.toString()
         var newInfo = inputInfo!!.text.toString()
-        val stared = originalNote!!.isStared()
-        val timestampAdded = originalNote!!.added
+        val stared = originalNote!!.isStared
+        val timestampAdded = originalNote!!.addedAt
         val timestampUpdated = System.currentTimeMillis().toString()
         if (TextUtils.isEmpty(newInfo.trim { it <= ' ' })) {
             newInfo = ""
@@ -730,24 +730,24 @@ class NoteDetailsDialogFragment : DialogFragment() {
         updatedNote = Note(oldId)
         updatedNote!!.title = newTitle
         updatedNote!!.info = newInfo
-        updatedNote!!.stared = stared
-        updatedNote!!.setTags(originalNote!!.getTags())
-        updatedNote!!.added = timestampAdded
-        updatedNote!!.archived = archived
-        updatedNote!!.updated = timestampUpdated
-        if (instance!!.isVipUser && vipImagesAdapter != null) {
+        updatedNote!!.isStared = stared
+        updatedNote!!.setTags(originalNote!!.tags)
+        updatedNote!!.addedAt = timestampAdded
+        updatedNote!!.isArchived = archived
+        updatedNote!!.updatedAt = timestampUpdated
+        if (instance!!.isVipUser && imagesAdapter != null) {
             // User is a VIP user and the VIP image adapter has been initialized.
-            currentImages = vipImagesAdapter!!.imageList
+            currentImages = imagesAdapter!!.imageList
             if (currentImages!!.size > 0) {
                 // The VIP user has added a image to the current Note.
                 Log.d(TAG, "Updated image count: " + currentImages!!.size)
                 var vipImageDiff = false
-                for (vipImage: VipImage in currentImages!!) {
+                for (image: Image in currentImages!!) {
                     if (originalImages == null) {
                         vipImageDiff = true
                         break
                     } else {
-                        if (!originalImages!!.contains(vipImage)) {
+                        if (!originalImages!!.contains(image)) {
                             vipImageDiff = true
                             break
                         }
@@ -758,16 +758,16 @@ class NoteDetailsDialogFragment : DialogFragment() {
                     uploadImages()
                 } else {
                     val images = ArrayList<String?>()
-                    for (vipImage: VipImage in currentImages!!) {
-                        images.add(vipImage.id)
+                    for (image: Image in currentImages!!) {
+                        images.add(image.id)
                     }
-                    updatedNote!!.vipImages = images
+                    updatedNote!!.images = images
                     originalNote = updatedNote
-                    oldTags = HashMap(originalNote!!.getTags())
-                    if (originalNote!!.isArchived()) {
-                        databaseManager!!.updateArchivedNote(updatedNote!!)
+                    oldTags = HashMap(originalNote!!.tags)
+                    if (originalNote!!.isArchived) {
+                        noteRepository.updateArchivedNote(updatedNote!!)
                     } else {
-                        databaseManager!!.updateNote(updatedNote!!)
+                        noteRepository.updateNote(updatedNote!!)
                     }
                     editMode = false
                     populateNoteDetails()
@@ -776,11 +776,11 @@ class NoteDetailsDialogFragment : DialogFragment() {
                 }
             } else {
                 originalNote = updatedNote
-                oldTags = HashMap(originalNote!!.getTags())
-                if (originalNote!!.isArchived()) {
-                    databaseManager!!.updateArchivedNote(updatedNote!!)
+                oldTags = HashMap(originalNote!!.tags)
+                if (originalNote!!.isArchived) {
+                    noteRepository.updateArchivedNote(updatedNote!!)
                 } else {
-                    databaseManager!!.updateNote(updatedNote!!)
+                    noteRepository.updateNote(updatedNote!!)
                 }
                 editMode = false
                 populateNoteDetails()
@@ -789,11 +789,11 @@ class NoteDetailsDialogFragment : DialogFragment() {
             }
         } else {
             originalNote = updatedNote
-            oldTags = HashMap(originalNote!!.getTags())
-            if (originalNote!!.isArchived()) {
-                databaseManager!!.updateArchivedNote(updatedNote!!)
+            oldTags = HashMap(originalNote!!.tags)
+            if (originalNote!!.isArchived) {
+                noteRepository.updateArchivedNote(updatedNote!!)
             } else {
-                databaseManager!!.updateNote(updatedNote!!)
+                noteRepository.updateNote(updatedNote!!)
             }
             editMode = false
             populateNoteDetails()
@@ -803,38 +803,38 @@ class NoteDetailsDialogFragment : DialogFragment() {
     }
 
     private fun uploadImages() {
-        Log.d(TAG, "Uploading " + vipImagesAdapter!!.itemCount + " image(s)")
-        var imagesToUpload = ArrayList<VipImage>()
+        Log.d(TAG, "Uploading " + imagesAdapter!!.itemCount + " image(s)")
+        var imagesToUpload = ArrayList<Image>()
         if (originalImages != null) {
-            for (vipImage: VipImage in vipImagesAdapter!!.imageList) {
-                if (originalImages!!.contains(vipImage)) {
-                    updatedNote!!.addVipImage(vipImage.id)
+            for (image: Image in imagesAdapter!!.imageList) {
+                if (originalImages!!.contains(image)) {
+                    updatedNote!!.addImage(image.id)
                 } else {
-                    imagesToUpload.add(vipImage)
+                    imagesToUpload.add(image)
                 }
             }
         } else {
-            imagesToUpload = vipImagesAdapter!!.imageList
+            imagesToUpload = imagesAdapter!!.imageList
         }
         val progressDialogText = "Saving attached image(s)"
         val progressDialog = ProgressDialog(instance!!.mainActivityRef)
         progressDialog.setTitle(progressDialogText)
         progressDialog.show()
         progressDialog.setMessage("Uploading " + imagesToUpload.size + " image(s)...")
-        instance!!.storageManager!!.uploadMultipleImages(imagesToUpload, object : StorageCallback {
+        instance!!.imageRepository.uploadMultipleImages(imagesToUpload, object : ImageCallback {
             override fun onSuccess(`object`: Any) {
                 Log.d(TAG, "Last image uploaded successfully!")
-                val uploadedImages = `object` as ArrayList<VipImage>
-                for (vipImage: VipImage in uploadedImages) {
-                    updatedNote!!.addVipImage(vipImage.id)
+                val uploadedImages = `object` as ArrayList<Image>
+                for (image: Image in uploadedImages) {
+                    updatedNote!!.addImage(image.id)
                 }
                 originalImages = currentImages
                 originalNote = updatedNote
-                oldTags = HashMap(originalNote!!.getTags())
-                if (originalNote!!.isArchived()) {
-                    databaseManager!!.updateArchivedNote((updatedNote)!!)
+                oldTags = HashMap(originalNote!!.tags)
+                if (originalNote!!.isArchived) {
+                    noteRepository.updateArchivedNote((updatedNote)!!)
                 } else {
-                    databaseManager!!.updateNote((updatedNote)!!)
+                    noteRepository.updateNote((updatedNote)!!)
                 }
                 progressDialog.dismiss()
                 editMode = false
@@ -872,20 +872,20 @@ class NoteDetailsDialogFragment : DialogFragment() {
                         val imageId = UUID.randomUUID().toString()
                         Log.d(TAG, "ImageId: $imageId")
                         Log.d(TAG, "ImagePath: $originalFilePath")
-                        val vipImage = VipImage(imageId)
-                        vipImage.originalFilePath = originalFilePath
-                        vipImagesAdapter!!.add(vipImage)
-                        vipImagesRecyclerView!!.visibility = View.VISIBLE
+                        val image = Image(imageId)
+                        image.originalFilePath = originalFilePath
+                        imagesAdapter!!.add(image)
+                        imagesRecyclerView!!.visibility = View.VISIBLE
                     }
                 } else if (data.data != null) {
                     // User selected a single image.
                     Log.d(TAG, "1 image selected.")
                     val originalFilePath = data.data.toString()
                     val imageId = UUID.randomUUID().toString()
-                    val vipImage = VipImage(imageId)
-                    vipImage.originalFilePath = originalFilePath
-                    vipImagesAdapter!!.add(vipImage)
-                    vipImagesRecyclerView!!.visibility = View.VISIBLE
+                    val image = Image(imageId)
+                    image.originalFilePath = originalFilePath
+                    imagesAdapter!!.add(image)
+                    imagesRecyclerView!!.visibility = View.VISIBLE
                 }
             }
         }

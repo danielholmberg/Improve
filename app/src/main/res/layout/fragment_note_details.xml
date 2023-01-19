@@ -29,7 +29,7 @@
             android:paddingEnd="@dimen/note_details_padding"
             android:paddingBottom="@dimen/note_details_padding"
             android:layout_below="@id/include_toolbar_note_details"
-            android:layout_above="@id/vip_images_list">
+            android:layout_above="@id/images_list">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/input_title_layout"
@@ -87,7 +87,7 @@
         </RelativeLayout>
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/vip_images_list"
+            android:id="@+id/images_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"

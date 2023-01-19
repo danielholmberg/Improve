@@ -1,15 +1,11 @@
-package dev.danielholmberg.improve.legacy.Activities
+package dev.danielholmberg.improve.clean.feature_note.presentation.add_note
 
-import dev.danielholmberg.improve.Improve.Companion.instance
 import androidx.appcompat.app.AppCompatActivity
-import dev.danielholmberg.improve.legacy.Managers.DatabaseManager
-import dev.danielholmberg.improve.legacy.Utilities.NoteInputValidator
+import dev.danielholmberg.improve.clean.feature_note.domain.util.NoteInputValidator
 import android.widget.ImageButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.flexbox.FlexboxLayout
-import dev.danielholmberg.improve.legacy.Adapters.TagsAdapter
 import androidx.recyclerview.widget.RecyclerView
-import dev.danielholmberg.improve.legacy.Adapters.VipImagesAdapter
 import android.os.Bundle
 import dev.danielholmberg.improve.R
 import com.google.android.material.textfield.TextInputLayout
@@ -23,10 +19,7 @@ import com.google.android.flexbox.AlignItems
 import com.google.android.flexbox.FlexWrap
 import android.text.TextWatcher
 import android.text.Editable
-import dev.danielholmberg.improve.legacy.ViewHolders.TagViewHolder
 import android.app.ProgressDialog
-import dev.danielholmberg.improve.legacy.Callbacks.StorageCallback
-import dev.danielholmberg.improve.legacy.Models.VipImage
 import android.widget.Toast
 import android.content.Context
 import android.text.TextUtils
@@ -35,13 +28,25 @@ import android.view.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
-import dev.danielholmberg.improve.legacy.Models.Note
-import dev.danielholmberg.improve.legacy.Models.Tag
+import dev.danielholmberg.improve.clean.Improve.Companion.instance
+import dev.danielholmberg.improve.clean.MainActivity
+import dev.danielholmberg.improve.clean.feature_note.domain.model.Image
+import dev.danielholmberg.improve.clean.feature_note.domain.model.Note
+import dev.danielholmberg.improve.clean.feature_note.domain.model.Tag
+import dev.danielholmberg.improve.clean.feature_note.domain.repository.NoteRepository
+import dev.danielholmberg.improve.clean.feature_note.domain.repository.TagRepository
+import dev.danielholmberg.improve.clean.feature_note.presentation.notes.TagViewHolder
+import dev.danielholmberg.improve.clean.feature_note.presentation.notes.adapter.ImagesAdapter
+import dev.danielholmberg.improve.clean.feature_note.presentation.notes.adapter.TagsAdapter
+import dev.danielholmberg.improve.clean.feature_note.presentation.util.ImageCallback
 import java.util.*
 import kotlin.collections.ArrayList
 
 class AddNoteActivity : AppCompatActivity() {
-    private var databaseManager: DatabaseManager? = null
+
+    private lateinit var noteRepository: NoteRepository
+    private lateinit var tagRepository: TagRepository
+
     private var context: Context? = null
     private var validator: NoteInputValidator? = null
     private var newNote: Note? = null
@@ -63,12 +68,14 @@ class AddNoteActivity : AppCompatActivity() {
     private var tagsAdapter: TagsAdapter? = null
 
     // VIP
-    private var vipImagesRecyclerView: RecyclerView? = null
-    private var vipImagesAdapter: VipImagesAdapter? = null
+    private var imagesRecyclerView: RecyclerView? = null
+    private var imagesAdapter: ImagesAdapter? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_note)
-        databaseManager = instance!!.databaseManager
+        noteRepository = instance!!.noteRepository
+        tagRepository = instance!!.tagRepository
         context = this
         initActivity()
     }
@@ -87,15 +94,15 @@ class AddNoteActivity : AppCompatActivity() {
         validator = NoteInputValidator(this, inputTitleLayout)
         tagsAdapter = instance!!.tagsAdapter
         newTagColor = "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColorNull))
-        val id = databaseManager!!.notesRef.push().key
+        val id = noteRepository.generateNewNoteId()
         newNote = Note(id)
         newTags = ArrayList()
         if (instance!!.isVipUser) {
-            vipImagesRecyclerView = findViewById<View>(R.id.images_list) as RecyclerView
-            vipImagesAdapter = VipImagesAdapter(newNote!!.id!!, false)
-            vipImagesRecyclerView!!.adapter = vipImagesAdapter
+            imagesRecyclerView = findViewById<View>(R.id.images_list) as RecyclerView
+            imagesAdapter = ImagesAdapter(newNote!!.id!!, false)
+            imagesRecyclerView!!.adapter = imagesAdapter
             val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-            vipImagesRecyclerView!!.layoutManager = layoutManager
+            imagesRecyclerView!!.layoutManager = layoutManager
         }
     }
 
@@ -125,8 +132,8 @@ class AddNoteActivity : AppCompatActivity() {
                 return true
             }
             R.id.starNote -> {
-                newNote!!.stared = !newNote!!.isStared()
-                if (newNote!!.isStared()) {
+                newNote!!.toggleIsStared()
+                if (newNote!!.isStared) {
                     item.setIcon(R.drawable.ic_star_enabled_accent)
                     item.setTitle(R.string.menu_note_star_disable)
                 } else {
@@ -242,9 +249,9 @@ class AddNoteActivity : AppCompatActivity() {
                     labelEditText.error = getString(R.string.err_msg_tag_label)
                     return
                 }
-                val newTagId = databaseManager!!.tagRef.push().key
+                val newTagId = tagRepository.generateNewTagId()
                 val newTag = Tag(newTagId)
-                newTag.setLabel(labelEditText.text.toString())
+                newTag.label = labelEditText.text.toString()
                 newTag.color = newTagColor
                 if ((newTagColor == "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagColorNull)))) {
                     newTag.textColor =
@@ -253,7 +260,7 @@ class AddNoteActivity : AppCompatActivity() {
                     newTag.textColor =
                         "#" + Integer.toHexString(ContextCompat.getColor(instance!!, R.color.tagTextColor))
                 }
-                databaseManager!!.addTag(newTag)
+                tagRepository.addTag(newTag)
                 tagsAdapter!!.addTag(newTag)
                 newNote!!.addTag(newTag.id)
                 renderTagList()
@@ -357,7 +364,7 @@ class AddNoteActivity : AppCompatActivity() {
 
     private fun renderTagList() {
         tagsList!!.removeAllViews()
-        for (tagId: String? in newNote!!.getTags().keys) {
+        for (tagId: String? in newNote!!.tags.keys) {
             val tagView = LayoutInflater.from(context).inflate(R.layout.item_tag, tagsList, false)
             val tagViewHolder = TagViewHolder(tagView)
             tagViewHolder.bindModelToView(instance!!.tagsAdapter!!.getTag(tagId))
@@ -374,36 +381,39 @@ class AddNoteActivity : AppCompatActivity() {
         }
         newNote!!.title = title
         newNote!!.info = info
-        newNote!!.archived = false
-        newNote!!.added = timestampAdded
-        newNote!!.updated = timestampAdded
-        if (instance!!.isVipUser && vipImagesAdapter!!.itemCount > 0) {
+        newNote!!.isArchived = false
+        newNote!!.addedAt = timestampAdded
+        newNote!!.updatedAt = timestampAdded
+        if (instance!!.isVipUser && imagesAdapter!!.itemCount > 0) {
             // Wait on adding new note and returning to parent activity
             // until all image uploads has been successfully completed.
             uploadImages()
         } else {
-            databaseManager!!.addNote((newNote)!!)
+            noteRepository!!.addNote((newNote)!!)
             showParentActivity()
         }
     }
 
     private fun uploadImages() {
-        Log.d(TAG, "Uploading " + vipImagesAdapter!!.itemCount + " image(s)")
+        Log.d(TAG, "Uploading ${imagesAdapter!!.itemCount} image(s)")
         val progressDialogText = "Saving attached image(s)"
         val progressDialog = ProgressDialog(this)
         progressDialog.setTitle(progressDialogText)
         progressDialog.show()
-        progressDialog.setMessage("Uploading " + vipImagesAdapter!!.itemCount + " image(s)...")
-        instance!!.storageManager
-            ?.uploadMultipleImages(vipImagesAdapter!!.imageList, object : StorageCallback {
+        progressDialog.setMessage("Uploading ${imagesAdapter!!.itemCount} image(s)...")
+
+        // TODO: Should be moved to UseCase
+
+        instance!!.imageRepository
+            ?.uploadMultipleImages(imagesAdapter!!.imageList, object : ImageCallback {
                 override fun onSuccess(`object`: Any) {
                     Log.d(TAG, "Last image uploaded successfully!")
-                    val uploadedImages = `object` as ArrayList<VipImage>
-                    for (vipImage: VipImage in uploadedImages) {
-                        newNote!!.addVipImage(vipImage.id)
+                    val uploadedImages = `object` as ArrayList<Image>
+                    for (image: Image in uploadedImages) {
+                        newNote!!.addImage(image.id)
                     }
                     progressDialog.dismiss()
-                    databaseManager!!.addNote((newNote)!!)
+                    noteRepository.addNote((newNote)!!)
                     showParentActivity()
                 }
 
@@ -438,22 +448,22 @@ class AddNoteActivity : AppCompatActivity() {
                 for (i in 0 until numberOfImagesSelected) {
                     val originalFilePath = data.clipData!!.getItemAt(i).uri.toString()
                     val imageId = UUID.randomUUID().toString()
-                    val vipImage = VipImage(imageId)
-                    vipImage.originalFilePath = originalFilePath
-                    vipImagesAdapter!!.add(vipImage)
-                    vipImagesAdapter!!.setEditMode(true)
-                    vipImagesRecyclerView!!.visibility = View.VISIBLE
+                    val image = Image(imageId)
+                    image.originalFilePath = originalFilePath
+                    imagesAdapter!!.add(image)
+                    imagesAdapter!!.setEditMode(true)
+                    imagesRecyclerView!!.visibility = View.VISIBLE
                 }
             } else if (data.data != null) {
                 // User selected a single image.
                 Log.d(TAG, "1 image selected.")
                 val originalFilePath = data.data.toString()
                 val imageId = UUID.randomUUID().toString()
-                val vipImage = VipImage(imageId)
-                vipImage.originalFilePath = originalFilePath
-                vipImagesAdapter!!.add(vipImage)
-                vipImagesAdapter!!.setEditMode(true)
-                vipImagesRecyclerView!!.visibility = View.VISIBLE
+                val image = Image(imageId)
+                image.originalFilePath = originalFilePath
+                imagesAdapter!!.add(image)
+                imagesAdapter!!.setEditMode(true)
+                imagesRecyclerView!!.visibility = View.VISIBLE
             }
         }
     }
