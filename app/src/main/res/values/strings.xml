@@ -96,6 +96,8 @@
     </string>
     <string name="feedback_hint_subject">Subject</string>
     <string name="feedback_hint_message">Message</string>
+    <string name="err_msg_feedback_subject">Please enter a subject</string>
+    <string name="err_msg_feedback_message">Please enter your feedback</string>
 
     <!-- Login activity strings -->
     <string name="anonymous_sign_in_btn_text">Anonymous Sign in</string>

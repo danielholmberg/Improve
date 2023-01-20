@@ -1,7 +1,7 @@
 package dev.danielholmberg.improve.clean.feature_feedback.data.repository
 
-import dev.danielholmberg.improve.clean.feature_feedback.data.entity.FeedbackEntity
 import dev.danielholmberg.improve.clean.feature_feedback.data.source.FeedbackDataSource
+import dev.danielholmberg.improve.clean.feature_feedback.data.source.entity.FeedbackEntity
 import dev.danielholmberg.improve.clean.feature_feedback.domain.model.Feedback
 import dev.danielholmberg.improve.clean.feature_feedback.domain.repository.FeedbackRepository
 import dev.danielholmberg.improve.clean.feature_feedback.domain.util.FeedbackCallback

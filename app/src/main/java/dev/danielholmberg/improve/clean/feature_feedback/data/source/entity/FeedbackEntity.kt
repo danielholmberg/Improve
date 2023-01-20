@@ -1,4 +1,4 @@
-package dev.danielholmberg.improve.clean.feature_feedback.data.entity
+package dev.danielholmberg.improve.clean.feature_feedback.data.source.entity
 
 import com.google.firebase.database.Exclude
 import com.google.firebase.database.IgnoreExtraProperties
@@ -10,15 +10,15 @@ class FeedbackEntity(
     var feedback_id: String? = null,
     var title: String? = null,
     var feedback: String? = null,
-    var timestamp: String? = null
+    private var timestamp: String? = null
 ) {
     @Exclude
     fun fromFeedback(feedback: Feedback): FeedbackEntity {
         return FeedbackEntity(
             uid = feedback.uid,
             feedback_id = feedback.feedbackId,
-            title = feedback.title,
-            feedback = feedback.feedback,
+            title = feedback.subject,
+            feedback = feedback.message,
             timestamp = feedback.timestamp
         )
     }
@@ -28,8 +28,8 @@ class FeedbackEntity(
         return Feedback(
             uid = uid,
             feedbackId = feedback_id,
-            title = title,
-            feedback = feedback,
+            subject = title,
+            message = feedback,
             timestamp = timestamp
         )
     }

@@ -3,11 +3,11 @@ package dev.danielholmberg.improve.clean.feature_feedback.data.source
 import android.util.Log
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import dev.danielholmberg.improve.clean.feature_feedback.data.entity.FeedbackEntity
+import dev.danielholmberg.improve.clean.feature_feedback.data.source.entity.FeedbackEntity
 import dev.danielholmberg.improve.clean.feature_feedback.domain.util.FeedbackCallback
 
 class FeedbackDataSourceImpl(
-    private val databaseService: FirebaseDatabase
+    private val databaseService: FirebaseDatabase,
 ) : FeedbackDataSource {
     private val feedbackRef: DatabaseReference
         get() = databaseService.reference.child(FEEDBACK_REF)
