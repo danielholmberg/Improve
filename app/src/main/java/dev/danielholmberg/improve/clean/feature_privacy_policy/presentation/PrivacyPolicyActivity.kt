@@ -1,56 +1,63 @@
 package dev.danielholmberg.improve.clean.feature_privacy_policy.presentation
 
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import dev.danielholmberg.improve.R
-import android.webkit.WebView
 import android.content.Intent
 import android.graphics.Color
-import android.util.Log
+import android.os.Build
+import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.webkit.WebView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import dev.danielholmberg.improve.R
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.MainActivity
-import dev.danielholmberg.improve.clean.core.RemoteConfigService
+import dev.danielholmberg.improve.clean.feature_privacy_policy.domain.repository.PrivacyPolicyRepository
+import dev.danielholmberg.improve.clean.feature_privacy_policy.domain.use_case.GetPrivacyPolicyUseCase
+import dev.danielholmberg.improve.clean.feature_privacy_policy.domain.use_case.PrivacyPolicyUseCases
 
 class PrivacyPolicyActivity : AppCompatActivity() {
-
-    private lateinit var toolbar: Toolbar
-    private lateinit var remoteConfigService: RemoteConfigService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_privacy_policy)
-        remoteConfigService = instance!!.remoteConfigService
-        toolbar = findViewById<View>(R.id.toolbar_privacy_policy) as Toolbar
+
+        val toolbar = findViewById<View>(R.id.toolbar_privacy_policy) as Toolbar
         setSupportActionBar(toolbar)
+
         supportActionBar!!.setDisplayShowTitleEnabled(false)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
+        // 1. Create ViewModel with UseCases and inject necessary repositories
+        val privacyPolicyRepository: PrivacyPolicyRepository = instance!!.privacyPolicyRepository
+        val viewModel = PrivacyPolicyViewModel(
+            privacyPolicyUseCases = PrivacyPolicyUseCases(
+                getPrivacyPolicyUseCase = GetPrivacyPolicyUseCase(
+                    privacyPolicyRepository = privacyPolicyRepository
+                )
+            )
+        )
+
         val privacyPolicyWebView = findViewById<View>(R.id.privacy_policy_webview) as WebView
         privacyPolicyWebView.setBackgroundColor(Color.TRANSPARENT)
+        privacyPolicyWebView.loadData(
+            viewModel.getPrivacyPolicyHtml(),
+            "text/html",
+            "utf-8"
+        )
 
-        // TODO: Should be moved to UseCase
-
-        remoteConfigService.fetchAndActivate()
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    val updated = task.result
-                    Log.d(TAG, "Config params updated: $updated")
-                }
-                privacyPolicyWebView.loadData(
-                    remoteConfigService.getPrivatePolicyText(),
-                    "text/html",
-                    "utf-8"
-                )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(0) {
+                handleBackPressedNavigation()
             }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle item selection
         return when (item.itemId) {
             android.R.id.home -> {
-                onBackPressed()
+                handleBackPressedNavigation()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -58,6 +65,10 @@ class PrivacyPolicyActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        handleBackPressedNavigation()
+    }
+
+    private fun handleBackPressedNavigation() {
         startActivity(Intent(this, MainActivity::class.java))
         finishAfterTransition()
     }

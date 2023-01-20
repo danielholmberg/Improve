@@ -53,6 +53,9 @@ import dev.danielholmberg.improve.clean.feature_note.domain.repository.TagReposi
 import dev.danielholmberg.improve.clean.feature_note.presentation.notes.adapter.ArchivedNotesAdapter
 import dev.danielholmberg.improve.clean.feature_note.presentation.notes.adapter.NotesAdapter
 import dev.danielholmberg.improve.clean.feature_note.presentation.notes.adapter.TagsAdapter
+import dev.danielholmberg.improve.clean.feature_privacy_policy.data.repository.PrivacyPolicyRepositoryImpl
+import dev.danielholmberg.improve.clean.feature_privacy_policy.data.source.PrivacyPolicyDataSourceImpl
+import dev.danielholmberg.improve.clean.feature_privacy_policy.domain.repository.PrivacyPolicyRepository
 import java.util.HashMap
 import kotlin.jvm.Volatile
 
@@ -70,6 +73,7 @@ class Improve : Application() {
     lateinit var feedbackRepository: FeedbackRepository
     lateinit var companyRepository: CompanyRepository
     lateinit var contactRepository: ContactRepository
+    lateinit var privacyPolicyRepository: PrivacyPolicyRepository
 
     lateinit var googleSignInClient: GoogleSignInClient
     lateinit var googleDriveService: GoogleDriveService
@@ -163,6 +167,11 @@ class Improve : Application() {
         contactRepository = ContactRepositoryImpl(
             contactDataSource = ContactDataSourceImpl(
                 companyRepository = companyRepository
+            )
+        )
+        privacyPolicyRepository = PrivacyPolicyRepositoryImpl(
+            privatePolicyDataSource = PrivacyPolicyDataSourceImpl(
+                remoteConfigService = remoteConfigService
             )
         )
     }
