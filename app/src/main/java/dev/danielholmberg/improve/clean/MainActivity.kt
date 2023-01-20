@@ -29,7 +29,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
-import dev.danielholmberg.improve.clean.feature_authentication.SignInActivity
+import dev.danielholmberg.improve.clean.feature_authentication.presentation.SignInActivity
 import dev.danielholmberg.improve.clean.feature_contact.presentation.contacts.adapter.CompanyRecyclerViewAdapter
 import dev.danielholmberg.improve.clean.feature_contact.presentation.fragments.ContactsFragment
 import dev.danielholmberg.improve.clean.feature_feedback.presentation.FeedbackActivity

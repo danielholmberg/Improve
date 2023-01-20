@@ -37,7 +37,7 @@
         </provider>
 
         <activity
-            android:name=".clean.feature_authentication.SignInActivity"
+            android:name=".clean.feature_authentication.presentation.SignInActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,4 +1,4 @@
-package dev.danielholmberg.improve.clean.feature_authentication
+package dev.danielholmberg.improve.clean.feature_authentication.presentation
 
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.ProgressBar
@@ -12,37 +12,55 @@ import android.widget.Button
 import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import android.widget.Toast
 import com.google.android.gms.auth.api.Auth
+import com.google.android.gms.auth.api.signin.GoogleSignInResult
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.MainActivity
+import dev.danielholmberg.improve.clean.feature_authentication.domain.repository.AuthRepository
+import dev.danielholmberg.improve.clean.feature_authentication.domain.use_case.AuthUseCases
+import dev.danielholmberg.improve.clean.feature_authentication.domain.use_case.AuthenticateGoogleAccountWithFirebaseUseCase
+import dev.danielholmberg.improve.clean.feature_authentication.domain.use_case.CheckIfAlreadyAuthenticatedUseCase
+import dev.danielholmberg.improve.clean.feature_authentication.domain.use_case.SignInAnonymouslyUseCase
 import dev.danielholmberg.improve.clean.feature_authentication.util.AuthCallback
 
 class SignInActivity : AppCompatActivity(), View.OnClickListener {
+
     private var progressBar: ProgressBar? = null
     private var signInButtonsLayout: LinearLayout? = null
     private var googleSignInBtn: Button? = null
     private var anonymousSignInBtn: Button? = null
 
+    private lateinit var viewModel: SignInViewModel
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "Starting application...")
 
-        // The getFireAuth().getCurrentUser() is not null, then the user has been previously authenticated.
-        if (instance!!.authService.currentUser != null) {
+        // 1. Create ViewModel with UseCases and inject necessary repositories
+        val authRepository: AuthRepository = instance!!.authRepository
+        viewModel = SignInViewModel(
+            authUseCases = AuthUseCases(
+                checkIfAlreadyAuthenticatedUseCase = CheckIfAlreadyAuthenticatedUseCase(
+                    authRepository = authRepository
+                ),
+                authenticateGoogleAccountWithFirebaseUseCase = AuthenticateGoogleAccountWithFirebaseUseCase(
+                    authRepository = authRepository
+                ),
+                signInAnonymouslyUseCase = SignInAnonymouslyUseCase(
+                    authRepository = authRepository
+                )
+            )
+        )
+
+        if (viewModel.isAlreadySignedIn()) {
             startMainActivity()
         }
+
         setContentView(R.layout.activity_sign_in)
 
-        // ProgressBar
         progressBar = findViewById<View>(R.id.sign_in_progressBar) as ProgressBar
-
-        // Sign in buttons layout
         signInButtonsLayout = findViewById<View>(R.id.sign_in_buttons_layout) as LinearLayout
-
-        // Anonymous Sign in button
         anonymousSignInBtn = findViewById<View>(R.id.anonymous_login_btn) as Button
         anonymousSignInBtn!!.setOnClickListener(this)
-
-        // Google Sign in button
         googleSignInBtn = findViewById<View>(R.id.google_sign_in_btn) as Button
         googleSignInBtn!!.setOnClickListener(this)
     }
@@ -54,47 +72,50 @@ class SignInActivity : AppCompatActivity(), View.OnClickListener {
             val result = Auth.GoogleSignInApi.getSignInResultFromIntent(data)
             if (result.isSuccess) {
                 Log.d(TAG, "Google sign in was successful!")
-
-                // Google Sign In was successful, authenticating with Firebase...
-                val account = result.signInAccount
-
-                // TODO: Extract to UseCase and Call from ViewModel instead
-                instance!!.authRepository.authGoogleAccountWithFirebase(account!!, object :
-                    AuthCallback {
-                    override fun onSuccess() {
-                        progressBar!!.visibility = View.GONE
-                        startMainActivity()
-                    }
-
-                    override fun onFailure(errorMessage: String?) {
-                        Log.e(TAG, "!!! Failed to authenticate with Firebase: $errorMessage")
-                        progressBar!!.visibility = View.GONE
-                        signInButtonsLayout!!.visibility = View.VISIBLE
-                    }
-                })
+                handleGoogleSignInSuccess(result)
             } else if (result.status.statusCode == GoogleSignInStatusCodes.SIGN_IN_CANCELLED) {
                 Log.e(TAG, "Google sign in was cancelled!")
-                Toast.makeText(
-                    applicationContext,
-                    "Google sign in was cancelled",
-                    Toast.LENGTH_SHORT
-                ).show()
-                progressBar!!.visibility = View.GONE
-                signInButtonsLayout!!.visibility = View.VISIBLE
+                handleGoogleSignInCancelled()
             } else {
                 Log.e(TAG, "Google sign in failed!")
-                Toast.makeText(applicationContext, "Google sign in failed", Toast.LENGTH_SHORT)
-                    .show()
-                progressBar!!.visibility = View.GONE
-                signInButtonsLayout!!.visibility = View.VISIBLE
+                handleGoogleSignInFailed()
             }
         }
     }
 
-    /**
-     * Sends the user to the MainActivity.
-     * Called when the user is correctly authenticated with Google and Firebase.
-     */
+    private fun handleGoogleSignInFailed() {
+        Toast.makeText(applicationContext, "Google sign in failed", Toast.LENGTH_SHORT)
+            .show()
+        progressBar!!.visibility = View.GONE
+        signInButtonsLayout!!.visibility = View.VISIBLE
+    }
+
+    private fun handleGoogleSignInCancelled() {
+        Toast.makeText(
+            applicationContext,
+            "Google sign in was cancelled",
+            Toast.LENGTH_SHORT
+        ).show()
+        progressBar!!.visibility = View.GONE
+        signInButtonsLayout!!.visibility = View.VISIBLE
+    }
+
+    private fun handleGoogleSignInSuccess(result: GoogleSignInResult) {
+        val account = result.signInAccount
+        viewModel.authenticateGoogleAccountWithFirebase(account!!, object : AuthCallback {
+            override fun onSuccess() {
+                progressBar!!.visibility = View.GONE
+                startMainActivity()
+            }
+
+            override fun onFailure(errorMessage: String?) {
+                Log.e(TAG, "Failed to authenticate with Firebase: $errorMessage")
+                progressBar!!.visibility = View.GONE
+                signInButtonsLayout!!.visibility = View.VISIBLE
+            }
+        })
+    }
+
     private fun startMainActivity() {
         val i = Intent(applicationContext, MainActivity::class.java)
         startActivity(i)
@@ -103,8 +124,7 @@ class SignInActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun startAnonymousSignIn() {
-        // TODO: Extract to UseCase and Call from ViewModel instead
-        instance!!.authRepository.signInAnonymously(object : AuthCallback {
+        viewModel.signInAnonymously(object : AuthCallback {
             override fun onSuccess() {
                 startMainActivity()
             }
