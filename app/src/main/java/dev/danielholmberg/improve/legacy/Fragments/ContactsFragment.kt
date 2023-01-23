@@ -21,7 +21,6 @@ import android.content.Intent
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import dev.danielholmberg.improve.legacy.Activities.AddContactActivity
 import java.util.*
 
 class ContactsFragment : Fragment() {
@@ -56,7 +55,7 @@ class ContactsFragment : Fragment() {
         snackBarView = view.findViewById(R.id.contacts_fragment_container)
         companyRecyclerView = view.findViewById(R.id.company_recycler_view)
         emptyListView = view.findViewById(R.id.empty_contact_list_tv)
-        fab = view.findViewById(R.id.fab_menu)
+        fab = view.findViewById(R.id.fab_menu_contact)
         addCompanyFABTextView = view.findViewById(R.id.add_company_fab_text)
         addContactFABTextView = view.findViewById(R.id.add_contact_fab_text)
         addContactFAB = view.findViewById(R.id.add_contact)

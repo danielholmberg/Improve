@@ -63,7 +63,7 @@ class NotesFragment : Fragment(), SearchView.OnQueryTextListener {
         snackBarView = view.findViewById(R.id.note_fragment_container)
         notesRecyclerView = view.findViewById<View>(R.id.notes_list) as RecyclerView
         emptyListText = view.findViewById<View>(R.id.empty_notes_list_tv) as TextView
-        fab = view.findViewById<View>(R.id.add_note) as FloatingActionButton
+        fab = view.findViewById<View>(R.id.fab_menu_note) as FloatingActionButton
         recyclerLayoutManager = LinearLayoutManager(activity)
         recyclerLayoutManager!!.reverseLayout = true
         recyclerLayoutManager!!.stackFromEnd = true
@@ -168,10 +168,6 @@ class NotesFragment : Fragment(), SearchView.OnQueryTextListener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.noteImport -> {
-                openFilePicker()
-                return true
-            }
             R.id.noteSearch -> {
                 val searchView = item.actionView as SearchView
                 searchView.queryHint = "Search Note"

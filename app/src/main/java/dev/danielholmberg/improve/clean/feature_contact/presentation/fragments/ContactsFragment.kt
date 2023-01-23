@@ -63,7 +63,7 @@ class ContactsFragment : Fragment() {
         snackBarView = view.findViewById(R.id.contacts_fragment_container)
         companyRecyclerView = view.findViewById(R.id.company_recycler_view)
         emptyListView = view.findViewById(R.id.empty_contact_list_tv)
-        fab = view.findViewById(R.id.fab_menu)
+        fab = view.findViewById(R.id.fab_menu_contact)
         addCompanyFABTextView = view.findViewById(R.id.add_company_fab_text)
         addContactFABTextView = view.findViewById(R.id.add_contact_fab_text)
         addContactFAB = view.findViewById(R.id.add_contact)

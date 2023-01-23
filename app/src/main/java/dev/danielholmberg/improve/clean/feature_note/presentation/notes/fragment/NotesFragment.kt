@@ -44,8 +44,13 @@ class NotesFragment : Fragment(), SearchView.OnQueryTextListener {
     private lateinit var snackBarView: CoordinatorLayout
     private lateinit var notesRecyclerView: RecyclerView
     private lateinit var emptyListText: TextView
+    private var isFABOpen = false
 
     private lateinit var fab: FloatingActionButton
+    private lateinit var createNoteFAB: FloatingActionButton
+    private lateinit var createNoteFABTextView: TextView
+    private lateinit var importNoteFAB: FloatingActionButton
+    private lateinit var importNoteFABTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,7 +110,11 @@ class NotesFragment : Fragment(), SearchView.OnQueryTextListener {
         snackBarView = view.findViewById(R.id.note_fragment_container)
         notesRecyclerView = view.findViewById<View>(R.id.notes_list) as RecyclerView
         emptyListText = view.findViewById<View>(R.id.empty_notes_list_tv) as TextView
-        fab = view.findViewById<View>(R.id.add_note) as FloatingActionButton
+        fab = view.findViewById<View>(R.id.fab_menu_note) as FloatingActionButton
+        createNoteFABTextView = view.findViewById(R.id.create_note_fab_text)
+        createNoteFAB = view.findViewById(R.id.create_note_fab)
+        importNoteFABTextView = view.findViewById(R.id.import_note_fab_text)
+        importNoteFAB = view.findViewById(R.id.import_note_fab)
 
         val recyclerLayoutManager = LinearLayoutManager(activity)
         recyclerLayoutManager.reverseLayout = true
@@ -125,6 +134,7 @@ class NotesFragment : Fragment(), SearchView.OnQueryTextListener {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (dy > 0 && fab.isShown) {
                     // Hide the FAB when the user scrolls down.
+                    closeFABMenu()
                     fab.hide()
                 }
                 if (!recyclerView.canScrollVertically(-1)) {
@@ -146,7 +156,57 @@ class NotesFragment : Fragment(), SearchView.OnQueryTextListener {
                 super.onScrollStateChanged(recyclerView, newState)
             }
         })
-        fab.setOnClickListener { createNewNote() }
+        fab.setOnClickListener {
+            if (isFABOpen) {
+                closeFABMenu()
+            } else {
+                showFABMenu()
+            }
+        }
+        createNoteFAB.setOnClickListener {
+            createNewNote()
+            closeFABMenu()
+        }
+        importNoteFAB.setOnClickListener {
+            openFilePicker()
+            closeFABMenu()
+        }
+    }
+
+    private fun showFABMenu() {
+        isFABOpen = true
+        fab.animate().rotation(45f).setDuration(300).start()
+        createNoteFAB.show()
+        createNoteFAB.animate()
+            .translationY(-resources.getDimension(R.dimen.fab_menu_item_position_1))
+            .setDuration(300).withEndAction {
+                createNoteFABTextView.visibility = View.VISIBLE
+                createNoteFABTextView.animate().alpha(1f).duration = 300
+            }
+        importNoteFAB.show()
+        importNoteFAB.animate()
+            .translationY(-resources.getDimension(R.dimen.fab_menu_item_position_2))
+            .setDuration(300).withEndAction {
+                importNoteFABTextView.visibility = View.VISIBLE
+                importNoteFABTextView.animate().alpha(1f).duration = 300
+            }
+    }
+
+    private fun closeFABMenu() {
+        isFABOpen = false
+        fab.animate().rotation(0f).setDuration(300).start()
+        createNoteFAB.hide()
+        createNoteFABTextView.animate().alpha(0f).setDuration(300)
+            .withEndAction {
+                createNoteFAB.animate().translationY(0f).setDuration(300)
+                    .withStartAction { createNoteFABTextView.visibility = View.GONE }
+            }
+        importNoteFAB.hide()
+        importNoteFABTextView.animate().alpha(0f).setDuration(300)
+            .withEndAction {
+                importNoteFAB.animate().translationY(0f).setDuration(300)
+                    .withStartAction { importNoteFABTextView.visibility = View.GONE }
+            }
     }
 
     private fun initListDataChangeListener() {
@@ -211,10 +271,6 @@ class NotesFragment : Fragment(), SearchView.OnQueryTextListener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.noteImport -> {
-                openFilePicker()
-                return true
-            }
             R.id.noteSearch -> {
                 launchSearchView(item)
                 return true

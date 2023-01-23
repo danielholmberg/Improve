@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/noteImport"
-        android:orderInCategory="1"
-        android:title="@string/menu_note_import"
-        android:icon="@drawable/ic_menu_google_drive_import_white"
-        app:showAsAction="ifRoom"/>
     <item android:id="@+id/noteSearch"
         android:orderInCategory="0"
         android:title="@string/search_note"
