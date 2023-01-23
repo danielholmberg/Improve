@@ -5,5 +5,5 @@
             <solid android:color="#60000000"/>
         </shape>
     </item>
-    <item android:drawable="@drawable/ic_vip_image_clear"/>
+    <item android:drawable="@drawable/ic_image_remove"/>
 </layer-list>

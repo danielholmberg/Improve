@@ -1,4 +1,4 @@
-package dev.danielholmberg.improve.clean.feature_note.presentation.notes
+package dev.danielholmberg.improve.clean.feature_note.presentation.notes.view_holder
 
 import androidx.recyclerview.widget.RecyclerView
 import android.widget.TextView
@@ -14,9 +14,10 @@ import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Tag
 
 class TagViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    private var tag: Tag? = null
-    private var tagLabel: TextView? = null
-    private var tagEnabledIndicator: ImageView? = null
+    private lateinit var tag: Tag
+    private lateinit var tagLabel: TextView
+    private lateinit var tagEnabledIndicator: ImageView
+    private lateinit var tagDeleteButton: ImageView
     private var background: GradientDrawable? = null
 
     /**
@@ -31,10 +32,30 @@ class TagViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     fun bindModelToView(tag: Tag?) {
         if (tag == null) return
         this.tag = tag
+
         tagLabel = itemView.findViewById<View>(R.id.tag_label_tv) as TextView
         tagEnabledIndicator = itemView.findViewById<View>(R.id.tag_enabled_indicator) as ImageView
-        if (tag.label != null) tagLabel!!.text = tag.label
-        if (tag.textColor != null) tagLabel!!.setTextColor(Color.parseColor(tag.textColor))
+        tagDeleteButton = itemView.findViewById(R.id.tag_delete_btn)
+
+        if (tag.label != null) tagLabel.text = tag.label
+        if (tag.textColor != null) tagLabel.setTextColor(Color.parseColor(tag.textColor))
+        tagDeleteButton.setOnClickListener {
+            val alertDialogBuilder = AlertDialog.Builder(itemView.context)
+                .setTitle(R.string.dialog_delete_tag_title)
+                .setMessage(R.string.dialog_delete_tag_msg)
+                .setPositiveButton("Yes") { _, _ ->
+
+                    // TODO: Should be move to UseCase
+
+                    instance!!.tagRepository.deleteTag(
+                        tag.id
+                    )
+                }
+                .setNegativeButton("No") { dialogInterface, _ -> dialogInterface.dismiss() }
+            val dialog = alertDialogBuilder.create()
+            dialog.show()
+        }
+
         val gradientDrawable = itemView.background as StateListDrawable
         val drawableContainerState: DrawableContainer.DrawableContainerState? =
             gradientDrawable.constantState as DrawableContainer.DrawableContainerState?
@@ -47,32 +68,13 @@ class TagViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     fun setTagStatusOnNote(isEnabled: Boolean) {
         if (isEnabled) {
-            tagEnabledIndicator!!.visibility = View.VISIBLE
+            tagEnabledIndicator.visibility = View.VISIBLE
         } else {
-            tagEnabledIndicator!!.visibility = View.GONE
+            tagEnabledIndicator.visibility = View.GONE
         }
     }
 
     fun setEditMode(editMode: Boolean) {
-        val deleteButton = itemView.findViewById<ImageView>(R.id.tag_delete_btn)
-        if (editMode) {
-            deleteButton.visibility = View.VISIBLE
-            deleteButton.setOnClickListener {
-                val alertDialogBuilder = AlertDialog.Builder(itemView.context)
-                    .setTitle(R.string.dialog_delete_tag_title)
-                    .setMessage(R.string.dialog_delete_tag_msg)
-                    .setPositiveButton("Yes") { _, _ ->
-                        // TODO: Should be move to UseCase
-                        instance!!.tagRepository.deleteTag(
-                            tag!!.id
-                        )
-                    }
-                    .setNegativeButton("No") { dialogInterface, _ -> dialogInterface.dismiss() }
-                val dialog = alertDialogBuilder.create()
-                dialog.show()
-            }
-        } else {
-            deleteButton.visibility = View.GONE
-        }
+        tagDeleteButton.visibility = if (editMode) View.VISIBLE else View.GONE
     }
 }

@@ -5,7 +5,7 @@ import android.util.Log
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
-import dev.danielholmberg.improve.clean.core.FileService.Companion.VIP_IMAGE_SUFFIX
+import dev.danielholmberg.improve.clean.core.FileService.Companion.IMAGE_SUFFIX
 import dev.danielholmberg.improve.clean.feature_authentication.domain.repository.AuthRepository
 import dev.danielholmberg.improve.clean.feature_note.presentation.util.ImageCallback
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Image
@@ -53,7 +53,7 @@ class ImageDataSourceImpl(
     override fun downloadImageToLocalFile(imageEntityId: String, callback: ImageCallback) {
         Log.d(TAG, "Downloading image to Local Filesystem...")
         val targetFile =
-            File(instance!!.fileService.imageDir, imageEntityId + VIP_IMAGE_SUFFIX)
+            File(instance!!.fileService.imageDir, imageEntityId + IMAGE_SUFFIX)
         Log.d(TAG, "targetFile path: " + targetFile.path)
         imagesRef.child(imageEntityId).getFile(targetFile).addOnSuccessListener {
             Log.d(
@@ -77,7 +77,7 @@ class ImageDataSourceImpl(
             val imageId = image.id
             val originalFilePath = Uri.parse(image.originalFilePath)
             val cachedImage =
-                File(instance!!.fileService.imageDir, imageId + VIP_IMAGE_SUFFIX)
+                File(instance!!.fileService.imageDir, imageId + IMAGE_SUFFIX)
             if (!cachedImage.exists()) {
                 try {
                     Log.d(TAG, "Copying image to Local Filesystem with image id: $imageId")

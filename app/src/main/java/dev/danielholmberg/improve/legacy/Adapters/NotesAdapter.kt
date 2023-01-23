@@ -91,7 +91,7 @@ class NotesAdapter : RecyclerView.Adapter<NoteViewHolder>() {
                         for (imageId in addedNote.vipImages) {
                             val cachedImage = File(
                                 instance!!.imageDir,
-                                imageId + StorageManager.VIP_IMAGE_SUFFIX
+                                imageId + StorageManager.IMAGE_SUFFIX
                             )
                             if (cachedImage.exists()) {
                                 Log.d(

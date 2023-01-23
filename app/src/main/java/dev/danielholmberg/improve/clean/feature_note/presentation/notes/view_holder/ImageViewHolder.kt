@@ -1,42 +1,36 @@
-package dev.danielholmberg.improve.clean.feature_note.presentation.notes
+package dev.danielholmberg.improve.clean.feature_note.presentation.notes.view_holder
 
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import androidx.recyclerview.widget.RecyclerView
-import dev.danielholmberg.improve.R
-import com.squareup.picasso.Picasso
-import android.widget.LinearLayout
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.ProgressBar
-import dev.danielholmberg.improve.clean.core.util.CircleTransform
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.ProgressBar
 import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Picasso
+import dev.danielholmberg.improve.R
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
-import dev.danielholmberg.improve.clean.feature_note.presentation.util.ImageCallback
+import dev.danielholmberg.improve.clean.core.util.CircleTransform
+import dev.danielholmberg.improve.clean.core.util.RoundedCornersTransform
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Image
 import dev.danielholmberg.improve.clean.feature_note.presentation.notes.adapter.ImagesAdapter
-import dev.danielholmberg.improve.legacy.Managers.StorageManager.Companion.VIP_IMAGE_SUFFIX
+import dev.danielholmberg.improve.clean.feature_note.presentation.util.ImageCallback
+import dev.danielholmberg.improve.legacy.Managers.StorageManager.Companion.IMAGE_SUFFIX
 import java.io.File
 
 class ImageViewHolder(
     private val context: Context,
     itemView: View,
-    noteId: String,
-    vipImagesAdapter: ImagesAdapter
+    private val imagesAdapter: ImagesAdapter
 ) : RecyclerView.ViewHolder(
     itemView
 ) {
-    private val noteId: String
-    private var image: Image? = null
-    private val vipImagesAdapter: ImagesAdapter
-
-    init {
-        this.noteId = noteId
-        this.vipImagesAdapter = vipImagesAdapter
-    }
+    private lateinit var image: Image
+    private var imageClearBtn: ImageButton? = null
 
     /**
      * Binds data from Image (Model) object to related View.
@@ -49,23 +43,32 @@ class ImageViewHolder(
      */
     fun bindModelToPreviewView(image: Image?) {
         if (image == null) return
+
         this.image = image
+
+        val targetSize = instance!!.resources.getDimension(R.dimen.image_view_size).toInt()
+        val roundedCornersRadius =
+            (instance!!.resources.getDimension(R.dimen.image_preview_corner_radius) - instance!!.resources.getDimension(
+                R.dimen.image_border_width
+            )).toInt()
+        val imageView = this.itemView.findViewById<View>(R.id.image_view) as ImageView
+        imageClearBtn = itemView.findViewById(R.id.image_clear_btn)
+        imageClearBtn?.setOnClickListener { imagesAdapter.remove(image) }
+
         val file = File(
             instance!!.fileService.imageDir,
-            image.id + VIP_IMAGE_SUFFIX
+            image.id + IMAGE_SUFFIX
         )
-        val targetSize = instance!!.resources.getDimension(R.dimen.vip_image_view_size).toInt()
-        val vipImageView = this.itemView.findViewById<View>(R.id.vip_image_view) as ImageView
         if (file.exists()) {
             Log.d(TAG, "Loading Preview image from Local Filesystem at path: ${file.path}")
             Picasso.get()
                 .load(file)
-                .centerCrop()
                 .resize(targetSize, targetSize)
-                .into(vipImageView)
+                .centerCrop()
+                .transform(RoundedCornersTransform(roundedCornersRadius))
+                .into(imageView)
 
-            //vipImagePlaceholder.setVisibility(View.GONE);
-            vipImageView.visibility = View.VISIBLE
+            imageView.visibility = View.VISIBLE
         } else if (image.originalFilePath != null) {
             Log.d(
                 TAG,
@@ -73,19 +76,20 @@ class ImageViewHolder(
             )
             Picasso.get()
                 .load(Uri.parse(image.originalFilePath))
-                .centerCrop()
                 .resize(targetSize, targetSize)
-                .into(vipImageView)
+                .centerCrop()
+                .transform(RoundedCornersTransform(roundedCornersRadius))
+                .into(imageView)
 
-            //vipImagePlaceholder.setVisibility(View.GONE);
-            vipImageView.visibility = View.VISIBLE
+            imageView.visibility = View.VISIBLE
         } else {
             Log.d(
                 TAG,
-                "Downloading Preview image from Firebase for Note ($noteId) with image id: " + image.id
+                "Downloading Preview image from Firebase with image id: " + image.id
             )
 
             // TODO: Should be handled by UseCase
+
             instance!!.imageRepository
                 .downloadImageToLocalFile(image.id!!, object :
                     ImageCallback {
@@ -94,53 +98,54 @@ class ImageViewHolder(
                             .load((`object` as File))
                             .centerCrop()
                             .resize(targetSize, targetSize)
-                            .into(vipImageView)
+                            .into(imageView)
 
                         //vipImagePlaceholder.setVisibility(View.GONE);
-                        vipImageView.visibility = View.VISIBLE
-                        vipImagesAdapter.notifyDataSetChanged()
+                        imageView.visibility = View.VISIBLE
+                        imagesAdapter.notifyDataSetChanged()
                     }
 
                     override fun onFailure(errorMessage: String?) {}
                     override fun onProgress(progress: Int) {}
                 })
         }
-        vipImageView.setOnClickListener { showImageFullscreen() }
+        imageView.setOnClickListener { showImageFullscreen() }
     }
 
     private fun showImageFullscreen() {
-        val vipImageViewFullscreenLayout = LayoutInflater.from(context)
-            .inflate(R.layout.dialog_vip_image_fullscreen, null) as LinearLayout
-        val vipImageViewFull =
-            vipImageViewFullscreenLayout.findViewById<View>(R.id.vip_image_view_full) as ImageView
+        val imageViewFullscreenLayout = LayoutInflater.from(context)
+            .inflate(R.layout.dialog_image_fullscreen, null) as LinearLayout
+        val imageViewFull =
+            imageViewFullscreenLayout.findViewById<View>(R.id.image_view_full) as ImageView
         val image = File(
             instance!!.fileService.imageDir,
-            image!!.id + VIP_IMAGE_SUFFIX
+            image.id + IMAGE_SUFFIX
         )
         if (image.exists()) {
             Log.d(TAG, "Loading Fullscreen image from Local Filesystem at path: " + image.path)
             Picasso.get()
                 .load(image)
-                .into(vipImageViewFull)
-        } else if (this.image!!.originalFilePath != null) {
+                .into(imageViewFull)
+        } else if (this.image.originalFilePath != null) {
             Log.d(
                 TAG,
-                "Loading Fullscreen image from Local Filesystem at path: " + this.image!!.originalFilePath
+                "Loading Fullscreen image from Local Filesystem at path: " + this.image.originalFilePath
             )
             Picasso.get()
-                .load(Uri.parse(this.image!!.originalFilePath))
-                .into(vipImageViewFull)
+                .load(Uri.parse(this.image.originalFilePath))
+                .into(imageViewFull)
         } else {
-            Log.d(TAG, "Loading Fullscreen image from Firebase with id: " + this.image!!.id)
+            Log.d(TAG, "Loading Fullscreen image from Firebase with id: " + this.image.id)
 
             // TODO: Should be handled by UseCase
+
             instance!!.imageRepository
-                .downloadImageToLocalFile(this.image!!.id!!, object :
+                .downloadImageToLocalFile(this.image.id!!, object :
                     ImageCallback {
                     override fun onSuccess(`object`: Any) {
                         Picasso.get()
                             .load(`object` as Uri)
-                            .into(vipImageViewFull)
+                            .into(imageViewFull)
                     }
 
                     override fun onFailure(errorMessage: String?) {}
@@ -150,7 +155,7 @@ class ImageViewHolder(
         val alertDialogBuilder = AlertDialog.Builder(
             context, R.style.CustomFullscreenDialogStyle
         )
-            .setView(vipImageViewFullscreenLayout)
+            .setView(imageViewFullscreenLayout)
             .setCancelable(true)
         val dialog = alertDialogBuilder.create()
         dialog.show()
@@ -158,17 +163,21 @@ class ImageViewHolder(
 
     fun bindModelToThumbnailView(image: Image?) {
         if (image == null) return
+
         this.image = image
-        val vipImageView = itemView.findViewById<ImageView>(R.id.vip_image_view_thumbnail)
-        val vipImagePlaceholder = itemView.findViewById<ProgressBar>(R.id.vip_image_progressBar)
-        vipImagePlaceholder.visibility = View.VISIBLE
-        vipImageView.visibility = View.GONE
+
+        val imageView = itemView.findViewById<ImageView>(R.id.image_view_thumbnail)
+        val imagePlaceholder = itemView.findViewById<ProgressBar>(R.id.image_progressBar)
+
+        imagePlaceholder.visibility = View.VISIBLE
+        imageView.visibility = View.GONE
+
         val file = File(
             instance!!.fileService.imageDir,
-            image.id + VIP_IMAGE_SUFFIX
+            image.id + IMAGE_SUFFIX
         )
         val thumbnailSize =
-            instance!!.resources.getDimension(R.dimen.vip_image_view_thumbnail_size).toInt()
+            instance!!.resources.getDimension(R.dimen.image_view_thumbnail_size).toInt()
 
         // If an image has previously been downloaded to local storage
         if (file.exists()) {
@@ -178,14 +187,15 @@ class ImageViewHolder(
                 .centerCrop()
                 .transform(CircleTransform())
                 .resize(thumbnailSize, thumbnailSize)
-                .into(vipImageView)
-            vipImagePlaceholder.visibility = View.GONE
-            vipImageView.visibility = View.VISIBLE
+                .into(imageView)
+            imagePlaceholder.visibility = View.GONE
+            imageView.visibility = View.VISIBLE
         } else {
             // Download image from Firebase to a local file
             Log.d(TAG, "Loading image from Firebase with image id: ${image.id}")
 
             // TODO: Should be handled by UseCase
+
             instance!!.imageRepository
                 .downloadImageToLocalFile(image.id!!, object :
                     ImageCallback {
@@ -195,10 +205,10 @@ class ImageViewHolder(
                             .centerCrop()
                             .transform(CircleTransform())
                             .resize(thumbnailSize, thumbnailSize)
-                            .into(vipImageView)
-                        vipImagePlaceholder.visibility = View.GONE
-                        vipImageView.visibility = View.VISIBLE
-                        vipImagesAdapter.notifyDataSetChanged()
+                            .into(imageView)
+                        imagePlaceholder.visibility = View.GONE
+                        imageView.visibility = View.VISIBLE
+                        imagesAdapter.notifyDataSetChanged()
                     }
 
                     override fun onFailure(errorMessage: String?) {}
@@ -208,15 +218,7 @@ class ImageViewHolder(
     }
 
     fun setEditMode(editMode: Boolean) {
-        val vipImageClearBtn: ImageButton? = this.itemView.findViewById(R.id.vip_image_clear_btn)
-        if (vipImageClearBtn != null) {
-            if (editMode) {
-                vipImageClearBtn.setOnClickListener { vipImagesAdapter.remove(image!!) }
-                vipImageClearBtn.visibility = View.VISIBLE
-            } else {
-                vipImageClearBtn.visibility = View.GONE
-            }
-        }
+        imageClearBtn?.visibility = if (editMode) View.VISIBLE else View.GONE
     }
 
     companion object {

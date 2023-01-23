@@ -13,8 +13,8 @@ data class NoteEntity(
     var added: String? = null,
     var updated: String? = null,
     var archived: Boolean = false,
-    var tags: MutableMap<String?, Boolean?> = HashMap(),
-    var vipImages: ArrayList<String?> = ArrayList(),
+    var tags: MutableMap<String, Boolean> = HashMap(),
+    var vipImages: ArrayList<String> = ArrayList(),
 ) {
     @Exclude
     fun fromNote(note: Note): NoteEntity {

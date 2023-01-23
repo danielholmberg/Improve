@@ -5,21 +5,21 @@
     android:layout_height="wrap_content"
     android:layout_alignParentEnd="true"
     android:layout_centerVertical="true"
-    android:background="@drawable/background_vip_image_thumbnail"
-    android:padding="@dimen/vip_image_border_width"
-    android:layout_marginStart="@dimen/vip_image_margin"
-    android:layout_marginEnd="@dimen/vip_image_margin"
+    android:background="@drawable/background_image_thumbnail"
+    android:padding="@dimen/image_border_width"
+    android:layout_marginStart="@dimen/image_margin"
+    android:layout_marginEnd="@dimen/image_margin"
     android:gravity="center">
 
     <ProgressBar
-        android:id="@+id/vip_image_progressBar"
+        android:id="@+id/image_progressBar"
         android:visibility="gone"
-        android:padding="@dimen/vip_image_border_width"
-        android:layout_width="@dimen/vip_image_view_thumbnail_size"
-        android:layout_height="@dimen/vip_image_view_thumbnail_size"/>
+        android:padding="@dimen/image_border_width"
+        android:layout_width="@dimen/image_view_thumbnail_size"
+        android:layout_height="@dimen/image_view_thumbnail_size"/>
 
     <ImageView
-        android:id="@+id/vip_image_view_thumbnail"
+        android:id="@+id/image_view_thumbnail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"/>

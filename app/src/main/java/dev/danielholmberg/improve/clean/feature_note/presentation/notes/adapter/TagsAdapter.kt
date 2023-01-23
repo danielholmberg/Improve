@@ -12,9 +12,10 @@ import android.view.LayoutInflater
 import android.view.View
 import dev.danielholmberg.improve.R
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
+import dev.danielholmberg.improve.clean.feature_note.data.source.entity.TagEntity
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Note
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Tag
-import dev.danielholmberg.improve.clean.feature_note.presentation.notes.TagViewHolder
+import dev.danielholmberg.improve.clean.feature_note.presentation.notes.view_holder.TagViewHolder
 import java.util.HashMap
 
 class TagsAdapter : RecyclerView.Adapter<TagViewHolder>() {
@@ -64,27 +65,28 @@ class TagsAdapter : RecyclerView.Adapter<TagViewHolder>() {
      * Downloads all tags from the Notes-node and adds a childEventListener to detect changes.
      */
     private fun initDatabaseListener() {
+
+        // TODO: Should be moved to UseCase
+
         instance!!.tagRepository.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(dataSnapshot: DataSnapshot, previousChildName: String?) {
-                // This method is triggered when a new child is added
-                // to the location to which this listener was added.
-                Log.d(TAG, "Tag OnChildAdded()")
                 val addedTag = dataSnapshot.getValue(
-                    Tag::class.java
-                )
+                    TagEntity::class.java
+                )?.toTag()
+
                 if (addedTag != null) {
                     tags.add(addedTag)
                 }
             }
 
             override fun onChildChanged(dataSnapshot: DataSnapshot, previousChildName: String?) {
-                // This method is triggered when the data at a child location has changed.
 
                 // TODO - Not used at the moment, useful when user can edit Tags.
-                Log.d(TAG, "Tag OnChildChanged()")
+
                 val updatedTag = dataSnapshot.getValue(
-                    Tag::class.java
-                )
+                    TagEntity::class.java
+                )?.toTag()
+
                 if (updatedTag != null) {
                     tags.add(updatedTag)
                     Toast.makeText(instance, "Tag updated", Toast.LENGTH_SHORT).show()
@@ -92,16 +94,13 @@ class TagsAdapter : RecyclerView.Adapter<TagViewHolder>() {
             }
 
             override fun onChildRemoved(dataSnapshot: DataSnapshot) {
-                // This method is triggered when a child is removed from the location
-                // to which this listener was added.
-
-                // TODO - Not used at the moment, useful when user can edit Tags.
-                Log.d(TAG, "Tag OnChildRemoved()")
                 val removedTag = dataSnapshot.getValue(
-                    Tag::class.java
-                )
+                    TagEntity::class.java
+                )?.toTag()
+
                 if (removedTag != null) {
                     tags.remove(removedTag)
+                    currentNote?.tags?.remove(removedTag.id)
                 } else {
                     Toast.makeText(
                         instance, "Failed to delete tag, please try again later",
@@ -161,10 +160,10 @@ class TagsAdapter : RecyclerView.Adapter<TagViewHolder>() {
         if (currentNote != null) {
             tagView!!.setOnClickListener {
                 if (currentNote!!.containsTag(tag.id)) {
-                    currentNote!!.removeTag(tag.id)
+                    currentNote!!.removeTag(tag.id!!)
                     holder.setTagStatusOnNote(false)
                 } else {
-                    currentNote!!.addTag(tag.id)
+                    currentNote!!.addTag(tag.id!!)
                     holder.setTagStatusOnNote(true)
                 }
             }

@@ -30,7 +30,7 @@
         android:visible="false">
         <item
             android:orderInCategory="0"
-            android:id="@+id/vipAddImage"
+            android:id="@+id/addImage"
             android:title="@string/vip_add_image"
             android:icon="@drawable/ic_menu_vip_add_image_primary"
             app:showAsAction="always"

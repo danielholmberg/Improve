@@ -52,10 +52,10 @@ class VipImageViewHolder(
         this.vipImage = vipImage
         val image = File(
             instance!!.imageDir,
-            vipImage.id + StorageManager.VIP_IMAGE_SUFFIX
+            vipImage.id + StorageManager.IMAGE_SUFFIX
         )
-        val targetSize = instance!!.resources.getDimension(R.dimen.vip_image_view_size).toInt()
-        val vipImageView = this.itemView.findViewById<View>(R.id.vip_image_view) as ImageView
+        val targetSize = instance!!.resources.getDimension(R.dimen.image_view_size).toInt()
+        val vipImageView = this.itemView.findViewById<View>(R.id.image_view) as ImageView
         if (image.exists()) {
             Log.d(TAG, "Loading Preview image from Local Filesystem at path: " + image.path)
             Picasso.get()
@@ -108,12 +108,12 @@ class VipImageViewHolder(
 
     private fun showImageFullscreen() {
         val vipImageViewFullscreenLayout = LayoutInflater.from(context)
-            .inflate(R.layout.dialog_vip_image_fullscreen, null) as LinearLayout
+            .inflate(R.layout.dialog_image_fullscreen, null) as LinearLayout
         val vipImageViewFull =
-            vipImageViewFullscreenLayout.findViewById<View>(R.id.vip_image_view_full) as ImageView
+            vipImageViewFullscreenLayout.findViewById<View>(R.id.image_view_full) as ImageView
         val image = File(
             instance!!.imageDir,
-            vipImage!!.id + StorageManager.VIP_IMAGE_SUFFIX
+            vipImage!!.id + StorageManager.IMAGE_SUFFIX
         )
         if (image.exists()) {
             Log.d(TAG, "Loading Fullscreen image from Local Filesystem at path: " + image.path)
@@ -155,16 +155,16 @@ class VipImageViewHolder(
     fun bindModelToThumbnailView(vipImage: VipImage?) {
         if (vipImage == null) return
         this.vipImage = vipImage
-        val vipImageView = itemView.findViewById<ImageView>(R.id.vip_image_view_thumbnail)
-        val vipImagePlaceholder = itemView.findViewById<ProgressBar>(R.id.vip_image_progressBar)
+        val vipImageView = itemView.findViewById<ImageView>(R.id.image_view_thumbnail)
+        val vipImagePlaceholder = itemView.findViewById<ProgressBar>(R.id.image_progressBar)
         vipImagePlaceholder.visibility = View.VISIBLE
         vipImageView.visibility = View.GONE
         val image = File(
             instance!!.imageDir,
-            vipImage.id + StorageManager.VIP_IMAGE_SUFFIX
+            vipImage.id + StorageManager.IMAGE_SUFFIX
         )
         val thumbnailSize =
-            instance!!.resources.getDimension(R.dimen.vip_image_view_thumbnail_size).toInt()
+            instance!!.resources.getDimension(R.dimen.image_view_thumbnail_size).toInt()
 
         // If an image has previously been downloaded to local storage
         if (image.exists()) {
@@ -202,7 +202,7 @@ class VipImageViewHolder(
     }
 
     fun setEditMode(editMode: Boolean) {
-        val vipImageClearBtn: ImageButton? = this.itemView.findViewById(R.id.vip_image_clear_btn)
+        val vipImageClearBtn: ImageButton? = this.itemView.findViewById(R.id.image_clear_btn)
         if (vipImageClearBtn != null) {
             if (editMode) {
                 vipImageClearBtn.setOnClickListener { vipImagesAdapter.remove(vipImage!!) }

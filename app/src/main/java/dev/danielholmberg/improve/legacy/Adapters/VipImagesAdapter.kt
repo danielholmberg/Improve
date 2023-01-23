@@ -51,10 +51,10 @@ class VipImagesAdapter(private val noteId: String, private val thumbnail: Boolea
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VipImageViewHolder {
         vipImageView = if (thumbnail) {
             LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_vip_image_thumbnail, parent, false)
+                .inflate(R.layout.item_image_thumbnail, parent, false)
         } else {
             LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_vip_image_preview, parent, false)
+                .inflate(R.layout.item_image_preview, parent, false)
         }
         return VipImageViewHolder(parent.context, vipImageView!!, noteId, this)
     }

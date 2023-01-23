@@ -33,11 +33,11 @@ class TagDataSourceImpl(
             if (databaseError != null) {
                 Log.e(TAG, "Failed to delete Tag: " + tagEntityId + "from Firebase: " + databaseError)
             } else {
-                for (note in instance!!.notesAdapter!!.notesList) {
+                for (note in instance!!.notesAdapter!!.hashMap.values) {
                     note.removeTag(tagEntityId)
                     noteRepository.updateNote(note)
                 }
-                for (archivedNote in instance!!.archivedNotesAdapter!!.archivedNotesList) {
+                for (archivedNote in instance!!.archivedNotesAdapter!!.hashMap.values) {
                     archivedNote.removeTag(tagEntityId)
                     noteRepository.updateArchivedNote(archivedNote)
                 }

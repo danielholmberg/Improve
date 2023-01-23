@@ -1,19 +1,12 @@
 package dev.danielholmberg.improve.clean.feature_note.presentation.notes.adapter
 
-import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
-import com.google.firebase.database.ChildEventListener
-import com.google.firebase.database.DataSnapshot
-import android.widget.Toast
-import com.google.firebase.database.DatabaseError
 import android.view.ViewGroup
 import android.view.LayoutInflater
 import dev.danielholmberg.improve.R
-import dev.danielholmberg.improve.clean.Improve.Companion.instance
-import dev.danielholmberg.improve.clean.feature_note.data.source.entity.NoteEntity
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Note
-import dev.danielholmberg.improve.clean.feature_note.presentation.notes.ArchivedNoteViewHolder
+import dev.danielholmberg.improve.clean.feature_note.presentation.notes.view_holder.ArchivedNoteViewHolder
 import java.util.*
 
 class ArchivedNotesAdapter : RecyclerView.Adapter<ArchivedNoteViewHolder>() {
@@ -65,87 +58,28 @@ class ArchivedNotesAdapter : RecyclerView.Adapter<ArchivedNoteViewHolder>() {
     private var archivedNotesCopy: List<Note>? = null
     private var filteredArchivedNotes: MutableList<Note>? = null
 
-    init {
-        initDatabaseListener()
+    fun add(note: Note) {
+        archivedNotes.add(note)
+        notifyItemChanged(archivedNotes.size())
     }
 
-    /**
-     * Downloads all archivedNotes from the Notes-node and adds a childEventListener to detect changes.
-     */
-    private fun initDatabaseListener() {
-        instance!!.noteRepository.addChildEventListenerForArchive(object : ChildEventListener {
-            override fun onChildAdded(dataSnapshot: DataSnapshot, previousChildName: String?) {
+    fun remove(note: Note) {
+        archivedNotes.remove(note)
+    }
 
-                // TODO: Should be moved to UseCase or somewhere in Data layer as the incoming NoteEntity is a Data Source model
+    fun contains(note: Note): Boolean {
+        val existingNote = hashMap[note.id]
+        return existingNote != null
+    }
 
-                // This method is triggered when a new child is added
-                // to the location to which this listener was added.
-                val archivedNote = dataSnapshot.getValue(
-                    NoteEntity::class.java
-                )?.toNote()
-
-                if (archivedNote != null) {
-                    archivedNotes.add(archivedNote)
-                }
-            }
-
-            override fun onChildChanged(dataSnapshot: DataSnapshot, previousChildName: String?) {
-
-                // TODO: Should be moved to UseCase or somewhere in Data layer as the incoming NoteEntity is a Data Source model
-
-                // This method is triggered when the data at a child location has changed.
-                val updatedNote = dataSnapshot.getValue(
-                    NoteEntity::class.java
-                )?.toNote()
-
-                if (updatedNote != null) {
-                    val existingNote = hashMap[updatedNote.id]
-                    if (existingNote == null) {
-                        archivedNotes.add(updatedNote)
-                    } else {
-                        archivedNotes.updateItemAt(
-                            archivedNotesList.indexOf(existingNote),
-                            updatedNote
-                        )
-                    }
-                    Toast.makeText(instance, "Archived note updated", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onChildRemoved(dataSnapshot: DataSnapshot) {
-
-                // TODO: Should be moved to UseCase or somewhere in Data layer as the incoming NoteEntity is a Data Source model
-
-                // This method is triggered when a child is removed from the location
-                // to which this listener was added.
-                val removedNote = dataSnapshot.getValue(
-                    NoteEntity::class.java
-                )?.toNote()
-
-                if (removedNote != null) {
-                    archivedNotes.remove(removedNote)
-                } else {
-                    Toast.makeText(
-                        instance, "Failed to delete note, please try again later",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-
-            override fun onChildMoved(dataSnapshot: DataSnapshot, s: String?) {
-                // This method is triggered when a child location's priority changes.
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-                // This method will be triggered in the event that this listener either failed
-                // at the server, or is removed as a result of the security and Firebase rules.
-                Log.e(TAG, "ArchivedNotes ChildEventListener cancelled: $databaseError")
-            }
-        })
+    fun update(note: Note) {
+        val index = notesIdList.indexOf(note.id)
+        archivedNotes.updateItemAt(index, note)
+        notifyItemChanged(index)
     }
 
     fun initSearch() {
-        archivedNotesCopy = archivedNotesList
+        archivedNotesCopy = hashMap.values.toList()
         filteredArchivedNotes = ArrayList()
     }
 
@@ -173,14 +107,15 @@ class ArchivedNotesAdapter : RecyclerView.Adapter<ArchivedNoteViewHolder>() {
         }
     }
 
-    val archivedNotesList: List<Note>
+    private val notesIdList: List<String?>
         get() {
-            val archivedNotesCopy: MutableList<Note> = ArrayList()
+            val notesIdCopy: MutableList<String?> = ArrayList()
             for (i in 0 until archivedNotes.size()) {
-                archivedNotesCopy.add(archivedNotes[i])
+                notesIdCopy.add(archivedNotes[i].id)
             }
-            return archivedNotesCopy
+            return notesIdCopy
         }
+
     val hashMap: HashMap<String?, Note>
         get() {
             val hashMap = HashMap<String?, Note>()

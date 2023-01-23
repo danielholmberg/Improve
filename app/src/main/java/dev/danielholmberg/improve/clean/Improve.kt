@@ -2,10 +2,9 @@ package dev.danielholmberg.improve.clean
 
 import android.app.Activity
 import android.app.Application
-import com.google.firebase.database.FirebaseDatabase
-import android.os.Build
-import android.app.NotificationManager
 import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
 import android.util.Log
 import androidx.fragment.app.Fragment
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -17,15 +16,14 @@ import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.storage.FirebaseStorage
 import dev.danielholmberg.improve.R
-import dev.danielholmberg.improve.clean.feature_note.data.repository.NoteRepositoryImpl
-import dev.danielholmberg.improve.clean.feature_note.domain.repository.NoteRepository
-import dev.danielholmberg.improve.clean.core.SharedPrefsService
 import dev.danielholmberg.improve.clean.core.FileService
 import dev.danielholmberg.improve.clean.core.GoogleDriveService
 import dev.danielholmberg.improve.clean.core.RemoteConfigService
+import dev.danielholmberg.improve.clean.core.SharedPrefsService
 import dev.danielholmberg.improve.clean.feature_authentication.data.repository.AuthRepositoryImpl
 import dev.danielholmberg.improve.clean.feature_authentication.data.source.AuthDataSourceImpl
 import dev.danielholmberg.improve.clean.feature_authentication.domain.repository.AuthRepository
@@ -42,6 +40,7 @@ import dev.danielholmberg.improve.clean.feature_feedback.data.repository.Feedbac
 import dev.danielholmberg.improve.clean.feature_feedback.data.source.FeedbackDataSourceImpl
 import dev.danielholmberg.improve.clean.feature_feedback.domain.repository.FeedbackRepository
 import dev.danielholmberg.improve.clean.feature_note.data.repository.ImageRepositoryImpl
+import dev.danielholmberg.improve.clean.feature_note.data.repository.NoteRepositoryImpl
 import dev.danielholmberg.improve.clean.feature_note.data.repository.TagRepositoryImpl
 import dev.danielholmberg.improve.clean.feature_note.data.source.image.ImageDataSourceImpl
 import dev.danielholmberg.improve.clean.feature_note.data.source.note.NoteDataSourceImpl
@@ -49,6 +48,7 @@ import dev.danielholmberg.improve.clean.feature_note.data.source.tag.TagDataSour
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Note
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Tag
 import dev.danielholmberg.improve.clean.feature_note.domain.repository.ImageRepository
+import dev.danielholmberg.improve.clean.feature_note.domain.repository.NoteRepository
 import dev.danielholmberg.improve.clean.feature_note.domain.repository.TagRepository
 import dev.danielholmberg.improve.clean.feature_note.presentation.notes.adapter.ArchivedNotesAdapter
 import dev.danielholmberg.improve.clean.feature_note.presentation.notes.adapter.NotesAdapter
@@ -56,8 +56,6 @@ import dev.danielholmberg.improve.clean.feature_note.presentation.notes.adapter.
 import dev.danielholmberg.improve.clean.feature_privacy_policy.data.repository.PrivacyPolicyRepositoryImpl
 import dev.danielholmberg.improve.clean.feature_privacy_policy.data.source.PrivacyPolicyDataSourceImpl
 import dev.danielholmberg.improve.clean.feature_privacy_policy.domain.repository.PrivacyPolicyRepository
-import java.util.HashMap
-import kotlin.jvm.Volatile
 
 class Improve : Application() {
 
@@ -102,6 +100,8 @@ class Improve : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        Log.i(TAG, "onCreate()")
+
         sImproveInstance = this
 
         createNotificationChannelExport()
@@ -197,6 +197,7 @@ class Improve : Application() {
     }
 
     private fun createNotificationChannelExport() {
+        Log.i(TAG, "Creating Notification Channel for Google Drive exports")
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -243,7 +244,7 @@ class Improve : Application() {
     }
 
     companion object {
-        private val TAG = this::class.simpleName
+        private val TAG = BuildConfig.TAG + Improve::class.simpleName
 
         // volatile attribute makes the singleton thread safe.
         @Volatile

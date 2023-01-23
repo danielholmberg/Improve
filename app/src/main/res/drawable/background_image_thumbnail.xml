@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
-        <shape android:shape="rectangle">
+        <shape android:shape="oval">
             <solid android:color="@color/cardInfoBackground"/>
             <corners
-                android:radius="@dimen/radius_vip_image_thumbnail" />
-            <stroke android:color="@color/colorAccent" android:width="@dimen/vip_image_border_width" />
+                android:radius="@dimen/image_thumbnail_corner_radius" />
+            <stroke android:color="@color/colorAccent" android:width="@dimen/image_border_width" />
         </shape>
     </item>
 </selector>

@@ -90,13 +90,16 @@
     <dimen name="radius_fab_text_corner">4dp</dimen>
     <dimen name="fab_text_padding_horizontal">4dp</dimen>
     <dimen name="fab_text_padding_vertical">8dp</dimen>
-    <dimen name="vip_image_view_thumbnail_size">24dp</dimen>
-    <dimen name="vip_image_view_size">100dp</dimen>
-    <dimen name="vip_image_view_corner_radius">20dp</dimen>
-    <dimen name="vip_image_border_width">2dp</dimen>
-    <dimen name="radius_vip_image_thumbnail">20dp</dimen>
-    <dimen name="vip_image_margin">2dp</dimen>
-    <dimen name="vip_images_additionals_indicator_text_size">10sp</dimen>
+
+    <!-- Image dimen -->
+    <dimen name="image_view_thumbnail_size">24dp</dimen>
+    <dimen name="image_view_size">100dp</dimen>
+    <dimen name="image_view_corner_radius">20dp</dimen>
+    <dimen name="image_border_width">2dp</dimen>
+    <dimen name="image_thumbnail_corner_radius">20dp</dimen>
+    <dimen name="image_margin">2dp</dimen>
+    <dimen name="images_extras_indicator_text_size">10sp</dimen>
+    <dimen name="image_preview_corner_radius">20dp</dimen>
 
     <item name="tag_letter_spacing" type="dimen" format="float">0.2</item>
 </resources>

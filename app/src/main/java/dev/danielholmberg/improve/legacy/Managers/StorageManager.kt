@@ -12,7 +12,6 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStream
 import java.util.ArrayList
-import kotlin.Throws
 
 class StorageManager {
     private val storage: FirebaseStorage
@@ -56,7 +55,7 @@ class StorageManager {
 
     fun downloadImageToLocalFile(imageId: String, callback: StorageCallback) {
         Log.d(TAG, "Downloading image to Local Filesystem...")
-        val targetFile = File(instance!!.imageDir, imageId + VIP_IMAGE_SUFFIX)
+        val targetFile = File(instance!!.imageDir, imageId + IMAGE_SUFFIX)
         Log.d(TAG, "targetFile path: " + targetFile.path)
         imagesRef.child(imageId).getFile(targetFile).addOnSuccessListener {
             Log.d(
@@ -79,7 +78,7 @@ class StorageManager {
             val vipImage = vipImagesList[i]
             val imageId = vipImage.id
             val originalFilePath = Uri.parse(vipImage.originalFilePath)
-            val cachedImage = File(instance!!.imageDir, imageId + VIP_IMAGE_SUFFIX)
+            val cachedImage = File(instance!!.imageDir, imageId + IMAGE_SUFFIX)
             if (!cachedImage.exists()) {
                 try {
                     Log.d(TAG, "Copying image to Local Filesystem with image id: $imageId")
@@ -132,6 +131,6 @@ class StorageManager {
         private val TAG = StorageManager::class.java.simpleName
         const val USERS_REF = "Users"
         const val IMAGES_REF = "Images"
-        const val VIP_IMAGE_SUFFIX = ".jpg"
+        const val IMAGE_SUFFIX = ".jpg"
     }
 }

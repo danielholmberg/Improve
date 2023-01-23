@@ -1,4 +1,4 @@
-package dev.danielholmberg.improve.clean.feature_note.presentation.notes
+package dev.danielholmberg.improve.clean.feature_note.presentation.notes.view_holder
 
 import android.content.Context
 import android.view.ViewGroup
@@ -17,22 +17,19 @@ import androidx.core.content.ContextCompat
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Note
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Image
-import dev.danielholmberg.improve.clean.feature_note.presentation.notes.fragment.NoteDetailsDialogFragment
+import dev.danielholmberg.improve.clean.feature_note.presentation.note_details.NoteDetailsDialogFragment
+import dev.danielholmberg.improve.clean.feature_note.presentation.note_details.NoteDetailsViewModel.Companion.NOTE_ADAPTER_POS_KEY
+import dev.danielholmberg.improve.clean.feature_note.presentation.note_details.NoteDetailsViewModel.Companion.NOTE_KEY
 import dev.danielholmberg.improve.clean.feature_note.presentation.notes.adapter.ImagesAdapter
 
-class NoteViewHolder(private val context: Context, itemView: View, parent: ViewGroup) :
+class NoteViewHolder(private val context: Context, itemView: View, private val parent: ViewGroup) :
     RecyclerView.ViewHolder(
         itemView
     ) {
-    private val parent: ViewGroup
     private var note: Note? = null
     private var title: TextView? = null
     private var info: TextView? = null
     private var footer: RelativeLayout? = null
-
-    init {
-        this.parent = parent
-    }
 
     /**
      * Binds data from Note (Model) object to related View.
@@ -50,9 +47,9 @@ class NoteViewHolder(private val context: Context, itemView: View, parent: ViewG
         info = itemView.findViewById<View>(R.id.item_note_info_tv) as TextView
         footer = itemView.findViewById<View>(R.id.footer_note) as RelativeLayout
         val imagesRecyclerView =
-            itemView.findViewById<View>(R.id.vip_images_thumbnail_list) as RecyclerView
+            itemView.findViewById<View>(R.id.images_thumbnail_list) as RecyclerView
         val additionalImagesIndicator =
-            itemView.findViewById<TextView>(R.id.vip_images_additionals_indicator)
+            itemView.findViewById<TextView>(R.id.images_extras_indicator)
         val tagsList = itemView.findViewById<View>(R.id.footer_note_tags_list) as FlexboxLayout
 
         // Title
@@ -94,30 +91,28 @@ class NoteViewHolder(private val context: Context, itemView: View, parent: ViewG
             itemView.background = ContextCompat.getDrawable(context, R.drawable.background_note)
         }
 
-        // Note has VIP image or not
         if (note.hasImage()) {
-            val imagesAdapter = ImagesAdapter(note.id!!, true)
+            val imagesAdapter = ImagesAdapter(true)
             imagesRecyclerView.adapter = imagesAdapter
             val layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             imagesRecyclerView.layoutManager = layoutManager
+
             imagesRecyclerView.visibility = View.VISIBLE
             additionalImagesIndicator.visibility = View.GONE
+
             var thumbnails = 0
             val maxThumbnails = 2
             Log.d(TAG, "Total number of images attached to Note: " + note.images.size)
             for (imageId in note.images) {
-                thumbnails++
                 Log.d(TAG, "Thumbnail nr $thumbnails with id: $imageId")
-                if (thumbnails <= maxThumbnails) {
+                if (thumbnails < maxThumbnails) {
+                    thumbnails++
                     imagesAdapter.add(Image(imageId))
                 } else {
                     // Show number indicator on total amount of attached images
-                    val numberOfAdditionalImages = note.images.size - maxThumbnails
-                    additionalImagesIndicator.text = instance!!.resources
-                        .getString(
-                            R.string.vip_images_additionals_indicator,
-                            numberOfAdditionalImages
-                        )
+                    additionalImagesIndicator.text = (note.images.size - thumbnails).let {
+                        if (it >= 100) "${99}+" else it.toString()
+                    }
                     additionalImagesIndicator.visibility = View.VISIBLE
                     break
                 }
@@ -150,9 +145,8 @@ class NoteViewHolder(private val context: Context, itemView: View, parent: ViewG
      */
     private fun createBundle(note: Note?, itemPos: Int): Bundle {
         val bundle = Bundle()
-        bundle.putParcelable(NoteDetailsDialogFragment.NOTE_KEY, note)
-        bundle.putInt(NoteDetailsDialogFragment.NOTE_PARENT_FRAGMENT_KEY, R.integer.NOTES_FRAGMENT)
-        bundle.putInt(NoteDetailsDialogFragment.NOTE_ADAPTER_POS_KEY, itemPos)
+        bundle.putParcelable(NOTE_KEY, note)
+        bundle.putInt(NOTE_ADAPTER_POS_KEY, itemPos)
         return bundle
     }
 

@@ -53,8 +53,8 @@
     <string name="sort_by_company_alphabetical">Sort by company name</string>
 
     <!-- Note strings -->
-    <string name="hint_title">Title</string>
-    <string name="hint_info">Information</string>
+    <string name="hint_title">Enter a title</string>
+    <string name="hint_info">Add some content</string>
     <string name="err_msg_title">Please enter a title</string>
     <string name="title_new_note">New Note</string>
     <string name="title_edit_note">Edit Note</string>
@@ -83,8 +83,6 @@
     <string name="menu_note_import_file">Import Note</string>
     <string name="menu_note_info">Info</string>
     <string name="menu_note_google_drive">Export to Google Drive</string>
-
-    <string name="vip_images_additionals_indicator">+%d</string>
 
     <!-- Feedback strings -->
     <string name="title_feedback">Feedback</string>

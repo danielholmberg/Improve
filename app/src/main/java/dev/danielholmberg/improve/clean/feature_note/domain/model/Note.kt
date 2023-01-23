@@ -14,7 +14,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 @IgnoreExtraProperties
-class Note(
+data class Note(
     var id: String? = null,
     var title: String? = null,
     var info: String? = null,
@@ -22,8 +22,8 @@ class Note(
     var addedAt: String? = null,
     var updatedAt: String? = null,
     var isArchived: Boolean = false,
-    var tags: MutableMap<String?, Boolean?> = HashMap(),
-    var images: ArrayList<String?> = ArrayList(),
+    var tags: MutableMap<String, Boolean> = HashMap(),
+    var images: ArrayList<String> = ArrayList(),
 ) : Parcelable {
 
     constructor(id: String?) : this() {
@@ -55,8 +55,8 @@ class Note(
     }
 
     @JvmName("setTags1")
-    fun setTags(tags: Map<String?, Boolean?>) {
-        val tagsMap: MutableMap<String?, Boolean?> = ConcurrentHashMap(tags)
+    fun setTags(tags: Map<String, Boolean>) {
+        val tagsMap: MutableMap<String, Boolean> = ConcurrentHashMap(tags)
 
         // Do not add if Tag has been removed.
         for (tagId in tagsMap.keys) {
@@ -68,12 +68,12 @@ class Note(
     }
 
     @Exclude
-    fun addTag(tagId: String?) {
+    fun addTag(tagId: String) {
         tags[tagId] = true
     }
 
     @Exclude
-    fun removeTag(tagId: String?) {
+    fun removeTag(tagId: String) {
         tags.remove(tagId)
     }
 
@@ -88,8 +88,8 @@ class Note(
     }
 
     @Exclude
-    fun addImage(vipImageId: String?) {
-        images.add(vipImageId)
+    fun addImage(imageId: String) {
+        images.add(imageId)
     }
 
     @Exclude

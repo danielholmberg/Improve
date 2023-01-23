@@ -50,9 +50,9 @@ class NoteViewHolder(private val context: Context, itemView: View, parent: ViewG
         info = itemView.findViewById<View>(R.id.item_note_info_tv) as TextView
         footer = itemView.findViewById<View>(R.id.footer_note) as RelativeLayout
         val vipImagesRecyclerView =
-            itemView.findViewById<View>(R.id.vip_images_thumbnail_list) as RecyclerView
+            itemView.findViewById<View>(R.id.images_thumbnail_list) as RecyclerView
         val additionalImagesIndicator =
-            itemView.findViewById<TextView>(R.id.vip_images_additionals_indicator)
+            itemView.findViewById<TextView>(R.id.images_extras_indicator)
         val tagsList = itemView.findViewById<View>(R.id.footer_note_tags_list) as FlexboxLayout
 
         // Title
@@ -113,11 +113,7 @@ class NoteViewHolder(private val context: Context, itemView: View, parent: ViewG
                 } else {
                     // Show number indicator on total amount of attached images
                     val numberOfAdditionalImages = note.vipImages.size - maxThumbnails
-                    additionalImagesIndicator.text = instance!!.resources
-                        .getString(
-                            R.string.vip_images_additionals_indicator,
-                            numberOfAdditionalImages
-                        )
+                    additionalImagesIndicator.text = "+$numberOfAdditionalImages"
                     additionalImagesIndicator.visibility = View.VISIBLE
                     break
                 }

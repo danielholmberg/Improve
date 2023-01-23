@@ -159,7 +159,7 @@ class NoteDetailsDialogFragment : DialogFragment() {
                         }
                         true
                     }
-                    R.id.vipAddImage -> {
+                    R.id.addImage -> {
                         chooseImage()
                         true
                     }

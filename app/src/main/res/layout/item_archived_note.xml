@@ -32,22 +32,22 @@
                 android:text="@string/hint_title"
                 android:textStyle="bold"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:layout_toStartOf="@id/vip_images_thumbnail_list"
+                android:layout_toStartOf="@id/images_thumbnail_list"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"/>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/vip_images_thumbnail_list"
+                android:id="@+id/images_thumbnail_list"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 android:orientation="horizontal"
                 android:gravity="end"
                 android:layout_centerVertical="true"
-                android:layout_toStartOf="@id/vip_images_thumbnails_container"/>
+                android:layout_toStartOf="@id/images_thumbnails_container"/>
 
             <LinearLayout
-                android:id="@+id/vip_images_thumbnails_container"
+                android:id="@+id/images_thumbnails_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -55,16 +55,16 @@
                 android:layout_centerVertical="true">
 
                 <TextView
-                    android:id="@+id/vip_images_additionals_indicator"
-                    android:layout_width="@dimen/vip_image_view_thumbnail_size"
+                    android:id="@+id/images_extras_indicator"
+                    android:layout_width="@dimen/image_view_thumbnail_size"
                     android:layout_height="24dp"
                     android:visibility="gone"
-                    android:textSize="@dimen/vip_images_additionals_indicator_text_size"
+                    android:textSize="@dimen/images_extras_indicator_text_size"
                     android:padding="4dp"
-                    android:layout_marginStart="@dimen/vip_image_margin"
-                    android:layout_marginEnd="@dimen/vip_image_margin"
+                    android:layout_marginStart="@dimen/image_margin"
+                    android:layout_marginEnd="@dimen/image_margin"
                     android:gravity="center"
-                    android:background="@drawable/background_vip_image_thumbnail"/>
+                    android:background="@drawable/background_image_thumbnail"/>
 
             </LinearLayout>
 
