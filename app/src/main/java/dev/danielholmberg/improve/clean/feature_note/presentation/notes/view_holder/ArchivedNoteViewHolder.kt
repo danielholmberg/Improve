@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Note
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Image
@@ -125,6 +126,6 @@ class ArchivedNoteViewHolder(private val context: Context, itemView: View, paren
     }
 
     companion object {
-        private val TAG = ArchivedNoteViewHolder::class.java.simpleName
+        private val TAG = BuildConfig.TAG + ArchivedNoteViewHolder::class.java.simpleName
     }
 }

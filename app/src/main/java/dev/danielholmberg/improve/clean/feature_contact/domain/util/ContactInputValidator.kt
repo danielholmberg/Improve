@@ -9,6 +9,7 @@ import android.widget.Spinner
 import dev.danielholmberg.improve.R
 import androidx.appcompat.app.AppCompatActivity
 import android.view.WindowManager
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.feature_contact.domain.model.Company
 
 class ContactInputValidator(private val context: Context, inputLayoutContainer: View) {
@@ -104,7 +105,7 @@ class ContactInputValidator(private val context: Context, inputLayoutContainer: 
     }
 
     companion object {
-        private val TAG = ContactInputValidator::class.java.simpleName
+        private val TAG = BuildConfig.TAG + ContactInputValidator::class.java.simpleName
 
         /**
          * @return true if the email is of correct format.

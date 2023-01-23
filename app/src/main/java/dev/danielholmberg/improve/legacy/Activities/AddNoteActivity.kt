@@ -135,7 +135,7 @@ class AddNoteActivity : AppCompatActivity() {
                 }
                 return true
             }
-            R.id.vipAddImage -> {
+            R.id.addImage -> {
                 // *** VIP feature *** //
                 chooseImage()
                 return true

@@ -9,6 +9,7 @@ import android.view.*
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import dev.danielholmberg.improve.BuildConfig
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
@@ -325,7 +326,7 @@ class NotesFragment : Fragment(), SearchView.OnQueryTextListener {
     }
 
     companion object {
-        private val TAG = NotesFragment::class.java.simpleName
+        private val TAG = BuildConfig.TAG + NotesFragment::class.java.simpleName
         private const val REQUEST_CODE_OPEN_FILE = 1
     }
 }

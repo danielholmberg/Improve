@@ -9,6 +9,7 @@ import android.view.View
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.R
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.MainActivity
@@ -74,6 +75,6 @@ class PrivacyPolicyActivity : AppCompatActivity() {
     }
 
     companion object {
-        private val TAG = PrivacyPolicyActivity::class.java.simpleName
+        private val TAG = BuildConfig.TAG + PrivacyPolicyActivity::class.java.simpleName
     }
 }

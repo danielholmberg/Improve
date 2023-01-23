@@ -28,6 +28,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.feature_authentication.presentation.SignInActivity
 import dev.danielholmberg.improve.clean.feature_contact.presentation.contacts.adapter.CompanyRecyclerViewAdapter
@@ -487,7 +488,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        private val TAG = MainActivity::class.java.simpleName
+        private val TAG = BuildConfig.TAG + MainActivity::class.java.simpleName
         const val TAG_NOTES_FRAGMENT = "NOTES_FRAGMENT"
         const val TAG_ARCHIVED_NOTES_FRAGMENT = "ARCHIVED_NOTES_FRAGMENT"
         const val TAG_CONTACTS_FRAGMENT = "CONTACTS_FRAGMENT"

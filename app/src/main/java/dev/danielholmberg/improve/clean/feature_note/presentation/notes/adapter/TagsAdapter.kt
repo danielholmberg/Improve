@@ -10,6 +10,7 @@ import com.google.firebase.database.DatabaseError
 import android.view.ViewGroup
 import android.view.LayoutInflater
 import android.view.View
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.R
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.feature_note.data.source.entity.TagEntity
@@ -185,6 +186,6 @@ class TagsAdapter : RecyclerView.Adapter<TagViewHolder>() {
     }
 
     companion object {
-        private val TAG = TagsAdapter::class.java.simpleName
+        private val TAG = BuildConfig.TAG + TagsAdapter::class.java.simpleName
     }
 }

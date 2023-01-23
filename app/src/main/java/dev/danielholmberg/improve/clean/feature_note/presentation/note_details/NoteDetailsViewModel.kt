@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.lifecycle.ViewModel
 import com.google.android.flexbox.FlexboxLayout
 import com.google.android.flexbox.FlexboxLayoutManager
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.R
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.core.GoogleDriveService
@@ -274,7 +275,7 @@ class NoteDetailsViewModel(
     }
 
     companion object {
-        private val TAG: String = NoteDetailsViewModel::class.java.simpleName
+        private val TAG: String = BuildConfig.TAG + NoteDetailsViewModel::class.java.simpleName
         const val NOTE_ADAPTER_POS_KEY = "adapterItemPos"
         const val NOTE_KEY = "originalNote"
     }

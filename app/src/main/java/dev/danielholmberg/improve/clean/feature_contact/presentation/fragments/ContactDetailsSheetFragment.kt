@@ -23,6 +23,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import com.google.android.gms.common.api.Scope
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.core.GoogleDriveService
 import dev.danielholmberg.improve.clean.feature_contact.domain.model.Contact
@@ -301,7 +302,7 @@ class ContactDetailsSheetFragment : BottomSheetDialogFragment(), View.OnClickLis
     }
 
     companion object {
-        private val TAG = ContactDetailsSheetFragment::class.java.simpleName
+        private val TAG = BuildConfig.TAG + ContactDetailsSheetFragment::class.java.simpleName
         const val CONTACT_KEY = "contact"
         const val PARENT_FRAGMENT_KEY = "parentFragment"
         private const val REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION = 999

@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.feature_contact.domain.model.Company
 import dev.danielholmberg.improve.clean.feature_contact.presentation.AddContactActivity
@@ -47,7 +48,7 @@ class CompanyViewHolder(private val mView: View) : RecyclerView.ViewHolder(
     }
 
     companion object {
-        private val TAG = CompanyViewHolder::class.java.simpleName
+        private val TAG = BuildConfig.TAG + CompanyViewHolder::class.java.simpleName
         lateinit var contactRecyclerView: RecyclerView
     }
 }

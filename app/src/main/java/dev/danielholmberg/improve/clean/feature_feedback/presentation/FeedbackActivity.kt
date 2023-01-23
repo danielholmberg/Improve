@@ -12,6 +12,7 @@ import android.os.Build
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.Toolbar
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.MainActivity
 import dev.danielholmberg.improve.clean.feature_authentication.domain.repository.AuthRepository
@@ -127,6 +128,6 @@ class FeedbackActivity : AppCompatActivity() {
     }
 
     companion object {
-        private val TAG = FeedbackActivity::class.java.simpleName
+        private val TAG = BuildConfig.TAG + FeedbackActivity::class.java.simpleName
     }
 }

@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.feature_authentication.data.source.AuthDataSourceImpl.Companion.USERS_REF
 import dev.danielholmberg.improve.clean.feature_authentication.domain.repository.AuthRepository
 import dev.danielholmberg.improve.clean.feature_note.data.source.entity.NoteEntity
@@ -121,7 +122,7 @@ class NoteDataSourceImpl(
     }
 
     companion object {
-        private val TAG = NoteRepository::class.java.simpleName
+        private val TAG = BuildConfig.TAG + NoteRepository::class.java.simpleName
         private const val NOTES_REF = "notes"
         private const val ARCHIVED_NOTES_REF = "archived_notes"
     }

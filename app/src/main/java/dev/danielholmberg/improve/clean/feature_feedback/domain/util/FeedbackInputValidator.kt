@@ -6,6 +6,7 @@ import android.widget.EditText
 import dev.danielholmberg.improve.R
 import androidx.appcompat.app.AppCompatActivity
 import android.view.WindowManager
+import dev.danielholmberg.improve.BuildConfig
 
 class FeedbackInputValidator(private val context: Context, inputLayout: View) {
     private val inputSubject: EditText = inputLayout.findViewById<View>(R.id.input_title) as EditText
@@ -41,6 +42,6 @@ class FeedbackInputValidator(private val context: Context, inputLayout: View) {
     }
 
     companion object {
-        private val TAG = FeedbackInputValidator::class.java.simpleName
+        private val TAG = BuildConfig.TAG + FeedbackInputValidator::class.java.simpleName
     }
 }

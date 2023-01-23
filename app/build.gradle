@@ -24,6 +24,7 @@ android {
         }
         debug {
             manifestPlaceholders = [crashlyticsEnabled: false]
+            buildConfigField("String", "TAG", "\"Improve__\"") // Custom BuildConfig field to customize Log-tag
         }
     }
     compileOptions {

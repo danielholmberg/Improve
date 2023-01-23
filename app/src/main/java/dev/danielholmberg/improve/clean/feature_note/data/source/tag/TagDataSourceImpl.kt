@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.feature_authentication.domain.repository.AuthRepository
 import dev.danielholmberg.improve.clean.feature_note.data.source.entity.TagEntity
@@ -62,7 +63,7 @@ class TagDataSourceImpl(
     }
 
     companion object {
-        private val TAG = TagDataSourceImpl::class.java.simpleName
+        private val TAG = BuildConfig.TAG + TagDataSourceImpl::class.java.simpleName
         private const val TAGS_REF = "tags"
         private const val USERS_REF = "users"
     }

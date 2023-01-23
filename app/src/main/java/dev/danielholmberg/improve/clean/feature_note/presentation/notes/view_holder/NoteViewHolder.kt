@@ -14,6 +14,7 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Note
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Image
@@ -151,6 +152,6 @@ class NoteViewHolder(private val context: Context, itemView: View, private val p
     }
 
     companion object {
-        private val TAG = NoteViewHolder::class.java.simpleName
+        private val TAG = BuildConfig.TAG + NoteViewHolder::class.java.simpleName
     }
 }

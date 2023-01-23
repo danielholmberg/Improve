@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.*
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.R
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.MainActivity
@@ -464,7 +465,7 @@ class CreateNoteActivity : AppCompatActivity() {
     }
 
     companion object {
-        private val TAG = CreateNoteActivity::class.java.simpleName
+        private val TAG = BuildConfig.TAG + CreateNoteActivity::class.java.simpleName
         private const val PICK_IMAGE_REQUEST = 1
     }
 }

@@ -19,6 +19,7 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.feature_contact.data.source.entity.CompanyEntity
 import dev.danielholmberg.improve.clean.feature_contact.domain.model.Company
@@ -286,6 +287,6 @@ class ContactsFragment : Fragment() {
     }
 
     companion object {
-        private val TAG = ContactsFragment::class.java.simpleName
+        private val TAG = BuildConfig.TAG + ContactsFragment::class.java.simpleName
     }
 }

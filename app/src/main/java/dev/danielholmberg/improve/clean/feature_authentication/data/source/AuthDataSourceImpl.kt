@@ -12,6 +12,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.ServerValue
 import com.google.firebase.database.DatabaseError
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 
 class AuthDataSourceImpl(
@@ -178,7 +179,7 @@ class AuthDataSourceImpl(
     }
 
     companion object {
-        private val TAG = AuthDataSourceImpl::class.java.simpleName
+        private val TAG = BuildConfig.TAG + AuthDataSourceImpl::class.java.simpleName
         const val USERS_REF = "users"
     }
 }

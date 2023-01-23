@@ -13,6 +13,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
 import android.widget.Toast
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInResult
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.MainActivity
 import dev.danielholmberg.improve.clean.feature_authentication.domain.repository.AuthRepository
@@ -162,7 +163,7 @@ class SignInActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     companion object {
-        private val TAG = SignInActivity::class.java.simpleName
+        private val TAG = BuildConfig.TAG + SignInActivity::class.java.simpleName
         private const val RC_SIGN_IN = 9001
     }
 }

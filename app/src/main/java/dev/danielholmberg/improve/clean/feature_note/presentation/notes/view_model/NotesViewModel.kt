@@ -7,6 +7,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.database.ChildEventListener
 import com.google.gson.Gson
 import com.google.gson.JsonParser
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.core.FileService
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Note
@@ -123,6 +124,6 @@ class NotesViewModel(
     }
 
     companion object {
-        private val TAG = NotesViewModel::class.java.simpleName
+        private val TAG = BuildConfig.TAG + NotesViewModel::class.java.simpleName
     }
 }

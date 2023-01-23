@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.view.LayoutInflater
 import dev.danielholmberg.improve.R
 import androidx.recyclerview.widget.LinearLayoutManager
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.feature_contact.data.source.entity.CompanyEntity
 import dev.danielholmberg.improve.clean.feature_contact.domain.model.Company
@@ -210,7 +211,7 @@ class CompanyRecyclerViewAdapter : RecyclerView.Adapter<CompanyViewHolder>() {
     var previouslyRemovedContact: Contact? = null
 
     companion object {
-        private val TAG = CompanyRecyclerViewAdapter::class.java.simpleName
+        private val TAG = BuildConfig.TAG + CompanyRecyclerViewAdapter::class.java.simpleName
         private const val ORDER_BY_NAME = "name"
     }
 }

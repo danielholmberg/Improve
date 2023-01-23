@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.feature_authentication.data.source.AuthDataSourceImpl.Companion.USERS_REF
 import dev.danielholmberg.improve.clean.feature_authentication.domain.repository.AuthRepository
 import dev.danielholmberg.improve.clean.feature_contact.data.source.entity.CompanyEntity
@@ -63,7 +64,7 @@ class CompanyDataSourceImpl(
             }
 
             companion object {
-            private val TAG = CompanyDataSourceImpl::class.java.simpleName
+            private val TAG = BuildConfig.TAG + CompanyDataSourceImpl::class.java.simpleName
             private const val COMPANIES_REF = "companies"
         }
 }

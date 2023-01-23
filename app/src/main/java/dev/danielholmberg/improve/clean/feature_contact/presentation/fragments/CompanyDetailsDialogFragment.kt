@@ -18,6 +18,7 @@ import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.DialogFragment
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.feature_contact.domain.model.Company
 import dev.danielholmberg.improve.clean.feature_contact.domain.model.Contact
@@ -181,7 +182,7 @@ class CompanyDetailsDialogFragment : DialogFragment() {
     }
 
     companion object {
-        val TAG: String = CompanyDetailsDialogFragment::class.java.simpleName
+        val TAG: String = BuildConfig.TAG + CompanyDetailsDialogFragment::class.java.simpleName
         const val COMPANY_KEY = "company"
     }
 }

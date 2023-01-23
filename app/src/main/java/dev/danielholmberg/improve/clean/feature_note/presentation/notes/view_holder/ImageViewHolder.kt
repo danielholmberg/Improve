@@ -1,6 +1,7 @@
 package dev.danielholmberg.improve.clean.feature_note.presentation.notes.view_holder
 
 import android.content.Context
+import dev.danielholmberg.improve.BuildConfig
 import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
@@ -222,6 +223,6 @@ class ImageViewHolder(
     }
 
     companion object {
-        private val TAG = ImageViewHolder::class.java.simpleName
+        private val TAG = BuildConfig.TAG + ImageViewHolder::class.java.simpleName
     }
 }

@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
 import android.view.ViewGroup
 import android.view.LayoutInflater
-import android.view.View
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.R
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Image
 import dev.danielholmberg.improve.clean.feature_note.presentation.notes.view_holder.ImageViewHolder
@@ -107,6 +107,6 @@ class ImagesAdapter(private val thumbnail: Boolean) :
     }
 
     companion object {
-        private val TAG = ImagesAdapter::class.java.simpleName
+        private val TAG = BuildConfig.TAG + ImagesAdapter::class.java.simpleName
     }
 }

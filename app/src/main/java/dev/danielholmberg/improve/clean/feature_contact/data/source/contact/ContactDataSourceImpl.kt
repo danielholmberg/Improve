@@ -2,6 +2,7 @@ package dev.danielholmberg.improve.clean.feature_contact.data.source.contact
 
 import android.util.Log
 import com.google.firebase.database.ChildEventListener
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.feature_contact.data.source.entity.ContactEntity
 import dev.danielholmberg.improve.clean.feature_contact.domain.repository.CompanyRepository
 
@@ -62,7 +63,7 @@ class ContactDataSourceImpl(
     }
 
     companion object {
-        private val TAG = ContactDataSourceImpl::class.java.simpleName
+        private val TAG = BuildConfig.TAG + ContactDataSourceImpl::class.java.simpleName
         private const val CONTACTS_REF = "contacts"
     }
 }

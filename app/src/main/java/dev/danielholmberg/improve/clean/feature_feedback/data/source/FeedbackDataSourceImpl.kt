@@ -3,6 +3,7 @@ package dev.danielholmberg.improve.clean.feature_feedback.data.source
 import android.util.Log
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.feature_feedback.data.source.entity.FeedbackEntity
 import dev.danielholmberg.improve.clean.feature_feedback.domain.util.FeedbackCallback
 
@@ -29,7 +30,7 @@ class FeedbackDataSourceImpl(
     }
 
     companion object {
-        private val TAG = FeedbackDataSourceImpl::class.java.simpleName
+        private val TAG = BuildConfig.TAG + FeedbackDataSourceImpl::class.java.simpleName
         private const val FEEDBACK_REF = "feedback"
     }
 }

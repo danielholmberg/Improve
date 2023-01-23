@@ -6,6 +6,7 @@ import android.widget.EditText
 import dev.danielholmberg.improve.R
 import androidx.appcompat.app.AppCompatActivity
 import android.view.WindowManager
+import dev.danielholmberg.improve.BuildConfig
 
 class NoteInputValidator(private val context: Context, inputTitleLayout: View) {
     private val inputTitle: EditText
@@ -43,6 +44,6 @@ class NoteInputValidator(private val context: Context, inputTitleLayout: View) {
     }
 
     companion object {
-        private val TAG = NoteInputValidator::class.java.simpleName
+        private val TAG = BuildConfig.TAG + NoteInputValidator::class.java.simpleName
     }
 }

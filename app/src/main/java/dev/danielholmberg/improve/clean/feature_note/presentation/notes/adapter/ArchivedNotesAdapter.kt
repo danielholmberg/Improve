@@ -4,6 +4,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
 import android.view.ViewGroup
 import android.view.LayoutInflater
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.R
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Note
 import dev.danielholmberg.improve.clean.feature_note.presentation.notes.view_holder.ArchivedNoteViewHolder
@@ -141,6 +142,6 @@ class ArchivedNotesAdapter : RecyclerView.Adapter<ArchivedNoteViewHolder>() {
     }
 
     companion object {
-        private val TAG = ArchivedNotesAdapter::class.java.simpleName
+        private val TAG = BuildConfig.TAG + ArchivedNotesAdapter::class.java.simpleName
     }
 }

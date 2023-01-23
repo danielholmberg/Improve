@@ -3,6 +3,7 @@ package dev.danielholmberg.improve.clean.core
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import dev.danielholmberg.improve.BuildConfig
 import java.util.*
 
 class SharedPrefsService(private val context: Context, private val prefsKey: String) {
@@ -65,7 +66,7 @@ class SharedPrefsService(private val context: Context, private val prefsKey: Str
     }
 
     companion object {
-        private val TAG = SharedPrefsService::class.java.simpleName
+        private val TAG = BuildConfig.TAG + SharedPrefsService::class.java.simpleName
         private const val DEFAULT_GET_STRING_ERROR_STRING: String = ""
         private const val DEFAULT_GET_INT_ERROR_INT: Int = -9999
         private const val DEFAULT_GET_BOOLEAN_ERROR_BOOLEAN: Boolean = false

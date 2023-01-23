@@ -9,6 +9,7 @@ import android.widget.Toast
 import com.google.firebase.database.DatabaseError
 import android.view.ViewGroup
 import android.view.LayoutInflater
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.R
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.feature_contact.data.repository.CompanyRepositoryImpl.Companion.ORDER_BY_NAME
@@ -186,6 +187,6 @@ class ContactRecyclerViewAdapter(private val company: Company) :
         }
 
     companion object {
-        private val TAG = ContactRecyclerViewAdapter::class.java.simpleName
+        private val TAG = BuildConfig.TAG + ContactRecyclerViewAdapter::class.java.simpleName
     }
 }

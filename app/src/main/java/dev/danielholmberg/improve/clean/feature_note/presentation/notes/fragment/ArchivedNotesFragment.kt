@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.R
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.feature_note.data.source.entity.NoteEntity
@@ -220,6 +221,6 @@ class ArchivedNotesFragment : Fragment(), SearchView.OnQueryTextListener {
     }
 
     companion object {
-        private val TAG = ArchivedNotesFragment::class.java.simpleName
+        private val TAG = BuildConfig.TAG + ArchivedNotesFragment::class.java.simpleName
     }
 }

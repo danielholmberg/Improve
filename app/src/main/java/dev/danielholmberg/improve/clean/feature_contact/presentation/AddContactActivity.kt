@@ -13,6 +13,7 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.MainActivity
 import dev.danielholmberg.improve.clean.feature_contact.domain.model.Company
@@ -236,7 +237,7 @@ class AddContactActivity : AppCompatActivity() {
     }
 
     companion object {
-        private val TAG = AddContactActivity::class.java.simpleName
+        private val TAG = BuildConfig.TAG + AddContactActivity::class.java.simpleName
         const val CONTACT_BUNDLE_KEY = "contactBundle"
         private const val CONTACT_KEY = "contact"
         const val PRE_SELECTED_COMPANY = "preSelectedCompany"

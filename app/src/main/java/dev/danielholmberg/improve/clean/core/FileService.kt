@@ -2,6 +2,7 @@ package dev.danielholmberg.improve.clean.core
 
 import android.content.Context
 import android.util.Log
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.legacy.Managers.StorageManager
 import java.io.File
 
@@ -33,7 +34,7 @@ class FileService(private val context: Context) {
     }
 
     companion object {
-        private val TAG = FileService::class.java.simpleName
-        const val VIP_IMAGE_SUFFIX = ".jpg"
+        private val TAG = BuildConfig.TAG + FileService::class.java.simpleName
+        const val IMAGE_SUFFIX = ".jpg"
     }
 }

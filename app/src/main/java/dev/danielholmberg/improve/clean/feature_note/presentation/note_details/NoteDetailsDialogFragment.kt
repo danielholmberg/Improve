@@ -22,6 +22,7 @@ import com.google.android.gms.common.api.Scope
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.api.services.drive.DriveScopes
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.R
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.feature_note.domain.model.Image
@@ -612,7 +613,7 @@ class NoteDetailsDialogFragment : DialogFragment() {
     }
 
     companion object {
-        val TAG: String = NoteDetailsDialogFragment::class.java.simpleName
+        val TAG: String = BuildConfig.TAG + NoteDetailsDialogFragment::class.java.simpleName
         private const val PICK_IMAGE_REQUEST = 1
         private const val REQUEST_PERMISSION_SUCCESS_CONTINUE_FILE_CREATION = 999
         fun newInstance(): NoteDetailsDialogFragment {

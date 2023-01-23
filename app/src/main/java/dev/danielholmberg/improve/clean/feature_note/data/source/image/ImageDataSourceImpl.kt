@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
 import dev.danielholmberg.improve.clean.core.FileService.Companion.IMAGE_SUFFIX
 import dev.danielholmberg.improve.clean.feature_authentication.domain.repository.AuthRepository
@@ -127,7 +128,7 @@ class ImageDataSourceImpl(
     }
 
     companion object {
-        private val TAG = ImageDataSourceImpl::class.java.simpleName
+        private val TAG = BuildConfig.TAG + ImageDataSourceImpl::class.java.simpleName
         private const val USERS_REF = "Users"
         private const val IMAGES_REF = "Images"
     }
