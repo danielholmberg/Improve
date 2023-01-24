@@ -237,11 +237,9 @@ class NoteDetailsDialogFragment : DialogFragment() {
 
     private fun buildMenu() {
         toolbar.menu.clear()
-        val menuTitle = toolbar.findViewById<TextView>(R.id.toolbar_note_dialog_title_tv)
 
         if (viewModel.editMode) {
             toolbar.inflateMenu(R.menu.menu_edit_note)
-            menuTitle.setText(R.string.title_edit_note)
 
             if (viewModel.isNoteStared()) {
                 toolbar.menu.findItem(R.id.starNote).setIcon(R.drawable.ic_star_enabled_accent)
@@ -256,7 +254,6 @@ class NoteDetailsDialogFragment : DialogFragment() {
             toolbar.menu.setGroupVisible(R.id.vipMenuGroup, instance!!.isVipUser)
         } else {
             toolbar.inflateMenu(R.menu.fragment_note_details_show)
-            menuTitle.setText(R.string.note_activity_details)
 
             if (viewModel.isNoteArchived()) {
                 toolbar.menu.findItem(R.id.noteUnarchive).isVisible = true

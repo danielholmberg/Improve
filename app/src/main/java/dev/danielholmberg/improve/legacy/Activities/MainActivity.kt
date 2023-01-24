@@ -164,19 +164,12 @@ class MainActivity : AppCompatActivity() {
         navigationView = findViewById<View>(R.id.nav_view) as NavigationView
         val drawerHeaderImageLayout = navigationView!!.getHeaderView(0)
             .findViewById<View>(R.id.drawer_header_image_layout) as RelativeLayout
-        val vipUserSymbol =
-            navigationView!!.getHeaderView(0).findViewById<View>(R.id.vip_user_symbol) as ImageView
         val drawerHeaderImage = navigationView!!.getHeaderView(0)
             .findViewById<View>(R.id.drawer_header_image_iv) as ImageView
         val drawerHeaderName = navigationView!!.getHeaderView(0)
             .findViewById<View>(R.id.drawer_header_name_tv) as TextView
         val drawerHeaderEmail = navigationView!!.getHeaderView(0)
             .findViewById<View>(R.id.drawer_header_email_tv) as TextView
-        if (instance!!.isVipUser) {
-            vipUserSymbol.visibility = View.VISIBLE
-        } else {
-            vipUserSymbol.visibility = View.GONE
-        }
         if (currentUser!!.isAnonymous) {
             drawerHeaderImageLayout.visibility = View.GONE
             drawerHeaderEmail.visibility = View.GONE

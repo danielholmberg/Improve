@@ -6,15 +6,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import android.os.Parcelable
 import android.widget.Toast
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import dev.danielholmberg.improve.R
-import android.view.WindowManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import android.widget.EditText
 import android.content.DialogInterface
 import android.util.Log
-import android.view.View
+import android.view.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.DialogFragment
@@ -75,6 +72,11 @@ class CompanyDetailsDialogFragment : DialogFragment() {
             }
             true
         }
+
+        // Set transparent background and no title to enable corner radius.
+        dialog?.window?.setBackgroundDrawableResource(R.drawable.inset_company_details)
+        dialog?.window?.requestFeature(Window.FEATURE_NO_TITLE)
+
         companyName = view.findViewById<View>(R.id.toolbar_company_title_tv) as TextView
         companyNrOfContacts =
             view.findViewById<View>(R.id.company_details_nr_of_contacts) as TextView
@@ -128,7 +130,7 @@ class CompanyDetailsDialogFragment : DialogFragment() {
             editCompanyDialogView.findViewById<View>(R.id.new_company_name_et) as EditText
         companyNameEditText.setText(companyNameId)
         val editCompanyDialog = AlertDialog.Builder(
-            context!!
+            requireContext()
         )
             .setTitle("Edit company")
             .setView(editCompanyDialogView)
@@ -163,7 +165,7 @@ class CompanyDetailsDialogFragment : DialogFragment() {
 
     private fun showDeleteCompanyDialog() {
         val alertDialogBuilder = AlertDialog.Builder(
-            activity!!
+            requireContext()
         ).setTitle(R.string.dialog_delete_company_title)
             .setMessage(R.string.dialog_delete_company_msg)
             .setPositiveButton("Yes") { _, _ -> deleteCompany(company) }

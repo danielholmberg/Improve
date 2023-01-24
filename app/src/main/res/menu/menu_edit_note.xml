@@ -8,13 +8,13 @@
             android:id="@+id/starNote"
             android:title="@string/menu_note_star_enable"
             android:icon="@drawable/ic_star_disabled_accent"
-            app:showAsAction="ifRoom"/>
+            app:showAsAction="always"/>
         <item
             android:orderInCategory="1"
             android:id="@+id/addTag"
             android:title="@string/menu_tag_add"
             android:icon="@drawable/ic_tag_add"
-            app:showAsAction="ifRoom"/>
+            app:showAsAction="always"/>
         <item
             android:orderInCategory="2"
             android:id="@+id/noteDone"

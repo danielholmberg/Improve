@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_header_main_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -10,22 +11,12 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/nav_header_vertical_spacing"
     android:paddingRight="@dimen/nav_header_vertical_spacing"
-    android:paddingTop="@dimen/nav_header_vertical_spacing"
+    android:paddingTop="40dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
-        <ImageView
-            android:id="@+id/vip_user_symbol"
-            android:visibility="gone"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginTop="@dimen/nav_header_iv_top_spacing"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:background="@drawable/ic_vip_user_white"/>
 
         <RelativeLayout
             android:id="@+id/drawer_header_image_layout"
@@ -38,17 +29,29 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:src="@drawable/ic_error_no_photo_white"
-                android:layout_centerInParent="true"/>
+                android:layout_centerInParent="true"
+                tools:visibility="visible"/>
         </RelativeLayout>
+
+        <TextView
+            android:id="@+id/app_version_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            style="@style/TextAppearance.AppCompat.Small"
+            tools:visibility="visible"
+            tools:text="v2.0"/>
 
     </RelativeLayout>
 
     <TextView
         android:id="@+id/drawer_header_name_tv"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
         android:textStyle="bold"
+        android:drawablePadding="4dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textColor="@color/titleTextColor"/>
 

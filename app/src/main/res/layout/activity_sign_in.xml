@@ -38,7 +38,7 @@
             android:id="@+id/google_sign_in_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/rounded_corner_button"
+            android:background="@drawable/rounded_corner_cta_button"
             android:elevation="@dimen/elevation_sign_in_button"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
@@ -52,6 +52,27 @@
             android:textColor="@color/titleTextColor"
             android:drawablePadding="8dp"
             android:drawableStart="@drawable/ic_google_icon_color" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <View
+                android:layout_width="120dp"
+                android:layout_height="2dp"
+                android:background="@color/colorAccent" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:text="OR"
+                android:textColor="@color/colorAccent"/>
+            <View
+                android:layout_width="120dp"
+                android:layout_height="2dp"
+                android:background="@color/colorAccent"/>
+        </LinearLayout>
 
         <Button
             android:id="@+id/anonymous_login_btn"

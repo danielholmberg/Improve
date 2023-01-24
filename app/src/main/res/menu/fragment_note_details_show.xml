@@ -11,27 +11,27 @@
         android:id="@+id/noteDelete"
         android:title="@string/menu_note_delete"
         android:icon="@drawable/ic_menu_delete_primary"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
         />
     <item
         android:id="@+id/noteUnarchive"
         android:title="@string/menu_note_unarchive"
         android:icon="@drawable/ic_menu_unarchive_primary"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/noteArchive"
         android:title="@string/menu_note_archive"
         android:icon="@drawable/ic_menu_archive_primary"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/noteExport"
         android:title="@string/menu_note_google_drive"
         android:icon="@drawable/ic_menu_google_drive_export_primary"
         android:enabled="true"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/noteInfo"
         android:title="@string/menu_note_info"
         android:icon="@drawable/ic_menu_info_primary"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 </menu>

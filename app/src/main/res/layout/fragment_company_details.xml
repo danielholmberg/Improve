@@ -1,52 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/company_details_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/cardInfoBackground">
+    android:background="@color/cardInfoBackground"
+    app:cardCornerRadius="@dimen/radius_company_corner">
 
-    <include
-        android:id="@+id/include_toolbar_company_details"
-        layout="@layout/app_bar_company_details_fragment"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"/>
-
-    <RelativeLayout
-        android:id="@+id/company_details_container"
-        android:layout_height="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:paddingStart="@dimen/margin_company_cardview"
-        android:paddingEnd="@dimen/margin_company_cardview"
-        android:paddingBottom="@dimen/margin_company_cardview">
+        android:layout_height="match_parent">
 
-        <RelativeLayout
-            android:id="@+id/company_details_content"
+        <include
+            android:id="@+id/include_toolbar_company_details"
+            layout="@layout/app_bar_company_details_fragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:paddingBottom="@dimen/margin_company_cardview"
-            android:paddingEnd="@dimen/margin_company_cardview">
-
-            <TextView
-                android:id="@+id/company_details_nr_of_contacts"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/placeholder_company_details_nr_of_contacts"
-                android:drawableStart="@drawable/ic_contact_person_grey"
-                android:textColor="@color/note_icon_grey"
-                android:layout_centerHorizontal="true"/>
-
-        </RelativeLayout>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/contacts_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:fadingEdgeLength="32dp"
             android:requiresFadingEdge="vertical"
-            android:layout_below="@id/company_details_content"
-            android:fadingEdgeLength="32dp"/>
+            android:background="@color/cardInfoBackground"
+            android:paddingHorizontal="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/include_toolbar_company_details" />
 
-    </RelativeLayout>
+        <RelativeLayout
+            android:id="@+id/company_details_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/margin_company_cardview"
+            android:paddingEnd="@dimen/margin_company_cardview"
+            android:paddingBottom="@dimen/margin_company_cardview"
+            android:background="@color/cardInfoBackground"
+            app:layout_constraintTop_toBottomOf="@id/contacts_recyclerview">
 
-</LinearLayout>
+            <RelativeLayout
+                android:id="@+id/company_details_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="@dimen/margin_company_cardview"
+                android:paddingBottom="@dimen/margin_company_cardview">
+
+                <TextView
+                    android:id="@+id/company_details_nr_of_contacts"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/placeholder_company_details_nr_of_contacts"
+                    android:textColor="@android:color/darker_gray"
+                    android:gravity="center_vertical"
+                    android:textSize="18sp"
+                    app:drawableEndCompat="@drawable/ic_contact_person_grey"
+                    app:drawableTint="@android:color/darker_gray"/>
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

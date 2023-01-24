@@ -98,9 +98,9 @@
     <string name="err_msg_feedback_message">Please enter your feedback</string>
 
     <!-- Login activity strings -->
-    <string name="anonymous_sign_in_btn_text">Anonymous Sign in</string>
+    <string name="anonymous_sign_in_btn_text">Continue Anonymously</string>
     <string name="anonymous_sign_in_btn_content_desc">Anonymous Sign in Button</string>
-    <string name="google_sign_in_btn_text">Sign in</string>
+    <string name="google_sign_in_btn_text">Sign in with Google</string>
     <string name="dialog_sign_out_msg">Do you want to sign out?</string>
     <string name="dialog_sign_out_title">Sign out</string>
     <string name="dialog_anonymous_sign_out_msg">If you sign out from an Anonymous-session, you will loose all your data. Do you want to continue?</string>

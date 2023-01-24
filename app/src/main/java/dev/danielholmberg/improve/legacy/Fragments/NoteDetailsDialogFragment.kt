@@ -259,14 +259,14 @@ class NoteDetailsDialogFragment : DialogFragment() {
 
     private fun createOptionsMenu() {
         Log.d(TAG, "Menu is redrawn")
-        val menuTitle =
-            (toolbar!!.findViewById<View>(R.id.toolbar_note_dialog_title_tv) as TextView)
+//        val menuTitle =
+//            (toolbar!!.findViewById<View>(R.id.toolbar_note_dialog_title_tv) as TextView)
         val menu = toolbar!!.menu
         menu.clear()
 
         // Check (if)Edit or (else)Show.
         if (editMode) {
-            menuTitle.setText(R.string.title_edit_note)
+//            menuTitle.setText(R.string.title_edit_note)
             toolbar!!.inflateMenu(R.menu.menu_edit_note)
             toolbar!!.setNavigationOnClickListener { showDiscardChangesDialog() }
             if (originalNote!!.isStared()) {
@@ -281,7 +281,7 @@ class NoteDetailsDialogFragment : DialogFragment() {
             menu.setGroupEnabled(R.id.vipMenuGroup, instance!!.isVipUser)
             menu.setGroupVisible(R.id.vipMenuGroup, instance!!.isVipUser)
         } else {
-            menuTitle.setText(R.string.note_activity_details)
+//            menuTitle.setText(R.string.note_activity_details)
             toolbar!!.inflateMenu(R.menu.fragment_note_details_show)
             toolbar!!.setNavigationOnClickListener { dismissDialog() }
 

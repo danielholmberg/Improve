@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent"/>
+            <padding
+                android:bottom="@dimen/margin_company_details_card"
+                android:top="@dimen/margin_company_details_card"
+                android:right="@dimen/margin_company_details_card"
+                android:left="@dimen/margin_company_details_card" />
+            <corners
+                android:radius="@dimen/radius_company_corner" />
+        </shape>
+    </item>
+</selector>

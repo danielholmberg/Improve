@@ -51,7 +51,7 @@
     <color name="tagDeleteColor">#F30202</color>
     <color name="tagDeleteBackground">#e0e0e0</color>
     <color name="fabTextColor">#FFFFFF</color>
-    <color name="fabTextBackgroundColor">#70242424</color>
+    <color name="fabTextBackgroundColor">#80242424</color>
     <color name="vipImageBackgroudColor">#70242424</color>
 
 </resources>

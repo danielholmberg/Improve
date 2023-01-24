@@ -27,6 +27,7 @@ import androidx.core.view.GravityCompat
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import dev.danielholmberg.improve.BuildConfig
 import dev.danielholmberg.improve.clean.Improve.Companion.instance
@@ -138,19 +139,22 @@ class MainActivity : AppCompatActivity() {
         navigationView = findViewById<View>(R.id.nav_view) as NavigationView
         val drawerHeaderImageLayout = navigationView!!.getHeaderView(0)
             .findViewById<View>(R.id.drawer_header_image_layout) as RelativeLayout
-        val vipUserSymbol =
-            navigationView!!.getHeaderView(0).findViewById<View>(R.id.vip_user_symbol) as ImageView
         val drawerHeaderImage = navigationView!!.getHeaderView(0)
             .findViewById<View>(R.id.drawer_header_image_iv) as ImageView
         val drawerHeaderName = navigationView!!.getHeaderView(0)
             .findViewById<View>(R.id.drawer_header_name_tv) as TextView
         val drawerHeaderEmail = navigationView!!.getHeaderView(0)
             .findViewById<View>(R.id.drawer_header_email_tv) as TextView
-        if (instance!!.isVipUser) {
-            vipUserSymbol.visibility = View.VISIBLE
-        } else {
-            vipUserSymbol.visibility = View.GONE
-        }
+
+        val vipSymbol = if (instance!!.isVipUser)
+            ContextCompat.getDrawable(this, R.drawable.ic_vip_user_white) else null
+        drawerHeaderName.setCompoundDrawablesWithIntrinsicBounds(
+            null,
+            null,
+            vipSymbol,
+            null
+        )
+
         if (currentUser!!.isAnonymous) {
             drawerHeaderImageLayout.visibility = View.GONE
             drawerHeaderEmail.visibility = View.GONE
@@ -174,6 +178,9 @@ class MainActivity : AppCompatActivity() {
             drawerHeaderName.text = currentUser!!.displayName
             drawerHeaderEmail.text = currentUser!!.email
         }
+
+        navigationView!!.getHeaderView(0)
+            .findViewById<TextView>(R.id.app_version_info).text = "v${BuildConfig.VERSION_NAME}"
 
         // Initializing navigation menu
         setUpNavigationView()
