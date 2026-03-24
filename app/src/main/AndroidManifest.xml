@@ -2,85 +2,54 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <!-- Network access -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!-- Phone calls (contacts feature) -->
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+
+    <!-- Push notifications (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Modern image access (Android 13+) — replaces READ_EXTERNAL_STORAGE for VIP images -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
+    <!-- WRITE_EXTERNAL_STORAGE and READ_EXTERNAL_STORAGE intentionally removed:
+         Scoped storage (API 29+) + Photo Picker API replaces them -->
 
     <application
-        android:name="Improve"
+        android:name=".ImproveApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_improve_launcher_square"
         android:label="@string/app_name"
-        android:launchMode="singleTask"
         android:roundIcon="@mipmap/ic_improve_launcher_circle"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme.Base"
-        android:windowSoftInputMode="stateAlwaysHidden"
+        android:theme="@style/Theme.Improve"
         tools:ignore="GoogleAppIndexingWarning">
+
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_notification" />
+
         <meta-data
             android:name="firebase_crash_collection_enabled"
             android:value="${crashlyticsEnabled}" />
 
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
-        </provider>
-
+        <!-- Single activity — hosts the full Compose NavGraph -->
         <activity
-            android:name=".Activities.SignInActivity"
-            android:exported="true">
+            android:name=".MainActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".Activities.MainActivity"
-            android:configChanges="orientation|screenSize"
-            android:launchMode="singleInstance"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="false"/>
-        <activity
-            android:name=".Activities.AddNoteActivity"
-            android:label="@string/title_new_note"
-            android:launchMode="singleInstance"
-            android:parentActivityName=".Activities.MainActivity"
-            android:windowSoftInputMode="adjustPan"
-            android:exported="false"/>
-        <activity
-            android:name=".Activities.AddContactActivity"
-            android:label="@string/title_new_contact"
-            android:launchMode="singleInstance"
-            android:parentActivityName=".Activities.MainActivity"
-            android:windowSoftInputMode="adjustPan"
-            android:exported="false"/>
-        <activity
-            android:name=".Activities.SubmitFeedbackActivity"
-            android:label="@string/title_submit_feedback"
-            android:launchMode="singleInstance"
-            android:parentActivityName=".Activities.MainActivity"
-            android:windowSoftInputMode="adjustPan"
-            android:exported="false"/>
-        <activity
-            android:name=".Activities.PrivacyPolicyActivity"
-            android:label="@string/title_privacy_policy"
-            android:launchMode="singleInstance"
-            android:parentActivityName=".Activities.MainActivity"
-            android:windowSoftInputMode="adjustPan"
-            android:exported="false"/>
 
+        <!-- Firebase Cloud Messaging -->
         <service
-            android:name=".Services.MyFirebaseMessagingService"
+            android:name=".services.ImproveMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

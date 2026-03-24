@@ -1,25 +1,54 @@
-# Add project specific ProGuard rules here.
-# By default, the flags in this file are appended to flags specified
-# in /Users/DanielHolmberg/Library/Android/sdk/tools/proguard/proguard-android.txt
-# You can edit the include path and order by changing the proguardFiles
-# directive in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Improve app ProGuard / R8 rules
 
-# Add any project specific keep options here:
+# Keep source line numbers for crash reporting
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# ── Kotlin ────────────────────────────────────────────────────────────────────
+-keep class kotlin.** { *; }
+-keep class kotlin.Metadata { *; }
+-dontwarn kotlin.**
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# ── Hilt / Dagger ─────────────────────────────────────────────────────────────
+-keep class dagger.hilt.** { *; }
+-keep class javax.inject.** { *; }
+-dontwarn dagger.hilt.**
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# ── Firebase Realtime Database ─────────────────────────────────────────────────
+# Keep all DTO/model classes used for Firebase deserialization
+-keep class dev.danielholmberg.improve.data.firebase.dto.** { *; }
+-keep class dev.danielholmberg.improve.domain.model.** { *; }
+
+# Firebase internals
+-keep class com.google.firebase.** { *; }
+-dontwarn com.google.firebase.**
+
+# ── Google Play Services / Auth ────────────────────────────────────────────────
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.android.gms.**
+
+# ── Google API Client (Drive) ──────────────────────────────────────────────────
+-keep class com.google.api.** { *; }
+-keep class com.google.apis.** { *; }
+-dontwarn com.google.api.**
+-dontwarn com.google.apis.**
+-dontwarn org.apache.httpcomponents.**
+
+# ── Gson (used by Google API client) ──────────────────────────────────────────
+-keep class com.google.gson.** { *; }
+-keepattributes Signature
+-keepattributes *Annotation*
+
+# ── Jetpack Compose ────────────────────────────────────────────────────────────
+-keep class androidx.compose.** { *; }
+-dontwarn androidx.compose.**
+
+# ── Coil ──────────────────────────────────────────────────────────────────────
+-dontwarn coil.**
+
+# ── Crashlytics ───────────────────────────────────────────────────────────────
+-keepattributes *Annotation*
+-keep class com.google.firebase.crashlytics.** { *; }
+
+# ── General AndroidX ──────────────────────────────────────────────────────────
+-dontwarn androidx.**
